@@ -13,7 +13,6 @@
         color: #ffd600;
         font-family: 'Arial', sans-serif;
         text-align: center;
-        /* 모바일에서 스크롤 안 생기게 차단 */
         width: 100vw;
         height: 100vh;
         overflow: hidden;
@@ -34,12 +33,11 @@
         z-index: 10;
         pointer-events: none;
         padding-top: 15px;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+        background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
     }
 
-    /* 모바일 화면에 맞춰 UI 버튼들 줄바꿈(Wrap) 및 크기 조정 */
     .control-group {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         pointer-events: auto; 
         display: flex;
         flex-wrap: wrap; 
@@ -50,7 +48,7 @@
     }
 
     .control-group label {
-        opacity: 0.7;
+        opacity: 0.8;
         font-size: 15px;
         font-weight: bold;
     }
@@ -86,13 +84,20 @@
         border: none;
     }
 
+    /* 💡 전체화면 전용 버튼 스타일 */
+    .fs-btn {
+        background: #00e676;
+        border-color: #00e676;
+        color: #000;
+    }
+
     #winner {
         font-size: 24px;
         margin-top: 5px;
         font-weight: bold;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         height: 30px;
-        opacity: 0.6;
+        opacity: 0.8;
     }
 
     @keyframes pop {
@@ -117,9 +122,12 @@
 <div id="game-wrapper">
     <div id="ui-layer">
         <div class="control-group">
-            <label>참가 인원(1~100):</label>
+            <label>인원(1~100):</label>
             <input type="number" id="ballCountInput" value="50" min="1" max="100">
             <button onclick="applyBallCount()">적용</button>
+            <button onclick="toggleFullScreen()" class="fs-btn">⛶ 전체화면</button>
+        </div>
+        <div class="control-group">
             <button onclick="startGame()" class="main-btn">▶ START</button>
             <button onclick="resetGame()" class="main-btn" style="background:#ff3b30; color:#fff;">RESET</button>
         </div>
@@ -131,14 +139,32 @@
 </div>
 
 <script>
+// ==========================================
+// 💡 모바일 전체화면 모드 (브라우저 주소창 숨김)
+// ==========================================
+function toggleFullScreen() {
+    let doc = window.document;
+    let docEl = doc.documentElement;
+
+    let requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+    let cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+    if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+        requestFullScreen.call(docEl).catch(err => {
+            console.log(`전체화면 활성화 오류: ${err.message}`);
+        });
+    } else {
+        cancelFullScreen.call(doc);
+    }
+}
+
 const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 
-// 💡 모바일 기기의 실제 가로/세로 길이를 인식하여 게임판 크기 결정
 const VIEW_WIDTH = window.innerWidth;
 const VIEW_HEIGHT = window.innerHeight;
 
-// 💡 게임시간 1분을 맞추기 위해 트랙 길이를 어마어마하게 늘림 (기존 22배 -> 40배)
-const WORLD_HEIGHT = VIEW_HEIGHT * 40; 
+// 💡 40초 플레이타임을 위해 트랙 길이를 조절 (40배 -> 30배)
+const WORLD_HEIGHT = VIEW_HEIGHT * 30; 
 
 let engine, world, render, runner;
 let balls = [];
@@ -214,8 +240,8 @@ buildLevel();
 function initEngine() {
     engine = Engine.create();
     world = engine.world;
-    // 💡 1분 동안 천천히 내려가도록 중력값을 더 낮춤
-    engine.gravity.y = 0.6; 
+    // 💡 40초를 맞추기 위해 중력값을 0.6에서 0.75로 살짝 올림
+    engine.gravity.y = 0.75; 
 
     render = Render.create({
         element: document.getElementById('canvas-container'),
@@ -278,7 +304,7 @@ function initEngine() {
 
     Events.on(render, 'afterRender', function() {
         const ctx = render.context;
-        ctx.font = "bold 13px Arial"; // 모바일에 맞게 글씨 크기 조정
+        ctx.font = "bold 13px Arial"; 
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         const offsetX = render.bounds.min.x;
@@ -384,7 +410,6 @@ function createPinsAndObstacles() {
     const startY = VIEW_HEIGHT * 0.4;
     const endY = WORLD_HEIGHT - (VIEW_HEIGHT * 3); 
 
-    // 모바일 너비에 맞춘 고속도로 방지 절벽
     for (let y = startY; y < WORLD_HEIGHT - 600; y += 250) { 
         let ledgeWidth = VIEW_WIDTH * 0.4;
         let leftLedge = Bodies.rectangle(ledgeWidth/2 - 20, y, ledgeWidth, 20, { isStatic: true, friction: 0, angle: Math.PI / 3.5, render: { fillStyle: "#ffaa00" }, restitution: 0.7 });
@@ -392,19 +417,18 @@ function createPinsAndObstacles() {
         World.add(world, [leftLedge, rightLedge]);
     }
 
-    // 병목 게이트 5단계 (시간 끌기용)
-    let gatePositions = [WORLD_HEIGHT * 0.15, WORLD_HEIGHT * 0.35, WORLD_HEIGHT * 0.55, WORLD_HEIGHT * 0.75, WORLD_HEIGHT * 0.85];
+    // 병목 게이트 4단계로 수정 (시간 40초 세팅용)
+    let gatePositions = [WORLD_HEIGHT * 0.2, WORLD_HEIGHT * 0.4, WORLD_HEIGHT * 0.6, WORLD_HEIGHT * 0.8];
     gatePositions.forEach((gy) => {
         let gateWidth = VIEW_WIDTH * 0.6;
         let lGate = Bodies.rectangle(VIEW_WIDTH * 0.1, gy, gateWidth, 30, { isStatic: true, render: { fillStyle: "#00e676" } });
-        movingObstacles.push({ body: lGate, type: 'slider', offset: 0, speed: 1.2, range: VIEW_WIDTH * 0.3 });
+        movingObstacles.push({ body: lGate, type: 'slider', offset: 0, speed: 1.5, range: VIEW_WIDTH * 0.3 });
         let rGate = Bodies.rectangle(VIEW_WIDTH * 0.9, gy, gateWidth, 30, { isStatic: true, render: { fillStyle: "#00e676" } });
-        movingObstacles.push({ body: rGate, type: 'slider', offset: 0, speed: -1.2, range: VIEW_WIDTH * 0.3 });
+        movingObstacles.push({ body: rGate, type: 'slider', offset: 0, speed: -1.5, range: VIEW_WIDTH * 0.3 });
         World.add(world, [lGate, rGate]);
     });
 
-    // 둥근 핀 (모바일 너비에 맞춰 촘촘하게 700개)
-    for (let i = 0; i < 700; i++) { 
+    for (let i = 0; i < 600; i++) { 
         let pin = Bodies.circle(
             Math.random() * VIEW_WIDTH, 
             startY + Math.random() * (endY - startY), 
@@ -414,7 +438,6 @@ function createPinsAndObstacles() {
         World.add(world, pin);
     }
     
-    // 회전 풍차
     for (let i = 0; i < 50; i++) {
         let y = startY + 300 + Math.random() * (endY - startY - 400);
         let x = VIEW_WIDTH / 2 + (Math.random() - 0.5) * (VIEW_WIDTH * 0.8); 
@@ -423,7 +446,6 @@ function createPinsAndObstacles() {
         World.add(world, spinBody);
     }
 
-    // 마의 구간 (Climax Zone)
     const climaxY = endY + 200;
     for(let i = 0; i < 40; i++) {
         let bumper = Bodies.circle(Math.random() * VIEW_WIDTH, climaxY + Math.random() * 1500, VIEW_WIDTH * 0.05, { isStatic: true, restitution: 1.6, render: { fillStyle: "#cc66ff" } });
@@ -434,7 +456,6 @@ function createPinsAndObstacles() {
 function createBalls() {
     const colors = ["#ff9500", "#4cd964", "#5ac8fa", "#ff2d55", "#e57373", "#ba68c8", "#4dd0e1", "#81c784", "#fff176"];
     const spreadHeight = Math.max(300, totalBalls * 6);
-    // 모바일 뷰에 맞춰 공 크기 조절
     const ballRadius = VIEW_WIDTH * 0.025 > 15 ? 15 : Math.max(VIEW_WIDTH * 0.025, 10); 
     
     for (let i = 1; i <= totalBalls; i++) {
@@ -448,6 +469,9 @@ function createBalls() {
 }
 
 function startGame() {
+    // START 버튼을 누를 때 모바일 전체화면도 함께 요청 (편의성)
+    if (!document.fullscreenElement) toggleFullScreen();
+
     if(!winnerDeclared && balls.length > 0 && balls[0].isStatic === false) return;
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
