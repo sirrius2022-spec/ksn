@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>위험성평가 자동화 Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0A1929;--navy2:#0D2B45;--navy3:#1A3F60;
+  --accent:#E8B84B;--accent2:#C9940F;
+  --red:#E74C3C;--red-bg:#FDEDEC;
+  --orange:#E67E22;--orange-bg:#FEF5E7;
+  --yellow:#D4AC0D;--yellow-bg:#FEFDE7;
+  --green:#1E8449;--green-bg:#EAFAF1;
+  --blue:#7EC8E3;--text-sub:#7FB3D3;--text-dim:#5B8AB0;
+  --border:rgba(255,255,255,0.08);
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--navy);min-height:100vh;color:#fff;}
+
+.header{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 50%,var(--navy3) 100%);
+  padding:18px 20px 14px;border-bottom:2px solid var(--accent);
+  position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+.header-inner{display:flex;align-items:center;gap:12px;max-width:960px;margin:0 auto;}
+.logo{
+  width:44px;height:44px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;color:var(--navy);box-shadow:0 0 16px rgba(232,184,75,.4);
+}
+.header-title{font-size:16px;font-weight:900;letter-spacing:-.5px;}
+.header-sub{font-size:10px;color:var(--accent);opacity:.8;margin-top:2px;letter-spacing:.8px;}
+.header-date{margin-left:auto;text-align:right;flex-shrink:0;}
+.header-date small{display:block;font-size:9px;color:var(--text-sub);}
+.header-date strong{font-size:11px;color:var(--accent);}
+
+.main{padding:20px 16px;max-width:960px;margin:0 auto;}
+
+.upload-zone{
+  border:2px dashed #1E4A6E;border-radius:16px;background:rgba(255,255,255,.03);
+  cursor:pointer;min-height:140px;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;transition:all .2s;
+}
+.upload-zone.drag{border-color:var(--accent);background:rgba(232,184,75,.06);}
+.upload-zone img{width:100%;max-height:240px;object-fit:cover;display:block;}
+.upload-placeholder{text-align:center;padding:30px 20px;}
+.upload-placeholder .ico{font-size:36px;margin-bottom:8px;}
+.upload-placeholder p{font-size:14px;font-weight:700;}
+.upload-placeholder small{font-size:11px;color:var(--text-sub);margin-top:4px;display:block;}
+
+.btn{width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:900;font-family:inherit;letter-spacing:-.3px;cursor:pointer;transition:all .2s;}
+.btn-analyze{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--navy);box-shadow:0 4px 20px rgba(232,184,75,.3);}
+.btn-analyze:disabled{background:#1E3A52;color:#5B8AB0;cursor:not-allowed;box-shadow:none;}
+.btn-reset{background:rgba(255,255,255,.06);color:#9DB8CC;border:1px solid rgba(255,255,255,.12);font-size:13px;margin-top:8px;display:none;}
+
+.error{margin-top:10px;padding:12px;background:#2D0A0A;border:1px solid var(--red);border-radius:10px;font-size:12px;color:var(--red);display:none;}
+
+.loading{text-align:center;padding:48px 0;display:none;}
+.loading .robot{font-size:44px;margin-bottom:12px;}
+.loading p{font-size:15px;font-weight:700;color:var(--accent);}
+.loading small{font-size:11px;color:var(--text-sub);margin-top:6px;display:block;}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:14px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,100%{opacity:.2;}50%{opacity:1;}}
+
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0 16px;}
+.card{background:rgba(255,255,255,.05);border-radius:12px;padding:14px 16px;border:1px solid var(--border);}
+.card .c-icon{font-size:18px;}
+.card .c-label{font-size:10px;color:var(--text-sub);margin-top:4px;}
+.card .c-value{font-size:18px;font-weight:900;margin-top:3px;}
+
+.table-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+.table-meta{font-size:10px;color:var(--text-sub);}
+.table-meta span{color:var(--accent);}
+
+.items{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+.item-card{background:rgba(255,255,255,.04);border-radius:14px;overflow:hidden;}
+.item-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);}
+.item-no{width:26px;height:26px;flex-shrink:0;border-radius:50%;background:var(--navy);border:2px solid;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;}
+.badge-4m{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:pre-line;line-height:1.3;text-align:center;flex-shrink:0;}
+.item-hazard{font-size:13px;font-weight:700;flex:1;line-height:1.4;}
+.risk-circle{width:36px;height:36px;flex-shrink:0;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;}
+.item-body{padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;}
+.field .f-label{font-size:9px;color:var(--text-sub);margin-bottom:2px;}
+.field .f-value{font-size:11px;line-height:1.5;}
+.field.full{grid-column:1/-1;}
+.tag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700;}
+
+.legend{margin-top:16px;padding:12px 14px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid var(--border);}
+.legend-title{font-size:10px;color:var(--text-sub);font-weight:600;margin-bottom:8px;}
+.legend-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.legend-tag{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.legend-note{font-size:9px;color:var(--text-dim);margin-top:8px;}
+
+#resultSection{display:none;}
+
+@media print{
+  .header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .btn,.upload-zone,.cards{display:none!important;}
+  .item-card{break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @page{size:A4;margin:10mm;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">⚠</div>
+    <div>
+      <div class="header-title">위험성평가 자동화 Agent</div>
+      <div class="header-sub">AI-POWERED · 산업안전보건법 제36조</div>
+    </div>
+    <div class="header-date">
+      <small>평가일자</small>
+      <strong id="todayDate"></strong>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-placeholder">
+      <div class="ico">📷</div>
+      <p>현장 사진 업로드</p>
+      <small>탭하거나 드래그하여 첨부</small>
+    </div>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+  <button class="btn btn-analyze" id="btnAnalyze" disabled onclick="analyze()">🔍 위험성평가 실시</button>
+  <button class="btn btn-reset" id="btnReset" onclick="resetAll()">↺ 다시 시작</button>
+  <div class="error" id="errorBox"></div>
+
+  <div class="loading" id="loading">
+    <div class="robot">🤖</div>
+    <p>AI가 현장 위험요인을 분석하고 있습니다…</p>
+    <small>4M 분류 · 위험성 결정 · 법적 근거 적용 중</small>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+
+  <div id="resultSection">
+    <div class="cards" id="summaryCards"></div>
+    <div class="table-title">📋 위험성평가표</div>
+    <div class="table-meta">평가장소: <span id="metaLoc"></span> &nbsp;·&nbsp; 위험성 기준: <span>빈도×강도 (5단계)</span></div>
+    <div class="items" id="itemList"></div>
+    <div class="legend">
+      <div class="legend-title">위험등급 기준 (빈도×강도)</div>
+      <div class="legend-tags">
+        <span class="legend-tag" style="background:#FDEDEC;color:#E74C3C;">매우높음 ≥15</span>
+        <span class="legend-tag" style="background:#FEF5E7;color:#E67E22;">높음 9~14</span>
+        <span class="legend-tag" style="background:#FEFDE7;color:#D4AC0D;">보통 5~8</span>
+        <span class="legend-tag" style="background:#EAFAF1;color:#1E8449;">낮음 ≤4</span>
+      </div>
+      <div class="legend-note" id="legendNote"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const TODAY = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+document.getElementById('todayDate').textContent = TODAY;
+document.getElementById('legendNote').textContent = '산업안전보건법 제36조 위험성평가 실시 | ' + TODAY;
+
+const CAT = {
+  Man:        {bg:'#1A3A5C',color:'#7EC8E3',label:'Man\n(인적)'},
+  Machine:    {bg:'#3B1F5C',color:'#C9A8F5',label:'Machine\n(기계)'},
+  Media:      {bg:'#1A3D2B',color:'#7EDBA8',label:'Media\n(환경)'},
+  Management: {bg:'#5C3210',color:'#F5C97E',label:'Mgmt\n(관리)'},
+};
+
+function riskLevel(s){
+  if(s>=15) return {label:'매우높음',action:'즉시 작업중지',color:'#E74C3C',bg:'#FDEDEC'};
+  if(s>=9)  return {label:'높음',    action:'긴급 개선 필요',color:'#E67E22',bg:'#FEF5E7'};
+  if(s>=5)  return {label:'보통',    action:'계획적 개선',  color:'#D4AC0D',bg:'#FEFDE7'};
+  return          {label:'낮음',    action:'허용 가능',    color:'#1E8449',bg:'#EAFAF1'};
+}
+
+let b64 = null;
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover', e=>{e.preventDefault();dropZone.classList.add('drag');});
+dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e=>{e.preventDefault();dropZone.classList.remove('drag');loadFile(e.dataTransfer.files[0]);});
+fileInput.addEventListener('change', e=>loadFile(e.target.files[0]));
+
+function loadFile(file){
+  if(!file||!file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    b64 = e.target.result.split(',')[1];
+    dropZone.innerHTML = `<img src="${e.target.result}" alt="현장사진">`;
+    document.getElementById('btnAnalyze').disabled = false;
+    document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('btnReset').style.display = 'none';
+    document.getElementById('errorBox').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetAll(){
+  b64 = null;
+  dropZone.innerHTML = `<div class="upload-placeholder"><div class="ico">📷</div><p>현장 사진 업로드</p><small>탭하거나 드래그하여 첨부</small></div>`;
+  document.getElementById('btnAnalyze').disabled = true;
+  document.getElementById('btnReset').style.display = 'none';
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('errorBox').style.display = 'none';
+  fileInput.value = '';
+}
+
+const SYSTEM = `당신은 대한민국 건설·산업안전 전문 위험성평가 AI입니다.
+사진을 분석하여 아래 JSON 형식으로만 응답하십시오. 다른 텍스트는 절대 출력하지 마십시오.
+
+{
+  "location": "장소명",
+  "items": [
+    {
+      "no": 1,
+      "category_4m": "Man|Machine|Media|Management",
+      "hazard": "유해위험요인 (구체적으로)",
+      "accident_type": "재해유형",
+      "current_measure": "현재 안전대책",
+      "frequency": 4,
+      "severity": 5,
+      "reduction_measure": "감소대책 (구체적 조치사항)",
+      "legal_basis": "관련 법령 및 조문"
+    }
+  ]
+}
+
+기준: 빈도(1~5)×강도(1~5)=위험성 점수. 기본 빈도4·강도5, 현장 상황에 맞게 조정. 최소 8개 이상 식별. 법적 근거: 산업안전보건법·산업안전보건기준에관한규칙·KCS/KDS 조문 명시.`;
+
+async function analyze(){
+  if(!b64) return;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('errorBox').style.display = 'none';
+  document.getElementById('btnAnalyze').disabled = true;
+  document.getElementById('btnAnalyze').textContent = '⏳  AI 분석 중…';
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':'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','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4000,
+        system:SYSTEM,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+          {type:'text',text:'이 사진의 위험성평가를 실시하십시오. JSON만 출력하십시오.'}
+        ]}]
+      })
+    });
+    const json = await res.json();
+    const txt = (json.content||[]).find(b=>b.type==='text')?.text||'';
+    const data = JSON.parse(txt.replace(/```json|```/g,'').trim());
+    renderResult(data);
+  }catch(e){
+    const eb = document.getElementById('errorBox');
+    eb.textContent = '분석 실패: ' + e.message;
+    eb.style.display = 'block';
+  }finally{
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('btnAnalyze').disabled = false;
+    document.getElementById('btnAnalyze').textContent = '🔍  위험성평가 실시';
+    document.getElementById('btnReset').style.display = 'block';
+  }
+}
+
+function renderResult(data){
+  const items = data.items||[];
+  const highRisk = items.filter(i=>i.frequency*i.severity>=15).length;
+  const urgent   = items.filter(i=>i.frequency*i.severity>=9).length;
+
+  document.getElementById('summaryCards').innerHTML = [
+    {icon:'🔎',label:'식별 위험요인',value:items.length+'건',color:'#E8B84B'},
+    {icon:'🚨',label:'고위험 항목',  value:highRisk+'건',    color:'#E74C3C'},
+    {icon:'⚡',label:'즉시조치 필요',value:urgent+'건',      color:'#E67E22'},
+    {icon:'📍',label:'평가 장소',    value:data.location||'-',color:'#7EC8E3'},
+  ].map(c=>`<div class="card">
+    <div class="c-icon">${c.icon}</div>
+    <div class="c-label">${c.label}</div>
+    <div class="c-value" style="color:${c.color}">${c.value}</div>
+  </div>`).join('');
+
+  document.getElementById('metaLoc').textContent = data.location||'-';
+
+  document.getElementById('itemList').innerHTML = items.map(item=>{
+    const score = item.frequency * item.severity;
+    const lvl = riskLevel(score);
+    const cat = CAT[item.category_4m]||CAT.Management;
+    return `<div class="item-card" style="border:1px solid ${lvl.color}44;">
+      <div class="item-head">
+        <div class="item-no" style="border-color:${lvl.color};color:${lvl.color};">${item.no}</div>
+        <div class="badge-4m" style="background:${cat.bg};color:${cat.color};">${cat.label}</div>
+        <div class="item-hazard">${item.hazard}</div>
+        <div class="risk-circle" style="background:${lvl.bg};border-color:${lvl.color};color:${lvl.color};">${score}</div>
+      </div>
+      <div class="item-body">
+        <div class="field">
+          <div class="f-label">재해유형</div>
+          <span class="tag" style="background:rgba(231,76,60,.15);color:#E74C3C;">${item.accident_type}</span>
+        </div>
+        <div class="field">
+          <div class="f-label">위험등급</div>
+          <span class="tag" style="background:${lvl.bg};color:${lvl.color};">${lvl.label} · ${lvl.action}</span>
+        </div>
+        <div class="field">
+          <div class="f-label">빈도 / 강도 / 점수</div>
+          <div class="f-value" style="color:#E8B84B;font-weight:800;">${item.frequency} × ${item.severity} = <span style="color:${lvl.color}">${score}</span></div>
+        </div>
+        <div class="field">
+          <div class="f-label">현재 안전대책</div>
+          <div class="f-value" style="color:#9DB8CC;">${item.current_measure}</div>
+        </div>
+        <div class="field full">
+          <div class="f-label" style="color:#7EDBA8;">✅ 감소대책</div>
+          <div class="f-value" style="color:#A9DFBF;font-weight:500;">${item.reduction_measure}</div>
+        </div>
+        <div class="field full">
+          <div class="f-label" style="color:#7EC8E3;">⚖ 법적근거</div>
+          <div class="f-value" style="color:#AED6F1;">${item.legal_basis}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('resultSection').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
