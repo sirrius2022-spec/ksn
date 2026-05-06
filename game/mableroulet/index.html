@@ -1,506 +1,261 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>Rian Education - Ultimate Marble Racing</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-<style>
-    body {
-        margin: 0;
-        background: #000;
-        color: #ffd600;
-        font-family: 'Arial', sans-serif;
-        text-align: center;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>안전 룰렛 - 모바일 전체화면</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: black;
+            font-family: Arial, sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            /* 💡 [요청 1] 스마트폰 전체화면 설정 */
+            height: 100vh;
+            width: 100vw;
+        }
 
-    #game-wrapper {
-        position: relative;
-        width: 1024px;
-        height: 768px;
-        box-shadow: 0 0 50px rgba(255, 214, 0, 0.5);
-        background: #0a0a0a;
-        transform-origin: center center;
-    }
+        #game-wrapper {
+            position: relative;
+            /* 💡 [요청 1] 세로로 길게 확장 */
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    #ui-layer {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 10;
-        pointer-events: none;
-        padding-top: 15px;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-    }
+        /* 💡 상단 UI 레이아웃 수정 */
+        #game-ui {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: yellow;
+            padding: 10px 0;
+            text-align: center;
+            z-index: 10;
+        }
 
-    h1 {
-        font-size: 26px; 
-        margin: 0 0 15px 0;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0.5; /* 글씨 투명도 50% */
-    }
+        #game-ui > p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
 
-    .control-group {
-        margin-bottom: 15px;
-        pointer-events: auto; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
+        /* [요청 3] 제작자 텍스트는 HTML에서 제거되었습니다. */
 
-    .control-group label {
-        opacity: 0.5;
-    }
+        #winner-text {
+            color: yellow;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
 
-    input[type="number"] {
-        padding: 8px;
-        font-size: 18px;
-        font-weight: bold;
-        border: 2px solid #ffd600;
-        border-radius: 8px;
-        background: #222;
-        color: #ffd600;
-        text-align: center;
-        width: 80px;
-    }
-    input[type="number"]:focus { outline: none; background: #333; }
+        .button {
+            background-color: yellow;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 0 2px;
+        }
 
-    button {
-        padding: 8px 15px;
-        font-size: 16px;
-        background: #333;
-        color: #ffd600;
-        border: 2px solid #ffd600;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: 0.2s;
-    }
-    button:hover { background: #ffd600; color: #000; }
+        #input-participants {
+            background-color: #222;
+            color: yellow;
+            border: 1px solid yellow;
+            padding: 5px;
+            width: 40px;
+            text-align: center;
+            font-size: 12px;
+        }
 
-    .main-btn {
-        background: #ffd600;
-        color: #000;
-        padding: 10px 30px;
-        font-size: 18px;
-        border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-    }
-    .main-btn:hover { background: #ffea00; transform: scale(1.05); }
+        #screen-toggle-btn {
+            background-color: #00ff7f; /* SpringGreen */
+            display: none; /* 모바일에서는 자동 전체화면이므로 숨김 */
+        }
 
-    .fs-btn {
-        background: #00e676; 
-        border-color: #00e676;
-        color: #000;
-    }
-    .fs-btn:hover { background: #00c853; }
-
-    #winner {
-        font-size: 32px;
-        margin-top: 5px;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        transition: 0.3s;
-        height: 40px;
-        opacity: 0.5;
-    }
-
-    @keyframes pop {
-        0% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1.15); text-shadow: 0 0 20px #ffd600, 0 0 40px #ff9800; opacity: 1; }
-        100% { transform: scale(1); opacity: 0.8; }
-    }
-    .celebrate { animation: pop 0.6s ease-in-out infinite; color: #fff !important; }
-
-    #canvas-container {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 1024px;
-        height: 768px;
-        z-index: 1;
-        overflow: hidden;
-    }
-</style>
+        /* Matter.js 렌더링 컨테이너 */
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
 </head>
 <body>
-
-<div id="game-wrapper">
-    <div id="ui-layer">
-        <h1>제작자 : Rian Education Ryu Su Min</h1>
-        
-        <div class="control-group">
-            <label style="font-size: 18px; font-weight: bold;">참가 인원 (1~100) : </label>
-            <input type="number" id="ballCountInput" value="50" min="1" max="100">
-            <button onclick="applyBallCount()">적용</button>
-            <button onclick="startGame()" class="main-btn" style="margin-left: 20px;">▶ START</button>
-            <button onclick="resetGame()" class="main-btn">RESET</button>
-            <button onclick="toggleFullScreen()" class="main-btn fs-btn">🖥️ 화면크게</button>
+    <div id="game-wrapper">
+        <div id="game-ui">
+            <p>참가 인원 (1~100) : <input type="number" id="input-participants" value="50" min="1" max="100"> <button class="button">적용</button></p>
+            <p><button id="start-btn" class="button">START</button> <button id="reset-btn" class="button">RESET</button></p>
+            <div id="winner-text"></div>
         </div>
-        
-        <div id="winner">🏁 대기 중... (사운드 ON!)</div>
+        <div id="canvas-container"></div>
     </div>
 
-    <div id="canvas-container"></div>
-</div>
+    <script>
+        // 💡 [요청 2] 게임 시간 1분으로 설정
+        const GAME_DURATION_SECONDS = 60; 
 
-<script>
-// ==========================================
-// 💡 화면 자동 스케일링 & 전체화면
-// ==========================================
-function resizeGame() {
-    const wrapper = document.getElementById('game-wrapper');
-    const scale = Math.min(window.innerWidth / 1024, window.innerHeight / 768);
-    wrapper.style.transform = `scale(${scale})`;
-}
-window.addEventListener('resize', resizeGame);
-resizeGame();
+        // Matter.js 모듈
+        const { Engine, Render, Runner, Bodies, Composite } = Matter;
 
-function toggleFullScreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => console.log(err));
-    } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-    }
-}
-
-const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
-
-const VIEW_WIDTH = 1024;
-const VIEW_HEIGHT = 768;
-const WORLD_HEIGHT = VIEW_HEIGHT * 22; 
-
-let engine, world, render, runner;
-let balls = [];
-let movingObstacles = [];
-let winnerDeclared = false;
-let totalBalls = 50; 
-let currentCameraY = 0; 
-let top5BallIds = new Set(); 
-
-let audioCtx = null;
-let lastBounceTime = 0;
-
-// 오프라인 사용 시 MP3 파일을 폴더에 넣고 파일명으로 수정하세요 (예: 'bgm.mp3')
-const bgmMusic = new Audio('https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-43.mp3');
-bgmMusic.loop = true;
-bgmMusic.volume = 0.3;
-const cheerSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-small-crowd-ovation-437.mp3');
-cheerSound.volume = 0.8;
-
-function playBounceSound() {
-    if (!audioCtx) return;
-    let now = Date.now();
-    if (now - lastBounceTime < 30) return; 
-    lastBounceTime = now;
-
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    osc.type = 'sine'; 
-    const notes = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
-    const freq = notes[Math.floor(Math.random() * notes.length)];
-    
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.15);
-}
-
-function playVictoryBGM() {
-    cheerSound.currentTime = 0;
-    cheerSound.play().catch(e => {});
-
-    if (!audioCtx) return;
-    const melody = [
-        { f: 523.25, d: 0.15 }, { f: 523.25, d: 0.15 }, { f: 523.25, d: 0.15 },
-        { f: 659.25, d: 0.35 }, { f: 587.33, d: 0.15 }, { f: 659.25, d: 0.35 },
-        { f: 783.99, d: 0.80 } 
-    ];
-    let startTime = audioCtx.currentTime;
-    melody.forEach(note => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle'; 
-        osc.frequency.value = note.f;
-        gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05); 
-        gain.gain.exponentialRampToValueAtTime(0.001, startTime + note.d); 
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(startTime);
-        osc.stop(startTime + note.d);
-        startTime += note.d + 0.05; 
-    });
-}
-
-initEngine();
-buildLevel();
-
-function initEngine() {
-    engine = Engine.create();
-    world = engine.world;
-    engine.gravity.y = 0.8; // 30초 플레이를 위해 중력 낮춤
-
-    render = Render.create({
-        element: document.getElementById('canvas-container'),
-        engine: engine,
-        options: {
-            width: VIEW_WIDTH,
-            height: VIEW_HEIGHT,
-            wireframes: false,
-            background: "#050505",
-            hasBounds: true
-        }
-    });
-
-    Render.run(render);
-    runner = Runner.create();
-    Runner.run(runner, engine);
-
-    Events.on(engine, 'collisionStart', function(event) {
-        if (winnerDeclared) return;
-        let shouldPlaySound = false;
-        for (let pair of event.pairs) {
-            if (top5BallIds.has(pair.bodyA.id) || top5BallIds.has(pair.bodyB.id)) {
-                shouldPlaySound = true;
-                break;
-            }
-        }
-        if (shouldPlaySound) playBounceSound();
-    });
-
-    Events.on(engine, "beforeUpdate", function() {
-        if (winnerDeclared) return;
-        let activeBalls = balls.filter(b => !b.isStatic);
-        if (activeBalls.length > 0) {
-            activeBalls.sort((a, b) => b.position.y - a.position.y); 
-            top5BallIds.clear();
-            let limit = Math.min(5, activeBalls.length); 
-            for (let i = 0; i < limit; i++) {
-                top5BallIds.add(activeBalls[i].id);
-            }
-        }
-        movingObstacles.forEach(obs => {
-            if (obs.type === 'spinner') {
-                Body.rotate(obs.body, obs.speed);
-            } else if (obs.type === 'slider') {
-                if (Math.abs(obs.offset) > obs.range) {
-                    obs.speed *= -1; 
-                }
-                obs.offset += obs.speed;
-                Body.translate(obs.body, { x: obs.speed, y: 0 });
+        // 엔진 및 렌더러 생성
+        const engine = Engine.create();
+        
+        // 💡 [요청 1] 모바일 화면 비율에 맞춰 렌더링 크기 설정
+        const render = Render.create({
+            element: document.getElementById('canvas-container'),
+            engine: engine,
+            options: {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                wireframes: false,
+                background: 'black'
             }
         });
-    });
 
-    Events.on(engine, "afterUpdate", function() {
-        if (!winnerDeclared) {
-            updateCamera();
-            checkWinner();
-        }
-    });
+        Render.run(render);
+        const runner = Runner.create();
+        Runner.run(runner, engine);
 
-    Events.on(render, 'afterRender', function() {
-        const ctx = render.context;
-        ctx.font = "900 16px Arial"; 
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const offsetX = render.bounds.min.x;
-        const offsetY = render.bounds.min.y;
-        for (let ball of balls) {
-            let x = ball.position.x - offsetX;
-            let y = ball.position.y - offsetY;
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = "#000000"; 
-            ctx.strokeText(ball.number, x, y);
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText(ball.number, x, y);
-        }
-    });
-}
+        // 💡 [요청 1] 세로로 긴 화면에 맞춰 장애물 재배치
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const wallThickness = 20;
 
-function applyBallCount() {
-    let inputEl = document.getElementById("ballCountInput");
-    let count = parseInt(inputEl.value, 10);
-    if (isNaN(count) || count < 1) count = 1;
-    if (count > 100) count = 100;
-    inputEl.value = count;
-    totalBalls = count;
-    resetGame();
-}
+        // 벽 생성
+        const leftWall = Bodies.rectangle(wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { fillStyle: 'yellow' } });
+        const rightWall = Bodies.rectangle(width - wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { fillStyle: 'yellow' } });
+        const topWall = Bodies.rectangle(width / 2, height, width, wallThickness, { isStatic: true, render: { fillStyle: 'yellow' } }); // 바닥 벽
 
-function updateCamera() {
-    if (balls.length === 0) return;
-    let activeBalls = balls.filter(b => !b.isStatic);
-    if (activeBalls.length === 0) activeBalls = balls;
-    activeBalls.sort((a, b) => b.position.y - a.position.y);
-    let leaderY = activeBalls[0].position.y; 
-    let desiredCameraY = leaderY - VIEW_HEIGHT * 0.65; 
-    desiredCameraY = Math.max(0, Math.min(desiredCameraY, WORLD_HEIGHT - VIEW_HEIGHT));
-    currentCameraY += (desiredCameraY - currentCameraY) * 0.08; 
-    Render.lookAt(render, {
-        min: { x: 0, y: currentCameraY },
-        max: { x: VIEW_WIDTH, y: currentCameraY + VIEW_HEIGHT }
-    });
-}
+        // 💡 [요청 1] 세로 화면에 맞는 장애물 배치 (image_5.png 패턴 참고)
+        const obstacles = [
+            // 경사진 노란색 바
+            Bodies.rectangle(width * 0.2, height * 0.15, width * 0.3, 10, { isStatic: true, angle: Math.PI / 6, render: { fillStyle: 'yellow' } }),
+            Bodies.rectangle(width * 0.8, height * 0.15, width * 0.3, 10, { isStatic: true, angle: -Math.PI / 6, render: { fillStyle: 'yellow' } }),
+            
+            // 더 많은 경사 바
+            Bodies.rectangle(width * 0.2, height * 0.35, width * 0.3, 10, { isStatic: true, angle: -Math.PI / 8, render: { fillStyle: 'yellow' } }),
+            Bodies.rectangle(width * 0.8, height * 0.35, width * 0.3, 10, { isStatic: true, angle: Math.PI / 8, render: { fillStyle: 'yellow' } }),
 
-function checkWinner() {
-    for (let ball of balls) {
-        if (ball.position.y > WORLD_HEIGHT - 50) {
-            winnerDeclared = true;
-            bgmMusic.pause();
-            playVictoryBGM();
-            const winnerEl = document.getElementById("winner");
-            winnerEl.innerHTML = "🎉 최종 우승 : " + ball.number + "번 🎉";
-            winnerEl.classList.add("celebrate");
-            engine.timing.timeScale = 0.1; 
-            Body.scale(ball, 2, 2);
-            ball.render.lineWidth = 5;
-            ball.render.strokeStyle = "#ffffff";
-            ball.render.fillStyle = "#ffd600";
-            spawnConfetti(ball.position.x, WORLD_HEIGHT - 10);
-            break;
-        }
-    }
-}
+            // 긴 가로 노란색 바
+            Bodies.rectangle(width / 2, height * 0.55, width * 0.8, 15, { isStatic: true, render: { fillStyle: 'yellow' } }),
 
-function spawnConfetti(x, y) {
-    const confettiColors = ['#ffeb3b', '#ff3d00', '#00e676', '#2979ff', '#e040fb'];
-    for (let i = 0; i < 150; i++) {
-        let confetti = Bodies.rectangle(
-            x + (Math.random() - 0.5) * 100, 
-            y + Math.random() * 50, 
-            Math.random() * 10 + 5, 
-            Math.random() * 10 + 5, 
-            {
-                frictionAir: 0.02,
+            // 경사진 빨간색 바 (지그재그)
+            Bodies.rectangle(width * 0.3, height * 0.7, width * 0.2, 8, { isStatic: true, angle: Math.PI / 4, render: { fillStyle: 'red' } }),
+            Bodies.rectangle(width * 0.7, height * 0.7, width * 0.2, 8, { isStatic: true, angle: -Math.PI / 4, render: { fillStyle: 'red' } }),
+            
+            Bodies.rectangle(width * 0.3, height * 0.85, width * 0.2, 8, { isStatic: true, angle: -Math.PI / 5, render: { fillStyle: 'red' } }),
+            Bodies.rectangle(width * 0.7, height * 0.85, width * 0.2, 8, { isStatic: true, angle: Math.PI / 5, render: { fillStyle: 'red' } }),
+        ];
+
+        Composite.add(engine.world, [leftWall, rightWall, topWall, ...obstacles]);
+
+        // 공 생성 함수
+        function createBall(x, y, radius, color, number) {
+            const ball = Bodies.circle(x, y, radius, {
                 restitution: 0.8,
-                render: { fillStyle: confettiColors[Math.floor(Math.random() * confettiColors.length)] },
-                isSensor: true 
+                friction: 0.005,
+                render: { fillStyle: color }
+            });
+            ball.number = number;
+            return ball;
+        }
+
+        // 공 색상 배열
+        const colors = ['red', 'blue', 'green', 'purple', 'orange', 'cyan', 'magenta', 'lime', 'pink', 'teal'];
+
+        // 공 추가 함수
+        function addBalls(count) {
+            Composite.clear(engine.world, true); // 장애물은 제외하고 공만 제거
+            Composite.add(engine.world, [leftWall, rightWall, topWall, ...obstacles]); // 장애물 다시 추가
+
+            const ballRadius = 10;
+            const uiHeight = document.getElementById('game-ui').offsetHeight;
+            const startY = uiHeight + ballRadius * 2;
+
+            for (let i = 1; i <= count; i++) {
+                const x = Math.random() * (width - ballRadius * 4) + ballRadius * 2;
+                const y = startY + Math.random() * (height * 0.5 - startY);
+                const color = colors[i % colors.length];
+                const ball = createBall(x, y, ballRadius, color, i);
+                Composite.add(engine.world, ball);
             }
-        );
-        Body.setVelocity(confetti, { x: (Math.random() - 0.5) * 40, y: -(Math.random() * 50 + 20) });
-        World.add(world, confetti);
-    }
-}
+        }
 
-function buildLevel() {
-    createWalls();
-    createPinsAndObstacles();
-    createBalls();
-    currentCameraY = 0;
-    Render.lookAt(render, { min: { x: 0, y: 0 }, max: { x: VIEW_WIDTH, y: VIEW_HEIGHT } });
-}
+        // 초기 공 추가
+        addBalls(50);
 
-function createWalls() {
-    let leftWall = Bodies.rectangle(-10, WORLD_HEIGHT / 2, 60, WORLD_HEIGHT, { isStatic: true, friction: 0, render: {fillStyle: '#333'} });
-    let rightWall = Bodies.rectangle(VIEW_WIDTH + 10, WORLD_HEIGHT / 2, 60, WORLD_HEIGHT, { isStatic: true, friction: 0, render: {fillStyle: '#333'} });
-    const gap = 55; 
-    const funnelY = WORLD_HEIGHT - 100;
-    const funnelWidth = (VIEW_WIDTH - gap) / 2;
-    let leftFunnel = Bodies.rectangle(funnelWidth / 2, funnelY, funnelWidth * 1.1, 40, { isStatic: true, friction: 0, angle: Math.PI / 6, render: {fillStyle: '#ffd600'} });
-    let rightFunnel = Bodies.rectangle(VIEW_WIDTH - (funnelWidth / 2), funnelY, funnelWidth * 1.1, 40, { isStatic: true, friction: 0, angle: -Math.PI / 6, render: {fillStyle: '#ffd600'} });
-    World.add(world, [leftWall, rightWall, leftFunnel, rightFunnel]);
-}
-
-function createPinsAndObstacles() {
-    movingObstacles = []; 
-    const startY = 350;
-    const endY = WORLD_HEIGHT - 3500; 
-
-    for (let y = startY; y < WORLD_HEIGHT - 600; y += 250) { 
-        let leftLedge = Bodies.rectangle(40, y, 220, 25, { isStatic: true, friction: 0, angle: Math.PI / 3.5, render: { fillStyle: "#ffaa00" }, restitution: 0.7 });
-        let rightLedge = Bodies.rectangle(VIEW_WIDTH - 40, y + 125, 220, 25, { isStatic: true, friction: 0, angle: -Math.PI / 3.5, render: { fillStyle: "#ffaa00" }, restitution: 0.7 });
-        World.add(world, [leftLedge, rightLedge]);
-    }
-
-    // 병목 게이트 3단계
-    let gatePositions = [WORLD_HEIGHT * 0.3, WORLD_HEIGHT * 0.55, WORLD_HEIGHT * 0.8];
-    gatePositions.forEach((gy) => {
-        let lGate = Bodies.rectangle(VIEW_WIDTH * 0.2, gy, 500, 35, { isStatic: true, render: { fillStyle: "#00e676" } });
-        movingObstacles.push({ body: lGate, type: 'slider', offset: 0, speed: 2.0, range: 250 });
-        let rGate = Bodies.rectangle(VIEW_WIDTH * 0.8, gy, 500, 35, { isStatic: true, render: { fillStyle: "#00e676" } });
-        movingObstacles.push({ body: rGate, type: 'slider', offset: 0, speed: -2.0, range: 250 });
-        World.add(world, [lGate, rGate]);
-    });
-
-    for (let i = 0; i < 500; i++) { 
-        let pin = Bodies.circle(VIEW_WIDTH / 2 + (Math.random() - 0.5) * (VIEW_WIDTH * 0.8), startY + Math.random() * (endY - startY), 12, { isStatic: true, friction: 0, render: { fillStyle: "#777" }, restitution: 0.8 });
-        World.add(world, pin);
-    }
-    for (let i = 0; i < 60; i++) {
-        let y = startY + 300 + Math.random() * (endY - startY - 400);
-        let x = VIEW_WIDTH / 2 + (Math.random() - 0.5) * (VIEW_WIDTH * 0.85); 
-        let spinBody = Bodies.rectangle(x, y, 150, 18, { isStatic: true, render: { fillStyle: "#ff3b30" } });
-        movingObstacles.push({ body: spinBody, type: 'spinner', speed: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 0.05 + 0.05) });
-        World.add(world, spinBody);
-    }
-
-    const climaxY = endY + 300;
-    for(let i = 0; i < 60; i++) {
-        let bumper = Bodies.circle(VIEW_WIDTH / 2 + (Math.random() - 0.5) * (VIEW_WIDTH * 0.8), climaxY + Math.random() * 2000, 25, { isStatic: true, restitution: 1.6, render: { fillStyle: "#cc66ff" } });
-        World.add(world, bumper);
-    }
-    for(let i = 0; i < 8; i++) {
-        let giantSpin = Bodies.rectangle(VIEW_WIDTH / 2 + (Math.random() - 0.5) * 400, climaxY + 2200 + (i * 200), 320, 25, { isStatic: true, render: { fillStyle: "#ff0000" } });
-        movingObstacles.push({ body: giantSpin, type: 'spinner', speed: (Math.random() > 0.5 ? 1 : -1) * 0.15 });
-        World.add(world, giantSpin);
-    }
-}
-
-function createBalls() {
-    const colors = ["#ff9500", "#4cd964", "#5ac8fa", "#ff2d55", "#e57373", "#ba68c8", "#4dd0e1", "#81c784", "#fff176"];
-    const spreadHeight = Math.max(300, totalBalls * 6);
-    for (let i = 1; i <= totalBalls; i++) {
-        let ball = Bodies.circle(VIEW_WIDTH / 2 + (Math.random() - 0.5) * (VIEW_WIDTH * 0.6), -150 - Math.random() * spreadHeight, 15, {
-            restitution: 0.85, friction: 0, frictionAir: 0.02, density: 0.05, isStatic: true, render: { fillStyle: colors[i % colors.length] }
+        // UI 이벤트 처리
+        document.querySelector('.button').addEventListener('click', function() {
+            const count = parseInt(document.getElementById('input-participants').value);
+            if (count > 0 && count <= 100) {
+                addBalls(count);
+                document.getElementById('winner-text').innerText = ''; // 승자 텍스트 초기화
+            }
         });
-        ball.number = i;
-        balls.push(ball);
-        World.add(world, ball);
-    }
-}
 
-function startGame() {
-    if(!winnerDeclared && balls.length > 0 && balls[0].isStatic === false) return;
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    bgmMusic.currentTime = 0;
-    bgmMusic.play().catch(e => {});
-    winnerDeclared = false;
-    document.getElementById("winner").innerHTML = "🔥 레이스 진행중! 🔥";
-    document.getElementById("winner").classList.remove("celebrate");
-    engine.timing.timeScale = 1.0; 
-    balls.forEach(ball => Body.setStatic(ball, false));
-}
+        document.getElementById('start-btn').addEventListener('click', function() {
+            startRace();
+        });
 
-function resetGame() {
-    bgmMusic.pause();
-    winnerDeclared = false;
-    document.getElementById("winner").innerHTML = "🏁 대기 중... (사운드 ON!)";
-    document.getElementById("winner").classList.remove("celebrate");
-    engine.timing.timeScale = 1.0;
-    World.clear(world);
-    Engine.clear(engine);
-    balls = [];
-    top5BallIds.clear();
-    buildLevel();
-}
-</script>
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            const count = parseInt(document.getElementById('input-participants').value);
+            addBalls(count);
+            document.getElementById('winner-text').innerText = ''; // 승자 텍스트 초기화
+        });
+
+        // 레이스 시작 함수
+        function startRace() {
+            Composite.clear(engine.world, true); // 기존 공 제거
+            const count = parseInt(document.getElementById('input-participants').value);
+            addBalls(count); // 공 다시 추가
+
+            // BGM 재생 로직 (기존 코드 유지)
+            // console.log("BGM 재생 시작");
+
+            document.getElementById('winner-text').innerText = "레이스 진행중!";
+            
+            // 💡 [요청 2] 1분 후 레이스 종료
+            setTimeout(endRace, GAME_DURATION_SECONDS * 1000);
+        }
+
+        // 레이스 종료 함수
+        function endRace() {
+            // console.log("BGM 재생 중지");
+            // console.log("레이스 완료");
+
+            // 승자 결정 로직 (가장 아래에 도달한 공)
+            const bodies = Composite.allBodies(engine.world);
+            let winnerBall = null;
+            let maxFinalY = -Infinity;
+
+            bodies.forEach(body => {
+                if (body.number && body.position.y > maxFinalY) {
+                    maxFinalY = body.position.y;
+                    winnerBall = body;
+                }
+            });
+
+            if (winnerBall) {
+                const winnerNumber = winnerBall.number;
+                // image_4.png의 패턴 참고 (이모지 추가)
+                document.getElementById('winner-text').innerHTML = `🎉 최종 우승 : ${winnerNumber}번 🎉`;
+                // console.log(`승자: ${winnerNumber}번`);
+            } else {
+                document.getElementById('winner-text').innerText = "승자를 결정할 수 없습니다.";
+            }
+        }
+    </script>
 </body>
 </html>
-
