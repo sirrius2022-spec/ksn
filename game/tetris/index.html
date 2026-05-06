@@ -2,9 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <!-- 모바일 최적화: 확대/축소 완벽 방지, 화면 꽉 채우기 -->
+    <!-- 확대/축소 완벽 방지, 화면 꽉 채우기 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>파이널 퍼펙트 레트로 테트리스</title>
+    <title>아타리 스타일 테트리스</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
@@ -12,13 +12,13 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            touch-action: none; /* 브라우저 기본 터치 스크롤 완벽 차단 */
+            touch-action: none; /* 스크롤 완벽 차단 */
         }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: #001f3f; /* 깊은 남색 배경 */
+            background-color: #050505;
             color: #fff;
             font-family: 'Press Start 2P', monospace;
             display: flex;
@@ -26,85 +26,102 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            height: 100dvh; /* 모바일 하단바를 고려한 동적 뷰포트 */
+            height: 100dvh;
             overflow: hidden;
+            /* 아케이드 기기 겉면 느낌의 어두운 패턴 */
+            background-image: radial-gradient(#222 1px, transparent 1px);
+            background-size: 10px 10px;
         }
 
-        /* 게임 메인 컨테이너 */
         #game-container {
             display: flex;
             flex-direction: column;
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             height: 100%;
             padding: 8px; 
             justify-content: space-between;
         }
 
-        /* 오락실 화면 영역 */
-        .arcade-screen {
+        /* 고전 게임의 '회색 벽돌 프레임' 구현 */
+        .brick-frame {
             display: flex;
             flex-direction: row;
-            background-color: #111;
-            border: 6px solid #222;
+            background-color: #555;
+            border: 12px solid #666;
+            border-style: ridge; /* 벽돌/입체 테두리 효과 */
             border-radius: 8px;
             padding: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 10px #000;
-            flex-grow: 1; /* 화면 크기 최대한 확보 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 15px #000;
+            flex-grow: 1; 
             margin-bottom: 10px;
             min-height: 0; 
+            /* 러시아 궁전/하늘 배경 이미지 (아타리 테트리스 오마주) */
+            background-image: url('https://images.unsplash.com/photo-1547448415-e9f5b28e570d?q=80&w=1000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center bottom;
+            position: relative;
         }
 
-        /* 테트리스 보드 래퍼 */
+        /* 배경 이미지를 살짝 어둡고 파랗게 덮어주는 오버레이 */
+        .brick-frame::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,30,100,0.4), rgba(0,0,50,0.8));
+            z-index: 0;
+        }
+
+        /* 테트리스 보드 래퍼 - 공간을 최대로 차지하도록 설정 */
         .board-container {
             position: relative;
-            flex: 2.2;
+            flex-grow: 1; /* 우측 패널을 제외한 모든 공간 차지 */
             display: flex;
-            justify-content: center; /* 캔버스 중앙 정렬 */
+            justify-content: center; 
             align-items: center;
             height: 100%;
-            overflow: hidden;
+            z-index: 1;
         }
 
-        /* 비율 깨짐 완전 방지를 위해 JS가 width, height를 직접 제어합니다. */
+        /* 캔버스 1:2 비율 고정 (배경은 약간 투명하게 하여 뒤의 궁전이 비치게 함) */
         canvas#tetris {
             display: block;
-            image-rendering: pixelated; /* 픽셀 아트 느낌 */
-            background-color: #050505; /* 캔버스 영역에만 배경 적용 (붕뜸 방지) */
-            border: 2px solid #333;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            image-rendering: pixelated; 
+            background-color: rgba(0, 0, 0, 0.85); /* 붕뜸 방지 및 배경 투과 */
+            border: 3px solid #111;
+            box-shadow: inset 0 0 20px rgba(0,0,0,1), 0 0 15px rgba(0,0,0,0.8);
         }
 
-        /* 사이드 패널 */
+        /* 우측 정보창 (너비를 대폭 줄여 메인 화면 확대) */
         .side-panel {
-            flex: 1;
+            width: 75px; /* 너비 대폭 축소 */
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding-left: 10px;
+            padding-left: 5px;
             gap: 15px;
-            border-left: 4px solid #222;
             padding-top: 15px;
             height: 100%;
+            z-index: 1;
         }
 
-        .panel-box { width: 100%; text-align: center; }
-        .panel-title { color: #ff3333; font-size: 10px; margin-bottom: 6px; text-shadow: 2px 2px 0px #000; }
-        .panel-value { color: #00ffff; font-size: 14px; text-shadow: 2px 2px 0px #000; }
+        .panel-box { width: 100%; text-align: center; background: rgba(0,0,0,0.6); padding: 5px 0; border-radius: 4px; border: 1px solid #444;}
+        .panel-title { color: #ff3333; font-size: 8px; margin-bottom: 5px; text-shadow: 1px 1px 0px #000; }
+        .panel-value { color: #00ffff; font-size: 11px; text-shadow: 1px 1px 0px #000; }
 
-        /* 다음 블록 캔버스 */
+        /* 다음 블록 캔버스 축소 */
         .next-piece-wrapper {
-            background-color: #000;
-            border: 3px solid #333;
-            padding: 5px;
-            margin-top: 5px;
-            width: 60px;
-            height: 60px;
+            background-color: rgba(0,0,0,0.8);
+            border: 2px solid #555;
+            padding: 3px;
+            margin-top: 2px;
+            width: 50px;
+            height: 50px;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: inset 0 0 10px #000;
         }
         
         #next-piece {
@@ -113,30 +130,27 @@
             image-rendering: pixelated;
         }
 
-        /* 사운드 토글 버튼 */
+        /* 사운드 토글 버튼 축소 */
         .sound-btn {
             margin-top: auto;
-            margin-bottom: 5px;
-            background-color: #333;
+            margin-bottom: 0px;
+            background-color: rgba(0,0,0,0.8);
             color: #fff;
             border: 2px solid #555;
-            padding: 8px 10px;
+            padding: 10px 0;
             font-family: 'Press Start 2P', monospace;
             font-size: 8px;
             cursor: pointer;
-            box-shadow: 0 3px 0 #111;
             border-radius: 4px;
-            transition: background-color 0.2s;
             width: 100%;
         }
-        .sound-btn:active { transform: translateY(3px); box-shadow: 0 0 0 transparent; }
         .sound-btn.on { color: #00ffff; border-color: #008888; }
         .sound-btn.off { color: #ff5555; border-color: #880000; text-decoration: line-through; }
 
         /* 오버레이 (시작/종료) */
         #overlay {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.85);
             display: flex;
             flex-direction: column;
@@ -147,11 +161,12 @@
 
         .retro-title {
             color: #ff3333;
-            font-size: 20px;
+            font-size: 24px;
             text-shadow: 3px 3px 0px #550000;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
             line-height: 1.5;
+            letter-spacing: 2px;
         }
 
         .start-btn {
@@ -167,7 +182,7 @@
         }
         .start-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
-        /* 모바일 컨트롤러 (그리드 레이아웃, 크기 80% 수준) */
+        /* 모바일 컨트롤러 */
         .controls {
             display: flex;
             justify-content: space-between;
@@ -177,10 +192,9 @@
             flex-shrink: 0;
         }
 
-        /* 십자키 (D-Pad) */
         .d-pad {
             display: grid;
-            grid-template-columns: 35px 35px 35px; /* 버튼 하나당 35px 크기 */
+            grid-template-columns: 35px 35px 35px;
             grid-template-rows: 35px 35px 35px;
             gap: 0;
         }
@@ -205,24 +219,17 @@
         .right-btn { grid-column: 3; grid-row: 2; border-radius: 0 4px 4px 0; }
         .center-square { grid-column: 2; grid-row: 2; background-color: #333; }
 
-        /* 깨지지 않는 순수 CSS 화살표 */
         .arrow-up { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 12px solid #666; }
         .arrow-down { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #666; }
         .arrow-left { width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 12px solid #666; }
         .arrow-right { width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 12px solid #666; }
         
-        /* 눌렀을때 화살표 색상 변경 */
         .d-btn:active .arrow-up { border-bottom-color: #444; }
         .d-btn:active .arrow-down { border-top-color: #444; }
         .d-btn:active .arrow-left { border-right-color: #444; }
         .d-btn:active .arrow-right { border-left-color: #444; }
 
-        /* 액션 버튼 */
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            align-items: center; 
-        }
+        .action-buttons { display: flex; gap: 12px; align-items: center; }
         .action-btn-container { display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .a-btn {
             width: 55px; height: 55px; border-radius: 50%; border: 2px solid #000;
@@ -238,14 +245,14 @@
 
 <div id="game-container">
     
-    <div class="arcade-screen">
+    <!-- 아케이드 기기 프레임 (벽돌 테두리 + 러시아 궁전 배경) -->
+    <div class="brick-frame">
         <div class="board-container" id="board-wrap">
-            <!-- 캔버스의 HTML 사이즈는 해상도(비율 1:2) 고정, 실제 화면 크기는 JS가 조절 -->
             <canvas id="tetris" width="200" height="400"></canvas>
             
             <div id="overlay">
                 <div class="retro-title" id="title-text">
-                    SUPER<br>TETRIS
+                    TETRIS<br><span style="font-size:12px; color:#fff">1988</span>
                 </div>
                 <button class="start-btn" id="start-button" onclick="startGame()">INSERT COIN</button>
             </div>
@@ -264,7 +271,7 @@
                 <div class="panel-title">LEVEL</div>
                 <div class="panel-value" id="level">1</div>
             </div>
-            <div class="panel-box">
+            <div class="panel-box" style="background:transparent; border:none; padding:0;">
                 <div class="panel-title">NEXT</div>
                 <div class="next-piece-wrapper">
                     <canvas id="next-piece" width="80" height="80"></canvas>
@@ -275,6 +282,7 @@
         </div>
     </div>
 
+    <!-- 모바일 컨트롤러 -->
     <div class="controls">
         <div class="d-pad">
             <div class="center-square"></div>
@@ -307,32 +315,29 @@ function resizeCanvas() {
     const canvas = document.getElementById('tetris');
     if (!container || !canvas) return;
 
-    // 부모 영역의 넓이와 높이를 구함
+    // 패널 너비를 대폭 줄였으므로 보드 컨테이너의 크기가 최대화 됨
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
     
-    // 테트리스 보드 비율인 1:2 (10칸 x 20칸) 강제 설정
-    let targetWidth = containerWidth;
-    let targetHeight = targetWidth * 2;
+    // 테트리스는 10x20 = 1:2 비율
+    let targetHeight = containerHeight;
+    let targetWidth = targetHeight / 2;
     
-    // 만약 계산된 높이가 부모 영역을 초과한다면 높이 기준으로 다시 맞춤
-    if (targetHeight > containerHeight) {
-        targetHeight = containerHeight;
-        targetWidth = targetHeight / 2;
+    // 세로가 너무 길어서 가로 너비를 초과할 경우, 가로 기준으로 맞춤
+    if (targetWidth > containerWidth) {
+        targetWidth = containerWidth;
+        targetHeight = targetWidth * 2;
     }
     
-    // CSS 픽셀 단위로 정확히 강제 주입하여 블록이 정사각형을 유지하도록 함
     canvas.style.width = Math.floor(targetWidth) + 'px';
     canvas.style.height = Math.floor(targetHeight) + 'px';
 }
 
-// 화면이 바뀌거나 회전하거나 전체화면이 될 때마다 크기 재계산
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
 document.addEventListener('fullscreenchange', resizeCanvas);
 document.addEventListener('webkitfullscreenchange', resizeCanvas);
 
-// 최초 실행 시 사이즈 조절
 resizeCanvas();
 setTimeout(resizeCanvas, 50);
 
@@ -351,10 +356,10 @@ const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-piece');
 const nextCtx = nextCanvas.getContext('2d');
 
-// 내부 렌더링 해상도는 한 블록당 20px 기준으로 고정 (200x400)
 ctx.scale(20, 20);
 nextCtx.scale(20, 20);
 
+// 원색 픽셀 색상
 const colors = [ null, '#00ffff', '#0000ff', '#ff8800', '#ffff00', '#00ff00', '#cc00ff', '#ff0000' ];
 
 function createPiece(type) {
@@ -413,11 +418,10 @@ function drawMatrix(matrix, offset, context) {
 }
 
 function draw() {
-    // JS가 배경을 조절하므로 화면만 클리어
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Grid (희미하게 배경 격자)
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    // 약간 투명한 격자 그리기
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
     ctx.lineWidth = 0.05;
     for(let i=1; i<10; i++) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 20); ctx.stroke(); }
     for(let i=1; i<20; i++) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(10, i); ctx.stroke(); }
@@ -572,8 +576,8 @@ function update(time = 0) {
 }
 
 function startGame() {
-    requestFullScreen(); // 폰 화면 전체를 사용
-    setTimeout(resizeCanvas, 100); // 전체화면 전환 후 사이즈 갱신
+    requestFullScreen(); // 전체화면
+    setTimeout(resizeCanvas, 100); 
     
     initAudio();
     arena.forEach(row => row.fill(0));
