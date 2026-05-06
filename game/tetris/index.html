@@ -2,9 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <!-- 모바일 최적화: 확대/축소 완벽 방지, 화면 꽉 채우기 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>파이널 레트로 테트리스</title>
+    <title>파이널 레트로 테트리스 (사운드 제어)</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
@@ -12,13 +11,13 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            touch-action: none; /* 브라우저 기본 터치 액션(스크롤 등) 완벽 차단 */
+            touch-action: none;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: #001f3f; /* 깊은 남색 배경 */
+            background-color: #001f3f;
             color: #fff;
             font-family: 'Press Start 2P', monospace;
             display: flex;
@@ -29,7 +28,6 @@
             overflow: hidden;
         }
 
-        /* 게임 메인 컨테이너 */
         #game-container {
             display: flex;
             flex-direction: column;
@@ -40,7 +38,6 @@
             justify-content: space-between;
         }
 
-        /* 오락실 화면 영역 (최대한 키움) */
         .arcade-screen {
             display: flex;
             flex-direction: row;
@@ -49,11 +46,10 @@
             border-radius: 8px;
             padding: 6px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 10px #000;
-            flex-grow: 1; /* 화면 크기 최대화 */
+            flex-grow: 1;
             margin-bottom: 5px;
         }
 
-        /* 테트리스 보드 */
         .board-container {
             position: relative;
             flex: 2.2;
@@ -67,13 +63,12 @@
 
         canvas {
             display: block;
-            image-rendering: pixelated; /* 픽셀 아트 느낌 */
+            image-rendering: pixelated;
             width: 100%;
             height: 100%;
-            object-fit: contain; /* 비율 유지하며 꽉 채우기 */
+            object-fit: contain;
         }
 
-        /* 사이드 패널 */
         .side-panel {
             flex: 1;
             display: flex;
@@ -105,7 +100,6 @@
             text-shadow: 2px 2px 0px #000;
         }
 
-        /* 다음 블록 캔버스 */
         .next-piece-wrapper {
             background-color: #000;
             border: 3px solid #333;
@@ -119,7 +113,39 @@
             box-shadow: inset 0 0 10px #000;
         }
 
-        /* 오버레이 (시작/종료) */
+        /* 사운드 토글 버튼 스타일 */
+        .sound-btn {
+            margin-top: auto; /* 패널 하단으로 밀어내기 */
+            margin-bottom: 10px;
+            background-color: #333;
+            color: #fff;
+            border: 2px solid #555;
+            padding: 8px 10px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #111;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sound-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 0 0 transparent;
+        }
+        
+        .sound-btn.on {
+            color: #00ffff;
+            border-color: #008888;
+        }
+
+        .sound-btn.off {
+            color: #ff5555;
+            border-color: #880000;
+            text-decoration: line-through;
+        }
+
+
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -157,20 +183,18 @@
             box-shadow: 0 0 0 transparent;
         }
 
-        /* 모바일 컨트롤러 (80% 축소) */
         .controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0px 15px 10px 15px;
-            height: 130px; /* 기존보다 축소 */
+            height: 130px;
             flex-shrink: 0;
         }
 
-        /* 십자키 (D-Pad) 축소 */
         .d-pad {
             position: relative;
-            width: 110px; /* 140px -> 110px */
+            width: 110px;
             height: 110px;
         }
 
@@ -191,7 +215,6 @@
             box-shadow: 0 0px 0px #111;
         }
 
-        /* 십자키 버튼 크기 및 위치 조정 */
         .up-btn { top: 0; left: 35px; width: 40px; height: 40px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;}
         .down-btn { bottom: 0; left: 35px; width: 40px; height: 40px; border-top-left-radius: 0; border-top-right-radius: 0;}
         .left-btn { top: 35px; left: 0; width: 40px; height: 40px; border-top-right-radius: 0; border-bottom-right-radius: 0;}
@@ -203,7 +226,6 @@
             z-index: -1;
         }
 
-        /* 깨지지 않는 순수 CSS 화살표 도형 */
         .arrow-up { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 12px solid #666; }
         .arrow-down { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #666; }
         .arrow-left { width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 12px solid #666; }
@@ -214,7 +236,6 @@
         .d-btn:active .arrow-left { border-right-color: #444; }
         .d-btn:active .arrow-right { border-left-color: #444; }
 
-        /* 액션 버튼 축소 */
         .action-buttons {
             display: flex;
             gap: 12px;
@@ -230,7 +251,7 @@
         }
 
         .a-btn {
-            width: 60px; /* 75px -> 60px 축소 */
+            width: 60px;
             height: 60px;
             border-radius: 50%;
             border: 2px solid #000;
@@ -259,7 +280,6 @@
 
 <div id="game-container">
     
-    <!-- 오락실 모니터 화면 (확대됨) -->
     <div class="arcade-screen">
         <div class="board-container">
             <canvas id="tetris" width="200" height="400"></canvas>
@@ -288,18 +308,18 @@
             <div class="panel-box">
                 <div class="panel-title">NEXT</div>
                 <div class="next-piece-wrapper">
-                    <!-- 캔버스 비율은 유지하되 표시되는 크기는 css로 제어됨 -->
                     <canvas id="next-piece" width="80" height="80"></canvas>
                 </div>
             </div>
+            
+            <!-- 사운드 토글 버튼 추가 -->
+            <button id="sound-toggle-btn" class="sound-btn on" onclick="toggleSound()">SND: ON</button>
         </div>
     </div>
 
-    <!-- 모바일 컨트롤러 (80% 축소됨) -->
     <div class="controls">
         <div class="d-pad">
             <div class="center-square"></div>
-            <!-- CSS 화살표 적용 (글씨 깨짐 완벽 방지) -->
             <div class="d-btn up-btn" id="btn-up"><div class="arrow-up"></div></div>
             <div class="d-btn left-btn" id="btn-left"><div class="arrow-left"></div></div>
             <div class="d-btn right-btn" id="btn-right"><div class="arrow-right"></div></div>
@@ -359,6 +379,9 @@ let lastTime = 0;
 let isGameOver = false;
 let isPlaying = false;
 let animationId = null;
+
+// 오디오 설정 상태 변수
+let isSoundEnabled = true;
 
 function randomPiece() {
     const pieces = 'IJLOSTZ';
@@ -469,7 +492,7 @@ function playerMove(dir) {
     if (!isPlaying) return;
     player.pos.x += dir;
     if (collide(arena, player)) {
-        player.pos.x -= dir; // 충돌 시 원상복구
+        player.pos.x -= dir; 
     } else {
         playSFX('move');
     }
@@ -561,14 +584,13 @@ function startGame() {
     isGameOver = false; isPlaying = true;
     nextPieceMatrix = null;
     playerReset();
-    playBGM();
+    if(isSoundEnabled) playBGM();
     lastTime = performance.now();
     cancelAnimationFrame(animationId);
     update();
 }
 
-/* --- 조작계 개선 (Pointer Events) --- */
-// 키보드 지원
+/* --- 조작계 --- */
 document.addEventListener('keydown', event => {
     if (!isPlaying) return;
     switch (event.keyCode) {
@@ -580,22 +602,20 @@ document.addEventListener('keydown', event => {
     }
 });
 
-// 완벽한 터치 & 오토 리피트(꾹 누르기) 로직
 function bindButton(id, action, autoRepeat = false) {
     const btn = document.getElementById(id);
     let timeoutId = null;
     let intervalId = null;
 
     const start = (e) => {
-        if(e) e.preventDefault(); // 기본 터치 동작(스크롤, 줌 등) 완벽 차단
+        if(e) e.preventDefault(); 
         if (!isPlaying) return;
         
-        action(); // 누르는 즉시 무조건 1회 실행 (반응성 보장)
+        action(); 
 
         if (autoRepeat) {
             clearTimeout(timeoutId);
             clearInterval(intervalId);
-            // 0.2초 꾹 누르면 그 때부터 빠르게(80ms) 연속 이동 시작
             timeoutId = setTimeout(() => {
                 intervalId = setInterval(action, 80);
             }, 200);
@@ -608,21 +628,16 @@ function bindButton(id, action, autoRepeat = false) {
         clearInterval(intervalId);
     };
 
-    // 마우스, 터치 모두 통합 지원하는 pointer 이벤트 사용
     btn.addEventListener('pointerdown', start);
     btn.addEventListener('pointerup', stop);
     btn.addEventListener('pointerleave', stop);
     btn.addEventListener('pointercancel', stop);
-    // 모바일 길게 누를 시 뜨는 컨텍스트 메뉴 방지
     btn.addEventListener('contextmenu', e => e.preventDefault());
 }
 
-// 방향키는 오토 리피트 적용 (좌, 우, 아래)
 bindButton('btn-left', () => playerMove(-1), true);
 bindButton('btn-right', () => playerMove(1), true);
 bindButton('btn-down', () => playerDrop(), true);
-
-// 액션키는 무조건 1회씩만 동작
 bindButton('btn-up', () => playerRotate(1), false);
 bindButton('btn-rotate', () => playerRotate(1), false);
 bindButton('btn-drop', () => playerHardDrop(), false);
@@ -650,12 +665,12 @@ function initAudio() {
 }
 
 function playBGM() {
-    if (!audioCtx || isBGMPlaying) return;
+    if (!audioCtx || isBGMPlaying || !isSoundEnabled) return;
     isBGMPlaying = true;
     let noteIndex = 0;
 
     function playNextNote() {
-        if (!isBGMPlaying) return;
+        if (!isBGMPlaying || !isSoundEnabled) return;
         const [freq, duration] = themeSong[noteIndex];
         const speedMultiplier = Math.max(0.6, 1 - (player.level * 0.05));
         const actualDuration = duration * speedMultiplier;
@@ -685,7 +700,7 @@ function stopBGM() {
 }
 
 function playSFX(type) {
-    if (!audioCtx) return;
+    if (!audioCtx || !isSoundEnabled) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain);
@@ -733,6 +748,25 @@ function playSFX(type) {
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
         osc.start(now);
         osc.stop(now + 0.3);
+    }
+}
+
+// 사운드 토글 함수
+function toggleSound() {
+    isSoundEnabled = !isSoundEnabled;
+    const btn = document.getElementById('sound-toggle-btn');
+    
+    if (isSoundEnabled) {
+        btn.innerText = 'SND: ON';
+        btn.classList.remove('off');
+        btn.classList.add('on');
+        initAudio();
+        if (isPlaying) playBGM();
+    } else {
+        btn.innerText = 'SND: OFF';
+        btn.classList.remove('on');
+        btn.classList.add('off');
+        stopBGM();
     }
 }
 
