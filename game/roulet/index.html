@@ -6,1037 +6,542 @@
 <title>GRAND ROULETTE</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --gold:   #f5c842;
-  --gold2:  #e8a800;
-  --gold3:  #fff0a0;
-  --crimson:#c0122c;
-  --ruby:   #e8183a;
-  --emerald:#00b86b;
-  --sapphire:#1a6fff;
-  --neon:   #ff3cac;
-  --bg:     #06040e;
-  --panel:  rgba(10,7,22,.97);
-  --border: rgba(245,200,66,.28);
-  --text:   #f1e9d2;
-  --dim:    #7a6a4a;
+:root{
+  --gold:#f5c842;--gold2:#e8a800;--gold3:#fff0a0;
+  --bg:#06040e;--border:rgba(245,200,66,.28);--text:#f1e9d2;--dim:#7a6a4a;
 }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);}
 
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{
-  width:100%;height:100%;overflow:hidden;
-  background:var(--bg);
-  font-family:'Rajdhani',sans-serif;
-  color:var(--text);
-  touch-action:none;
-}
-
-/* ── 배경 레이어 ── */
+/* 배경 */
 #scene{position:fixed;inset:0;z-index:0;overflow:hidden;}
-#scene-bg{
+#sbg{
   position:absolute;inset:0;
   background:
-    radial-gradient(ellipse 120% 80% at 50% 0%,   rgba(192,18,44,.18) 0%,transparent 55%),
-    radial-gradient(ellipse 100% 60% at 80% 100%,  rgba(26,111,255,.12) 0%,transparent 55%),
-    radial-gradient(ellipse 80%  80% at 0%   60%,  rgba(0,184,107,.08) 0%,transparent 50%),
-    radial-gradient(ellipse 200% 200% at 50% 50%,  #0e0820 0%,#06040e 60%);
+    radial-gradient(ellipse 120% 80% at 50% 0%,rgba(192,18,44,.2) 0%,transparent 55%),
+    radial-gradient(ellipse 100% 60% at 80% 100%,rgba(26,111,255,.13) 0%,transparent 55%),
+    radial-gradient(ellipse 200% 200% at 50% 50%,#0e0820 0%,#06040e 60%);
 }
-/* 별빛 패턴 */
-#stars{position:absolute;inset:0;}
-/* 바닥 그리드 */
-#grid{
+#sgrid{
   position:absolute;inset:0;opacity:.07;
-  background-image:
-    linear-gradient(rgba(245,200,66,.8) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(245,200,66,.8) 1px,transparent 1px);
+  background-image:linear-gradient(rgba(245,200,66,.8) 1px,transparent 1px),linear-gradient(90deg,rgba(245,200,66,.8) 1px,transparent 1px);
   background-size:60px 60px;
-  transform:perspective(400px) rotateX(55deg) translateY(20%);
-  transform-origin:bottom center;
+  transform:perspective(400px) rotateX(55deg) translateY(20%);transform-origin:bottom center;
 }
-/* 아치형 장식 조명 */
-.arch-light{
-  position:absolute;border-radius:50%;
-  filter:blur(60px);pointer-events:none;
-}
+.al{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none;}
 
-/* ── 전체 앱 ── */
-#app{
-  position:relative;z-index:10;
-  width:100%;height:100%;
-  display:flex;flex-direction:column;
-  align-items:center;
-  padding:10px 8px 6px;
-  gap:0;
-}
+/* 앱 */
+#app{position:relative;z-index:10;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;padding:8px 8px 4px;}
 
-/* ── 헤더 ── */
-#header{
-  width:100%;max-width:520px;
-  text-align:center;
-  flex-shrink:0;
-  margin-bottom:4px;
-}
-#title-main{
-  font-family:'Cinzel Decorative',serif;
-  font-size:clamp(18px,5vw,32px);
-  font-weight:900;
-  letter-spacing:4px;
-  background:linear-gradient(135deg,#fff0a0 0%,var(--gold) 35%,#fff8d0 55%,var(--gold2) 80%,#e8c850 100%);
+/* 헤더 */
+#hdr{width:100%;max-width:520px;text-align:center;flex-shrink:0;margin-bottom:4px;}
+#ttl{
+  font-family:'Cinzel Decorative',serif;font-size:clamp(18px,5vw,30px);font-weight:900;letter-spacing:4px;
+  background:linear-gradient(135deg,#fff0a0 0%,var(--gold) 35%,#fff8d0 55%,var(--gold2) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   filter:drop-shadow(0 0 12px rgba(245,200,66,.5));
-  line-height:1.1;
 }
-#title-sub{
-  font-family:'Cinzel',serif;
-  font-size:clamp(8px,2vw,11px);
-  letter-spacing:8px;
-  color:var(--dim);
-  text-transform:uppercase;
-  margin-top:1px;
-}
+#sub{font-family:'Cinzel',serif;font-size:9px;letter-spacing:8px;color:var(--dim);margin-top:1px;}
 
-/* ── 인원 설정 바 ── */
-#ctrl-bar{
-  display:flex;align-items:center;gap:8px;
-  background:rgba(245,200,66,.05);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:6px 14px;
-  flex-shrink:0;
-  margin-bottom:6px;
-  flex-wrap:wrap;
-  justify-content:center;
+/* 컨트롤 */
+#ctrl{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;
+  background:rgba(245,200,66,.05);border:1px solid var(--border);border-radius:12px;
+  padding:6px 14px;flex-shrink:0;margin-bottom:4px;
 }
-#ctrl-bar label{
-  font-family:'Cinzel',serif;
-  font-size:10px;letter-spacing:2px;
-  color:var(--dim);
+#ctrl label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--dim);}
+#ctrl input{
+  width:58px;padding:4px 6px;background:rgba(0,0,0,.4);border:1px solid var(--border);
+  border-radius:6px;color:var(--gold);font-family:'Cinzel',serif;font-size:14px;font-weight:700;text-align:center;touch-action:auto;
 }
-#ctrl-bar input{
-  width:58px;padding:4px 6px;
-  background:rgba(0,0,0,.4);
-  border:1px solid var(--border);
-  border-radius:6px;
-  color:var(--gold);
-  font-family:'Cinzel',serif;font-size:14px;font-weight:700;
-  text-align:center;
-}
-#ctrl-bar input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 8px rgba(245,200,66,.35);}
-
+#ctrl input:focus{outline:none;border-color:var(--gold);}
 .cbtn{
-  font-family:'Cinzel',serif;font-size:10px;font-weight:700;
-  letter-spacing:1px;padding:5px 12px;
-  background:rgba(245,200,66,.1);
-  border:1px solid var(--border);
-  border-radius:6px;color:var(--gold);cursor:pointer;
-  transition:all .2s;
+  font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:1px;
+  padding:6px 14px;background:rgba(245,200,66,.1);border:1px solid var(--border);
+  border-radius:6px;color:var(--gold);cursor:pointer;touch-action:auto;
+  -webkit-user-select:none;user-select:none;
 }
-.cbtn:hover,.cbtn:active{background:rgba(245,200,66,.25);box-shadow:0 0 10px rgba(245,200,66,.3);}
+.cbtn:active{background:rgba(245,200,66,.3);}
 
-/* ── 룰렛 메인 영역 ── */
-#roulette-area{
-  position:relative;
-  flex:1;
-  display:flex;align-items:center;justify-content:center;
-  width:100%;
-}
+/* 룰렛 영역 */
+#rarea{position:relative;flex:1;display:flex;align-items:center;justify-content:center;width:100%;min-height:0;}
 
-/* 바깥 장식 링 */
-#outer-ring{
-  position:relative;
-  display:flex;align-items:center;justify-content:center;
-}
-.deco-ring{
-  position:absolute;border-radius:50%;
-  border:1px solid rgba(245,200,66,.15);
-  pointer-events:none;
-}
+/* 캔버스: 원판+바늘+허브 모두 포함, overflow visible */
+#wc{display:block;touch-action:none;}
 
-/* 캔버스 */
-#wheel-canvas{
-  display:block;
-  border-radius:50%;
-  cursor:pointer;
-}
-
-/* 포인터 (화살표) */
-#pointer-wrap{
-  position:absolute;
-  top:50%;left:50%;
-  width:0;height:0;
-  transform:translate(-50%,-50%);
-  pointer-events:none;
-  z-index:20;
-}
-#pointer{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  width:0;height:0;
-  filter:drop-shadow(0 0 8px rgba(245,200,66,.8));
-}
-
-/* 중심 장식 */
-#center-hub{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  z-index:30;pointer-events:none;
-  box-shadow:0 0 30px rgba(245,200,66,.4), inset 0 0 15px rgba(0,0,0,.8);
-}
-
-/* ── 스핀 버튼 ── */
-#spin-btn{
-  flex-shrink:0;
-  font-family:'Cinzel Decorative',serif;
-  font-size:clamp(13px,3.5vw,18px);
-  font-weight:900;
-  letter-spacing:3px;
-  padding:12px 36px;
-  border:none;border-radius:50px;
-  cursor:pointer;
-  position:relative;overflow:hidden;
-  transition:all .25s;
+/* 스핀 버튼 */
+#spbtn{
+  flex-shrink:0;font-family:'Cinzel Decorative',serif;font-size:clamp(13px,3.5vw,18px);font-weight:900;
+  letter-spacing:3px;padding:12px 36px;border:none;border-radius:50px;cursor:pointer;
   background:linear-gradient(135deg,#b8860b 0%,var(--gold) 40%,var(--gold3) 60%,var(--gold2) 100%);
-  color:#1a0a00;
-  box-shadow:0 6px 30px rgba(245,200,66,.5), 0 2px 0 rgba(255,255,255,.2) inset,0 -3px 0 rgba(0,0,0,.3) inset;
-  margin-bottom:4px;
-  text-shadow:0 1px 0 rgba(255,255,255,.3);
+  color:#1a0a00;margin-bottom:4px;touch-action:auto;-webkit-user-select:none;user-select:none;
+  box-shadow:0 6px 30px rgba(245,200,66,.5);position:relative;z-index:10;
 }
-#spin-btn::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,.25) 0%,transparent 50%);
-  pointer-events:none;
-}
-#spin-btn:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(245,200,66,.7),0 2px 0 rgba(255,255,255,.2) inset;}
-#spin-btn:active{transform:translateY(1px);box-shadow:0 3px 15px rgba(245,200,66,.4);}
-#spin-btn:disabled{opacity:.5;cursor:default;transform:none;}
+#spbtn:active{transform:translateY(2px);box-shadow:0 2px 10px rgba(245,200,66,.3);}
+#spbtn:disabled{opacity:.45;pointer-events:none;}
 
-/* ── 당첨 오버레이 ── */
-#win-overlay{
-  position:fixed;inset:0;z-index:100;
-  display:none;
+/* 당첨 레이어 */
+#wlayer{
+  position:fixed;inset:0;z-index:9999;display:none;
   align-items:center;justify-content:center;
-  background:rgba(6,4,14,.85);
-  backdrop-filter:blur(8px);
+  background:rgba(6,4,14,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
 }
-#win-overlay.active{display:flex;}
-
-#win-card{
+#wlayer.show{display:flex;}
+#wcard{
   background:linear-gradient(145deg,#120820 0%,#1e0e10 50%,#0a1020 100%);
-  border:2px solid var(--gold);
-  border-radius:24px;
-  padding:32px 44px 28px;
-  text-align:center;
-  box-shadow:
-    0 0 0 1px rgba(245,200,66,.1),
-    0 0 60px rgba(245,200,66,.35),
-    0 0 120px rgba(192,18,44,.2),
-    0 40px 80px rgba(0,0,0,.8);
-  max-width:340px;
-  width:88vw;
-  position:relative;
-  overflow:hidden;
+  border:2px solid var(--gold);border-radius:24px;padding:28px 36px 24px;text-align:center;
+  width:min(340px,88vw);box-shadow:0 0 60px rgba(245,200,66,.4),0 40px 80px rgba(0,0,0,.8);
+  pointer-events:auto;position:relative;z-index:10000;
 }
-#win-card::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(245,200,66,.06) 0%,transparent 50%,rgba(192,18,44,.04) 100%);
-}
-.win-deco{font-size:36px;display:block;margin-bottom:8px;animation:float 2s ease-in-out infinite;}
-#win-label{
-  font-family:'Cinzel',serif;font-size:10px;letter-spacing:6px;
-  color:var(--dim);text-transform:uppercase;margin-bottom:6px;
-}
-#win-num{
-  font-family:'Cinzel Decorative',serif;font-weight:900;
-  font-size:clamp(64px,18vw,96px);
-  line-height:1;
+.wd{font-size:34px;display:block;margin-bottom:6px;animation:wfl 2s ease-in-out infinite;}
+#wlbl{font-family:'Cinzel',serif;font-size:10px;letter-spacing:6px;color:var(--dim);margin-bottom:4px;}
+#wnum{
+  font-family:'Cinzel Decorative',serif;font-weight:900;font-size:clamp(60px,17vw,92px);line-height:1;
   background:linear-gradient(180deg,#fff8e0 0%,var(--gold) 40%,var(--gold2) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  filter:drop-shadow(0 0 20px rgba(245,200,66,.7));
-  animation:winPop .6s cubic-bezier(.22,1.4,.36,1) forwards;
+  animation:wpop .6s cubic-bezier(.22,1.4,.36,1) both;
 }
-#win-txt{
-  font-family:'Cinzel',serif;font-size:clamp(14px,4vw,18px);
-  letter-spacing:3px;color:var(--gold3);
-  margin:6px 0 16px;
+#wtxt{font-family:'Cinzel',serif;font-size:clamp(13px,4vw,17px);letter-spacing:3px;color:var(--gold3);margin:6px 0 18px;}
+#wcls{
+  display:block;width:100%;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:3px;
+  padding:14px 28px;background:linear-gradient(135deg,var(--gold2) 0%,var(--gold) 100%);
+  border:none;border-radius:50px;color:#1a0a00;cursor:pointer;
+  box-shadow:0 4px 20px rgba(245,200,66,.45);touch-action:auto;pointer-events:auto;
+  position:relative;z-index:10001;-webkit-user-select:none;user-select:none;
+  -webkit-appearance:none;appearance:none;min-height:52px;
 }
-#win-close{
-  font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;
-  padding:10px 28px;
-  background:linear-gradient(135deg,var(--gold2) 0%,var(--gold) 100%);
-  border:none;border-radius:50px;
-  color:#1a0a00;font-weight:700;cursor:pointer;
-  box-shadow:0 4px 20px rgba(245,200,66,.4);
-  transition:all .2s;
-}
-#win-close:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,200,66,.6);}
+#wcls:active{transform:scale(.97);}
 
-/* ── 파티클 캔버스 ── */
-#fx-canvas{position:fixed;inset:0;z-index:90;pointer-events:none;}
+/* FX */
+#fx{position:fixed;inset:0;z-index:1000;pointer-events:none;}
 
-/* ── 애니메이션 ── */
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
-@keyframes winPop{from{transform:scale(0) rotate(-10deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
-@keyframes shimmer{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}
-@keyframes hubSpin{from{transform:translate(-50%,-50%) rotate(0);}to{transform:translate(-50%,-50%) rotate(360deg);}}
-@keyframes glowPulse{0%,100%{opacity:.6;}50%{opacity:1;}}
-@keyframes starTwinkle{0%,100%{opacity:.2;}50%{opacity:.9;}}
-@keyframes ringRotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-@keyframes ringRotateCCW{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
-
-/* ── 링 장식 애니메이션 ── */
-.ring-anim-cw { animation:ringRotate linear infinite; }
-.ring-anim-ccw { animation:ringRotateCCW linear infinite; }
-
-/* ── 모바일 반응형 ── */
-@media(max-height:700px){
-  #title-main{font-size:clamp(14px,4vw,22px);}
-  #spin-btn{padding:10px 28px;font-size:clamp(11px,3vw,15px);}
-}
+@keyframes wfl{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes wpop{from{transform:scale(0) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
 </style>
 </head>
 <body>
-
-<!-- 배경 -->
 <div id="scene">
-  <div id="scene-bg"></div>
-  <canvas id="stars-bg" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
-  <div id="grid"></div>
-  <div class="arch-light" id="al1" style="width:300px;height:300px;top:-80px;left:-80px;background:rgba(192,18,44,.12);"></div>
-  <div class="arch-light" id="al2" style="width:250px;height:250px;bottom:-60px;right:-60px;background:rgba(26,111,255,.1);"></div>
-  <div class="arch-light" id="al3" style="width:200px;height:200px;top:30%;left:50%;transform:translateX(-50%);background:rgba(245,200,66,.06);"></div>
+  <div id="sbg"></div>
+  <canvas id="stc" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+  <div id="sgrid"></div>
+  <div class="al" style="width:280px;height:280px;top:-60px;left:-60px;background:rgba(192,18,44,.13);"></div>
+  <div class="al" style="width:220px;height:220px;bottom:-50px;right:-50px;background:rgba(26,111,255,.1);"></div>
 </div>
 
-<!-- FX 파티클 -->
-<canvas id="fx-canvas"></canvas>
+<canvas id="fx"></canvas>
 
-<!-- 앱 -->
 <div id="app">
-  <!-- 헤더 -->
-  <div id="header">
-    <div id="title-main">GRAND ROULETTE</div>
-    <div id="title-sub">Fortune Wheel · Lucky Draw</div>
+  <div id="hdr">
+    <div id="ttl">GRAND ROULETTE</div>
+    <div id="sub">Fortune Wheel · Lucky Draw</div>
   </div>
-
-  <!-- 인원 설정 -->
-  <div id="ctrl-bar">
+  <div id="ctrl">
     <label>PLAYERS</label>
-    <input type="number" id="playerInput" value="10" min="2" max="100">
-    <button class="cbtn" onclick="applyPlayers()">APPLY</button>
-    <button class="cbtn" onclick="toggleFS()">⛶ FULL</button>
+    <input type="number" id="pin" value="10" min="2" max="100">
+    <button class="cbtn" id="abtn">APPLY</button>
+    <button class="cbtn" id="fbtn">⛶ FULL</button>
   </div>
-
-  <!-- 룰렛 -->
-  <div id="roulette-area">
-    <div id="outer-ring">
-      <canvas id="wheel-canvas"></canvas>
-      <div id="pointer-wrap">
-        <canvas id="pointer-canvas"></canvas>
-      </div>
-      <div id="center-hub">
-        <canvas id="hub-canvas"></canvas>
-      </div>
-    </div>
+  <div id="rarea">
+    <!-- 단 하나의 캔버스: 원판+바늘+허브 모두 여기에 그림 -->
+    <canvas id="wc"></canvas>
   </div>
-
-  <!-- 스핀 버튼 -->
-  <button id="spin-btn" onclick="spinWheel()">✦ SPIN ✦</button>
+  <button id="spbtn">✦ SPIN ✦</button>
 </div>
 
-<!-- 당첨 오버레이 -->
-<div id="win-overlay">
-  <div id="win-card">
-    <span class="win-deco">🎰</span>
-    <div id="win-label">GRAND PRIZE WINNER</div>
-    <div id="win-num">1</div>
-    <div id="win-txt">CONGRATULATIONS!</div>
-    <button id="win-close" onclick="closeWin()">✦ CONTINUE ✦</button>
+<div id="wlayer">
+  <div id="wcard">
+    <span class="wd">🏆</span>
+    <div id="wlbl">GRAND PRIZE WINNER</div>
+    <div id="wnum">1</div>
+    <div id="wtxt">CONGRATULATIONS!</div>
+    <button id="wcls" type="button">✦ CONTINUE ✦</button>
   </div>
 </div>
 
 <script>
-'use strict';
-// ════════════════════════════════════════════
-//  GRAND ROULETTE — Complete Engine
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════
+//  GRAND ROULETTE — Clean Rebuild
+//  바늘: 12시 방향, 캔버스 상단 여백 안에 배치
+// ══════════════════════════════════════════
 
 // ── 별 배경 ──
-(function initStars(){
-  const c = document.getElementById('stars-bg');
-  const x = c.getContext('2d');
-  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; drawStars(); }
-  function drawStars(){
-    x.clearRect(0,0,c.width,c.height);
-    const count = 180;
-    for(let i=0;i<count;i++){
-      const sx = Math.random()*c.width;
-      const sy = Math.random()*c.height;
-      const r  = Math.random()*1.3+0.2;
-      const a  = Math.random()*.9+.1;
-      x.beginPath();
-      x.arc(sx,sy,r,0,Math.PI*2);
-      x.fillStyle=`rgba(255,248,220,${a})`;
-      x.fill();
+(function(){
+  var c=document.getElementById('stc'),x=c.getContext('2d');
+  function d(){
+    c.width=window.innerWidth;c.height=window.innerHeight;
+    for(var i=0;i<180;i++){
+      var sx=Math.random()*c.width,sy=Math.random()*c.height,r=Math.random()*1.3+.2,a=Math.random()*.9+.1;
+      x.beginPath();x.arc(sx,sy,r,0,6.28);x.fillStyle='rgba(255,248,220,'+a+')';x.fill();
     }
   }
-  resize();
-  window.addEventListener('resize', resize);
+  d();window.addEventListener('resize',d);
 })();
 
-// ── Web Audio ──
-let AC = null;
-function initAC(){
-  if(!AC){ AC = new(window.AudioContext||window.webkitAudioContext)(); }
-  if(AC.state==='suspended') AC.resume();
+// ── Audio ──
+var AC=null;
+function initAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}
+function tone(f,d,tp,v,t0){
+  if(!AC)return;
+  var o=AC.createOscillator(),g=AC.createGain(),t=t0||AC.currentTime;
+  o.type=tp||'sine';o.frequency.value=f;
+  g.gain.setValueAtTime(v||.1,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.01);
 }
-
-function sfxTick(freq){
-  if(!AC) return;
-  const o=AC.createOscillator(), g=AC.createGain();
-  o.type='triangle'; o.frequency.value=freq||600;
-  g.gain.setValueAtTime(.12,AC.currentTime);
-  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.07);
-  o.connect(g); g.connect(AC.destination);
-  o.start(); o.stop(AC.currentTime+.07);
-}
-
+var lt=0;
+function sfxTick(f){if(!AC)return;var n=Date.now();if(n-lt<25)return;lt=n;tone(f,.08,'triangle',.1);}
 function sfxSpin(){
-  if(!AC) return;
-  // 드럼롤 느낌
-  const buf=AC.createBuffer(1,AC.sampleRate*.05,AC.sampleRate);
-  const d=buf.getChannelData(0);
-  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2)*.4;
-  const s=AC.createBufferSource(), g=AC.createGain();
-  s.buffer=buf; g.gain.value=.5;
-  s.connect(g); g.connect(AC.destination); s.start();
+  if(!AC)return;
+  var b=AC.createBuffer(1,AC.sampleRate*.06,AC.sampleRate),d=b.getChannelData(0);
+  for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2)*.5;
+  var s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;g.gain.value=.5;
+  s.connect(g);g.connect(AC.destination);s.start();
 }
-
+function sfxWobble(){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain();o.type='sawtooth';o.frequency.value=120;g.gain.setValueAtTime(.18,AC.currentTime);g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+2.5);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+2.6);}
+function sfxHeart(){if(!AC)return;[0,.28,.56,.9,1.22,1.6,2.0,2.45].forEach(function(d,i){var t=AC.currentTime+d;tone(i%2===0?90:65,.16,'sine',.3,t);});}
 function sfxWin(){
-  if(!AC) return;
-  const fanfare=[
-    [523.25,.15],[523.25,.15],[523.25,.15],
-    [659.25,.3],[587.33,.15],[659.25,.3],[783.99,.7]
-  ];
-  let t=AC.currentTime+.05;
-  fanfare.forEach(([f,d])=>{
-    const o=AC.createOscillator(),g=AC.createGain();
-    o.type='triangle'; o.frequency.value=f;
-    g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(.35,t+.03);
-    g.gain.exponentialRampToValueAtTime(.001,t+d);
-    o.connect(g); g.connect(AC.destination);
-    o.start(t); o.stop(t+d+.1);
-    t+=d+.04;
-  });
-  // 화음
-  [523.25*2, 659.25*2].forEach(f=>{
-    const o=AC.createOscillator(),g=AC.createGain();
-    o.type='sine'; o.frequency.value=f;
-    g.gain.setValueAtTime(0,AC.currentTime+.05);
-    g.gain.linearRampToValueAtTime(.08,AC.currentTime+.1);
-    g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+1.4);
-    o.connect(g); g.connect(AC.destination);
-    o.start(AC.currentTime+.05); o.stop(AC.currentTime+1.5);
-  });
+  if(!AC)return;
+  var m=[[523,.13],[523,.13],[523,.13],[659,.3],[587,.13],[659,.3],[784,.7]],t=AC.currentTime+.05;
+  m.forEach(function(n){tone(n[0],n[1],'triangle',.28,t);t+=n[1]+.04;});
+  [1046,1318].forEach(function(f){tone(f,1.2,'sine',.07,AC.currentTime+.05);});
 }
+function sfxDrum(){if(!AC)return;for(var i=0;i<24;i++){var t=AC.currentTime+i*.06;tone(80+i*4,.05,'square',.12,t);}}
 
-function sfxSlowing(){
-  if(!AC) return;
-  const o=AC.createOscillator(), g=AC.createGain();
-  o.type='sine';
-  o.frequency.setValueAtTime(880,AC.currentTime);
-  o.frequency.exponentialRampToValueAtTime(220,AC.currentTime+1.2);
-  g.gain.setValueAtTime(.15,AC.currentTime);
-  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+1.4);
-  o.connect(g); g.connect(AC.destination);
-  o.start(); o.stop(AC.currentTime+1.5);
+// ── 파티클 ──
+var fxC=document.getElementById('fx'),fxX=fxC.getContext('2d'),PX=[];
+function rzFX(){fxC.width=window.innerWidth;fxC.height=window.innerHeight;}
+rzFX();window.addEventListener('resize',rzFX);
+function confetti(x,y,n){
+  var cols=['#f5c842','#e8183a','#00b86b','#1a6fff','#ff3cac','#ffffff','#ff8c00','#c084fc'];
+  for(var i=0;i<(n||220);i++){var a=Math.random()*6.28,sp=Math.random()*20+5;
+    PX.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-8,rot:Math.random()*360,vr:(Math.random()-.5)*18,w:Math.random()*9+3,h:Math.random()*5+2,col:cols[Math.floor(Math.random()*cols.length)],s:Math.random()<.25?'c':'r',life:1,dec:Math.random()*.006+.003});}
 }
-
-// ── 파티클 시스템 ──
-const fxCanvas = document.getElementById('fx-canvas');
-const fxCtx = fxCanvas.getContext('2d');
-let particles = [];
-
-function resizeFX(){ fxCanvas.width=window.innerWidth; fxCanvas.height=window.innerHeight; }
-resizeFX();
-window.addEventListener('resize',()=>{ resizeFX(); buildWheel(); });
-
-function launchConfetti(){
-  const cx=window.innerWidth/2, cy=window.innerHeight*0.45;
-  const colors=['#f5c842','#e8183a','#00b86b','#1a6fff','#ff3cac','#ffffff','#ff8c00','#c084fc','#34d399'];
-  for(let i=0;i<280;i++){
-    const ang=Math.random()*Math.PI*2;
-    const spd=Math.random()*22+6;
-    particles.push({
-      x:cx, y:cy,
-      vx:Math.cos(ang)*spd*(Math.random()*.6+.7),
-      vy:Math.sin(ang)*spd*(Math.random()*.6+.7)-10,
-      rot:Math.random()*360, vrot:(Math.random()-0.5)*20,
-      w:Math.random()*10+4, h:Math.random()*6+2,
-      color:colors[Math.floor(Math.random()*colors.length)],
-      shape:Math.random()<.3?'circle':'rect',
-      life:1, decay:Math.random()*.007+.003, gravity:.3
-    });
-  }
-  // 폭발 링
-  for(let i=0;i<60;i++){
-    const ang=(i/60)*Math.PI*2;
-    particles.push({
-      x:cx, y:cy,
-      vx:Math.cos(ang)*30,
-      vy:Math.sin(ang)*30,
-      rot:0, vrot:0,
-      w:4, h:4, color:'#f5c842',
-      shape:'circle',
-      life:1, decay:.04, gravity:0
-    });
-  }
+function sparkRing(x,y){for(var i=0;i<50;i++){var a=(i/50)*6.28;PX.push({x:x,y:y,vx:Math.cos(a)*28,vy:Math.sin(a)*28,rot:0,vr:0,w:4,h:4,col:'#f5c842',s:'c',life:1,dec:.04});}}
+function drawFX(){
+  fxX.clearRect(0,0,fxC.width,fxC.height);
+  PX=PX.filter(function(p){return p.life>0;});
+  PX.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.32;p.vx*=.98;p.rot+=p.vr;p.life-=p.dec;
+    fxX.save();fxX.globalAlpha=Math.max(0,p.life);fxX.translate(p.x,p.y);fxX.rotate(p.rot*Math.PI/180);fxX.fillStyle=p.col;
+    if(p.s==='c'){fxX.beginPath();fxX.arc(0,0,p.w/2,0,6.28);fxX.fill();}else{fxX.fillRect(-p.w/2,-p.h/2,p.w,p.h);}
+    fxX.restore();});
+  requestAnimationFrame(drawFX);
 }
+drawFX();
 
-function launchStarBurst(){
-  const cx=window.innerWidth/2, cy=window.innerHeight*0.45;
-  for(let i=0;i<8;i++){
-    const ang=(i/8)*Math.PI*2;
-    for(let j=0;j<12;j++){
-      const spd=j*3+5;
-      particles.push({
-        x:cx,y:cy,
-        vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd,
-        rot:0,vrot:0, w:5,h:5,
-        color:['#f5c842','#ffffff','#ff3cac'][j%3],
-        shape:'star',
-        life:1, decay:.015, gravity:.1
-      });
-    }
-  }
-}
-
-function drawParticles(){
-  fxCtx.clearRect(0,0,fxCanvas.width,fxCanvas.height);
-  particles=particles.filter(p=>p.life>0);
-  particles.forEach(p=>{
-    p.x+=p.vx; p.y+=p.vy;
-    p.vy+=p.gravity||.3; p.vx*=.98;
-    p.rot+=p.vrot; p.life-=p.decay;
-    fxCtx.save();
-    fxCtx.globalAlpha=Math.max(0,p.life);
-    fxCtx.translate(p.x,p.y);
-    fxCtx.rotate(p.rot*Math.PI/180);
-    fxCtx.fillStyle=p.color;
-    if(p.shape==='circle'){
-      fxCtx.beginPath();
-      fxCtx.arc(0,0,p.w/2,0,Math.PI*2);
-      fxCtx.fill();
-    } else if(p.shape==='star'){
-      drawStar(fxCtx,0,0,p.w);
-    } else {
-      fxCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-    }
-    fxCtx.restore();
-  });
-}
-
-function drawStar(ctx,x,y,r){
-  ctx.beginPath();
-  for(let i=0;i<5;i++){
-    const a=(i*4*Math.PI/5)-Math.PI/2;
-    const ai=(i*4*Math.PI/5+2*Math.PI/5)-Math.PI/2;
-    if(i===0) ctx.moveTo(x+r*Math.cos(a),y+r*Math.sin(a));
-    else ctx.lineTo(x+r*Math.cos(a),y+r*Math.sin(a));
-    ctx.lineTo(x+r*.4*Math.cos(ai),y+r*.4*Math.sin(ai));
-  }
-  ctx.closePath(); ctx.fill();
-}
-
-// FX 루프
-function fxLoop(){ drawParticles(); requestAnimationFrame(fxLoop); }
-fxLoop();
-
-// ── 룰렛 엔진 ──
-let numPlayers = 10;
-let wheelAngle = 0;      // 현재 각도 (라디안)
-let spinning = false;
-let winnerNum = null;
-let lastTickSector = -1;
-let animID = null;
-
-// 색상 팔레트 (8색 순환, 네온+골드 믹스)
-const SECTOR_COLORS = [
-  ['#c0122c','#e8183a'],  // 크림슨
-  ['#0d5fd4','#1a6fff'],  // 사파이어
-  ['#007a47','#00b86b'],  // 에메랄드
-  ['#8b0a9e','#b833d4'],  // 퍼플
-  ['#c45200','#ff6b00'],  // 오렌지
-  ['#005a8a','#007dc4'],  // 블루
-  ['#8a0038','#cc0055'],  // 로즈
-  ['#1a5c00','#2a8c00'],  // 그린
+// ── 룰렛 ──
+var N=10,ANG=0,spinning=false;
+var COLS=[
+  ['#c0122c','#e8183a'],['#0d5fd4','#1a6fff'],['#007a47','#00b86b'],
+  ['#8b0a9e','#b833d4'],['#c45200','#ff6b00'],['#005a8a','#007dc4'],
+  ['#8a0038','#cc0055'],['#1a5c00','#2a8c00']
 ];
+var WC=document.getElementById('wc'),WX=WC.getContext('2d');
+var R=100,CX=0,CY=0;   // 원판 중심 좌표 (캔버스 기준)
+var PTR_H=0;            // 바늘 높이 (캔버스 상단 여백)
 
-// 캔버스 크기 계산
-let RADIUS, WX, WY;
-const wheelCanvas = document.getElementById('wheel-canvas');
-const wCtx = wheelCanvas.getContext('2d');
-const pCanvas = document.getElementById('pointer-canvas');
-const pCtx2 = pCanvas.getContext('2d');
-const hubCanvas = document.getElementById('hub-canvas');
-const hubCtx = hubCanvas.getContext('2d');
+function lc(h,f){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return 'rgb('+Math.min(255,r+80*f)+','+Math.min(255,g+80*f)+','+Math.min(255,b+80*f)+')';}
+function dc(h,f){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return 'rgb('+Math.max(0,r-60*f)+','+Math.max(0,g-60*f)+','+Math.max(0,b-60*f)+')';}
 
-function calcSize(){
-  const area = document.getElementById('roulette-area');
-  const W = area.clientWidth, H = area.clientHeight;
-  const avail = Math.min(W, H, 440);
-  RADIUS = Math.floor(avail * 0.46);
-  const sz = RADIUS * 2 + 4;
-  wheelCanvas.width = wheelCanvas.height = sz;
-  WX = WY = sz/2;
-
-  // 포인터
-  const pw = Math.round(RADIUS*0.18), ph = Math.round(RADIUS*0.4);
-  pCanvas.width = pw; pCanvas.height = ph;
-  pCanvas.style.position='absolute';
-  pCanvas.style.right = (-pw/2 - RADIUS - 8) + 'px';
-  pCanvas.style.top = (-(ph/2)) + 'px';
-
-  // 허브
-  const hs = Math.round(RADIUS*0.22);
-  hubCanvas.width = hubCanvas.height = hs;
-  hubCanvas.style.position='absolute';
-  hubCanvas.style.width = hs+'px';
-  hubCanvas.style.height = hs+'px';
-  hubCanvas.style.marginLeft = (-hs/2)+'px';
-  hubCanvas.style.marginTop = (-hs/2)+'px';
-
-  // 데코 링
-  const outer = document.getElementById('outer-ring');
-  outer.style.width = (sz+60)+'px';
-  outer.style.height = (sz+60)+'px';
+function resize(){
+  var area=document.getElementById('rarea');
+  var W=area.clientWidth, H=area.clientHeight;
+  // 바늘 높이 확보: 캔버스 총 높이 = 바늘높이 + 원판지름
+  var maxR=Math.min(W/2, H*0.44, 200);
+  R = Math.floor(maxR);
+  PTR_H = Math.round(R * 0.22);  // 바늘이 차지하는 상단 여백
+  // 캔버스 크기: 가로=원판지름, 세로=바늘+원판
+  WC.width  = R*2 + 4;
+  WC.height = R*2 + 4 + PTR_H;
+  CX = WC.width / 2;
+  CY = PTR_H + R + 2;  // 원판 중심 = 바늘 여백 아래
 }
 
-function drawPointer(){
-  const c = pCanvas, x = pCtx2;
-  x.clearRect(0,0,c.width,c.height);
-  const w=c.width, h=c.height;
-  // 삼각형 포인터
-  x.beginPath();
-  x.moveTo(w,h/2);
-  x.lineTo(0,h/4);
-  x.lineTo(0,h*3/4);
-  x.closePath();
-  const g=x.createLinearGradient(0,0,w,0);
-  g.addColorStop(0,'#b8860b');
-  g.addColorStop(0.4,'#f5c842');
-  g.addColorStop(0.7,'#fff0a0');
-  g.addColorStop(1,'#e8a800');
-  x.fillStyle=g;
-  x.shadowColor='rgba(245,200,66,.8)'; x.shadowBlur=12;
-  x.fill();
-  // 테두리
-  x.strokeStyle='rgba(255,255,255,.4)'; x.lineWidth=1.5; x.stroke();
-}
-
-function drawHub(){
-  const c=hubCanvas, x=hubCtx;
-  const s=c.width;
-  x.clearRect(0,0,s,s);
-  // 외부 링
-  x.beginPath(); x.arc(s/2,s/2,s/2-1,0,Math.PI*2);
-  const g1=x.createLinearGradient(0,0,s,s);
-  g1.addColorStop(0,'#3a2800'); g1.addColorStop(.5,'#f5c842'); g1.addColorStop(1,'#8a5e00');
-  x.strokeStyle=g1; x.lineWidth=3; x.stroke();
-  // 내부 원
-  x.beginPath(); x.arc(s/2,s/2,s/2-4,0,Math.PI*2);
-  const g2=x.createRadialGradient(s*.35,s*.35,1,s/2,s/2,s/2);
-  g2.addColorStop(0,'#3a2000'); g2.addColorStop(1,'#0a0600');
-  x.fillStyle=g2; x.fill();
-  // 중심 다이아몬드
-  x.save(); x.translate(s/2,s/2); x.rotate(Math.PI/4);
-  x.fillStyle='#f5c842';
-  x.shadowColor='rgba(245,200,66,.8)'; x.shadowBlur=6;
-  const ds=s*.14;
-  x.fillRect(-ds,-ds,ds*2,ds*2);
-  x.restore();
-  // 볼트 점 (6개)
-  for(let i=0;i<6;i++){
-    const a=(i/6)*Math.PI*2;
-    const bx=s/2+Math.cos(a)*(s/2-9);
-    const by=s/2+Math.sin(a)*(s/2-9);
-    x.beginPath(); x.arc(bx,by,2.5,0,Math.PI*2);
-    x.fillStyle='#f5c842'; x.shadowBlur=4; x.fill();
-  }
-}
-
-function buildWheel(){
-  calcSize();
-  drawPointer();
-  drawHub();
-  drawWheel();
-}
-
-// 룰렛 원판 그리기
 function drawWheel(){
-  const c=wCtx, R=RADIUS, cx=WX, cy=WY;
-  const n=numPlayers;
-  const arc=Math.PI*2/n;
-  c.clearRect(0,0,wheelCanvas.width,wheelCanvas.height);
+  var c=WX, n=N, arc=Math.PI*2/n;
+  c.clearRect(0,0,WC.width,WC.height);
 
-  // 외부 장식 링 (5겹)
-  const ringDefs=[
-    {r:R+1,   w:8,  type:'gold-shadow'},
-    {r:R+8,   w:2,  type:'gold'},
-    {r:R+11,  w:12, type:'dark'},
-    {r:R+17,  w:2,  type:'gold-thin'},
-    {r:R+20,  w:10, type:'bulb'},
-  ];
-
-  // 가장 바깥 그림자
+  // ── 1. 바늘 (12시 방향, 캔버스 상단) ──
+  var pw = R * 0.12;   // 바늘 너비 절반
+  var ptip = CY - R - 4;          // 뾰족한 끝 (원판 표면 바로 위)
+  var pbase = PTR_H * 0.08;        // 바늘 꼭대기 y
   c.save();
-  c.shadowColor='rgba(245,200,66,.5)'; c.shadowBlur=30;
-  c.beginPath(); c.arc(cx,cy,R+22,0,Math.PI*2);
+  // 바늘 삼각형
+  c.beginPath();
+  c.moveTo(CX, ptip);              // 아래 끝 (원판 접촉점)
+  c.lineTo(CX - pw, pbase);
+  c.lineTo(CX + pw, pbase);
+  c.closePath();
+  var pg = c.createLinearGradient(CX, pbase, CX, ptip);
+  pg.addColorStop(0, '#8a6200');
+  pg.addColorStop(0.35, '#f5c842');
+  pg.addColorStop(0.7,  '#fff0a0');
+  pg.addColorStop(1,    '#f5c842');
+  c.fillStyle = pg;
+  c.shadowColor = 'rgba(245,200,66,1)';
+  c.shadowBlur  = 20;
+  c.fill();
+  c.strokeStyle = 'rgba(255,255,255,0.5)';
+  c.lineWidth   = 1.5;
+  c.stroke();
+  // 바늘 꼭대기 장식 원
+  var br = pw * 0.85;
+  c.beginPath(); c.arc(CX, pbase, br, 0, 6.28);
+  var bg = c.createRadialGradient(CX-br*.3, pbase-br*.3, 1, CX, pbase, br);
+  bg.addColorStop(0,'#fff8d0'); bg.addColorStop(1,'#b8860b');
+  c.fillStyle = bg; c.shadowBlur = 10; c.fill();
+  c.strokeStyle='rgba(255,255,255,.4)'; c.lineWidth=1; c.stroke();
+  c.restore();
+
+  // ── 2. 원판 외부 글로우 ──
+  c.save();
+  c.shadowColor='rgba(245,200,66,.45)'; c.shadowBlur=30;
+  c.beginPath(); c.arc(CX,CY,R+2,0,6.28);
   c.strokeStyle='rgba(245,200,66,.2)'; c.lineWidth=2; c.stroke();
   c.restore();
 
-  // 각 섹터 그리기
-  for(let i=0;i<n;i++){
-    const startA = wheelAngle + i*arc - Math.PI/2;
-    const endA   = startA + arc;
-    const ci = i%SECTOR_COLORS.length;
-    const [c1,c2]=SECTOR_COLORS[ci];
-
+  // ── 3. 섹터 ──
+  for(var i=0;i<n;i++){
+    var sa=ANG+i*arc-Math.PI/2, ea=sa+arc, ma=(sa+ea)/2;
+    var ci=i%COLS.length, col=COLS[ci];
     c.save();
-    // 섹터 채우기 (방사형 그라디언트)
-    const midA=(startA+endA)/2;
-    const gradR=c.createRadialGradient(cx,cy,R*.15,cx,cy,R*.98);
-    gradR.addColorStop(0, lightenColor(c1,.4));
-    gradR.addColorStop(.5, c2);
-    gradR.addColorStop(1, darkenColor(c1,.3));
-    c.beginPath();
-    c.moveTo(cx,cy);
-    c.arc(cx,cy,R,startA,endA);
-    c.closePath();
-    c.fillStyle=gradR;
-    c.fill();
-
-    // 섹터 구분선
-    c.strokeStyle='rgba(0,0,0,.45)'; c.lineWidth=1.5;
-    c.stroke();
-
-    // 섹터 테두리 골드 선
-    c.beginPath();
-    c.moveTo(cx,cy);
-    c.arc(cx,cy,R,startA,endA);
-    c.closePath();
-    c.strokeStyle='rgba(245,200,66,.18)'; c.lineWidth=.8; c.stroke();
-
+    var gr=c.createRadialGradient(CX,CY,R*.1,CX,CY,R*.97);
+    gr.addColorStop(0,lc(col[0],.4)); gr.addColorStop(.5,col[1]); gr.addColorStop(1,dc(col[0],.3));
+    c.beginPath(); c.moveTo(CX,CY); c.arc(CX,CY,R,sa,ea); c.closePath();
+    c.fillStyle=gr; c.fill();
+    c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=1.5; c.stroke();
     c.restore();
 
-    // 번호 텍스트
-    const textR = n <= 20 ? R*.72 : n <= 50 ? R*.76 : R*.8;
-    const tx = cx + Math.cos(midA)*textR;
-    const ty = cy + Math.sin(midA)*textR;
-    const fontSize = n<=10 ? 18 : n<=20 ? 14 : n<=40 ? 11 : n<=70 ? 9 : 7.5;
-
+    // 번호
+    var tr=n<=20?R*.72:n<=50?R*.76:R*.8;
+    var fs=n<=10?17:n<=20?13:n<=40?10:n<=70?8.5:7;
+    var tx=CX+Math.cos(ma)*tr, ty=CY+Math.sin(ma)*tr;
     c.save();
-    c.translate(tx,ty);
-    c.rotate(midA + Math.PI/2);
+    c.translate(tx,ty); c.rotate(ma+Math.PI/2);
     c.textAlign='center'; c.textBaseline='middle';
-    c.font=`900 ${fontSize}px 'Cinzel Decorative', serif`;
-    // 텍스트 그림자
-    c.shadowColor='rgba(0,0,0,.9)'; c.shadowBlur=6; c.shadowOffsetX=1; c.shadowOffsetY=1;
-    c.fillStyle='rgba(0,0,0,.6)';
-    c.fillText(String(i+1), 1.5, 1.5);
-    c.shadowBlur=0; c.shadowOffsetX=0; c.shadowOffsetY=0;
-    c.fillStyle='#ffffff';
-    c.fillText(String(i+1), 0, 0);
+    c.font='900 '+fs+'px "Cinzel Decorative",serif';
+    c.shadowColor='rgba(0,0,0,.9)'; c.shadowBlur=5;
+    c.fillStyle='rgba(0,0,0,.5)'; c.fillText(String(i+1),1.2,1.2);
+    c.shadowBlur=0; c.fillStyle='#fff'; c.fillText(String(i+1),0,0);
     c.restore();
   }
 
-  // 내부 장식 링
-  drawInnerRings(c, cx, cy, R);
-}
-
-function drawInnerRings(c, cx, cy, R){
-  // 외곽 두꺼운 링
+  // ── 4. 골드 외곽 링 ──
   c.save();
-  c.beginPath(); c.arc(cx,cy,R-.5,0,Math.PI*2);
-  const g=c.createLinearGradient(cx-R,cy,cx+R,cy);
-  g.addColorStop(0,'#8a6200'); g.addColorStop(.25,'#f5c842');
-  g.addColorStop(.5,'#fff0a0'); g.addColorStop(.75,'#f5c842'); g.addColorStop(1,'#8a6200');
-  c.strokeStyle=g; c.lineWidth=8;
-  c.shadowColor='rgba(245,200,66,.6)'; c.shadowBlur=12;
-  c.stroke(); c.restore();
+  c.beginPath(); c.arc(CX,CY,R-.5,0,6.28);
+  var gl=c.createLinearGradient(CX-R,CY,CX+R,CY);
+  gl.addColorStop(0,'#8a6200'); gl.addColorStop(.25,'#f5c842');
+  gl.addColorStop(.5,'#fff0a0'); gl.addColorStop(.75,'#f5c842'); gl.addColorStop(1,'#8a6200');
+  c.strokeStyle=gl; c.lineWidth=8;
+  c.shadowColor='rgba(245,200,66,.6)'; c.shadowBlur=10; c.stroke(); c.restore();
 
-  // 보석 점 (각 섹터 경계)
-  const n=numPlayers, arc=Math.PI*2/n;
-  for(let i=0;i<n;i++){
-    const a=wheelAngle + i*arc - Math.PI/2;
-    const bx=cx+Math.cos(a)*(R-5);
-    const by=cy+Math.sin(a)*(R-5);
+  // ── 5. 섹터 경계 보석 ──
+  for(var j=0;j<n;j++){
+    var ba=ANG+j*arc-Math.PI/2;
     c.save();
-    c.beginPath(); c.arc(bx,by,n<=30?3.5:n<=60?2.5:2,0,Math.PI*2);
-    c.fillStyle='#f5c842';
-    c.shadowColor='rgba(245,200,66,.9)'; c.shadowBlur=6;
-    c.fill(); c.restore();
+    c.beginPath(); c.arc(CX+Math.cos(ba)*(R-5),CY+Math.sin(ba)*(R-5),n<=30?3.5:n<=60?2.5:2,0,6.28);
+    c.fillStyle='#f5c842'; c.shadowColor='rgba(245,200,66,.9)'; c.shadowBlur=5; c.fill(); c.restore();
   }
 
-  // 내부 장식 원
-  const inR=R*.18;
+  // ── 6. 중앙 허브 ──
+  var hs=R*.22;
   c.save();
-  const rig=c.createRadialGradient(cx,cy,0,cx,cy,inR);
-  rig.addColorStop(0,'#1a0a00'); rig.addColorStop(.6,'#0d0600'); rig.addColorStop(1,'#2a1500');
-  c.beginPath(); c.arc(cx,cy,inR,0,Math.PI*2);
-  c.fillStyle=rig; c.fill();
-  c.strokeStyle='rgba(245,200,66,.35)'; c.lineWidth=1.5; c.stroke();
+  c.beginPath(); c.arc(CX,CY,hs,0,6.28);
+  var hg1=c.createLinearGradient(CX-hs,CY,CX+hs,CY);
+  hg1.addColorStop(0,'#3a2800'); hg1.addColorStop(.5,'#f5c842'); hg1.addColorStop(1,'#8a5e00');
+  c.strokeStyle=hg1; c.lineWidth=4; c.shadowColor='rgba(245,200,66,.7)'; c.shadowBlur=8; c.stroke();
+  c.beginPath(); c.arc(CX,CY,hs-3,0,6.28);
+  var hg2=c.createRadialGradient(CX-hs*.3,CY-hs*.3,1,CX,CY,hs);
+  hg2.addColorStop(0,'#3a2000'); hg2.addColorStop(1,'#0a0600');
+  c.fillStyle=hg2; c.shadowBlur=0; c.fill();
+  c.fillStyle='#f5c842'; c.shadowColor='rgba(245,200,66,.8)'; c.shadowBlur=6;
+  c.save(); c.translate(CX,CY); c.rotate(Math.PI/4);
+  var ds=hs*.28; c.fillRect(-ds/2,-ds/2,ds,ds); c.restore();
+  for(var vi=0;vi<6;vi++){
+    var va=(vi/6)*6.28;
+    c.beginPath(); c.arc(CX+Math.cos(va)*(hs-5),CY+Math.sin(va)*(hs-5),2.2,0,6.28); c.fill();
+  }
   c.restore();
 }
 
-function lightenColor(hex, f){
-  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-  return `rgb(${Math.min(255,r+80*f)},${Math.min(255,g+80*f)},${Math.min(255,b+80*f)})`;
-}
-function darkenColor(hex, f){
-  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-  return `rgb(${Math.max(0,r-60*f)},${Math.max(0,g-60*f)},${Math.max(0,b-60*f)})`;
-}
+// ── SVG 데코 링 (원판 중심 기준으로 배치) ──
+function buildSVG(){
+  var area=document.getElementById('rarea');
+  var old=area.querySelector('svg.dsvg'); if(old) old.remove();
+  var NS='http://www.w3.org/2000/svg';
+  // 캔버스의 화면상 위치 기준으로 SVG 배치
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('class','dsvg');
+  svg.setAttribute('width', WC.width);
+  svg.setAttribute('height', WC.height);
+  svg.style.cssText='position:absolute;pointer-events:none;z-index:5;';
+  var cx=CX, cy=CY;
 
-// ── 스핀 로직 ──
-function spinWheel(){
-  if(spinning) return;
-  initAC();
-  document.getElementById('spin-btn').disabled=true;
-  spinning=true;
-  winnerNum=null;
-  lastTickSector=-1;
-
-  // 당첨 번호 미리 결정
-  const winner=Math.floor(Math.random()*numPlayers)+1;
-
-  // 목표 각도 계산
-  const arc=Math.PI*2/numPlayers;
-  // pointer가 오른쪽 (0도)를 가리키므로, winner가 맨 위로 오려면
-  const winnerSectorCenter = ((winner-1)*arc - Math.PI/2) + arc/2;
-  const targetAngle = -winnerSectorCenter - wheelAngle;
-  const extraSpins = (5 + Math.floor(Math.random()*4)) * Math.PI*2;
-  const totalRotation = extraSpins + ((targetAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-
-  const startAngle = wheelAngle;
-  const endAngle = startAngle + totalRotation;
-  const totalDuration = 4500 + Math.random()*1500; // 4.5~6초
-
-  let startTime = null;
-  let prevAngle = startAngle;
-  let tickCount = 0;
-
-  sfxSpin();
-
-  function easeOut(t){
-    // 빠르게 시작 → 느리게 감속 (극적 효과)
-    return 1 - Math.pow(1-t, 4);
+  function mkC(r,stroke,sw,da,dur,dir){
+    var c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',r);
+    c.setAttribute('fill','none'); c.setAttribute('stroke',stroke); c.setAttribute('stroke-width',sw);
+    if(da) c.setAttribute('stroke-dasharray',da);
+    var at=document.createElementNS(NS,'animateTransform');
+    at.setAttribute('attributeName','transform'); at.setAttribute('type','rotate');
+    at.setAttribute('from','0 '+cx+' '+cy); at.setAttribute('to',(dir||360)+' '+cx+' '+cy);
+    at.setAttribute('dur',dur); at.setAttribute('repeatCount','indefinite');
+    c.appendChild(at); return c;
   }
+  svg.appendChild(mkC(R+14,'rgba(245,200,66,.12)',5,'','3s'));
+  svg.appendChild(mkC(R+20,'rgba(245,200,66,.5)',1.5,'4 8','18s'));
+  svg.appendChild(mkC(R+26,'rgba(245,200,66,.18)',1,'2 12','28s','-360'));
 
-  function animate(ts){
-    if(!startTime) startTime=ts;
-    const elapsed=ts-startTime;
-    const t=Math.min(elapsed/totalDuration, 1);
-    const eased=easeOut(t);
-    wheelAngle = startAngle + totalRotation * eased;
-
-    // 섹터 체크 (틱 소리)
-    const currentSector = getSectorAt(wheelAngle);
-    if(currentSector !== lastTickSector){
-      lastTickSector = currentSector;
-      tickCount++;
-      // 속도에 따라 톤 변화
-      const speed = Math.abs(wheelAngle - prevAngle);
-      const tickFreq = 300 + Math.min(speed*800, 1200);
-      if(t < .85) sfxTick(tickFreq);
-    }
-    prevAngle=wheelAngle;
-
-    drawWheel();
-
-    if(t < .85 && t > .6){
-      // 감속 구간 사운드
-    }
-
-    if(t < 1){
-      animID=requestAnimationFrame(animate);
-    } else {
-      wheelAngle = endAngle;
-      drawWheel();
-      spinning=false;
-      winnerNum=winner;
-      sfxSlowing();
-      setTimeout(()=>{
-        sfxWin();
-        launchConfetti();
-        launchStarBurst();
-        setTimeout(launchConfetti, 400);
-        showWinner(winner);
-        document.getElementById('spin-btn').disabled=false;
-      }, 300);
-    }
+  // LED 불빛
+  for(var i=0;i<24;i++){
+    var a=(i/24)*6.28, lx=cx+Math.cos(a)*(R+8), ly=cy+Math.sin(a)*(R+8);
+    var dot=document.createElementNS(NS,'circle');
+    dot.setAttribute('cx',lx); dot.setAttribute('cy',ly); dot.setAttribute('r','3');
+    dot.setAttribute('fill',['#f5c842','#ff3cac','#00b86b','#1a6fff','#ff6b00'][i%5]);
+    var bk=document.createElementNS(NS,'animate');
+    bk.setAttribute('attributeName','opacity'); bk.setAttribute('values','0.2;1;0.2');
+    bk.setAttribute('dur',(1+Math.random()*1.5)+'s'); bk.setAttribute('repeatCount','indefinite');
+    bk.setAttribute('begin',Math.random()*.8+'s');
+    dot.appendChild(bk); svg.appendChild(dot);
   }
-  requestAnimationFrame(animate);
-}
-
-function getSectorAt(angle){
-  const arc=Math.PI*2/numPlayers;
-  // pointer가 오른쪽(0rad)에서 가리키므로: (−angle) mod 2π → 섹터
-  const normalized = ((-angle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-  // 12시 기준으로 포인터 보정
-  const adjusted = (normalized + Math.PI/2 + Math.PI*2) % (Math.PI*2);
-  return Math.floor(adjusted / arc) % numPlayers;
-}
-
-function showWinner(n){
-  document.getElementById('win-num').textContent=n;
-  document.getElementById('win-overlay').classList.add('active');
-  // 색상 강조
-  const color=SECTOR_COLORS[(n-1)%SECTOR_COLORS.length][1];
-  document.getElementById('win-num').style.background=
-    `linear-gradient(180deg,#fff8e0 0%,${color} 40%,${darkenColor(color,.2)} 100%)`;
-  document.getElementById('win-num').style.webkitBackgroundClip='text';
-  document.getElementById('win-num').style.webkitTextFillColor='transparent';
-  document.getElementById('win-num').style.backgroundClip='text';
-}
-
-function closeWin(){
-  document.getElementById('win-overlay').classList.remove('active');
-}
-
-// ── 플레이어 수 적용 ──
-function applyPlayers(){
-  let v=parseInt(document.getElementById('playerInput').value,10);
-  if(isNaN(v)||v<2) v=2;
-  if(v>100) v=100;
-  document.getElementById('playerInput').value=v;
-  numPlayers=v;
-  wheelAngle=0;
-  buildWheel();
-}
-
-// ── 전체화면 ──
-function toggleFS(){
-  const d=document.documentElement;
-  if(!document.fullscreenElement){
-    (d.requestFullscreen||d.webkitRequestFullScreen||d.mozRequestFullScreen).call(d).catch(()=>{});
-  } else {
-    (document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen).call(document);
-  }
-}
-
-// ── 데코 링 오버레이 SVG ──
-function buildDecoRings(){
-  const area=document.getElementById('outer-ring');
-  // 기존 SVG 제거
-  const old=area.querySelector('svg.deco-svg');
-  if(old) old.remove();
-
-  const sz=RADIUS*2+60;
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('class','deco-svg');
-  svg.setAttribute('width',sz); svg.setAttribute('height',sz);
-  svg.style.position='absolute'; svg.style.top='0'; svg.style.left='0';
-  svg.style.pointerEvents='none'; svg.style.zIndex='5';
-
-  const cx=sz/2, cy=sz/2;
-
-  // 바깥 링 1 (천천히 회전)
-  const r1=RADIUS+24;
-  const circ1=document.createElementNS('http://www.w3.org/2000/svg','circle');
-  circ1.setAttribute('cx',cx); circ1.setAttribute('cy',cy); circ1.setAttribute('r',r1);
-  circ1.setAttribute('fill','none');
-  circ1.setAttribute('stroke','url(#g1)'); circ1.setAttribute('stroke-width','1.5');
-  circ1.setAttribute('stroke-dasharray','4 8');
-  const animEl=document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
-  animEl.setAttribute('attributeName','transform'); animEl.setAttribute('type','rotate');
-  animEl.setAttribute('from',`0 ${cx} ${cy}`); animEl.setAttribute('to',`360 ${cx} ${cy}`);
-  animEl.setAttribute('dur','20s'); animEl.setAttribute('repeatCount','indefinite');
-  circ1.appendChild(animEl);
-
-  // 바깥 링 2 (반시계)
-  const r2=RADIUS+30;
-  const circ2=document.createElementNS('http://www.w3.org/2000/svg','circle');
-  circ2.setAttribute('cx',cx); circ2.setAttribute('cy',cy); circ2.setAttribute('r',r2);
-  circ2.setAttribute('fill','none');
-  circ2.setAttribute('stroke','rgba(245,200,66,.2)'); circ2.setAttribute('stroke-width','1');
-  circ2.setAttribute('stroke-dasharray','2 12');
-  const animEl2=document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
-  animEl2.setAttribute('attributeName','transform'); animEl2.setAttribute('type','rotate');
-  animEl2.setAttribute('from',`0 ${cx} ${cy}`); animEl2.setAttribute('to',`-360 ${cx} ${cy}`);
-  animEl2.setAttribute('dur','30s'); animEl2.setAttribute('repeatCount','indefinite');
-  circ2.appendChild(animEl2);
-
-  // 글로우 링
-  const r3=RADIUS+16;
-  const circ3=document.createElementNS('http://www.w3.org/2000/svg','circle');
-  circ3.setAttribute('cx',cx); circ3.setAttribute('cy',cy); circ3.setAttribute('r',r3);
-  circ3.setAttribute('fill','none');
-  circ3.setAttribute('stroke','rgba(245,200,66,.15)'); circ3.setAttribute('stroke-width','6');
-  const animEl3=document.createElementNS('http://www.w3.org/2000/svg','animate');
-  animEl3.setAttribute('attributeName','stroke-opacity');
-  animEl3.setAttribute('values','0.1;0.4;0.1'); animEl3.setAttribute('dur','2s');
-  animEl3.setAttribute('repeatCount','indefinite');
-  circ3.appendChild(animEl3);
-
-  // 그라디언트 정의
-  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
-  const grad=document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
-  grad.setAttribute('id','g1'); grad.setAttribute('x1','0%'); grad.setAttribute('y1','0%');
-  grad.setAttribute('x2','100%'); grad.setAttribute('y2','100%');
-  const s1=document.createElementNS('http://www.w3.org/2000/svg','stop');
-  s1.setAttribute('offset','0%'); s1.setAttribute('stop-color','#f5c842'); s1.setAttribute('stop-opacity','0.6');
-  const s2=document.createElementNS('http://www.w3.org/2000/svg','stop');
-  s2.setAttribute('offset','50%'); s2.setAttribute('stop-color','#fff0a0'); s2.setAttribute('stop-opacity','0.9');
-  const s3=document.createElementNS('http://www.w3.org/2000/svg','stop');
-  s3.setAttribute('offset','100%'); s3.setAttribute('stop-color','#e8a800'); s3.setAttribute('stop-opacity','0.6');
-  grad.appendChild(s1); grad.appendChild(s2); grad.appendChild(s3);
-  defs.appendChild(grad);
-
-  // 불빛 점들 (장식 LED)
-  const ledCount=24;
-  const ledR=RADIUS+12;
-  for(let i=0;i<ledCount;i++){
-    const a=(i/ledCount)*Math.PI*2;
-    const lx=cx+Math.cos(a)*ledR;
-    const ly=cy+Math.sin(a)*ledR;
-    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circle.setAttribute('cx',lx); circle.setAttribute('cy',ly); circle.setAttribute('r','3');
-    const ledColors=['#f5c842','#ff3cac','#00b86b','#1a6fff','#ff6b00'];
-    circle.setAttribute('fill',ledColors[i%ledColors.length]);
-    const blink=document.createElementNS('http://www.w3.org/2000/svg','animate');
-    blink.setAttribute('attributeName','opacity');
-    blink.setAttribute('values','0.3;1;0.3'); blink.setAttribute('dur',(1+Math.random()*1.5)+'s');
-    blink.setAttribute('repeatCount','indefinite');
-    blink.setAttribute('begin',(Math.random()*.8)+'s');
-    circle.appendChild(blink);
-    svg.appendChild(circle);
-  }
-
-  svg.appendChild(defs);
-  svg.appendChild(circ3);
-  svg.appendChild(circ1);
-  svg.appendChild(circ2);
   area.appendChild(svg);
 }
 
-// ── 초기화 ──
-buildWheel();
-buildDecoRings();
+function build(){
+  resize(); drawWheel(); buildSVG();
+}
 
-// 리사이즈 시 재빌드
-window.addEventListener('resize',()=>{
-  buildWheel();
-  buildDecoRings();
+// ── 스핀: 3페이즈 + 워블(앞뒤 진동) ──
+function getSector(a){
+  var arc=Math.PI*2/N;
+  // 포인터는 12시(−π/2 방향)를 가리킴
+  // 원판은 ANG 기준으로 -π/2에서 섹터0 시작
+  // 포인터가 가리키는 섹터: 12시 방향 = -π/2 절대각
+  var norm=((-(a)+Math.PI*2*1000)%(Math.PI*2));
+  return Math.floor(norm/arc)%N;
+}
+
+function spin(){
+  if(spinning) return;
+  initAC(); spinning=true;
+  document.getElementById('spbtn').disabled=true;
+
+  var winner=Math.floor(Math.random()*N)+1;
+  var arc=Math.PI*2/N;
+  // winner 섹터 중심을 12시(−π/2)에 맞추기 위한 각도
+  // 섹터 i의 중심 = ANG + i*arc + arc/2 - π/2 (절대각)
+  // 포인터 = 각도 0(12시) → ANG에서 winner가 맨 위로
+  var targetSectorMid = ((winner-1)*arc) + arc/2;
+  var currentNorm = ((ANG % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+  var diff = (targetSectorMid - currentNorm + Math.PI*2) % (Math.PI*2);
+  var extraSpins = (7 + Math.floor(Math.random()*4)) * Math.PI*2;
+  var totalRot = extraSpins + diff;
+
+  var startAng=ANG, mainEnd=startAng+totalRot;
+  var totalDur=9000+Math.random()*3000;
+  var wobbleDur=2000, wobbleAmp=arc*(0.7+Math.random()*1.0), wobbleCount=3+Math.floor(Math.random()*3);
+
+  var startT=null, lastSec=-1, phase='main';
+  var wobbleT=0, drumDone=false, heartDone=false, wobbleDone=false;
+
+  sfxSpin();
+
+  function easeMain(t){
+    if(t<.1) return (t/.1)*(t/.1)*.15;
+    if(t<.62){ var s=.15,r=s/.1; return s+r*(t-.1); }
+    var s2=.15+(.15/.1)*(.62-.1), u=(t-.62)/.38;
+    return s2+(1-s2)*(1-Math.pow(1-u,6));
+  }
+  function easeWobble(t){
+    return wobbleAmp*Math.exp(-3.8*t)*Math.sin(wobbleCount*Math.PI*t);
+  }
+
+  function frame(ts){
+    if(!startT) startT=ts;
+    var el=ts-startT;
+
+    if(phase==='main'){
+      var t=Math.min(el/totalDur,1);
+      ANG=startAng+totalRot*easeMain(t);
+
+      var sec=getSector(ANG);
+      if(sec!==lastSec){ lastSec=sec; sfxTick(200+Math.min(Math.abs(totalRot*easeMain(Math.max(0,t-.01)))*40,1400)); }
+      if(t>.59&&!drumDone){ drumDone=true; sfxDrum(); }
+      if(t>.79&&!heartDone){ heartDone=true; sfxHeart(); }
+
+      drawWheel();
+      if(t>=1){
+        ANG=mainEnd; phase='wobble'; wobbleT=ts; sfxWobble();
+      }
+      requestAnimationFrame(frame);
+
+    } else if(phase==='wobble'){
+      var wt=(ts-wobbleT)/wobbleDur; if(wt>=1){ wt=1; phase='done'; }
+      ANG=mainEnd+easeWobble(wt);
+
+      var ws=getSector(ANG);
+      if(ws!==lastSec){ lastSec=ws; sfxTick(240+Math.floor(Math.random()*180)); }
+
+      drawWheel();
+      if(phase==='done'){
+        ANG=mainEnd; drawWheel(); spinning=false;
+        setTimeout(function(){
+          sfxWin();
+          var cx2=window.innerWidth/2, cy2=window.innerHeight*.45;
+          sparkRing(cx2,cy2); confetti(cx2,cy2,250);
+          setTimeout(function(){confetti(cx2,cy2,180);},350);
+          setTimeout(function(){confetti(cx2,cy2,150);},700);
+          showWinner(winner);
+          document.getElementById('spbtn').disabled=false;
+        },300);
+        return;
+      }
+      requestAnimationFrame(frame);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function showWinner(n){
+  var wn=document.getElementById('wnum');
+  wn.style.animation='none'; wn.offsetWidth; wn.style.animation='wpop .6s cubic-bezier(.22,1.4,.36,1) both';
+  wn.textContent=n;
+  var col=COLS[(n-1)%COLS.length][1];
+  wn.style.background='linear-gradient(180deg,#fff8e0 0%,'+col+' 40%,'+dc(col,.2)+' 100%)';
+  wn.style.webkitBackgroundClip='text'; wn.style.webkitTextFillColor='transparent'; wn.style.backgroundClip='text';
+  document.getElementById('wlayer').classList.add('show');
+}
+function closeWin(){ document.getElementById('wlayer').classList.remove('show'); }
+
+// ── 이벤트 연결 ──
+document.getElementById('spbtn').addEventListener('click', spin);
+document.getElementById('spbtn').addEventListener('touchstart', function(e){ e.preventDefault(); spin(); }, {passive:false});
+
+document.getElementById('abtn').addEventListener('click', function(){
+  var v=parseInt(document.getElementById('pin').value,10);
+  if(isNaN(v)||v<2)v=2; if(v>100)v=100;
+  document.getElementById('pin').value=v;
+  N=v; ANG=0; build();
+});
+document.getElementById('fbtn').addEventListener('click', function(){
+  var d=document.documentElement;
+  if(!document.fullscreenElement)(d.requestFullscreen||d.webkitRequestFullScreen||d.mozRequestFullScreen).call(d).catch(function(){});
+  else(document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen).call(document);
 });
 
-// 스핀 버튼 터치 최적화
-document.getElementById('spin-btn').addEventListener('touchstart', e=>{
-  e.preventDefault(); spinWheel();
-},{passive:false});
+// CONTINUE 버튼 — 모든 방식 연결
+(function(){
+  var btn=document.getElementById('wcls');
+  var lay=document.getElementById('wlayer');
+  btn.addEventListener('click', closeWin);
+  btn.addEventListener('touchstart', function(e){ e.stopPropagation(); }, {passive:true});
+  btn.addEventListener('touchend', function(e){ e.preventDefault(); e.stopPropagation(); closeWin(); }, {passive:false});
+  lay.addEventListener('click', function(e){ if(e.target===lay) closeWin(); });
+  lay.addEventListener('touchend', function(e){ if(e.target===lay){ e.preventDefault(); closeWin(); } }, {passive:false});
+})();
+
+window.addEventListener('resize', function(){ build(); });
+
+// 초기화
+build();
 </script>
 </body>
 </html>
