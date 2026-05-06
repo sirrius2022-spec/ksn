@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- 모바일 최적화: 확대/축소 완벽 방지, 화면 꽉 채우기 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>퍼펙트 레트로 테트리스</title>
+    <title>파이널 퍼펙트 레트로 테트리스</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
@@ -12,7 +12,7 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            touch-action: none; /* 브라우저 기본 터치 액션(스크롤 등) 완벽 차단 */
+            touch-action: none; /* 브라우저 기본 터치 스크롤 완벽 차단 */
         }
 
         body {
@@ -25,9 +25,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* 모바일 하단바를 고려한 동적 뷰포트 (지원안될시 vh 폴백) */
-            height: 100vh; 
-            height: 100dvh; 
+            height: 100vh;
+            height: 100dvh; /* 모바일 하단바를 고려한 동적 뷰포트 */
             overflow: hidden;
         }
 
@@ -38,11 +37,11 @@
             width: 100%;
             max-width: 500px;
             height: 100%;
-            padding: 8px; /* 패딩 최소화하여 화면 크기 확보 */
+            padding: 8px; 
             justify-content: space-between;
         }
 
-        /* 오락실 화면 영역 (최대한 키움) */
+        /* 오락실 화면 영역 */
         .arcade-screen {
             display: flex;
             flex-direction: row;
@@ -51,29 +50,27 @@
             border-radius: 8px;
             padding: 4px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 10px #000;
-            flex-grow: 1; /* 화면 크기 최대화 */
+            flex-grow: 1; /* 화면 크기 최대한 확보 */
             margin-bottom: 10px;
-            min-height: 0; /* flex 자식 넘침 방지 */
+            min-height: 0; 
         }
 
-        /* 테트리스 보드 - 블록 붕뜸 현상 완전 해결 */
+        /* 테트리스 보드 래퍼 */
         .board-container {
             position: relative;
             flex: 2.2;
             display: flex;
-            justify-content: center;
+            justify-content: center; /* 캔버스 중앙 정렬 */
             align-items: center;
-            /* 배경색과 테두리를 캔버스로 옮겨서 여백을 투명하게 처리 */
             height: 100%;
+            overflow: hidden;
         }
 
+        /* 비율 깨짐 완전 방지를 위해 JS가 width, height를 직접 제어합니다. */
         canvas#tetris {
             display: block;
             image-rendering: pixelated; /* 픽셀 아트 느낌 */
-            height: 100%;
-            max-width: 100%;
-            aspect-ratio: 10 / 20; /* 정확한 1:2 비율 강제 */
-            background-color: #050505; /* 캔버스 영역에만 배경색 적용 (붕뜸 방지) */
+            background-color: #050505; /* 캔버스 영역에만 배경 적용 (붕뜸 방지) */
             border: 2px solid #333;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
@@ -92,23 +89,9 @@
             height: 100%;
         }
 
-        .panel-box {
-            width: 100%;
-            text-align: center;
-        }
-
-        .panel-title {
-            color: #ff3333;
-            font-size: 10px;
-            margin-bottom: 6px;
-            text-shadow: 2px 2px 0px #000;
-        }
-
-        .panel-value {
-            color: #00ffff;
-            font-size: 14px;
-            text-shadow: 2px 2px 0px #000;
-        }
+        .panel-box { width: 100%; text-align: center; }
+        .panel-title { color: #ff3333; font-size: 10px; margin-bottom: 6px; text-shadow: 2px 2px 0px #000; }
+        .panel-value { color: #00ffff; font-size: 14px; text-shadow: 2px 2px 0px #000; }
 
         /* 다음 블록 캔버스 */
         .next-piece-wrapper {
@@ -146,12 +129,7 @@
             transition: background-color 0.2s;
             width: 100%;
         }
-
-        .sound-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 0 0 transparent;
-        }
-        
+        .sound-btn:active { transform: translateY(3px); box-shadow: 0 0 0 transparent; }
         .sound-btn.on { color: #00ffff; border-color: #008888; }
         .sound-btn.off { color: #ff5555; border-color: #880000; text-decoration: line-through; }
 
@@ -187,23 +165,19 @@
             box-shadow: 0 4px 0 #008888;
             border-radius: 5px;
         }
+        .start-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
-        .start-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 transparent;
-        }
-
-        /* 모바일 컨트롤러 (콤팩트 & 그리드 레이아웃 적용으로 잘림 방지) */
+        /* 모바일 컨트롤러 (그리드 레이아웃, 크기 80% 수준) */
         .controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0px 15px 5px 15px;
-            height: 120px; /* 고정 크기 */
+            height: 120px; 
             flex-shrink: 0;
         }
 
-        /* 십자키 (D-Pad) - CSS Grid 적용으로 레이아웃 안정성 확보 */
+        /* 십자키 (D-Pad) */
         .d-pad {
             display: grid;
             grid-template-columns: 35px 35px 35px; /* 버튼 하나당 35px 크기 */
@@ -219,14 +193,12 @@
             box-shadow: inset 0 0 5px rgba(255,255,255,0.1), 0 3px 0px #111;
             cursor: pointer;
         }
-        
         .d-btn:active {
             background-color: #222;
             transform: translateY(3px);
             box-shadow: 0 0px 0px #111;
         }
 
-        /* 그리드 위치 배치 */
         .up-btn { grid-column: 2; grid-row: 1; border-radius: 4px 4px 0 0; }
         .down-btn { grid-column: 2; grid-row: 3; border-radius: 0 0 4px 4px; }
         .left-btn { grid-column: 1; grid-row: 2; border-radius: 4px 0 0 4px; }
@@ -238,60 +210,37 @@
         .arrow-down { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #666; }
         .arrow-left { width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 12px solid #666; }
         .arrow-right { width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 12px solid #666; }
-
+        
+        /* 눌렀을때 화살표 색상 변경 */
         .d-btn:active .arrow-up { border-bottom-color: #444; }
         .d-btn:active .arrow-down { border-top-color: #444; }
         .d-btn:active .arrow-left { border-right-color: #444; }
         .d-btn:active .arrow-right { border-left-color: #444; }
 
-        /* 액션 버튼 축소 및 정렬 */
+        /* 액션 버튼 */
         .action-buttons {
             display: flex;
             gap: 12px;
-            align-items: center; /* 세로 중앙 정렬 */
+            align-items: center; 
         }
-
-        .action-btn-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
+        .action-btn-container { display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .a-btn {
-            width: 55px; /* 축소 */
-            height: 55px;
-            border-radius: 50%;
-            border: 2px solid #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
+            width: 55px; height: 55px; border-radius: 50%; border: 2px solid #000;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
-
         .btn-rotate { background-color: #5555ff; box-shadow: 0 4px 0px #000088, inset 0 4px 8px rgba(255,255,255,0.3); } 
         .btn-drop { background-color: #ff5555; box-shadow: 0 4px 0px #880000, inset 0 4px 8px rgba(255,255,255,0.3); } 
-
-        .a-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0px transparent, inset 0 2px 5px rgba(0,0,0,0.5);
-        }
-
-        .btn-label {
-            font-size: 8px;
-            color: #ddd;
-            text-shadow: 1px 1px 0 #000;
-        }
+        .a-btn:active { transform: translateY(4px); box-shadow: 0 0 0px transparent, inset 0 2px 5px rgba(0,0,0,0.5); }
+        .btn-label { font-size: 8px; color: #ddd; text-shadow: 1px 1px 0 #000; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     
-    <!-- 오락실 모니터 화면 -->
     <div class="arcade-screen">
         <div class="board-container" id="board-wrap">
-            <!-- 캔버스 자체가 배경색을 가지도록 하여 블록 붕뜸 현상 제거 -->
+            <!-- 캔버스의 HTML 사이즈는 해상도(비율 1:2) 고정, 실제 화면 크기는 JS가 조절 -->
             <canvas id="tetris" width="200" height="400"></canvas>
             
             <div id="overlay">
@@ -322,12 +271,10 @@
                 </div>
             </div>
             
-            <!-- 사운드 토글 버튼 -->
             <button id="sound-toggle-btn" class="sound-btn on" onclick="toggleSound()">SND:ON</button>
         </div>
     </div>
 
-    <!-- 모바일 컨트롤러 -->
     <div class="controls">
         <div class="d-pad">
             <div class="center-square"></div>
@@ -352,32 +299,63 @@
 </div>
 
 <script>
+/* -------------------------------------------------------------
+   비율 깨짐 및 붕뜸 완벽 방지: 캔버스 자동 리사이즈 로직
+------------------------------------------------------------- */
+function resizeCanvas() {
+    const container = document.getElementById('board-wrap');
+    const canvas = document.getElementById('tetris');
+    if (!container || !canvas) return;
+
+    // 부모 영역의 넓이와 높이를 구함
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    // 테트리스 보드 비율인 1:2 (10칸 x 20칸) 강제 설정
+    let targetWidth = containerWidth;
+    let targetHeight = targetWidth * 2;
+    
+    // 만약 계산된 높이가 부모 영역을 초과한다면 높이 기준으로 다시 맞춤
+    if (targetHeight > containerHeight) {
+        targetHeight = containerHeight;
+        targetWidth = targetHeight / 2;
+    }
+    
+    // CSS 픽셀 단위로 정확히 강제 주입하여 블록이 정사각형을 유지하도록 함
+    canvas.style.width = Math.floor(targetWidth) + 'px';
+    canvas.style.height = Math.floor(targetHeight) + 'px';
+}
+
+// 화면이 바뀌거나 회전하거나 전체화면이 될 때마다 크기 재계산
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
+document.addEventListener('fullscreenchange', resizeCanvas);
+document.addEventListener('webkitfullscreenchange', resizeCanvas);
+
+// 최초 실행 시 사이즈 조절
+resizeCanvas();
+setTimeout(resizeCanvas, 50);
+
 /* --- 전체화면 (Fullscreen) 기능 --- */
 function requestFullScreen() {
     const docEl = document.documentElement;
     if (!document.fullscreenElement) {
-        if (docEl.requestFullscreen) {
-            docEl.requestFullscreen().catch(err => console.log(err));
-        } else if (docEl.webkitRequestFullscreen) { /* Safari */
-            docEl.webkitRequestFullscreen();
-        } else if (docEl.msRequestFullscreen) { /* IE11 */
-            docEl.msRequestFullscreen();
-        }
+        if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+        else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen(); 
     }
 }
 
-/* --- 테트리스 로직 --- */
+/* --- 테트리스 핵심 로직 --- */
 const canvas = document.getElementById('tetris');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-piece');
 const nextCtx = nextCanvas.getContext('2d');
 
+// 내부 렌더링 해상도는 한 블록당 20px 기준으로 고정 (200x400)
 ctx.scale(20, 20);
 nextCtx.scale(20, 20);
 
-const colors = [
-    null, '#00ffff', '#0000ff', '#ff8800', '#ffff00', '#00ff00', '#cc00ff', '#ff0000'
-];
+const colors = [ null, '#00ffff', '#0000ff', '#ff8800', '#ffff00', '#00ff00', '#cc00ff', '#ff0000' ];
 
 function createPiece(type) {
     if (type === 'I') return [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]];
@@ -405,8 +383,6 @@ let lastTime = 0;
 let isGameOver = false;
 let isPlaying = false;
 let animationId = null;
-
-// 오디오 설정 상태 변수
 let isSoundEnabled = true;
 
 function randomPiece() {
@@ -437,10 +413,10 @@ function drawMatrix(matrix, offset, context) {
 }
 
 function draw() {
-    // 배경은 css에서 처리하므로 클리어만 수행
+    // JS가 배경을 조절하므로 화면만 클리어
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Grid (희미하게)
+    // Grid (희미하게 배경 격자)
     ctx.strokeStyle = 'rgba(255,255,255,0.05)';
     ctx.lineWidth = 0.05;
     for(let i=1; i<10; i++) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 20); ctx.stroke(); }
@@ -461,9 +437,7 @@ function collide(arena, player) {
     const [m, o] = [player.matrix, player.pos];
     for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < m[y].length; ++x) {
-            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-                return true;
-            }
+            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) return true;
         }
     }
     return false;
@@ -516,11 +490,8 @@ function playerHardDrop() {
 function playerMove(dir) {
     if (!isPlaying) return;
     player.pos.x += dir;
-    if (collide(arena, player)) {
-        player.pos.x -= dir; 
-    } else {
-        playSFX('move');
-    }
+    if (collide(arena, player)) player.pos.x -= dir; 
+    else playSFX('move');
 }
 
 function playerRotate(dir) {
@@ -601,8 +572,8 @@ function update(time = 0) {
 }
 
 function startGame() {
-    // 시작 시 브라우저 전체화면 요청 (가로/세로 꽉 차게)
-    requestFullScreen();
+    requestFullScreen(); // 폰 화면 전체를 사용
+    setTimeout(resizeCanvas, 100); // 전체화면 전환 후 사이즈 갱신
     
     initAudio();
     arena.forEach(row => row.fill(0));
@@ -640,13 +611,10 @@ function bindButton(id, action, autoRepeat = false) {
         if (!isPlaying) return;
         
         action(); 
-
         if (autoRepeat) {
             clearTimeout(timeoutId);
             clearInterval(intervalId);
-            timeoutId = setTimeout(() => {
-                intervalId = setInterval(action, 80);
-            }, 200);
+            timeoutId = setTimeout(() => { intervalId = setInterval(action, 80); }, 200);
         }
     };
 
@@ -782,7 +750,6 @@ function playSFX(type) {
 function toggleSound() {
     isSoundEnabled = !isSoundEnabled;
     const btn = document.getElementById('sound-toggle-btn');
-    
     if (isSoundEnabled) {
         btn.innerText = 'SND:ON';
         btn.classList.remove('off');
@@ -796,9 +763,6 @@ function toggleSound() {
         stopBGM();
     }
 }
-
-draw();
-drawNext();
 </script>
 </body>
 </html>
