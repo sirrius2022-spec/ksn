@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 모바일 브라우저 주소창을 고려한 100dvh (꽉 찬 화면) */
+            /* 모바일 브라우저 주소창을 고려한 100dvh */
             height: 100dvh; 
             color: #0f0;
             font-family: 'Courier New', Courier, monospace;
@@ -45,7 +45,7 @@
         #gameArea {
             position: relative;
             width: 100%;
-            flex: 1; /* 남은 위아래 공간을 모두 차지 (가장 중요) */
+            flex: 1; /* 남은 위아래 공간을 모두 차지 */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -90,31 +90,32 @@
         }
         button.actionBtn:active { background: #0f0; color: #000; }
         
-        /* 모바일용 가상 방향키 (잘리지 않도록 높이와 여백 축소) */
+        /* 모바일용 가상 방향키 (크기 80% 축소 및 윗선 고정) */
         #dpadArea {
             width: 100%;
-            height: 150px; /* 고정 높이 할당 */
+            height: 110px; /* 공간을 덜 차지하도록 높이 축소 */
+            padding-top: 5px;
             padding-bottom: 15px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* flex-start로 윗선을 고정 */
             flex-shrink: 0;
         }
 
         #dpad {
             display: grid;
-            /* 버튼 크기를 70px -> 55px로 축소 */
-            grid-template-columns: repeat(3, 55px);
-            grid-template-rows: repeat(2, 55px);
+            /* 버튼 크기를 55px -> 45px (약 80%)로 축소 */
+            grid-template-columns: repeat(3, 45px);
+            grid-template-rows: repeat(2, 45px);
             gap: 8px;
         }
         
         .dirBtn {
             background: rgba(0, 255, 0, 0.1);
             border: 2px solid #0f0;
-            border-radius: 12px;
+            border-radius: 10px; /* 곡률 살짝 축소 */
             color: #0f0;
-            font-size: 22px;
+            font-size: 20px; /* 화살표 크기 살짝 축소 */
             display: flex;
             justify-content: center;
             align-items: center;
