@@ -813,12 +813,14 @@ function applyBallCount() {
   resetGame();
 }
 
+
 // ── START ──
 function startGame() {
   if (raceStarted && !winnerDeclared) return;
   initAC();
 
-  if (!document.fullscreenElement) toggleFullScreen();
+  // 💡 아래 줄을 삭제하거나 주석(//) 처리하여 전체화면 자동 전환을 막습니다.
+  // if (!document.fullscreenElement) toggleFullScreen(); 
 
   winnerDeclared = false;
   raceStarted = false;
@@ -835,6 +837,8 @@ function startGame() {
     wd.className = 'racing';
   });
 }
+
+  
 
 // ── RESET ──
 function resetGame() {
