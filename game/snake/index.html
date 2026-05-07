@@ -14,6 +14,7 @@
                 linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px);
             background-size: 20px 20px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -22,8 +23,19 @@
             overflow: hidden;
             touch-action: none;
         }
-        #gameContainer {
+        #gameArea {
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #scoreBoard {
+            width: 100%;
+            text-align: left;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #0f0;
+            margin-bottom: 10px;
         }
         canvas {
             background: rgba(0, 0, 0, 0.8);
@@ -42,7 +54,7 @@
             width: 100%;
             pointer-events: none;
         }
-        button {
+        button.actionBtn {
             margin-top: 20px;
             padding: 10px 20px;
             background: rgba(0, 255, 0, 0.1);
@@ -54,27 +66,57 @@
             cursor: pointer;
             box-shadow: 0 0 10px #0f0;
             pointer-events: auto;
-            transition: all 0.2s;
         }
-        button:hover { background: #0f0; color: #000; }
-        #scoreBoard {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            text-shadow: 0 0 5px #0f0;
+        button.actionBtn:active { background: #0f0; color: #000; }
+        
+        /* 모바일용 가상 방향키 */
+        #dpad {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(2, 60px);
+            gap: 10px;
+            justify-content: center;
         }
+        .dirBtn {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            color: #0f0;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            touch-action: manipulation;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+        .dirBtn:active { background: rgba(0, 255, 0, 0.5); }
+        #btnUp { grid-column: 2; grid-row: 1; }
+        #btnLeft { grid-column: 1; grid-row: 2; }
+        #btnDown { grid-column: 2; grid-row: 2; }
+        #btnRight { grid-column: 3; grid-row: 2; }
+
     </style>
 </head>
 <body>
 
-<div id="gameContainer">
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+<div id="gameArea">
     <div id="scoreBoard">SCORE: <span id="score">0</span></div>
-    <div id="ui">
-        <h1 id="title">NEON SNAKE</h1>
-        <button id="startBtn">GAME START</button>
+    <div style="position: relative;">
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <div id="ui">
+            <h1 id="title">NEON SNAKE</h1>
+            <button id="startBtn" class="actionBtn">GAME START</button>
+        </div>
+    </div>
+    
+    <!-- 모바일 터치 패드 -->
+    <div id="dpad">
+        <div class="dirBtn" id="btnUp">▲</div>
+        <div class="dirBtn" id="btnLeft">◀</div>
+        <div class="dirBtn" id="btnDown">▼</div>
+        <div class="dirBtn" id="btnRight">▶</div>
     </div>
 </div>
 
@@ -86,18 +128,16 @@
     const title = document.getElementById('title');
     const scoreEl = document.getElementById('score');
 
-    // 모바일 대응 캔버스 크기 조정
+    // 캔버스 크기를 화면에 맞게 유동적으로 조절 (정사각형 유지)
     function resizeCanvas() {
-        const scale = Math.min(window.innerWidth / 420, window.innerHeight / 420);
-        if (scale < 1) {
-            canvas.style.transform = `scale(${scale})`;
-            canvas.style.transformOrigin = 'center center';
-        }
+        const size = Math.min(window.innerWidth * 0.9, 400); // 최대 400px
+        canvas.width = size;
+        canvas.height = size;
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // --- Web Audio API (레트로 사운드) ---
+    // 오디오 컨텍스트
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx;
 
@@ -107,7 +147,6 @@
         const gainNode = audioCtx.createGain();
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-
         const now = audioCtx.currentTime;
         if (type === 'eat') {
             osc.type = 'square';
@@ -126,99 +165,67 @@
         }
     }
 
-    // --- 게임 변수 ---
-    const gridSize = 20;
-    const tileCount = canvas.width / gridSize;
+    // 게임 변수
+    let tileCount = 15; // 격자 칸 수 (가로세로 15칸)
+    let gridSize = canvas.width / tileCount;
     
     let snake = [];
     let dx = 0;
     let dy = 0;
-    let food = { x: 15, y: 15 };
+    let food = { x: 5, y: 5 };
     let score = 0;
-    let speed = 10; // 초기 속도 (낮을수록 느림, fps 개념)
+    let speed = 7;
     
     let gameLoopTimeout;
     let isPlaying = false;
     let changingDirection = false;
 
-    // --- 입력 처리 (PC 키보드 & 모바일 스와이프) ---
-    document.addEventListener('keydown', changeDirection);
+    // --- 방향 제어 로직 ---
+    function setDirection(newDx, newDy) {
+        if (changingDirection || !isPlaying) return;
+        const goingUp = dy === -1;
+        const goingDown = dy === 1;
+        const goingRight = dx === 1;
+        const goingLeft = dx === -1;
 
-    let touchStartX = 0;
-    let touchStartY = 0;
+        if (newDx === -1 && !goingRight) { dx = -1; dy = 0; changingDirection = true; } // 좌
+        if (newDy === -1 && !goingDown) { dx = 0; dy = -1; changingDirection = true; } // 상
+        if (newDx === 1 && !goingLeft) { dx = 1; dy = 0; changingDirection = true; } // 우
+        if (newDy === 1 && !goingUp) { dx = 0; dy = 1; changingDirection = true; } // 하
+    }
 
-    canvas.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-    }, { passive: false });
-
-    canvas.addEventListener('touchmove', (e) => {
-        e.preventDefault(); // 스크롤 방지
-    }, { passive: false });
-
-    canvas.addEventListener('touchend', (e) => {
-        if (!isPlaying) return;
-        let touchEndX = e.changedTouches[0].screenX;
-        let touchEndY = e.changedTouches[0].screenY;
-        handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+    // PC 키보드
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') setDirection(-1, 0);
+        if (e.key === 'ArrowUp') setDirection(0, -1);
+        if (e.key === 'ArrowRight') setDirection(1, 0);
+        if (e.key === 'ArrowDown') setDirection(0, 1);
     });
 
-    function changeDirection(event) {
-        if (changingDirection || !isPlaying) return;
-        
-        const LEFT_KEY = 37; const RIGHT_KEY = 39;
-        const UP_KEY = 38; const DOWN_KEY = 40;
+    // 모바일 터치 패드 이벤트 (마우스 클릭도 지원)
+    const addTouch = (id, nx, ny) => {
+        const btn = document.getElementById(id);
+        const handler = (e) => { e.preventDefault(); setDirection(nx, ny); };
+        btn.addEventListener('touchstart', handler, {passive: false});
+        btn.addEventListener('mousedown', handler);
+    };
+    addTouch('btnLeft', -1, 0);
+    addTouch('btnUp', 0, -1);
+    addTouch('btnRight', 1, 0);
+    addTouch('btnDown', 0, 1);
 
-        const keyPressed = event.keyCode;
-        const goingUp = dy === -1;
-        const goingDown = dy === 1;
-        const goingRight = dx === 1;
-        const goingLeft = dx === -1;
-
-        if (keyPressed === LEFT_KEY && !goingRight) { dx = -1; dy = 0; changingDirection = true; }
-        if (keyPressed === UP_KEY && !goingDown) { dx = 0; dy = -1; changingDirection = true; }
-        if (keyPressed === RIGHT_KEY && !goingLeft) { dx = 1; dy = 0; changingDirection = true; }
-        if (keyPressed === DOWN_KEY && !goingUp) { dx = 0; dy = 1; changingDirection = true; }
-    }
-
-    function handleSwipe(startX, startY, endX, endY) {
-        if (changingDirection) return;
-        
-        let deltaX = endX - startX;
-        let deltaY = endY - startY;
-
-        // 스와이프 거리가 짧으면 무시
-        if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) return;
-
-        const goingUp = dy === -1;
-        const goingDown = dy === 1;
-        const goingRight = dx === 1;
-        const goingLeft = dx === -1;
-
-        // X축 이동이 Y축 이동보다 크면 좌우 스와이프
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            if (deltaX > 0 && !goingLeft) { dx = 1; dy = 0; changingDirection = true; } // 우
-            else if (deltaX < 0 && !goingRight) { dx = -1; dy = 0; changingDirection = true; } // 좌
-        } else {
-            // Y축 이동이 더 크면 상하 스와이프
-            if (deltaY > 0 && !goingUp) { dx = 0; dy = 1; changingDirection = true; } // 하
-            else if (deltaY < 0 && !goingDown) { dx = 0; dy = -1; changingDirection = true; } // 상
-        }
-    }
-
-    // --- 그리기 및 게임 로직 ---
+    // --- 게임 루프 ---
     function drawGame() {
         if (!isPlaying) return;
-        
         if (hasGameEnded()) {
             gameOver();
             return;
         }
 
         changingDirection = false;
+        gridSize = canvas.width / tileCount; // 리사이즈 대비
         
-        // 속도 제어를 위해 setTimeout 사용
-        gameLoopTimeout = setTimeout(function onTick() {
+        gameLoopTimeout = setTimeout(() => {
             clearCanvas();
             drawFood();
             advanceSnake();
@@ -232,10 +239,9 @@
     }
 
     function drawFood() {
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 10;
         ctx.shadowColor = '#f00';
         ctx.fillStyle = '#f00';
-        // 음식을 동그랗게 그리기
         ctx.beginPath();
         ctx.arc(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize / 2.5, 0, Math.PI * 2);
         ctx.fill();
@@ -245,7 +251,6 @@
 
     function drawSnake() {
         snake.forEach((part, index) => {
-            // 머리는 다른 색상/광원 효과
             if (index === 0) {
                 ctx.fillStyle = '#fff';
                 ctx.shadowColor = '#fff';
@@ -255,7 +260,6 @@
                 ctx.shadowColor = '#0f0';
                 ctx.shadowBlur = 5;
             }
-            // 그리드 크기보다 살짝 작게 그려서 블록 구분을 줌
             ctx.fillRect(part.x * gridSize + 1, part.y * gridSize + 1, gridSize - 2, gridSize - 2);
             ctx.shadowBlur = 0;
         });
@@ -265,44 +269,32 @@
         const head = { x: snake[0].x + dx, y: snake[0].y + dy };
         snake.unshift(head);
 
-        const hasEatenFood = snake[0].x === food.x && snake[0].y === food.y;
-        if (hasEatenFood) {
+        if (head.x === food.x && head.y === food.y) {
             score += 10;
             scoreEl.innerText = score;
             playSound('eat');
-            
-            // 점수가 오를수록 속도 미세하게 증가 (최대치 제한)
-            if (score % 50 === 0 && speed < 25) speed += 1.5;
-            
+            if (score % 50 === 0 && speed < 20) speed += 1; // 속도 증가
             generateFood();
         } else {
-            snake.pop(); // 먹이를 먹지 않았다면 꼬리를 자름 (길이 유지)
+            snake.pop();
         }
     }
 
     function generateFood() {
         food.x = Math.floor(Math.random() * tileCount);
         food.y = Math.floor(Math.random() * tileCount);
-        
-        // 음식이 뱀의 몸통 위에 생성되지 않도록 체크
-        snake.forEach(function has_snake_eaten_food(part) {
-            const has_eaten = part.x == food.x && part.y == food.y;
-            if (has_eaten) generateFood();
+        snake.forEach((part) => {
+            if (part.x === food.x && part.y === food.y) generateFood();
         });
     }
 
     function hasGameEnded() {
-        // 벽에 충돌
-        const hitLeftWall = snake[0].x < 0;
-        const hitRightWall = snake[0].x >= tileCount;
-        const hitTopWall = snake[0].y < 0;
-        const hitBottomWall = snake[0].y >= tileCount;
-        
-        if (hitLeftWall || hitRightWall || hitTopWall || hitBottomWall) return true;
-
-        // 자기 몸에 충돌
+        const head = snake[0];
+        // 벽 충돌 (0 미만이거나 타일 수 이상일 때)
+        if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) return true;
+        // 자기 몸 충돌
         for (let i = 4; i < snake.length; i++) {
-            if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
+            if (snake[i].x === head.x && snake[i].y === head.y) return true;
         }
         return false;
     }
@@ -326,16 +318,18 @@
         title.style.display = 'none';
         startBtn.style.display = 'none';
         
-        // 초기화
+        // 초기화 (중앙에서 약간 왼쪽에서 시작)
+        const startX = Math.floor(tileCount / 2);
+        const startY = Math.floor(tileCount / 2);
         snake = [
-            { x: 10, y: 10 },
-            { x: 9, y: 10 },
-            { x: 8, y: 10 }
+            { x: startX, y: startY },
+            { x: startX - 1, y: startY },
+            { x: startX - 2, y: startY }
         ];
-        dx = 1;
+        dx = 1; // 오른쪽 방향으로 출발
         dy = 0;
         score = 0;
-        speed = 8;
+        speed = 7;
         scoreEl.innerText = score;
         generateFood();
         
@@ -347,4 +341,3 @@
 </script>
 </body>
 </html>
-
