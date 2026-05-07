@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- 확대/축소 완벽 방지, 화면 꽉 채우기 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>아타리 스타일 테트리스</title>
+    <title>레트로 테트리스 (전체화면 해제)</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
@@ -26,7 +26,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            height: 100dvh;
+            height: 100dvh; /* 모바일 브라우저 상하단 바 제외한 실제 화면 크기 */
             overflow: hidden;
             /* 아케이드 기기 겉면 느낌의 어두운 패턴 */
             background-image: radial-gradient(#222 1px, transparent 1px);
@@ -49,14 +49,14 @@
             flex-direction: row;
             background-color: #555;
             border: 12px solid #666;
-            border-style: ridge; /* 벽돌/입체 테두리 효과 */
+            border-style: ridge;
             border-radius: 8px;
             padding: 4px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 15px #000;
             flex-grow: 1; 
             margin-bottom: 10px;
             min-height: 0; 
-            /* 러시아 궁전/하늘 배경 이미지 (아타리 테트리스 오마주) */
+            /* 러시아 궁전/하늘 배경 이미지 */
             background-image: url('https://images.unsplash.com/photo-1547448415-e9f5b28e570d?q=80&w=1000&auto=format&fit=crop');
             background-size: cover;
             background-position: center bottom;
@@ -72,10 +72,10 @@
             z-index: 0;
         }
 
-        /* 테트리스 보드 래퍼 - 공간을 최대로 차지하도록 설정 */
+        /* 테트리스 보드 래퍼 */
         .board-container {
             position: relative;
-            flex-grow: 1; /* 우측 패널을 제외한 모든 공간 차지 */
+            flex-grow: 1; 
             display: flex;
             justify-content: center; 
             align-items: center;
@@ -83,18 +83,18 @@
             z-index: 1;
         }
 
-        /* 캔버스 1:2 비율 고정 (배경은 약간 투명하게 하여 뒤의 궁전이 비치게 함) */
+        /* 캔버스 1:2 비율 고정 */
         canvas#tetris {
             display: block;
             image-rendering: pixelated; 
-            background-color: rgba(0, 0, 0, 0.85); /* 붕뜸 방지 및 배경 투과 */
+            background-color: rgba(0, 0, 0, 0.85); 
             border: 3px solid #111;
             box-shadow: inset 0 0 20px rgba(0,0,0,1), 0 0 15px rgba(0,0,0,0.8);
         }
 
-        /* 우측 정보창 (너비를 대폭 줄여 메인 화면 확대) */
+        /* 우측 정보창 */
         .side-panel {
-            width: 75px; /* 너비 대폭 축소 */
+            width: 75px; 
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
@@ -111,7 +111,7 @@
         .panel-title { color: #ff3333; font-size: 8px; margin-bottom: 5px; text-shadow: 1px 1px 0px #000; }
         .panel-value { color: #00ffff; font-size: 11px; text-shadow: 1px 1px 0px #000; }
 
-        /* 다음 블록 캔버스 축소 */
+        /* 다음 블록 캔버스 */
         .next-piece-wrapper {
             background-color: rgba(0,0,0,0.8);
             border: 2px solid #555;
@@ -130,7 +130,7 @@
             image-rendering: pixelated;
         }
 
-        /* 사운드 토글 버튼 축소 */
+        /* 사운드 토글 버튼 */
         .sound-btn {
             margin-top: auto;
             margin-bottom: 0px;
@@ -245,7 +245,6 @@
 
 <div id="game-container">
     
-    <!-- 아케이드 기기 프레임 (벽돌 테두리 + 러시아 궁전 배경) -->
     <div class="brick-frame">
         <div class="board-container" id="board-wrap">
             <canvas id="tetris" width="200" height="400"></canvas>
@@ -315,7 +314,6 @@ function resizeCanvas() {
     const canvas = document.getElementById('tetris');
     if (!container || !canvas) return;
 
-    // 패널 너비를 대폭 줄였으므로 보드 컨테이너의 크기가 최대화 됨
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
     
@@ -323,7 +321,6 @@ function resizeCanvas() {
     let targetHeight = containerHeight;
     let targetWidth = targetHeight / 2;
     
-    // 세로가 너무 길어서 가로 너비를 초과할 경우, 가로 기준으로 맞춤
     if (targetWidth > containerWidth) {
         targetWidth = containerWidth;
         targetHeight = targetWidth * 2;
@@ -335,20 +332,9 @@ function resizeCanvas() {
 
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
-document.addEventListener('fullscreenchange', resizeCanvas);
-document.addEventListener('webkitfullscreenchange', resizeCanvas);
 
 resizeCanvas();
 setTimeout(resizeCanvas, 50);
-
-/* --- 전체화면 (Fullscreen) 기능 --- */
-function requestFullScreen() {
-    const docEl = document.documentElement;
-    if (!document.fullscreenElement) {
-        if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
-        else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen(); 
-    }
-}
 
 /* --- 테트리스 핵심 로직 --- */
 const canvas = document.getElementById('tetris');
@@ -576,7 +562,7 @@ function update(time = 0) {
 }
 
 function startGame() {
-    requestFullScreen(); // 전체화면
+    // 자동 전체화면(requestFullScreen) 제거 완료!
     setTimeout(resizeCanvas, 100); 
     
     initAudio();
