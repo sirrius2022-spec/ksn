@@ -95,37 +95,46 @@
                 <p>현장 사진을 기반으로 4M(인적, 기계적, 작업적, 관리적) 위험 요인을 분석하는 전문 도구</p>
             </a>
 
-<div class="program-card" style="border: 1px solid #333; border-radius: 12px; padding: 25px; background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Pretendard', sans-serif;">
-    
-    <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <div style="background: #e63946; width: 5px; height: 30px; margin-right: 15px;"></div>
-        <h2 style="margin: 0; color: #1d3557; font-size: 24px;">흙막이 탄소성 해석 프로그램 (Elasto-Plastic Analysis)</h2>
-    </div>
 
-    <p style="line-height: 1.6; color: #457b9d; font-size: 15px;">
-        본 프로그램은 굴착 단계별 지반의 <strong>탄소성(Elasto-Plastic) 거동</strong>을 모사하여 지반-구조물 상호작용(SSI)을 정밀하게 분석합니다. 
-        버팀대(Strut), 어스앵커(Earth-anchor) 등 지지 구조물의 강성과 단계별 굴착 고를 반영한 최적의 안전 진단을 제공합니다.
-    </p>
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e1e4e8;
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
 
-    <div style="margin-top: 25px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6;">
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
 
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
 
-        <div class="card" style="border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; margin-bottom: 20px; background-color: #fff; font-family: sans-serif;">
-    <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <span style="font-size: 24px; margin-right: 12px;">🏗️</span>
-        <h3 style="margin: 0; font-size: 20px; color: #1a73e8; font-weight: bold;">
-            흙막이 탄소성 해석 에이전트
-        </h3>
-    </div>
-    
-    <p style="margin: 0; color: #5f6368; line-height: 1.6; font-size: 15px;">
-        굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 정밀하게 분석하여 안전성을 검토하는 전문 도구
-    </p>
+.icon {
+    font-size: 24px;
+    margin-right: 12px;
+}
 
-    <a href="https://sirrius2022-spec.github.io/ksn/agent/sunex-ai" style="display: inline-block; margin-top: 16px; color: #1a73e8; text-decoration: none; font-weight: 500;">
-        바로가기 →
-    </a>
-</div>
+.card-title {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1a73e8; /* 교수님 사이트 전용 블루 */
+    font-weight: 600;
+}
+
+.card-description {
+    margin: 0;
+    color: #5f6368;
+    line-height: 1.6;
+    font-size: 1rem;
+}
 
         
 
