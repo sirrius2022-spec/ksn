@@ -3,851 +3,492 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>MARBLE GRAND PRIX</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Rian Education - Ultimate Marble Racing (Mobile)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <style>
-:root {
-  --gold: #fbbf24;
-  --gold2: #f59e0b;
-  --neon: #00f5ff;
-  --neon2: #0ea5e9;
-  --red: #ff3b5c;
-  --green: #00e676;
-  --bg: #04050a;
-  --panel: rgba(8,12,24,0.95);
-  --border: rgba(251,191,36,0.3);
-  --text: #e2e8f0;
-  --dim: #64748b;
-}
+    body, html {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        color: #ffd600;
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    #game-wrapper {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background: #0a0a0a;
+    }
 
-@keyframes shimmer {
-  0%,100% { opacity:.6; } 50% { opacity:1; }
-}
-@keyframes scanline {
-  0% { transform:translateY(-100%); } 100% { transform:translateY(100vh); }
-}
-@keyframes pulseGold {
-  0%,100% { box-shadow:0 0 8px rgba(251,191,36,.4); }
-  50% { box-shadow:0 0 24px rgba(251,191,36,.9), 0 0 48px rgba(251,191,36,.4); }
-}
-@keyframes winnerPulse {
-  0%,100% { transform:scale(1); text-shadow:0 0 20px var(--gold); }
-  50% { transform:scale(1.04); text-shadow:0 0 60px var(--gold),0 0 100px rgba(251,191,36,.5); }
-}
-@keyframes rankIn {
-  from { opacity:0; transform:translateX(30px); }
-  to   { opacity:1; transform:translateX(0); }
-}
-@keyframes countDown {
-  from { transform:scale(2.5); opacity:0; }
-  50%  { opacity:1; }
-  to   { transform:scale(.5); opacity:0; }
-}
-@keyframes neonFlicker {
-  0%,100% { opacity:1; } 92% { opacity:1; } 93% { opacity:.4; } 95% { opacity:1; } 97% { opacity:.7; } 98% { opacity:1; }
-}
-@keyframes gradientShift {
-  0% { background-position:0% 50%; }
-  50% { background-position:100% 50%; }
-  100% { background-position:0% 50%; }
-}
+    #ui-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 10;
+        pointer-events: none;
+        padding-top: 15px;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+    }
 
-html,body {
-  width:100%; height:100%; overflow:hidden;
-  background:var(--bg);
-  font-family:'Rajdhani', sans-serif;
-  color:var(--text);
-}
+    .control-group {
+        margin-bottom: 8px;
+        pointer-events: auto; 
+        display: flex;
+        flex-wrap: wrap; 
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 0 10px;
+    }
 
-/* ── 배경 효과 ── */
-#bg-fx {
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-  background:
-    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(0,245,255,.04) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 90%, rgba(251,191,36,.05) 0%, transparent 60%),
-    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(4,5,10,1) 0%, transparent 100%);
-}
-#grid-bg {
-  position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.12;
-  background-image:
-    linear-gradient(rgba(0,245,255,.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,245,255,.5) 1px, transparent 1px);
-  background-size:40px 40px;
-}
-.scan-line {
-  position:fixed; left:0; width:100%; height:3px; z-index:0; pointer-events:none;
-  background:linear-gradient(transparent, rgba(0,245,255,.08), transparent);
-  animation:scanline 8s linear infinite;
-}
+    .control-group label {
+        opacity: 0.8;
+        font-size: 15px;
+        font-weight: bold;
+    }
 
-/* ── 레이아웃 ── */
-#game-wrapper { position:relative; width:100vw; height:100vh; z-index:1; }
-#canvas-container { position:absolute; inset:0; z-index:1; }
+    input[type="number"] {
+        padding: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        border: 2px solid #ffd600;
+        border-radius: 8px;
+        background: #222;
+        color: #ffd600;
+        text-align: center;
+        width: 60px;
+    }
 
-/* ── 상단 HUD ── */
-#hud {
-  position:absolute; top:0; left:0; right:0; z-index:20;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 14px;
-  background:linear-gradient(180deg, rgba(4,5,10,.98) 0%, rgba(4,5,10,.7) 80%, transparent 100%);
-  border-bottom:1px solid var(--border);
-}
+    button {
+        padding: 8px 12px;
+        font-size: 14px;
+        background: #333;
+        color: #ffd600;
+        border: 2px solid #ffd600;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
 
-#logo {
-  font-family:'Orbitron',monospace; font-weight:900;
-  font-size:clamp(13px,3vw,20px);
-  letter-spacing:3px;
-  background:linear-gradient(135deg, var(--gold) 0%, #fff8e1 50%, var(--gold2) 100%);
-  background-size:200% auto;
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  background-clip:text;
-  animation:gradientShift 3s ease infinite;
-  white-space:nowrap;
-}
-#logo span { color:var(--neon); -webkit-text-fill-color:var(--neon); font-size:.7em; }
+    .main-btn {
+        background: #ffd600;
+        color: #000;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+    }
 
-/* 인원 컨트롤 */
-#count-ctrl {
-  display:flex; align-items:center; gap:8px;
-}
-#count-ctrl label { font-size:11px; color:var(--dim); letter-spacing:1px; text-transform:uppercase; }
-#count-ctrl input {
-  width:52px; padding:4px 6px;
-  background:rgba(255,255,255,.05); border:1px solid var(--border);
-  border-radius:6px; color:var(--gold); font-family:'Orbitron',monospace;
-  font-size:13px; font-weight:700; text-align:center;
-}
-#count-ctrl input:focus { outline:none; border-color:var(--gold); box-shadow:0 0 8px rgba(251,191,36,.4); }
-.small-btn {
-  padding:5px 10px; font-size:11px; font-family:'Rajdhani',sans-serif; font-weight:700;
-  background:rgba(255,255,255,.05); border:1px solid var(--border);
-  border-radius:6px; color:var(--text); cursor:pointer; letter-spacing:1px;
-  transition:all .2s;
-}
-.small-btn:hover,
-.small-btn:active { background:rgba(251,191,36,.15); border-color:var(--gold); color:var(--gold); }
+    .fs-btn {
+        background: #00e676;
+        border-color: #00e676;
+        color: #000;
+    }
 
-/* 버튼 그룹 */
-#btn-group { display:flex; gap:8px; align-items:center; }
+    #winner {
+        font-size: 24px;
+        margin-top: 5px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        height: 30px;
+        opacity: 0.8;
+    }
 
-.action-btn {
-  font-family:'Orbitron',monospace; font-weight:700; letter-spacing:2px;
-  border-radius:8px; cursor:pointer; border:none;
-  transition:all .2s; position:relative; overflow:hidden;
-  font-size:clamp(10px,2.5vw,13px);
-  padding:8px 14px;
-}
-.action-btn::after {
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(135deg, rgba(255,255,255,.1) 0%, transparent 50%);
-  pointer-events:none;
-}
-#start-btn {
-  background:linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
-  color:#000; box-shadow:0 4px 20px rgba(251,191,36,.5);
-}
-#start-btn:hover { transform:translateY(-1px); box-shadow:0 6px 30px rgba(251,191,36,.7); }
-#reset-btn {
-  background:linear-gradient(135deg, #ff3b5c 0%, #c0392b 100%);
-  color:#fff; box-shadow:0 4px 20px rgba(255,59,92,.4);
-}
-#reset-btn:hover { transform:translateY(-1px); box-shadow:0 6px 30px rgba(255,59,92,.6); }
+    @keyframes pop {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.15); text-shadow: 0 0 20px #ffd600, 0 0 40px #ff9800; opacity: 1; }
+        100% { transform: scale(1); opacity: 0.8; }
+    }
+    .celebrate { animation: pop 0.6s ease-in-out infinite; color: #fff !important; }
 
-/* ── 우측 랭킹 패널 ── */
-#rank-panel {
-  position:absolute; right:10px; top:80px; z-index:20;
-  width:130px;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px 8px;
-  backdrop-filter:blur(12px);
-  box-shadow:0 8px 32px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
-}
-#rank-title {
-  font-family:'Orbitron',monospace; font-size:9px; letter-spacing:3px;
-  color:var(--gold); text-align:center; margin-bottom:8px; padding-bottom:6px;
-  border-bottom:1px solid var(--border);
-  animation:neonFlicker 4s ease infinite;
-}
-.rank-item {
-  display:flex; align-items:center; gap:6px;
-  padding:4px 2px; border-radius:6px;
-  transition:all .3s; animation:rankIn .4s ease;
-}
-.rank-item:not(:last-child) { margin-bottom:2px; }
-.rank-num {
-  font-family:'Orbitron',monospace; font-size:9px; font-weight:700;
-  width:16px; text-align:center; flex-shrink:0;
-}
-.rank-1 .rank-num { color:var(--gold); text-shadow:0 0 10px var(--gold); }
-.rank-2 .rank-num { color:#94a3b8; }
-.rank-3 .rank-num { color:#cd7f32; }
-.rank-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; box-shadow:0 0 6px currentColor; }
-.rank-name {
-  font-size:12px; font-weight:600;
-  color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-
-/* ── 하단 상태 바 ── */
-#status-bar {
-  position:absolute; bottom:0; left:0; right:0; z-index:20;
-  padding:10px 16px;
-  background:linear-gradient(0deg, rgba(4,5,10,.98) 0%, rgba(4,5,10,.7) 80%, transparent 100%);
-  border-top:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center;
-}
-#winner-display {
-  font-family:'Orbitron',monospace; font-size:clamp(12px,3.5vw,18px);
-  font-weight:700; letter-spacing:2px; text-align:center; color:var(--text);
-  min-height:26px;
-}
-#winner-display.racing { color:var(--neon); text-shadow:0 0 20px var(--neon); animation:neonFlicker 3s ease infinite; }
-#winner-display.won { color:var(--gold); animation:winnerPulse 1s ease-in-out infinite; }
-
-/* ── 카운트다운 오버레이 ── */
-#countdown-overlay {
-  position:absolute; inset:0; z-index:30;
-  display:none; align-items:center; justify-content:center;
-  background:rgba(4,5,10,.7); backdrop-filter:blur(4px);
-  pointer-events:none;
-}
-#countdown-overlay.active { display:flex; }
-#count-num {
-  font-family:'Orbitron',monospace; font-weight:900;
-  font-size:clamp(80px,20vw,160px);
-  background:linear-gradient(135deg, var(--neon) 0%, var(--gold) 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  animation:countDown .9s ease-out forwards;
-  text-shadow:none; filter:drop-shadow(0 0 30px rgba(0,245,255,.6));
-}
-
-/* ── 진행 바 ── */
-#progress-track {
-  position:absolute; left:10px; top:80px; z-index:20;
-  width:8px; height:calc(100vh - 160px);
-  background:rgba(255,255,255,.05);
-  border:1px solid var(--border);
-  border-radius:4px; overflow:hidden;
-}
-#progress-fill {
-  position:absolute; bottom:0; width:100%; height:0%;
-  background:linear-gradient(180deg, var(--neon) 0%, var(--gold) 100%);
-  border-radius:4px; transition:height .1s;
-  box-shadow:0 0 8px var(--neon);
-}
-#prog-label {
-  position:absolute; left:14px; top:80px; z-index:20;
-  font-family:'Orbitron',monospace; font-size:8px; color:var(--dim);
-  writing-mode:vertical-rl; text-orientation:mixed; letter-spacing:2px;
-  text-transform:uppercase;
-}
-
-/* ── 승자 팝업 ── */
-#winner-popup {
-  position:absolute; inset:0; z-index:40;
-  display:none; align-items:center; justify-content:center;
-  pointer-events:none;
-}
-#winner-popup.active { display:flex; }
-#winner-card {
-  background:linear-gradient(135deg, rgba(8,12,24,.98) 0%, rgba(20,16,8,.98) 100%);
-  border:2px solid var(--gold);
-  border-radius:20px; padding:28px 40px;
-  text-align:center;
-  box-shadow:0 0 60px rgba(251,191,36,.4), 0 20px 60px rgba(0,0,0,.8);
-  animation:rankIn .6s ease;
-  backdrop-filter:blur(20px);
-}
-#winner-card .trophy { font-size:48px; display:block; margin-bottom:8px; }
-#winner-card .label { font-family:'Orbitron',monospace; font-size:10px; letter-spacing:4px; color:var(--dim); margin-bottom:4px; }
-#winner-card .num {
-  font-family:'Orbitron',monospace; font-size:60px; font-weight:900;
-  background:linear-gradient(135deg, var(--gold) 0%, #fff8e1 50%, var(--gold2) 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  animation:winnerPulse 1s ease-in-out infinite;
-  line-height:1;
-}
-#winner-card .sub { font-size:14px; color:var(--dim); margin-top:4px; letter-spacing:2px; }
-
-/* ── 파티클 캔버스 ── */
-#particle-canvas { position:absolute; inset:0; z-index:35; pointer-events:none; }
+    #canvas-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
 </style>
 </head>
 <body>
 
-<div id="bg-fx"></div>
-<div id="grid-bg"></div>
-<div class="scan-line"></div>
-
 <div id="game-wrapper">
-  <canvas id="particle-canvas"></canvas>
-
-  <!-- 상단 HUD -->
-  <div id="hud">
-    <div id="logo">MARBLE<span>GP</span></div>
-
-    <div id="count-ctrl">
-      <label>PLAYERS</label>
-      <input type="number" id="ballCountInput" value="50" min="1" max="100">
-      <button class="small-btn" onclick="applyBallCount()">SET</button>
+    <div id="ui-layer">
+        <div class="control-group">
+            <label>인원(1~100):</label>
+            <input type="number" id="ballCountInput" value="50" min="1" max="100">
+            <button onclick="applyBallCount()">적용</button>
+            <button onclick="toggleFullScreen()" class="fs-btn">⛶ 전체화면</button>
+        </div>
+        <div class="control-group">
+            <button onclick="startGame()" class="main-btn">▶ START</button>
+            <button onclick="resetGame()" class="main-btn" style="background:#ff3b30; color:#fff;">RESET</button>
+        </div>
+        
+        <div id="winner">🏁 대기 중...</div>
     </div>
 
-    <div id="btn-group">
-      <button class="action-btn" id="start-btn" onclick="startGame()">▶ START</button>
-      <button class="action-btn" id="reset-btn" onclick="resetGame()">↺ RESET</button>
-      
-    </div>
-  </div>
-
-  <!-- 좌측 진행도 -->
-  <div id="progress-track"><div id="progress-fill"></div></div>
-  <div id="prog-label">RACE</div>
-
-  <!-- 우측 랭킹 -->
-  <div id="rank-panel">
-    <div id="rank-title">◆ RANKING ◆</div>
-    <div id="rank-list"></div>
-  </div>
-
-  <!-- 게임 캔버스 -->
-  <div id="canvas-container"></div>
-
-  <!-- 카운트다운 -->
-  <div id="countdown-overlay"><div id="count-num">3</div></div>
-
-  <!-- 하단 상태 -->
-  <div id="status-bar">
-    <div id="winner-display">— READY TO RACE —</div>
-  </div>
-
-  <!-- 승자 팝업 -->
-  <div id="winner-popup">
-    <div id="winner-card">
-      <span class="trophy">🏆</span>
-      <div class="label">GRAND PRIX WINNER</div>
-      <div class="num" id="wp-num">1</div>
-      <div class="sub" id="wp-sub">CONGRATULATIONS</div>
-    </div>
-  </div>
+    <div id="canvas-container"></div>
 </div>
 
 <script>
-// ════════════════════════════════════════
-// MARBLE GRAND PRIX — Premium Edition
-// ════════════════════════════════════════
+function toggleFullScreen() {
+    let doc = window.document;
+    let docEl = doc.documentElement;
+
+    let requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+    let cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+    if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+        requestFullScreen.call(docEl).catch(err => {
+            console.log(`전체화면 활성화 오류: ${err.message}`);
+        });
+    } else {
+        cancelFullScreen.call(doc);
+    }
+}
 
 const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 
-const VW = window.innerWidth;
-const VH = window.innerHeight;
-const WORLD_H = VH * 28;
+const VIEW_WIDTH = window.innerWidth;
+const VIEW_HEIGHT = window.innerHeight;
+
+// 💡 40초 플레이타임을 위해 트랙 길이를 조절 (30배)
+const WORLD_HEIGHT = VIEW_HEIGHT * 30; 
 
 let engine, world, render, runner;
-let balls = [], movingObstacles = [];
+let balls = [];
+let movingObstacles = [];
 let winnerDeclared = false;
-let totalBalls = 50;
-let camY = 0;
-let top5 = new Set();
-let raceStarted = false;
-let frameCount = 0;
-let ballColors = {}; // id → css color
+let totalBalls = 50; 
+let currentCameraY = 0; 
+let top5BallIds = new Set(); 
 
-// ── 오디오 ──
-let AC = null;
-let lastBounce = 0;
+// 🎵 오디오 시스템
+let audioCtx = null;
+let lastBounceTime = 0;
 
-function initAC() {
-  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
-  if (AC.state === 'suspended') AC.resume();
+const bgmMusic = new Audio('https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-43.mp3');
+bgmMusic.loop = true;
+bgmMusic.volume = 0.3;
+const cheerSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-small-crowd-ovation-437.mp3');
+cheerSound.volume = 0.8;
+
+function playBounceSound() {
+    if (!audioCtx) return;
+    let now = Date.now();
+    if (now - lastBounceTime < 30) return; 
+    lastBounceTime = now;
+
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = 'sine'; 
+    const notes = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+    const freq = notes[Math.floor(Math.random() * notes.length)];
+    
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.15);
 }
 
-function sfxBounce() {
-  if (!AC) return;
-  const now = Date.now();
-  if (now - lastBounce < 40) return;
-  lastBounce = now;
-  const notes = [659,784,880,988,1047,1175];
-  const o = AC.createOscillator(), g = AC.createGain();
-  o.type = 'sine';
-  o.frequency.value = notes[Math.floor(Math.random()*notes.length)];
-  g.gain.setValueAtTime(0.08, AC.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime+0.12);
-  o.connect(g); g.connect(AC.destination);
-  o.start(); o.stop(AC.currentTime+0.12);
+function playVictoryBGM() {
+    cheerSound.currentTime = 0;
+    cheerSound.play().catch(e => {});
+
+    if (!audioCtx) return;
+    const melody = [
+        { f: 523.25, d: 0.15 }, { f: 523.25, d: 0.15 }, { f: 523.25, d: 0.15 },
+        { f: 659.25, d: 0.35 }, { f: 587.33, d: 0.15 }, { f: 659.25, d: 0.35 },
+        { f: 783.99, d: 0.80 } 
+    ];
+    let startTime = audioCtx.currentTime;
+    melody.forEach(note => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle'; 
+        osc.frequency.value = note.f;
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05); 
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + note.d); 
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + note.d);
+        startTime += note.d + 0.05; 
+    });
 }
 
-function sfxWin() {
-  if (!AC) return;
-  const mel = [
-    [523,.12],[523,.12],[523,.12],[659,.3],[587,.12],[659,.3],[784,.6]
-  ];
-  let t = AC.currentTime + 0.05;
-  mel.forEach(([f,d]) => {
-    const o = AC.createOscillator(), g = AC.createGain();
-    o.type = 'triangle'; o.frequency.value = f;
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.25, t+0.03);
-    g.gain.exponentialRampToValueAtTime(0.001, t+d);
-    o.connect(g); g.connect(AC.destination);
-    o.start(t); o.stop(t+d+0.1);
-    t += d + 0.04;
-  });
+initEngine();
+buildLevel();
+
+function initEngine() {
+    engine = Engine.create();
+    world = engine.world;
+    engine.gravity.y = 0.75; 
+
+    render = Render.create({
+        element: document.getElementById('canvas-container'),
+        engine: engine,
+        options: {
+            width: VIEW_WIDTH,
+            height: VIEW_HEIGHT,
+            wireframes: false,
+            background: "#050505",
+            hasBounds: true
+        }
+    });
+
+    Render.run(render);
+    runner = Runner.create();
+    Runner.run(runner, engine);
+
+    Events.on(engine, 'collisionStart', function(event) {
+        if (winnerDeclared) return;
+        let shouldPlaySound = false;
+        for (let pair of event.pairs) {
+            if (top5BallIds.has(pair.bodyA.id) || top5BallIds.has(pair.bodyB.id)) {
+                shouldPlaySound = true;
+                break;
+            }
+        }
+        if (shouldPlaySound) playBounceSound();
+    });
+
+    Events.on(engine, "beforeUpdate", function() {
+        if (winnerDeclared) return;
+        let activeBalls = balls.filter(b => !b.isStatic);
+        if (activeBalls.length > 0) {
+            activeBalls.sort((a, b) => b.position.y - a.position.y); 
+            top5BallIds.clear();
+            let limit = Math.min(5, activeBalls.length); 
+            for (let i = 0; i < limit; i++) {
+                top5BallIds.add(activeBalls[i].id);
+            }
+        }
+        movingObstacles.forEach(obs => {
+            if (obs.type === 'spinner') {
+                Body.rotate(obs.body, obs.speed);
+            } else if (obs.type === 'slider') {
+                if (Math.abs(obs.offset) > obs.range) {
+                    obs.speed *= -1; 
+                }
+                obs.offset += obs.speed;
+                Body.translate(obs.body, { x: obs.speed, y: 0 });
+            }
+        });
+    });
+
+    Events.on(engine, "afterUpdate", function() {
+        if (!winnerDeclared) {
+            updateCamera();
+            checkWinner();
+        }
+    });
+
+    Events.on(render, 'afterRender', function() {
+        const ctx = render.context;
+        ctx.font = "bold 13px Arial"; 
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const offsetX = render.bounds.min.x;
+        const offsetY = render.bounds.min.y;
+        for (let ball of balls) {
+            let x = ball.position.x - offsetX;
+            let y = ball.position.y - offsetY;
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#000000"; 
+            ctx.strokeText(ball.number, x, y);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(ball.number, x, y);
+        }
+    });
 }
 
-function sfxCountdown(n) {
-  if (!AC) return;
-  const freq = n === 0 ? 880 : 440;
-  const o = AC.createOscillator(), g = AC.createGain();
-  o.type = 'square'; o.frequency.value = freq;
-  g.gain.setValueAtTime(0.15, AC.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime+0.18);
-  o.connect(g); g.connect(AC.destination);
-  o.start(); o.stop(AC.currentTime+0.18);
+function applyBallCount() {
+    let inputEl = document.getElementById("ballCountInput");
+    let count = parseInt(inputEl.value, 10);
+    if (isNaN(count) || count < 1) count = 1;
+    if (count > 100) count = 100;
+    inputEl.value = count;
+    totalBalls = count;
+    resetGame();
 }
 
-// ── 파티클 ──
-const pCanvas = document.getElementById('particle-canvas');
-const pCtx = pCanvas.getContext('2d');
-let particles = [];
-
-function resizeParticle() {
-  pCanvas.width = window.innerWidth;
-  pCanvas.height = window.innerHeight;
+function updateCamera() {
+    if (balls.length === 0) return;
+    let activeBalls = balls.filter(b => !b.isStatic);
+    if (activeBalls.length === 0) activeBalls = balls;
+    activeBalls.sort((a, b) => b.position.y - a.position.y);
+    let leaderY = activeBalls[0].position.y; 
+    let desiredCameraY = leaderY - VIEW_HEIGHT * 0.65; 
+    desiredCameraY = Math.max(0, Math.min(desiredCameraY, WORLD_HEIGHT - VIEW_HEIGHT));
+    currentCameraY += (desiredCameraY - currentCameraY) * 0.08; 
+    Render.lookAt(render, {
+        min: { x: 0, y: currentCameraY },
+        max: { x: VIEW_WIDTH, y: currentCameraY + VIEW_HEIGHT }
+    });
 }
-resizeParticle();
-window.addEventListener('resize', resizeParticle);
+
+function checkWinner() {
+    for (let ball of balls) {
+        if (ball.position.y > WORLD_HEIGHT - 50) {
+            winnerDeclared = true;
+            bgmMusic.pause();
+            playVictoryBGM();
+            const winnerEl = document.getElementById("winner");
+            winnerEl.innerHTML = "🎉 최종 우승 : " + ball.number + "번 🎉";
+            winnerEl.classList.add("celebrate");
+            engine.timing.timeScale = 0.1; 
+            Body.scale(ball, 2, 2);
+            ball.render.lineWidth = 4;
+            ball.render.strokeStyle = "#ffffff";
+            ball.render.fillStyle = "#ffd600";
+            spawnConfetti(ball.position.x, WORLD_HEIGHT - 10);
+            break;
+        }
+    }
+}
 
 function spawnConfetti(x, y) {
-  const colors = ['#fbbf24','#ff3b5c','#00f5ff','#00e676','#a78bfa','#fb923c','#f472b6'];
-  for (let i = 0; i < 180; i++) {
-    particles.push({
-      x, y,
-      vx: (Math.random()-0.5)*18,
-      vy: -(Math.random()*20+8),
-      rot: Math.random()*360,
-      vrot: (Math.random()-0.5)*12,
-      w: Math.random()*8+3,
-      h: Math.random()*5+2,
-      color: colors[Math.floor(Math.random()*colors.length)],
-      life: 1, decay: Math.random()*0.008+0.004
-    });
-  }
-}
-
-function updateParticles() {
-  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-  particles = particles.filter(p => p.life > 0);
-  particles.forEach(p => {
-    p.x += p.vx; p.y += p.vy;
-    p.vy += 0.4; p.vx *= 0.98;
-    p.rot += p.vrot; p.life -= p.decay;
-    pCtx.save();
-    pCtx.translate(p.x, p.y);
-    pCtx.rotate(p.rot * Math.PI/180);
-    pCtx.globalAlpha = Math.max(0, p.life);
-    pCtx.fillStyle = p.color;
-    pCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    pCtx.restore();
-  });
-}
-
-// ── 랭킹 UI ──
-const BALL_COLORS = [
-  '#ff6b6b','#ffa94d','#ffd43b','#a9e34b','#4dabf7',
-  '#da77f2','#ff8787','#63e6be','#74c0fc','#ff8fa3',
-  '#ffe066','#66d9e8','#e599f7','#8ce99a','#f783ac',
-  '#339af0','#ff6b6b','#fcc419','#51cf66','#cc5de8'
-];
-
-function getColor(idx) {
-  return BALL_COLORS[idx % BALL_COLORS.length];
-}
-
-function updateRankUI() {
-  if (balls.length === 0) return;
-  const active = balls.filter(b => !b.isStatic);
-  if (active.length === 0) return;
-  active.sort((a,b) => b.position.y - a.position.y);
-  const top = active.slice(0, 5);
-  const list = document.getElementById('rank-list');
-  list.innerHTML = '';
-  top.forEach((b, i) => {
-    const div = document.createElement('div');
-    div.className = `rank-item rank-${i+1}`;
-    const rankLabel = i===0?'①':i===1?'②':i===2?'③':`${i+1}.`;
-    const color = ballColors[b.id] || '#fff';
-    div.innerHTML = `<span class="rank-num">${rankLabel}</span><span class="rank-dot" style="color:${color};background:${color}"></span><span class="rank-name"># ${b.number}</span>`;
-    list.appendChild(div);
-  });
-}
-
-function updateProgress() {
-  if (balls.length === 0) return;
-  const active = balls.filter(b => !b.isStatic);
-  if (active.length === 0) return;
-  active.sort((a,b) => b.position.y - a.position.y);
-  const leaderY = active[0].position.y;
-  const pct = Math.min(100, (leaderY / WORLD_H) * 100);
-  document.getElementById('progress-fill').style.height = pct + '%';
-}
-
-// ── 엔진 초기화 ──
-function initEngine() {
-  engine = Engine.create();
-  world = engine.world;
-  engine.gravity.y = 0.75;
-
-  render = Render.create({
-    element: document.getElementById('canvas-container'),
-    engine,
-    options: {
-      width: VW, height: VH,
-      wireframes: false,
-      background: 'transparent',
-      hasBounds: true
+    const confettiColors = ['#ffeb3b', '#ff3d00', '#00e676', '#2979ff', '#e040fb'];
+    for (let i = 0; i < 100; i++) {
+        let confetti = Bodies.rectangle(
+            x + (Math.random() - 0.5) * 80, 
+            y + Math.random() * 40, 
+            Math.random() * 8 + 4, 
+            Math.random() * 8 + 4, 
+            {
+                frictionAir: 0.02,
+                restitution: 0.8,
+                render: { fillStyle: confettiColors[Math.floor(Math.random() * confettiColors.length)] },
+                isSensor: true 
+            }
+        );
+        Body.setVelocity(confetti, { x: (Math.random() - 0.5) * 30, y: -(Math.random() * 40 + 15) });
+        World.add(world, confetti);
     }
-  });
-
-  // 캔버스 배경 투명 처리
-  render.canvas.style.background = 'transparent';
-
-  Render.run(render);
-  runner = Runner.create();
-  Runner.run(runner, engine);
-
-  Events.on(engine, 'collisionStart', e => {
-    if (winnerDeclared) return;
-    for (const p of e.pairs)
-      if (top5.has(p.bodyA.id) || top5.has(p.bodyB.id)) { sfxBounce(); break; }
-  });
-
-  Events.on(engine, 'beforeUpdate', () => {
-    if (winnerDeclared) return;
-    const active = balls.filter(b => !b.isStatic);
-    active.sort((a,b) => b.position.y - a.position.y);
-    top5.clear();
-    active.slice(0,5).forEach(b => top5.add(b.id));
-
-    movingObstacles.forEach(obs => {
-      if (obs.type === 'spinner') {
-        Body.rotate(obs.body, obs.speed);
-      } else if (obs.type === 'slider') {
-        if (Math.abs(obs.offset) > obs.range) obs.speed *= -1;
-        obs.offset += obs.speed;
-        Body.translate(obs.body, { x: obs.speed, y: 0 });
-      }
-    });
-  });
-
-  Events.on(engine, 'afterUpdate', () => {
-    frameCount++;
-    if (!winnerDeclared) {
-      updateCamera();
-      checkWinner();
-    }
-    if (frameCount % 6 === 0) { updateRankUI(); updateProgress(); }
-    updateParticles();
-  });
-
-  // 번호 렌더링
-  Events.on(render, 'afterRender', () => {
-    const ctx = render.context;
-    const ox = render.bounds.min.x, oy = render.bounds.min.y;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    balls.forEach(ball => {
-      const x = ball.position.x - ox, y = ball.position.y - oy;
-      const r = ball.circleRadius || 12;
-      // 글로우 링
-      if (top5.has(ball.id)) {
-        ctx.beginPath();
-        ctx.arc(x, y, r + 3, 0, Math.PI*2);
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-      ctx.font = `bold ${Math.max(8, r*0.75)}px Orbitron,monospace`;
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = 'rgba(0,0,0,0.9)';
-      ctx.strokeText(ball.number, x, y);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(ball.number, x, y);
-    });
-  });
 }
 
-// ── 카메라 ──
-function updateCamera() {
-  if (balls.length === 0) return;
-  const active = balls.filter(b => !b.isStatic);
-  if (active.length === 0) return;
-  active.sort((a,b) => b.position.y - a.position.y);
-  const leaderY = active[0].position.y;
-  let target = leaderY - VH * 0.65;
-  target = Math.max(0, Math.min(target, WORLD_H - VH));
-  camY += (target - camY) * 0.08;
-  Render.lookAt(render, { min:{x:0,y:camY}, max:{x:VW,y:camY+VH} });
-}
-
-// ── 승자 체크 ──
-function checkWinner() {
-  for (const ball of balls) {
-    if (ball.position.y > WORLD_H - 60) {
-      winnerDeclared = true;
-      sfxWin();
-      engine.timing.timeScale = 0.15;
-
-      // 승자 강조
-      Body.scale(ball, 1.8, 1.8);
-      ball.render.fillStyle = '#fbbf24';
-      ball.render.strokeStyle = '#ffffff';
-      ball.render.lineWidth = 4;
-
-      // 컨페티
-      const cx = ball.position.x - render.bounds.min.x;
-      const cy = ball.position.y - render.bounds.min.y;
-      spawnConfetti(cx > 0 && cx < VW ? cx : VW/2, VH * 0.7);
-
-      // UI 업데이트
-      const wd = document.getElementById('winner-display');
-      wd.textContent = `🏆 WINNER : #${ball.number}`;
-      wd.className = 'won';
-
-      document.getElementById('wp-num').textContent = '#' + ball.number;
-      const popup = document.getElementById('winner-popup');
-      popup.classList.add('active');
-
-      break;
-    }
-  }
-}
-
-// ── 레벨 빌드 ──
 function buildLevel() {
-  createWalls();
-  createObstacles();
-  createBalls();
-  camY = 0;
-  Render.lookAt(render, { min:{x:0,y:0}, max:{x:VW,y:VH} });
-  updateRankUI();
+    createWalls();
+    createPinsAndObstacles();
+    createBalls();
+    currentCameraY = 0;
+    Render.lookAt(render, { min: { x: 0, y: 0 }, max: { x: VIEW_WIDTH, y: VIEW_HEIGHT } });
 }
 
 function createWalls() {
-  const lw = Bodies.rectangle(-15, WORLD_H/2, 60, WORLD_H, {
-    isStatic:true, friction:0,
-    render:{fillStyle:'#0d1117', strokeStyle:'rgba(0,245,255,.3)', lineWidth:2}
-  });
-  const rw = Bodies.rectangle(VW+15, WORLD_H/2, 60, WORLD_H, {
-    isStatic:true, friction:0,
-    render:{fillStyle:'#0d1117', strokeStyle:'rgba(0,245,255,.3)', lineWidth:2}
-  });
-  const gap = VW * 0.14;
-  const fy = WORLD_H - 70;
-  const fw = (VW - gap) / 2;
-  const lf = Bodies.rectangle(fw/2, fy, fw*1.15, 35, {
-    isStatic:true, friction:0, angle:Math.PI/6,
-    render:{fillStyle:'#1a1a2e', strokeStyle:'rgba(251,191,36,.5)', lineWidth:2}
-  });
-  const rf = Bodies.rectangle(VW - fw/2, fy, fw*1.15, 35, {
-    isStatic:true, friction:0, angle:-Math.PI/6,
-    render:{fillStyle:'#1a1a2e', strokeStyle:'rgba(251,191,36,.5)', lineWidth:2}
-  });
-  // FINISH LINE
-  const finish = Bodies.rectangle(VW/2, WORLD_H - 20, VW * 0.15, 12, {
-    isStatic:true, isSensor:true,
-    render:{fillStyle:'rgba(251,191,36,0.8)', strokeStyle:'#fbbf24', lineWidth:2}
-  });
-  World.add(world, [lw, rw, lf, rf, finish]);
+    let leftWall = Bodies.rectangle(-10, WORLD_HEIGHT / 2, 60, WORLD_HEIGHT, { isStatic: true, friction: 0, render: {fillStyle: '#333'} });
+    let rightWall = Bodies.rectangle(VIEW_WIDTH + 10, WORLD_HEIGHT / 2, 60, WORLD_HEIGHT, { isStatic: true, friction: 0, render: {fillStyle: '#333'} });
+    const gap = VIEW_WIDTH * 0.15; 
+    const funnelY = WORLD_HEIGHT - 80;
+    const funnelWidth = (VIEW_WIDTH - gap) / 2;
+    let leftFunnel = Bodies.rectangle(funnelWidth / 2, funnelY, funnelWidth * 1.2, 40, { isStatic: true, friction: 0, angle: Math.PI / 6, render: {fillStyle: '#ffd600'} });
+    let rightFunnel = Bodies.rectangle(VIEW_WIDTH - (funnelWidth / 2), funnelY, funnelWidth * 1.2, 40, { isStatic: true, friction: 0, angle: -Math.PI / 6, render: {fillStyle: '#ffd600'} });
+    World.add(world, [leftWall, rightWall, leftFunnel, rightFunnel]);
 }
 
-function createObstacles() {
-  movingObstacles = [];
-  const startY = VH * 0.4;
-  const endY = WORLD_H - VH * 2.5;
+function createPinsAndObstacles() {
+    movingObstacles = []; 
+    const startY = VIEW_HEIGHT * 0.4;
+    const endY = WORLD_HEIGHT - (VIEW_HEIGHT * 3); 
 
-  // 지그재그 경사판
-  for (let y = startY; y < WORLD_H - 500; y += 220) {
-    const lw = VW * 0.42;
-    const alt = Math.floor((y - startY) / 220) % 2 === 0;
-    const lx = alt ? lw/2 - 15 : VW - lw/2 + 15;
-    const rx = alt ? VW - lw/2 + 15 : lw/2 - 15;
-    const a = alt ? Math.PI/3.8 : -Math.PI/3.8;
+    for (let y = startY; y < WORLD_HEIGHT - 600; y += 250) { 
+        let ledgeWidth = VIEW_WIDTH * 0.4;
+        let leftLedge = Bodies.rectangle(ledgeWidth/2 - 20, y, ledgeWidth, 20, { isStatic: true, friction: 0, angle: Math.PI / 3.5, render: { fillStyle: "#ffaa00" }, restitution: 0.7 });
+        let rightLedge = Bodies.rectangle(VIEW_WIDTH - (ledgeWidth/2) + 20, y + 125, ledgeWidth, 20, { isStatic: true, friction: 0, angle: -Math.PI / 3.5, render: { fillStyle: "#ffaa00" }, restitution: 0.7 });
+        World.add(world, [leftLedge, rightLedge]);
+    }
 
-    const ledge1 = Bodies.rectangle(lx, y, lw, 16, {
-      isStatic:true, friction:0, angle:a, restitution:0.65,
-      render:{fillStyle:'#1e293b', strokeStyle:'rgba(0,245,255,.25)', lineWidth:1}
+    let gatePositions = [WORLD_HEIGHT * 0.2, WORLD_HEIGHT * 0.4, WORLD_HEIGHT * 0.6, WORLD_HEIGHT * 0.8];
+    gatePositions.forEach((gy) => {
+        let gateWidth = VIEW_WIDTH * 0.6;
+        let lGate = Bodies.rectangle(VIEW_WIDTH * 0.1, gy, gateWidth, 30, { isStatic: true, render: { fillStyle: "#00e676" } });
+        movingObstacles.push({ body: lGate, type: 'slider', offset: 0, speed: 1.5, range: VIEW_WIDTH * 0.3 });
+        let rGate = Bodies.rectangle(VIEW_WIDTH * 0.9, gy, gateWidth, 30, { isStatic: true, render: { fillStyle: "#00e676" } });
+        movingObstacles.push({ body: rGate, type: 'slider', offset: 0, speed: -1.5, range: VIEW_WIDTH * 0.3 });
+        World.add(world, [lGate, rGate]);
     });
-    World.add(world, ledge1);
-  }
 
-  // 슬라이더 게이트 (4개)
-  const gates = [WORLD_H*.2, WORLD_H*.38, WORLD_H*.56, WORLD_H*.74];
-  gates.forEach(gy => {
-    const gw = VW * 0.55;
-    const lg = Bodies.rectangle(VW*0.12, gy, gw, 22, {
-      isStatic:true,
-      render:{fillStyle:'rgba(0,230,118,.15)', strokeStyle:'rgba(0,230,118,.6)', lineWidth:2}
-    });
-    const rg = Bodies.rectangle(VW*0.88, gy, gw, 22, {
-      isStatic:true,
-      render:{fillStyle:'rgba(0,230,118,.15)', strokeStyle:'rgba(0,230,118,.6)', lineWidth:2}
-    });
-    movingObstacles.push({body:lg, type:'slider', offset:0, speed:1.6, range:VW*0.28});
-    movingObstacles.push({body:rg, type:'slider', offset:0, speed:-1.6, range:VW*0.28});
-    World.add(world, [lg, rg]);
-  });
+    for (let i = 0; i < 600; i++) { 
+        let pin = Bodies.circle(
+            Math.random() * VIEW_WIDTH, 
+            startY + Math.random() * (endY - startY), 
+            VIEW_WIDTH * 0.018, 
+            { isStatic: true, friction: 0, render: { fillStyle: "#777" }, restitution: 0.8 }
+        );
+        World.add(world, pin);
+    }
+    
+    for (let i = 0; i < 50; i++) {
+        let y = startY + 300 + Math.random() * (endY - startY - 400);
+        let x = VIEW_WIDTH / 2 + (Math.random() - 0.5) * (VIEW_WIDTH * 0.8); 
+        let spinBody = Bodies.rectangle(x, y, VIEW_WIDTH * 0.3, 15, { isStatic: true, render: { fillStyle: "#ff3b30" } });
+        movingObstacles.push({ body: spinBody, type: 'spinner', speed: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 0.05 + 0.05) });
+        World.add(world, spinBody);
+    }
 
-  // 핀 (galton board 스타일)
-  for (let i = 0; i < 550; i++) {
-    const px = 30 + Math.random() * (VW - 60);
-    const py = startY + Math.random() * (endY - startY);
-    const pin = Bodies.circle(px, py, VW * 0.016, {
-      isStatic:true, friction:0, restitution:0.75,
-      render:{fillStyle:'#1e293b', strokeStyle:'rgba(148,163,184,.35)', lineWidth:1}
-    });
-    World.add(world, pin);
-  }
-
-  // 스피너 (회전 막대)
-  for (let i = 0; i < 45; i++) {
-    const sy = startY + 250 + Math.random() * (endY - startY - 350);
-    const sx = 60 + Math.random() * (VW - 120);
-    const spin = Bodies.rectangle(sx, sy, VW*0.28, 13, {
-      isStatic:true,
-      render:{fillStyle:'rgba(255,59,92,.15)', strokeStyle:'rgba(255,59,92,.55)', lineWidth:1.5}
-    });
-    movingObstacles.push({body:spin, type:'spinner', speed:(Math.random()>.5?1:-1)*(Math.random()*.055+0.04)});
-    World.add(world, spin);
-  }
-
-  // 클라이맥스 범퍼 존
-  for (let i = 0; i < 38; i++) {
-    const by = endY + 200 + Math.random() * 1200;
-    const bx = 40 + Math.random() * (VW - 80);
-    const bumper = Bodies.circle(bx, by, VW*0.045, {
-      isStatic:true, restitution:1.5,
-      render:{fillStyle:'rgba(167,139,250,.15)', strokeStyle:'rgba(167,139,250,.7)', lineWidth:2}
-    });
-    World.add(world, bumper);
-  }
+    const climaxY = endY + 200;
+    for(let i = 0; i < 40; i++) {
+        let bumper = Bodies.circle(Math.random() * VIEW_WIDTH, climaxY + Math.random() * 1500, VIEW_WIDTH * 0.05, { isStatic: true, restitution: 1.6, render: { fillStyle: "#cc66ff" } });
+        World.add(world, bumper);
+    }
 }
 
 function createBalls() {
-  const ballR = Math.max(10, Math.min(VW * 0.024, 16));
-  const spread = Math.max(280, totalBalls * 5.5);
-
-  for (let i = 1; i <= totalBalls; i++) {
-    const color = getColor(i-1);
-    const ball = Bodies.circle(
-      VW/2 + (Math.random()-.5) * (VW*0.45),
-      -120 - Math.random() * spread,
-      ballR,
-      {
-        restitution:0.85, friction:0, frictionAir:0.022, density:0.05,
-        isStatic:true,
-        render:{
-          fillStyle:color,
-          strokeStyle:'rgba(255,255,255,0.2)',
-          lineWidth:1.5
-        }
-      }
-    );
-    ball.number = i;
-    ballColors[ball.id] = color;
-    balls.push(ball);
-    World.add(world, ball);
-  }
-}
-
-// ── 카운트다운 후 시작 ──
-function doCountdown(cb) {
-  const overlay = document.getElementById('countdown-overlay');
-  const num = document.getElementById('count-num');
-  let count = 3;
-
-  function showCount(n) {
-    overlay.classList.add('active');
-    num.style.animation = 'none';
-    void num.offsetWidth; // reflow
-    num.style.animation = 'countDown .9s ease-out forwards';
-    if (n === 0) {
-      num.textContent = 'GO!';
-    } else {
-      num.textContent = n;
+    const colors = ["#ff9500", "#4cd964", "#5ac8fa", "#ff2d55", "#e57373", "#ba68c8", "#4dd0e1", "#81c784", "#fff176"];
+    const spreadHeight = Math.max(300, totalBalls * 6);
+    const ballRadius = VIEW_WIDTH * 0.025 > 15 ? 15 : Math.max(VIEW_WIDTH * 0.025, 10); 
+    
+    for (let i = 1; i <= totalBalls; i++) {
+        let ball = Bodies.circle(VIEW_WIDTH / 2 + (Math.random() - 0.5) * (VIEW_WIDTH * 0.5), -150 - Math.random() * spreadHeight, ballRadius, {
+            restitution: 0.85, friction: 0, frictionAir: 0.025, density: 0.05, isStatic: true, render: { fillStyle: colors[i % colors.length] }
+        });
+        ball.number = i;
+        balls.push(ball);
+        World.add(world, ball);
     }
-    sfxCountdown(n === 0 ? 0 : 1);
-    if (n === 0) {
-      setTimeout(() => { overlay.classList.remove('active'); cb(); }, 700);
-    } else {
-      setTimeout(() => showCount(n-1), 900);
-    }
-  }
-  showCount(count);
 }
 
-// ── 전체화면 ──
-}
-
-// ── 인원 적용 ──
-function applyBallCount() {
-  let v = parseInt(document.getElementById('ballCountInput').value, 10);
-  if (isNaN(v) || v < 1) v = 1;
-  if (v > 100) v = 100;
-  document.getElementById('ballCountInput').value = v;
-  totalBalls = v;
-  resetGame();
-}
-
-// ── START ──
 function startGame() {
-  if (raceStarted && !winnerDeclared) return;
-  initAC();
-
-  winnerDeclared = false;
-  raceStarted = false;
-  document.getElementById('winner-popup').classList.remove('active');
-  document.getElementById('winner-display').textContent = '';
-  document.getElementById('winner-display').className = '';
-
-  doCountdown(() => {
-    raceStarted = true;
-    engine.timing.timeScale = 1.0;
-    balls.forEach(b => Body.setStatic(b, false));
-    const wd = document.getElementById('winner-display');
-    wd.textContent = '◆ RACE IN PROGRESS ◆';
-    wd.className = 'racing';
-  });
+    // 💡 START 버튼을 눌러도 더 이상 전체화면으로 자동 전환되지 않습니다.
+    if(!winnerDeclared && balls.length > 0 && balls[0].isStatic === false) return;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    bgmMusic.currentTime = 0;
+    bgmMusic.play().catch(e => {});
+    winnerDeclared = false;
+    document.getElementById("winner").innerHTML = "🔥 레이스 진행중! 🔥";
+    document.getElementById("winner").classList.remove("celebrate");
+    engine.timing.timeScale = 1.0; 
+    balls.forEach(ball => Body.setStatic(ball, false));
 }
 
-// ── RESET ──
 function resetGame() {
-  raceStarted = false;
-  winnerDeclared = false;
-  engine.timing.timeScale = 1.0;
-  ballColors = {};
-  document.getElementById('countdown-overlay').classList.remove('active');
-  document.getElementById('winner-popup').classList.remove('active');
-  document.getElementById('winner-display').textContent = '— READY TO RACE —';
-  document.getElementById('winner-display').className = '';
-  document.getElementById('rank-list').innerHTML = '';
-  document.getElementById('progress-fill').style.height = '0%';
-  particles = [];
-
-  World.clear(world);
-  Engine.clear(engine);
-  balls = [];
-  top5.clear();
-  movingObstacles = [];
-  frameCount = 0;
-  buildLevel();
+    bgmMusic.pause();
+    cheerSound.pause();
+    winnerDeclared = false;
+    document.getElementById("winner").innerHTML = "🏁 대기 중...";
+    document.getElementById("winner").classList.remove("celebrate");
+    engine.timing.timeScale = 1.0;
+    World.clear(world);
+    Engine.clear(engine);
+    balls = [];
+    top5BallIds.clear();
+    buildLevel();
 }
-
-// ── 초기화 ──
-initEngine();
-buildLevel();
 </script>
 </body>
 </html>
