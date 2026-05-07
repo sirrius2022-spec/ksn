@@ -1,1 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 웹사이트 만들기 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0fdfa; }
+        .step-card { transition: all 0.3s ease; }
+        .step-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .tab-btn.active { border-bottom: 2px solid #0f766e; color: #0f766e; font-weight: 700; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
 
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-teal-100">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="font-black text-2xl text-teal-700 flex items-center gap-2">
+                💡 따라하기 쉬운 홈페이지 구축
+            </div>
+            <div class="text-sm text-gray-500 font-medium">강사: 김성남</div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-12 pb-8 sm:pt-20 sm:pb-12 bg-gradient-to-b from-teal-50 to-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4 text-gray-900">
+                코딩 1도 몰라도<br>
+                <span class="text-teal-600">내 업무/취미용 웹사이트</span> 만들기
+            </h1>
+            <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                제가 직접 시행착오를 겪으며 찾아낸 <b>가장 쉽고 무료인 방법</b>입니다.<br>
+                주제만 내 일이나 취미로 바꿔서 똑같이 따라 해 보세요!
+            </p>
+        </div>
+    </section>
+
+    <!-- Concept Section: Before & After -->
+    <section class="py-8 bg-white">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="bg-teal-50 rounded-2xl p-6 sm:p-8 border border-teal-100 shadow-sm">
+                <h3 class="text-xl font-bold text-teal-800 mb-4 text-center">🎯 이렇게 응용해 보세요!</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-5 rounded-xl border border-gray-200">
+                        <div class="text-xs font-bold text-gray-500 mb-1">강사의 실제 사례</div>
+                        <div class="text-lg font-bold text-gray-800 mb-2">"건설안전 강의 포털"</div>
+                        <ul class="text-sm text-gray-600 space-y-1 list-disc pl-4">
+                            <li>목적: 수강생들에게 자료 제공</li>
+                            <li>메뉴: 룰렛 게임, 4M 평가 에이전트</li>
+                            <li>소통: 질문 방명록 (패들렛)</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-teal-200 shadow-[0_0_15px_rgba(20,184,166,0.1)] relative">
+                        <div class="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">YOUR TURN!</div>
+                        <div class="text-xs font-bold text-teal-600 mb-1">여러분의 응용 사례 (예시)</div>
+                        <div class="text-lg font-bold text-gray-800 mb-2">"나만의 캠핑 기록장" 또는 "팀 업무 매뉴얼"</div>
+                        <ul class="text-sm text-gray-600 space-y-1 list-disc pl-4">
+                            <li>목적: 캠핑장 리뷰 공유 / 신입사원 안내</li>
+                            <li>메뉴: 전국 캠핑장 지도, 준비물 체크리스트</li>
+                            <li>소통: 캠핑 꿀팁 방명록 / 질문 게시판</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4 Steps Section -->
+    <section class="py-12 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900">🚀 마법의 4단계 실습 과정</h2>
+                <p class="mt-2 text-gray-500">각 단계별로 강사가 한 방식을 보고, 내 주제에 맞춰 내용을 바꿔보세요.</p>
+            </div>
+
+            <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-teal-200 before:to-transparent">
+                
+                <!-- Step 1 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-teal-500 text-white font-bold text-sm shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">1</div>
+                    <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-gray-100 shadow-sm step-card relative">
+                        <h3 class="text-xl font-bold mb-2 text-gray-800">✨ 제미나이(Gemini)에 요청하기</h3>
+                        <p class="text-sm text-gray-600 mb-4">"코드를 대신 짜주는 AI 비서에게 내 주제를 설명합니다."</p>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm">
+                            <div class="flex border-b border-gray-200 mb-3">
+                                <button class="tab-btn active px-3 py-1 mr-2" onclick="switchTab(this, 's1-kang', 's1-you')">강사의 프롬프트</button>
+                                <button class="tab-btn px-3 py-1 text-gray-500" onclick="switchTab(this, 's1-you', 's1-kang')">여러분의 프롬프트 (예시)</button>
+                            </div>
+                            <div id="s1-kang" class="text-gray-700 italic">"건설안전 강의용 홈페이지를 HTML 하나로 만들어줘. 강사 소개, 룰렛 게임 메뉴, 계산기 메뉴를 넣어줘. 파란색 톤으로 깔끔하게 해줘."</div>
+                            <div id="s1-you" class="text-gray-700 italic hidden font-semibold text-teal-800">"<span class="bg-yellow-200 px-1">팀 업무 매뉴얼</span> 홈페이지를 HTML 하나로 만들어줘. <span class="bg-yellow-200 px-1">팀 소개, 회의록 양식, 휴가 신청법</span> 메뉴를 넣어줘. <span class="bg-yellow-200 px-1">초록색 톤</span>으로 깔끔하게 해줘."</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-gray-800 text-white font-bold text-sm shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">2</div>
+                    <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-gray-100 shadow-sm step-card relative">
+                        <h3 class="text-xl font-bold mb-2 text-gray-800">🐙 깃허브(GitHub)에 코드 저장하기</h3>
+                        <p class="text-sm text-gray-600 mb-4">"제미나이가 짜준 코드를 전 세계 무료 저장소에 올립니다."</p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm">
+                            <ul class="list-decimal pl-4 space-y-1 text-gray-700">
+                                <li>GitHub 회원가입 후 <b>New</b> 버튼 클릭</li>
+                                <li>창고 이름(Repository name) 짓기<br>
+                                    <span class="text-xs text-gray-500">(강사: ksn-edu / 여러분: my-camping, team-manual 등)</span></li>
+                                <li><b>Add file -> Create new file</b> 클릭</li>
+                                <li>파일 이름은 무조건 <b class="text-red-500">index.html</b> 로 적고 내용 붙여넣기</li>
+                                <li>초록색 <b>Commit changes</b> 버튼 누르면 저장 완료!</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-black text-white font-bold text-sm shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">3</div>
+                    <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-gray-100 shadow-sm step-card relative">
+                        <h3 class="text-xl font-bold mb-2 text-gray-800">▲ 버셀(Vercel)로 세상에 공개하기</h3>
+                        <p class="text-sm text-gray-600 mb-4">"저장된 코드를 실제 인터넷 주소(URL)로 연결하는 마법!"</p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-700">
+                            <p class="mb-2">1. Vercel 가입 시 <b class="text-black">Continue with GitHub</b> 선택 (이게 핵심!)</p>
+                            <p class="mb-2">2. 화면 중앙의 <b>Add New -> Project</b> 클릭</p>
+                            <p class="mb-2">3. 방금 만든 GitHub 창고 옆의 <b>Import</b> 클릭</p>
+                            <p>4. <b>Deploy</b> 버튼을 누르고 10초만 기다리면 완성!</p>
+                            <div class="mt-3 p-2 bg-blue-100 rounded text-blue-800 text-xs text-center font-bold">
+                                🎉 축하합니다! 이제 스마트폰으로 접속 가능한 나만의 주소가 생겼습니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-pink-500 text-white font-bold text-sm shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">4</div>
+                    <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-gray-100 shadow-sm step-card relative">
+                        <h3 class="text-xl font-bold mb-2 text-gray-800">📝 패들렛(Padlet)으로 방명록 달기</h3>
+                        <p class="text-sm text-gray-600 mb-4">"만들어진 홈페이지에 방문자와 소통할 게시판을 붙입니다."</p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm">
+                            <p class="text-gray-700 mb-2">게시판 코딩은 어렵습니다. 무료 게시판 서비스인 Padlet 링크를 가져다 붙이는 게 왕초보의 지름길입니다.</p>
+                            <div class="bg-white p-3 border border-gray-200 rounded font-mono text-xs text-gray-600 overflow-x-auto">
+                                <span class="text-gray-400">&lt;!-- GitHub의 index.html 수정하기 --&gt;</span><br>
+                                &lt;a href="<span class="text-pink-600">여러분의 패들렛 공유 링크 주소</span>"&gt;<br>
+                                &nbsp;&nbsp;방명록 남기기<br>
+                                &lt;/a&gt;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Extra Tip -->
+    <section class="py-12 bg-gray-900 text-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-2xl font-bold mb-4 text-teal-400">🔥 강사의 특급 노하우: "수정은 어떻게 해요?"</h2>
+            <p class="text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto">
+                글자를 바꾸고 싶거나 메뉴를 추가하고 싶나요?<br>
+                Vercel은 잊어버리세요. <b class="text-white bg-teal-600 px-2 rounded">GitHub에 접속해서 index.html 파일만 수정</b>하고 저장(Commit)하면 끝입니다.<br>
+                Vercel이 변경사항을 감지하고 알아서 인터넷에 1분 안에 반영해 줍니다. 참 쉽죠?
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-950 text-gray-500 py-6 text-center text-sm">
+        <p>어렵게 배운 지식을 쉽게 나눕니다 | © KSN-EDU. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function switchTab(btn, showId, hideId) {
+            // 탭 버튼 스타일 변경
+            const parent = btn.parentElement;
+            const buttons = parent.querySelectorAll('button');
+            buttons.forEach(b => {
+                b.classList.remove('active', 'text-gray-500');
+                if(b === btn) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.add('text-gray-500');
+                    b.classList.remove('active');
+                }
+            });
+
+            // 내용 보여주기/숨기기
+            document.getElementById(showId).classList.remove('hidden');
+            document.getElementById(hideId).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
