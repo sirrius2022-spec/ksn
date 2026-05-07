@@ -1,1 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D 리얼 로또 추첨기</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* 3D 애니메이션 및 커스텀 스타일 */
+    @keyframes roll-out {
+      0% { transform: translateY(-120px) scale(0.4) rotate(-720deg); opacity: 0; }
+      30% { transform: translateY(0px) scale(1) rotate(-360deg); opacity: 1; }
+      50% { transform: translateY(-30px) rotate(-180deg); }
+      75% { transform: translateY(0px) rotate(-90deg); }
+      85% { transform: translateY(-10px) rotate(-45deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+    
+    @keyframes mix-1 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(30px, -40px) rotate(90deg); }
+      50% { transform: translate(-20px, 20px) rotate(180deg); }
+      75% { transform: translate(-40px, -20px) rotate(270deg); }
+    }
+    @keyframes mix-2 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-30px, 30px) rotate(-90deg); }
+      50% { transform: translate(40px, -20px) rotate(-180deg); }
+      75% { transform: translate(10px, 40px) rotate(-270deg); }
+    }
+    @keyframes mix-3 {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(20px, 30px) rotate(120deg); }
+      50% { transform: translate(-40px, -10px) rotate(240deg); }
+      75% { transform: translate(30px, -30px) rotate(360deg); }
+    }
 
+    .animate-roll {
+      animation: roll-out 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    }
+    
+    .glass-machine {
+      box-shadow: 
+        inset -15px -15px 40px rgba(0,0,0,0.6), 
+        inset 15px 15px 40px rgba(255,255,255,0.3),
+        0 20px 50px rgba(0,0,0,0.5);
+      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%);
+      backdrop-filter: blur(4px);
+    }
+    
+    .machine-tube {
+      background: linear-gradient(90deg, #4b5563 0%, #9ca3af 20%, #4b5563 80%, #1f2937 100%);
+      box-shadow: inset 0 10px 20px rgba(0,0,0,0.8);
+    }
+
+    /* JavaScript에서 제어할 믹싱 애니메이션 클래스 */
+    .mixing-active .dummy-ball {
+      opacity: 0.8 !important;
+    }
+    .mixing-inactive .dummy-ball {
+      opacity: 0.1 !important;
+      animation: none !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-900 flex items-center justify-center p-4 sm:p-8 font-sans overflow-x-hidden">
+
+  <div class="max-w-4xl w-full bg-slate-800 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden border border-slate-700">
+    
+    <!-- 헤더 -->
+    <div class="bg-gradient-to-r from-indigo-900 to-purple-900 p-6 text-center text-white border-b border-indigo-800">
+      <div class="flex items-center justify-center gap-2 mb-2">
+        <i data-lucide="trophy" class="w-8 h-8 text-yellow-400 drop-shadow-md"></i>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow-lg">3D 리얼 로또 추첨기</h1>
+      </div>
+      <p class="text-indigo-200 font-medium text-sm sm:text-base">사운드 켜고 진짜 기계의 긴장감을 느껴보세요!</p>
+    </div>
+
+    <div class="p-6 sm:p-10 flex flex-col items-center">
+      
+      <!-- 입체적인 추첨 기계 영역 -->
+      <div class="relative flex flex-col items-center justify-center mb-6 h-56 sm:h-64 w-full">
+        <!-- 유리 원통형 기계 -->
+        <div id="machineContainer" class="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full glass-machine z-20 flex items-center justify-center border border-white/20 mixing-inactive">
+          <!-- 더미 공들이 들어갈 컨테이너 -->
+          <div id="dummyBallsContainer" class="absolute inset-0 p-4"></div>
+          <!-- 유리 반사 하이라이트 -->
+          <div class="absolute top-2 left-4 w-20 h-12 bg-white/20 rounded-full blur-md rotate-[-30deg]"></div>
+        </div>
+
+        <!-- 공 굴러나오는 파이프 -->
+        <div class="absolute -bottom-4 w-12 h-16 sm:w-16 sm:h-20 machine-tube z-10 border-x border-slate-600 rounded-b-xl">
+          <div class="absolute inset-x-0 bottom-0 h-4 bg-black/60 rounded-b-xl blur-[2px]"></div>
+        </div>
+      </div>
+
+      <!-- 추첨 결과 트레이 -->
+      <div class="w-full max-w-3xl bg-slate-900 rounded-full p-4 sm:p-6 shadow-[inset_0_10px_20px_rgba(0,0,0,0.6)] border-b-4 border-slate-700 min-h-[100px] flex items-center justify-center mb-10">
+        <div id="resultTray" class="flex flex-wrap items-center justify-center gap-2 sm:gap-4 w-full">
+          <p id="emptyMessage" class="text-slate-500 text-lg animate-pulse font-medium">추첨을 시작해 공을 뽑아보세요!</p>
+        </div>
+      </div>
+
+      <!-- 컨트롤 버튼 -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center w-full mb-6">
+        <button id="drawBtn" class="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-lg font-bold text-white shadow-xl transition-all bg-gradient-to-b from-indigo-500 to-purple-700 hover:from-indigo-400 hover:to-purple-600 hover:-translate-y-1 active:translate-y-0">
+          <i data-lucide="play" class="w-5 h-5 fill-current btn-icon"></i>
+          <span id="drawBtnText">추첨 시작하기</span>
+        </button>
+
+        <button id="resetBtn" disabled class="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-lg font-bold transition-all border-2 border-slate-700 text-slate-500 bg-slate-800 cursor-not-allowed">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+          다시 뽑기
+        </button>
+      </div>
+
+      <!-- 최근 추첨 기록 -->
+      <div id="historySection" class="w-full border-t border-slate-700 pt-8 mt-4 hidden">
+        <div class="flex items-center justify-center sm:justify-start gap-2 mb-4 text-slate-300">
+          <i data-lucide="history" class="w-5 h-5"></i>
+          <h2 class="text-lg font-bold">최근 추첨 기록</h2>
+        </div>
+        <div id="historyList" class="space-y-3">
+          <!-- 기록이 여기에 추가됨 -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Lucide 아이콘 초기화
+    lucide.createIcons();
+
+    // 상태 변수
+    let isDrawing = false;
+    let isMixing = false;
+    let history = [];
+    let audioCtx = null;
+
+    // DOM 요소
+    const drawBtn = document.getElementById('drawBtn');
+    const drawBtnText = document.getElementById('drawBtnText');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultTray = document.getElementById('resultTray');
+    const emptyMessage = document.getElementById('emptyMessage');
+    const machineContainer = document.getElementById('machineContainer');
+    const dummyBallsContainer = document.getElementById('dummyBallsContainer');
+    const historySection = document.getElementById('historySection');
+    const historyList = document.getElementById('historyList');
+
+    // --- 번호에 따른 3D 스타일 생성 ---
+    function get3DBallStyle(number) {
+      let baseColor, darkColor;
+      if (number <= 10) { baseColor = '#facc15'; darkColor = '#a16207'; } // 노랑
+      else if (number <= 20) { baseColor = '#60a5fa'; darkColor = '#1d4ed8'; } // 파랑
+      else if (number <= 30) { baseColor = '#f87171'; darkColor = '#b91c1c'; } // 빨강
+      else if (number <= 40) { baseColor = '#9ca3af'; darkColor = '#374151'; } // 회색
+      else { baseColor = '#4ade80'; darkColor = '#15803d'; } // 초록
+
+      const isDarkText = number <= 10 || number > 40;
+      
+      return `
+        background: radial-gradient(circle at 35% 35%, #ffffff 0%, ${baseColor} 30%, ${darkColor} 85%, #000000 100%);
+        color: ${isDarkText ? '#111' : '#fff'};
+        text-shadow: ${isDarkText ? 'none' : '1px 1px 2px rgba(0,0,0,0.6)'};
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4), inset -4px -4px 10px rgba(0,0,0,0.6), inset 3px 3px 8px rgba(255,255,255,0.6);
+      `;
+    }
+
+    // --- HTML 요소 생성 헬퍼 ---
+    function createLottoBall(number, isBonus = false, isSmall = false) {
+      const sizeClass = isSmall ? 'w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm' : 'w-12 h-12 sm:w-16 sm:h-16 text-lg sm:text-2xl';
+      const bonusClass = isBonus && !isSmall ? 'scale-110 ring-4 ring-purple-400/50' : '';
+      const bonusRingClass = isBonus && isSmall ? 'ring-2 ring-purple-500' : '';
+      
+      const ballHTML = `
+        <div class="flex items-center justify-center rounded-full font-black relative ${sizeClass} ${bonusClass} ${bonusRingClass}" style="${get3DBallStyle(number)}">
+          <div class="absolute top-[10%] right-[20%] w-[30%] h-[20%] bg-white/50 rounded-full blur-[1px] rotate-[30deg]"></div>
+          <span class="relative z-10 font-bold">${number}</span>
+        </div>
+      `;
+      return ballHTML;
+    }
+
+    // --- 기계 안의 더미 공 초기화 ---
+    function initDummyBalls() {
+      dummyBallsContainer.innerHTML = '';
+      for (let i = 0; i < 12; i++) {
+        const dummy = document.createElement('div');
+        const animClass = `mix-${(i % 3) + 1}`;
+        const animDuration = 0.3 + (i * 0.05);
+        
+        dummy.className = 'dummy-ball absolute w-6 h-6 sm:w-8 sm:h-8 rounded-full transition-opacity duration-300 opacity-80';
+        dummy.style.cssText = `
+          ${get3DBallStyle(i * 3 + 2)}
+          top: ${20 + (i % 4) * 15}%;
+          left: ${20 + (i % 3) * 20}%;
+          animation: ${animClass} ${animDuration}s infinite alternate ease-in-out;
+        `;
+        dummyBallsContainer.appendChild(dummy);
+      }
+    }
+    initDummyBalls();
+
+    // --- 사운드 엔진 (Web Audio API) ---
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playMixingSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(45, audioCtx.currentTime);
+      
+      const lfo = audioCtx.createOscillator();
+      lfo.type = 'square';
+      lfo.frequency.value = 14;
+      const lfoGain = audioCtx.createGain();
+      lfoGain.gain.value = 20;
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      
+      gain.gain.setValueAtTime(0, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.5);
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime + 2.0);
+      gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2.5);
+      
+      lfo.start(audioCtx.currentTime);
+      osc.start(audioCtx.currentTime);
+      lfo.stop(audioCtx.currentTime + 2.5);
+      osc.stop(audioCtx.currentTime + 2.5);
+    }
+
+    function playPopSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(700, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
+      
+      gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+      
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    function playSuccessSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+      osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3);
+      
+      gain.gain.setValueAtTime(0, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime + 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.0);
+      
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 1.0);
+    }
+
+    // --- UI 업데이트 함수 ---
+    function updateDrawButtonState() {
+      if (isDrawing) {
+        drawBtn.className = "flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-lg font-bold text-white transition-all bg-slate-600 cursor-not-allowed transform-none shadow-none";
+        drawBtn.innerHTML = `
+          <div class="w-5 h-5 border-t-2 border-white rounded-full animate-spin"></div>
+          <span id="drawBtnText">${isMixing ? '기계 회전 중...' : '공 굴러오는 중...'}</span>
+        `;
+        
+        resetBtn.disabled = true;
+        resetBtn.className = "flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-lg font-bold transition-all border-2 border-slate-700 text-slate-500 bg-slate-800 cursor-not-allowed";
+      } else {
+        drawBtn.className = "flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-lg font-bold text-white shadow-xl transition-all bg-gradient-to-b from-indigo-500 to-purple-700 hover:from-indigo-400 hover:to-purple-600 hover:-translate-y-1 active:translate-y-0";
+        drawBtn.innerHTML = `
+          <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+          <span id="drawBtnText">추첨 시작하기</span>
+        `;
+        lucide.createIcons();
+
+        resetBtn.disabled = false;
+        resetBtn.className = "flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-lg font-bold transition-all border-2 border-slate-600 text-slate-300 bg-slate-800 hover:bg-slate-700 active:bg-slate-900";
+      }
+    }
+
+    function renderHistory() {
+      if (history.length === 0) {
+        historySection.classList.add('hidden');
+        return;
+      }
+      historySection.classList.remove('hidden');
+      historySection.classList.add('animate-roll'); // 새로 렌더링시 애니메이션
+      
+      historyList.innerHTML = history.map((record, index) => {
+        const timeLabel = index === 0 ? '방금 전' : `${index}회 전`;
+        const mainBallsHTML = record.slice(0, 6).map(num => createLottoBall(num, false, true)).join('');
+        const bonusBallHTML = createLottoBall(record[6], true, true);
+        
+        return `
+          <div class="bg-slate-900/50 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-700 shadow-inner">
+            <span class="text-sm font-bold text-slate-400 whitespace-nowrap bg-slate-800 px-3 py-1 rounded-lg">${timeLabel}</span>
+            <div class="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
+              ${mainBallsHTML}
+              <span class="text-slate-500 mx-1 font-bold">+</span>
+              ${bonusBallHTML}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- 추첨 로직 ---
+    async function startDrawing() {
+      if (isDrawing) return;
+      isDrawing = true;
+      initAudio();
+
+      // UI 초기화
+      resultTray.innerHTML = '';
+      
+      // 난수 7개 생성
+      const numbers = new Set();
+      while (numbers.size < 7) {
+        numbers.add(Math.floor(Math.random() * 45) + 1);
+      }
+      const numbersArray = Array.from(numbers);
+      const mainNumbers = numbersArray.slice(0, 6).sort((a, b) => a - b);
+      const finalNumbers = [...mainNumbers, numbersArray[6]];
+
+      // 1단계: 믹싱 애니메이션
+      isMixing = true;
+      updateDrawButtonState();
+      machineContainer.classList.remove('mixing-inactive');
+      machineContainer.classList.add('mixing-active');
+      
+      // 더미 공들 애니메이션 재시작 트릭
+      initDummyBalls(); 
+      playMixingSound();
+
+      await new Promise(r => setTimeout(r, 2500));
+      
+      isMixing = false;
+      updateDrawButtonState();
+      machineContainer.classList.remove('mixing-active');
+      machineContainer.classList.add('mixing-inactive');
+
+      // 2단계: 공 하나씩 배출
+      let step = 0;
+      const interval = setInterval(() => {
+        playPopSound();
+        
+        const num = finalNumbers[step];
+        const ballWrapper = document.createElement('div');
+        ballWrapper.className = 'animate-roll';
+        
+        if (step < 6) {
+          ballWrapper.innerHTML = createLottoBall(num);
+          resultTray.appendChild(ballWrapper);
+        } else {
+          // 보너스 볼
+          ballWrapper.style.animationDelay = '0.1s';
+          ballWrapper.innerHTML = `
+            <div class="flex items-center gap-2 sm:gap-4 ml-2 sm:ml-4">
+              <span class="text-2xl sm:text-4xl font-black text-slate-500 drop-shadow-md">+</span>
+              <div class="flex flex-col items-center">
+                ${createLottoBall(num, true)}
+                <span class="text-xs font-bold text-white mt-3 bg-purple-600/80 px-3 py-1 rounded-full shadow-lg border border-purple-400">보너스</span>
+              </div>
+            </div>
+          `;
+          resultTray.appendChild(ballWrapper);
+        }
+
+        step++;
+        
+        if (step >= 7) {
+          clearInterval(interval);
+          setTimeout(() => {
+            playSuccessSound();
+            isDrawing = false;
+            updateDrawButtonState();
+            
+            // 기록 저장 (최대 5개)
+            history.unshift(finalNumbers);
+            if(history.length > 5) history.pop();
+            renderHistory();
+            
+          }, 1200);
+        }
+      }, 1200);
+    }
+
+    function resetGame() {
+      if (isDrawing) return;
+      resultTray.innerHTML = '<p id="emptyMessage" class="text-slate-500 text-lg animate-pulse font-medium">추첨을 시작해 공을 뽑아보세요!</p>';
+      history = [];
+      renderHistory();
+      resetBtn.disabled = true;
+      resetBtn.className = "flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-lg font-bold transition-all border-2 border-slate-700 text-slate-500 bg-slate-800 cursor-not-allowed";
+    }
+
+    // 이벤트 리스너 등록
+    drawBtn.addEventListener('click', startDrawing);
+    resetBtn.addEventListener('click', resetGame);
+
+  </script>
+</body>
+</html>
