@@ -3,775 +3,729 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0f1a">
 <title>SUNEX-AI</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
 :root {
-  --bg:       #080c14;
-  --s1:       #0e1520;
-  --s2:       #141e2e;
-  --s3:       #1a2540;
-  --border:   #1e3050;
-  --border2:  #263c58;
-  --accent:   #2d8cf0;
-  --a-glow:   rgba(45,140,240,.18);
-  --green:    #0ecb81;
-  --g-glow:   rgba(14,203,129,.14);
-  --orange:   #f5a623;
-  --red:      #f04e4e;
-  --purple:   #9b6dff;
-  --text:     #dce8f8;
-  --text2:    #7a9abf;
-  --text3:    #3d5a7a;
-  --mono:     'JetBrains Mono', monospace;
-  --radius:   12px;
-  --safe-b:   env(safe-area-inset-bottom, 0px);
+  --bg:      #0a0f1a;
+  --s1:      #131a2a;
+  --s2:      #1a2238;
+  --s3:      #232d48;
+  --border:  #2a3654;
+  --accent:  #4d9eff;
+  --green:   #2dd47f;
+  --orange:  #ffb547;
+  --red:     #ff5d5d;
+  --purple:  #a78bff;
+  --text:    #e6eef9;
+  --text2:   #8da4c2;
+  --text3:   #4a5e80;
+  --mono:    'JetBrains Mono', monospace;
+  --sans:    'Noto Sans KR', sans-serif;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{
-  font-family:'Noto Sans KR',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  height:100%;
-  overflow:hidden;
-  font-size:14px;
-  line-height:1.5;
+html, body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* ── APP SHELL ── */
-.app{display:flex;flex-direction:column;height:100dvh;height:100vh;}
+body { padding-bottom: 30px; }
 
 /* ── HEADER ── */
-.hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;
-  background:var(--s1);
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
-  padding-top:max(12px, env(safe-area-inset-top));
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.hdr-brand{display:flex;align-items:center;gap:10px;}
-.logo{
-  width:34px;height:34px;border-radius:9px;
-  background:linear-gradient(135deg,#1a5ccc,#2d8cf0);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-weight:700;font-size:12px;color:#fff;
-  box-shadow:0 3px 12px rgba(45,140,240,.35);
-  flex-shrink:0;
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(135deg, #2562d4, #4d9eff);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-weight: 700; font-size: 13px; color: #fff;
+  box-shadow: 0 4px 14px rgba(77,158,255,.35);
 }
-.brand-text{}
-.brand-name{font-family:var(--mono);font-weight:700;font-size:15px;line-height:1;}
-.brand-name b{color:var(--accent);}
-.brand-sub{font-size:10px;color:var(--text3);margin-top:1px;font-family:var(--mono);}
-.hdr-right{display:flex;align-items:center;gap:10px;}
-.status-pill{
-  display:flex;align-items:center;gap:5px;
-  background:var(--s2);border:1px solid var(--border);
-  padding:5px 10px;border-radius:20px;
+.brand-text { line-height: 1.1; }
+.brand-name { font-family: var(--mono); font-weight: 700; font-size: 15px; }
+.brand-name b { color: var(--accent); }
+.brand-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.status {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--s2); border: 1px solid var(--border);
+  padding: 6px 11px; border-radius: 20px;
 }
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.dot.green{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite;}
-.dot.orange{background:var(--orange);animation:blink .8s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
-.st-lbl{font-family:var(--mono);font-size:10px;color:var(--text2);}
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 6px var(--green);
+  animation: pulse 2s infinite;
+}
+.dot.busy { background: var(--orange); box-shadow: 0 0 6px var(--orange); animation-duration: 0.7s; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.status-lbl { font-family: var(--mono); font-size: 10px; color: var(--text2); }
 
-/* ── BOTTOM NAV ── */
-.nav{
-  display:flex;
-  background:var(--s1);
-  border-top:1px solid var(--border);
-  flex-shrink:0;
-  padding-bottom:max(8px, var(--safe-b));
+/* ── TAB BAR ── */
+.tabbar {
+  position: sticky; top: 60px; z-index: 40;
+  background: var(--bg);
+  display: flex;
+  border-bottom: 1px solid var(--border);
 }
-.nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  padding:10px 4px 6px;gap:4px;
-  background:none;border:none;color:var(--text3);
-  cursor:pointer;transition:color .15s;
-  font-size:10px;font-family:'Noto Sans KR',sans-serif;
+.tab {
+  flex: 1; padding: 13px 8px;
+  background: none; border: none;
+  color: var(--text3);
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  cursor: pointer; position: relative;
+  transition: color 0.2s;
 }
-.nav-btn.active{color:var(--accent);}
-.nav-btn .nav-icon{font-size:20px;line-height:1;}
-.nav-btn .nav-lbl{font-size:10px;}
-
-/* ── PAGES ── */
-.pages{flex:1;overflow:hidden;position:relative;}
-.page{
-  position:absolute;inset:0;
-  overflow-y:auto;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  padding:0 0 12px;
-  display:none;
-}
-.page.active{display:block;}
-
-/* ── SECTIONS ── */
-.sec{
-  margin:12px 14px 0;
-  background:var(--s1);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  overflow:hidden;
-}
-.sec-hdr{
-  display:flex;align-items:center;gap:8px;
-  padding:11px 14px;
-  border-bottom:1px solid var(--border);
-  background:var(--s2);
-  cursor:pointer;
-  user-select:none;
-}
-.sec-hdr-icon{font-size:14px;}
-.sec-hdr-title{
-  font-family:var(--mono);font-size:11px;
-  color:var(--accent);letter-spacing:.07em;flex:1;
-}
-.sec-toggle{
-  font-size:12px;color:var(--text3);
-  transition:transform .2s;
-}
-.sec.collapsed .sec-toggle{transform:rotate(-90deg);}
-.sec.collapsed .sec-body{display:none;}
-.sec-body{padding:12px 14px;}
-
-/* ── FIELDS ── */
-.field{margin-bottom:10px;}
-.field:last-child{margin-bottom:0;}
-.field label{
-  display:block;font-size:11px;color:var(--text2);
-  margin-bottom:5px;font-weight:500;
-}
-.field input,.field select{
-  width:100%;
-  background:var(--s3);border:1px solid var(--border2);
-  color:var(--text);font-family:var(--mono);font-size:14px;
-  padding:11px 12px;border-radius:8px;outline:none;
-  transition:border-color .15s;
-  -webkit-appearance:none;appearance:none;
-}
-.field select{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a9abf' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;
-  padding-right:32px;
-}
-.field input:focus,.field select:focus{border-color:var(--accent);}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
-.unit{font-size:10px;color:var(--text3);margin-left:3px;}
-
-/* ── INLINE LAYER TABLE ── */
-.layer-item{
-  background:var(--s3);border:1px solid var(--border2);
-  border-radius:8px;padding:10px;margin-bottom:8px;position:relative;
-}
-.layer-item:last-child{margin-bottom:0;}
-.layer-row1{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px;}
-.layer-row2{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
-.layer-nameinput{
-  background:var(--bg);border:1px solid var(--border2);
-  color:var(--text);font-family:var(--mono);font-size:13px;
-  padding:8px 10px;border-radius:6px;outline:none;width:100%;
-}
-.layer-del{
-  background:rgba(240,78,78,.12);border:1px solid rgba(240,78,78,.25);
-  color:var(--red);border-radius:6px;padding:8px 12px;
-  font-size:13px;cursor:pointer;
-}
-.mini-field{}
-.mini-field label{font-size:9px;color:var(--text3);display:block;margin-bottom:3px;text-align:center;}
-.mini-field input{
-  width:100%;background:var(--bg);border:1px solid var(--border);
-  color:var(--text);font-family:var(--mono);font-size:12px;
-  padding:7px 4px;border-radius:5px;text-align:center;outline:none;
-}
-.mini-field input:focus{border-color:var(--accent);}
-
-/* Support items */
-.sup-item{
-  background:var(--s3);border:1px solid var(--border2);
-  border-radius:8px;padding:10px;margin-bottom:8px;
-}
-.sup-row1{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:6px;}
-
-/* ── ADD BUTTON ── */
-.add-btn{
-  width:100%;margin-top:8px;
-  background:rgba(45,140,240,.07);border:1px dashed rgba(45,140,240,.3);
-  color:var(--accent);font-family:'Noto Sans KR',sans-serif;font-size:13px;
-  padding:11px;border-radius:8px;cursor:pointer;
-  transition:background .15s;
-}
-.add-btn:active{background:rgba(45,140,240,.15);}
-
-/* ── RUN BUTTON ── */
-.run-wrap{padding:14px;}
-.run-btn{
-  width:100%;
-  background:linear-gradient(135deg,#1a5ccc,#2d8cf0);
-  border:none;color:#fff;
-  font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:16px;
-  padding:16px;border-radius:var(--radius);cursor:pointer;
-  transition:all .2s;
-  box-shadow:0 4px 20px rgba(45,140,240,.3);
-  letter-spacing:.02em;
-}
-.run-btn:active{transform:scale(.97);}
-.run-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
-
-/* Progress */
-.prog-wrap{padding:0 14px 4px;}
-.prog-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
-.prog-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .3s;border-radius:2px;}
-
-/* ── RESULT PAGE ── */
-.result-cards{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:10px;margin:12px 14px 0;
-}
-.rc{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--radius);padding:13px;
-}
-.rc.ok{border-color:rgba(14,203,129,.35);background:rgba(14,203,129,.04);}
-.rc.warn{border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.04);}
-.rc.danger{border-color:rgba(240,78,78,.35);background:rgba(240,78,78,.04);}
-.rc-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:5px;letter-spacing:.06em;}
-.rc-val{font-family:var(--mono);font-weight:700;font-size:22px;line-height:1;}
-.rc-val.ok{color:var(--green);}
-.rc-val.warn{color:var(--orange);}
-.rc-val.danger{color:var(--red);}
-.rc-val.purple{color:var(--purple);}
-.rc-val.accent{color:var(--accent);}
-.rc-unit{font-size:11px;color:var(--text3);margin-left:2px;}
-.rc-sub{font-size:10px;color:var(--text2);margin-top:4px;}
-
-/* Diagram */
-.diag-card{
-  margin:10px 14px 0;
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--radius);overflow:hidden;
-}
-.diag-tabs{
-  display:flex;border-bottom:1px solid var(--border);
-  background:var(--s2);
-}
-.dtab{
-  flex:1;padding:10px 4px;text-align:center;
-  font-size:11px;color:var(--text3);cursor:pointer;
-  border:none;background:none;transition:color .15s;
-  font-family:'Noto Sans KR',sans-serif;
-}
-.dtab.active{color:var(--accent);border-bottom:2px solid var(--accent);}
-.diag-body{padding:12px;}
-#mainSVG{width:100%;height:auto;display:block;}
-
-/* Manage levels */
-.mgmt-card{
-  margin:10px 14px 0;
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--radius);padding:13px;
-}
-.mgmt-title{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:.08em;margin-bottom:10px;}
-.mgmt-row{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 0;border-bottom:1px solid var(--border);
-}
-.mgmt-row:last-child{border-bottom:none;padding-bottom:0;}
-.mgmt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.mgmt-name{font-size:12px;color:var(--text2);width:70px;flex-shrink:0;}
-.mgmt-bar-wrap{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;}
-.mgmt-bar{height:100%;border-radius:3px;transition:width .6s ease;}
-.mgmt-val{font-family:var(--mono);font-size:12px;font-weight:700;width:52px;text-align:right;flex-shrink:0;}
-
-/* Stability bars */
-.stab-card{
-  margin:10px 14px 0;
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--radius);padding:13px;
-}
-.stab-row{margin-bottom:12px;}
-.stab-row:last-child{margin-bottom:0;}
-.stab-label-row{display:flex;justify-content:space-between;margin-bottom:5px;}
-.stab-name{font-size:12px;color:var(--text2);}
-.stab-fs{font-family:var(--mono);font-size:14px;font-weight:700;}
-.stab-track{height:8px;background:var(--s3);border-radius:4px;overflow:visible;position:relative;}
-.stab-fill{height:100%;border-radius:4px;transition:width .7s ease;}
-.stab-min{
-  position:absolute;top:-4px;height:16px;width:2px;
-  background:var(--orange);border-radius:1px;
-}
-.stab-min-lbl{
-  position:absolute;top:12px;font-family:var(--mono);font-size:9px;color:var(--orange);
-  transform:translateX(-50%);
+.tab.on { color: var(--accent); }
+.tab.on::after {
+  content: ''; position: absolute; bottom: -1px; left: 20%; right: 20%;
+  height: 2px; background: var(--accent); border-radius: 1px;
 }
 
-/* ── AI PAGE ── */
-.ai-page{display:flex;flex-direction:column;height:100%;}
-.qp-scroll{
-  padding:10px 14px 6px;
-  display:flex;gap:7px;overflow-x:auto;flex-shrink:0;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
-.qp-scroll::-webkit-scrollbar{display:none;}
-.qp{
-  white-space:nowrap;
-  background:var(--s2);border:1px solid var(--border2);
-  color:var(--text2);font-size:12px;
-  padding:7px 13px;border-radius:20px;cursor:pointer;
-  transition:all .15s;flex-shrink:0;
-}
-.qp:active{background:var(--a-glow);border-color:var(--accent);color:var(--accent);}
+/* ── PANELS ── */
+.panel { display: none; padding: 12px 14px 20px; }
+.panel.on { display: block; }
 
-.chat-area{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  padding:4px 14px 8px;
-  display:flex;flex-direction:column;gap:10px;
+/* ── CARDS ── */
+.card {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 12px; overflow: hidden;
 }
-.msg{}
-.msg-role{font-family:var(--mono);font-size:10px;margin-bottom:4px;letter-spacing:.05em;}
-.msg-role.ai{color:var(--accent);}
-.msg-role.user{color:var(--text3);text-align:right;}
-.bubble{
-  padding:11px 13px;border-radius:10px;font-size:13px;line-height:1.65;
+.card-head {
+  padding: 12px 14px;
+  background: var(--s2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
 }
-.ai .bubble{
-  background:var(--s2);border:1px solid var(--border);
-  border-left:2px solid var(--accent);border-radius:2px 10px 10px 10px;
+.card-icon { font-size: 14px; }
+.card-title {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--accent); letter-spacing: 0.07em; flex: 1;
 }
-.user .bubble{
-  background:rgba(45,140,240,.1);border:1px solid rgba(45,140,240,.2);
-  border-radius:10px 2px 10px 10px;text-align:right;
-}
-.typing{display:flex;align-items:center;gap:5px;padding:4px 0;}
-.td{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:tb 1.1s infinite;}
-.td:nth-child(2){animation-delay:.18s;}
-.td:nth-child(3){animation-delay:.36s;}
-@keyframes tb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+.card-body { padding: 14px; }
 
-.chat-input-area{
-  padding:10px 14px;
-  padding-bottom:max(10px, var(--safe-b));
-  border-top:1px solid var(--border);
-  background:var(--s1);
-  display:flex;gap:8px;flex-shrink:0;
+/* ── INPUTS ── */
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block; font-size: 11px; color: var(--text2);
+  margin-bottom: 6px; font-weight: 500;
 }
-.chat-input{
-  flex:1;background:var(--s2);border:1px solid var(--border2);
-  color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;
-  padding:11px 13px;border-radius:22px;outline:none;
-  resize:none;max-height:90px;overflow-y:auto;
-  transition:border-color .15s;
-  line-height:1.4;
+.field label .u {
+  color: var(--text3); margin-left: 4px;
+  font-family: var(--mono); font-size: 10px;
 }
-.chat-input:focus{border-color:var(--accent);}
-.send-btn{
-  width:44px;height:44px;border-radius:50%;flex-shrink:0;
-  background:var(--accent);border:none;color:#fff;
-  font-size:18px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 10px rgba(45,140,240,.4);
-  transition:all .15s;align-self:flex-end;
+.field input, .field select {
+  width: 100%;
+  background: var(--s3); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--mono); font-size: 14px;
+  padding: 12px 13px; border-radius: 8px;
+  outline: none; -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s;
 }
-.send-btn:active{transform:scale(.93);}
-.send-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238da4c2' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+  padding-right: 34px;
+}
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-/* inline table in chat */
-.dtable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin:6px 0;}
-.dtable th{background:var(--s3);padding:5px 7px;text-align:left;color:var(--text2);border-bottom:1px solid var(--border);}
-.dtable td{padding:5px 7px;border-bottom:1px solid var(--border);color:var(--text);}
-.dtable tr:last-child td{border:none;}
-.badge-ok{display:inline-block;background:rgba(14,203,129,.12);border:1px solid rgba(14,203,129,.3);color:var(--green);font-size:10px;padding:1px 6px;border-radius:3px;}
-.badge-warn{display:inline-block;background:rgba(240,78,78,.1);border:1px solid rgba(240,78,78,.25);color:var(--red);font-size:10px;padding:1px 6px;border-radius:3px;}
-
-/* placeholder */
-.ph{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:50px 20px;text-align:center;
+/* ── ITEMS ── */
+.item {
+  background: var(--s3); border: 1px solid var(--border);
+  border-radius: 9px; padding: 11px; margin-bottom: 9px;
 }
-.ph-icon{font-size:56px;margin-bottom:14px;opacity:.2;}
-.ph-title{font-family:var(--mono);font-size:14px;color:var(--text2);margin-bottom:6px;}
-.ph-sub{font-size:12px;color:var(--text3);}
+.item:last-child { margin-bottom: 0; }
+.item-row1 {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 8px; margin-bottom: 9px;
+}
+.item-name {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--mono); font-size: 13px;
+  padding: 9px 11px; border-radius: 7px; outline: none; width: 100%;
+}
+.item-del {
+  background: rgba(255,93,93,.12); border: 1px solid rgba(255,93,93,.3);
+  color: var(--red); border-radius: 7px;
+  padding: 9px 14px; font-size: 14px; cursor: pointer;
+}
+.item-row2 {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+}
+.minif { display: flex; flex-direction: column; }
+.minif label {
+  font-size: 9px; color: var(--text3); text-align: center;
+  margin-bottom: 4px; font-family: var(--mono);
+}
+.minif input, .minif select {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--mono); font-size: 12px;
+  padding: 8px 4px; border-radius: 6px; text-align: center;
+  outline: none; width: 100%;
+  -webkit-appearance: none; appearance: none;
+}
+.sup-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 6px; align-items: end;
+}
 
-/* ── SCROLL HELPERS ── */
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* ── BUTTONS ── */
+.add {
+  width: 100%; margin-top: 10px;
+  background: rgba(77,158,255,.07); border: 1px dashed rgba(77,158,255,.3);
+  color: var(--accent); font-family: var(--sans); font-size: 13px;
+  padding: 12px; border-radius: 8px; cursor: pointer;
+}
+.add:active { background: rgba(77,158,255,.18); }
+
+.run {
+  width: 100%; margin-top: 6px;
+  background: linear-gradient(135deg, #2562d4, #4d9eff);
+  border: none; color: #fff;
+  font-family: var(--sans); font-weight: 700; font-size: 16px;
+  padding: 17px; border-radius: 12px; cursor: pointer;
+  box-shadow: 0 4px 22px rgba(77,158,255,.35);
+  transition: transform 0.12s;
+}
+.run:active { transform: scale(0.97); }
+.run:disabled { opacity: 0.4; box-shadow: none; }
+
+.prog {
+  height: 3px; background: var(--border);
+  border-radius: 2px; margin: 0 0 12px; overflow: hidden;
+}
+.prog-fill {
+  height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  transition: width 0.3s; border-radius: 2px;
+}
+
+/* ── RESULT ── */
+.rc-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 12px;
+}
+.rc {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 11px; padding: 13px;
+}
+.rc.ok     { border-color: rgba(45,212,127,.4); background: rgba(45,212,127,.05); }
+.rc.warn   { border-color: rgba(255,181,71,.4); background: rgba(255,181,71,.05); }
+.rc.danger { border-color: rgba(255,93,93,.4); background: rgba(255,93,93,.05); }
+.rc-lbl {
+  font-family: var(--mono); font-size: 9px; color: var(--text3);
+  margin-bottom: 5px; letter-spacing: 0.06em;
+}
+.rc-val { font-family: var(--mono); font-weight: 700; font-size: 22px; line-height: 1; }
+.rc-val.ok     { color: var(--green); }
+.rc-val.warn   { color: var(--orange); }
+.rc-val.danger { color: var(--red); }
+.rc-val.purple { color: var(--purple); }
+.rc-unit { font-size: 11px; color: var(--text3); margin-left: 2px; }
+.rc-sub  { font-size: 10px; color: var(--text2); margin-top: 5px; }
+
+/* ── DIAGRAM ── */
+.diag-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  background: var(--s2);
+}
+.dt {
+  flex: 1; padding: 11px 4px; font-size: 12px; color: var(--text3);
+  border: none; background: none; cursor: pointer;
+  font-family: var(--sans);
+}
+.dt.on { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.diag-body { padding: 12px; }
+#mainSVG { width: 100%; height: auto; display: block; }
+
+/* ── MGMT/STAB ── */
+.mtitle {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text2); letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.mrow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.mrow:last-child { border: none; padding-bottom: 0; }
+.mdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.mname { font-size: 12px; color: var(--text2); width: 80px; flex-shrink: 0; }
+.mbar { flex: 1; height: 6px; background: var(--s3); border-radius: 3px; overflow: hidden; }
+.mfill { height: 100%; border-radius: 3px; transition: width 0.6s; }
+.mval {
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  width: 56px; text-align: right; flex-shrink: 0;
+}
+
+.stab-row { margin-bottom: 14px; }
+.stab-row:last-child { margin-bottom: 0; }
+.stab-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.stab-name { font-size: 12px; color: var(--text2); }
+.stab-fs { font-family: var(--mono); font-size: 14px; font-weight: 700; }
+.stab-track { height: 8px; background: var(--s3); border-radius: 4px; position: relative; }
+.stab-fill { height: 100%; border-radius: 4px; transition: width 0.7s; }
+.stab-min {
+  position: absolute; top: -4px; height: 16px; width: 2px;
+  background: var(--orange); border-radius: 1px;
+}
+.stab-min-lbl {
+  position: absolute; top: 14px;
+  font-family: var(--mono); font-size: 9px; color: var(--orange);
+  transform: translateX(-50%); white-space: nowrap;
+}
+
+/* ── EMPTY ── */
+.empty { text-align: center; padding: 60px 20px; color: var(--text3); }
+.empty-icon { font-size: 56px; opacity: 0.25; margin-bottom: 12px; }
+.empty-title {
+  font-family: var(--mono); font-size: 13px;
+  color: var(--text2); margin-bottom: 6px;
+}
+.empty-sub { font-size: 12px; }
+
+/* ── AI ── */
+.qp-bar {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding: 0 0 12px; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.qp-bar::-webkit-scrollbar { display: none; }
+.qp {
+  white-space: nowrap;
+  background: var(--s2); border: 1px solid var(--border);
+  color: var(--text2); font-size: 12px;
+  padding: 8px 13px; border-radius: 18px;
+  cursor: pointer; flex-shrink: 0;
+}
+.qp:active {
+  background: rgba(77,158,255,.15);
+  border-color: var(--accent); color: var(--accent);
+}
+
+.chat-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+
+.msg-role { font-family: var(--mono); font-size: 10px; margin-bottom: 4px; }
+.msg-role.ai { color: var(--accent); }
+.msg-role.user { color: var(--text3); text-align: right; }
+
+.bubble { padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.65; }
+.msg.ai .bubble {
+  background: var(--s2); border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+}
+.msg.user .bubble {
+  background: rgba(77,158,255,.1); border: 1px solid rgba(77,158,255,.2);
+  text-align: right;
+}
+
+.typing { display: flex; gap: 5px; padding: 4px 0; }
+.td {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); animation: tb 1.1s infinite;
+}
+.td:nth-child(2) { animation-delay: 0.18s; }
+.td:nth-child(3) { animation-delay: 0.36s; }
+@keyframes tb { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-7px); } }
+
+/* ── CHAT INPUT ── */
+.chat-form {
+  display: flex; gap: 8px;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 14px; padding: 8px;
+  margin-top: 12px;
+}
+.chat-input {
+  flex: 1;
+  background: var(--s2); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--sans); font-size: 14px;
+  padding: 11px 14px; border-radius: 10px;
+  outline: none; resize: none;
+  max-height: 90px; min-height: 40px;
+  line-height: 1.4;
+}
+.chat-input:focus { border-color: var(--accent); }
+.send {
+  width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+  background: var(--accent); border: none; color: #fff;
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 10px rgba(77,158,255,.4);
+}
+.send:active { transform: scale(0.92); }
+
+/* ── DTABLE ── */
+.dtable {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--mono); font-size: 11px; margin: 8px 0;
+}
+.dtable th {
+  background: var(--s3); padding: 6px 8px; text-align: left;
+  color: var(--text2); border-bottom: 1px solid var(--border);
+}
+.dtable td {
+  padding: 6px 8px; border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.dtable tr:last-child td { border: none; }
+.bok {
+  background: rgba(45,212,127,.12); color: var(--green);
+  padding: 1px 6px; border-radius: 3px; font-size: 10px;
+}
+.bwarn {
+  background: rgba(255,93,93,.1); color: var(--red);
+  padding: 1px 6px; border-radius: 3px; font-size: 10px;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- HEADER -->
-  <div class="hdr">
-    <div class="hdr-brand">
-      <div class="logo">SX</div>
-      <div class="brand-text">
-        <div class="brand-name"><b>SUNEX</b>-AI</div>
-        <div class="brand-sub">흙막이 탄소성 해석</div>
-      </div>
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <div class="logo">SX</div>
+    <div class="brand-text">
+      <div class="brand-name"><b>SUNEX</b>-AI</div>
+      <div class="brand-sub">흙막이 탄소성 해석</div>
     </div>
-    <div class="hdr-right">
-      <div class="status-pill">
-        <div class="dot green" id="sDot"></div>
-        <span class="st-lbl" id="sLbl">READY</span>
+  </div>
+  <div class="status">
+    <div class="dot" id="statusDot"></div>
+    <span class="status-lbl" id="statusLbl">READY</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabbar">
+  <button class="tab on" data-tab="input" onclick="showTab('input')">⌨ 입력</button>
+  <button class="tab" data-tab="result" onclick="showTab('result')">📊 결과</button>
+  <button class="tab" data-tab="ai" onclick="showTab('ai')">🤖 AI</button>
+</div>
+
+<!-- ══ TAB 1: INPUT ══ -->
+<div class="panel on" id="panel-input">
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-icon">🏗</span>
+      <span class="card-title">공법 · 벽체</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>흙막이 공법</label>
+        <select id="method" onchange="onMethodChange()">
+          <option value="hpile">H-PILE + 토류판</option>
+          <option value="sheetpile">강널말뚝 (Sheet Pile)</option>
+          <option value="cip">C.I.P (현장타설말뚝)</option>
+          <option value="scw">S.C.W (지중연속벽)</option>
+          <option value="slurry">지하연속벽 (Slurry Wall)</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>굴착깊이 <span class="u">m</span></label>
+          <input type="number" id="excavDepth" value="8.0" step="0.5" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>근입깊이 <span class="u">m</span></label>
+          <input type="number" id="embedDepth" value="6.0" step="0.5" inputmode="decimal">
+        </div>
+      </div>
+      <div class="row2" id="hpileRow">
+        <div class="field">
+          <label>H-PILE 간격 <span class="u">m</span></label>
+          <input type="number" id="hpileSpacing" value="1.5" step="0.1" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>I 단면2차 <span class="u">cm⁴</span></label>
+          <input type="number" id="hpileI" value="53300" step="100" inputmode="numeric">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>벽체두께 <span class="u">mm</span></label>
+          <input type="number" id="wallThick" value="400" step="50" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>탄성계수 E <span class="u">GPa</span></label>
+          <input type="number" id="wallE" value="200" step="10" inputmode="numeric">
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- PAGES -->
-  <div class="pages">
-
-    <!-- ══ PAGE 1: INPUT ══ -->
-    <div class="page active" id="pg-input">
-
-      <!-- 공법 -->
-      <div class="sec" id="sec0">
-        <div class="sec-hdr" onclick="toggleSec('sec0')">
-          <span class="sec-hdr-icon">🏗</span>
-          <span class="sec-hdr-title">공법 · 벽체</span>
-          <span class="sec-toggle">▼</span>
-        </div>
-        <div class="sec-body">
-          <div class="field">
-            <label>흙막이 공법</label>
-            <select id="method" onchange="onMethodChange()">
-              <option value="hpile">H-PILE + 토류판</option>
-              <option value="sheetpile">강널말뚝 (Sheet Pile)</option>
-              <option value="cip">C.I.P (현장타설말뚝)</option>
-              <option value="scw">S.C.W (지중연속벽)</option>
-              <option value="slurry">지하연속벽 (Slurry Wall)</option>
-            </select>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label>굴착깊이 <span class="unit">m</span></label>
-              <input type="number" id="excavDepth" value="8.0" step="0.5" min="1" inputmode="decimal">
-            </div>
-            <div class="field">
-              <label>근입깊이 <span class="unit">m</span></label>
-              <input type="number" id="embedDepth" value="6.0" step="0.5" min="1" inputmode="decimal">
-            </div>
-          </div>
-          <div class="field-row" id="hpileExtra">
-            <div class="field">
-              <label>H-PILE 간격 <span class="unit">m</span></label>
-              <input type="number" id="hpileSpacing" value="1.5" step="0.1" inputmode="decimal">
-            </div>
-            <div class="field">
-              <label>단면2차모멘트 <span class="unit">cm⁴</span></label>
-              <input type="number" id="hpileI" value="53300" step="100" inputmode="numeric">
-            </div>
-          </div>
-          <div class="field-row" id="wallExtra">
-            <div class="field">
-              <label>벽체두께 <span class="unit">mm</span></label>
-              <input type="number" id="wallThick" value="400" step="50" inputmode="numeric">
-            </div>
-            <div class="field">
-              <label>탄성계수 E <span class="unit">GPa</span></label>
-              <input type="number" id="wallE" value="200" step="10" inputmode="numeric">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 지층 -->
-      <div class="sec" id="sec1">
-        <div class="sec-hdr" onclick="toggleSec('sec1')">
-          <span class="sec-hdr-icon">🌍</span>
-          <span class="sec-hdr-title">지층 조건</span>
-          <span class="sec-toggle">▼</span>
-        </div>
-        <div class="sec-body">
-          <div id="layerList"></div>
-          <button class="add-btn" onclick="addLayer()">+ 지층 추가</button>
-        </div>
-      </div>
-
-      <!-- 지하수 & 하중 -->
-      <div class="sec" id="sec2">
-        <div class="sec-hdr" onclick="toggleSec('sec2')">
-          <span class="sec-hdr-icon">💧</span>
-          <span class="sec-hdr-title">지하수 · 하중</span>
-          <span class="sec-toggle">▼</span>
-        </div>
-        <div class="sec-body">
-          <div class="field-row">
-            <div class="field">
-              <label>지하수위 <span class="unit">m(GL-)</span></label>
-              <input type="number" id="gwl" value="3.0" step="0.5" inputmode="decimal">
-            </div>
-            <div class="field">
-              <label>수압 조건</label>
-              <select id="waterCond">
-                <option value="hydrostatic">정수압</option>
-                <option value="seepage">침투압</option>
-                <option value="none">무시</option>
-              </select>
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label>상재하중 q <span class="unit">kPa</span></label>
-              <input type="number" id="surcharge" value="10" step="5" inputmode="numeric">
-            </div>
-            <div class="field">
-              <label>시공단계</label>
-              <select id="stages">
-                <option value="1">1단계</option>
-                <option value="2">2단계</option>
-                <option value="3" selected>3단계</option>
-                <option value="4">4단계</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 지지공 -->
-      <div class="sec" id="sec3">
-        <div class="sec-hdr" onclick="toggleSec('sec3')">
-          <span class="sec-hdr-icon">⚙️</span>
-          <span class="sec-hdr-title">지지공 (버팀대 / 앵커)</span>
-          <span class="sec-toggle">▼</span>
-        </div>
-        <div class="sec-body">
-          <div id="supList"></div>
-          <button class="add-btn" onclick="addSupport()">+ 지지공 추가</button>
-        </div>
-      </div>
-
-      <!-- Progress + Run -->
-      <div class="prog-wrap" style="margin-top:12px;">
-        <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-      </div>
-      <div class="run-wrap">
-        <button class="run-btn" id="runBtn" onclick="runAnalysis()">
-          ▶ &nbsp;탄소성 해석 실행
-        </button>
-      </div>
-      <div style="height:8px;"></div>
-
-    </div><!-- /pg-input -->
-
-    <!-- ══ PAGE 2: RESULT ══ -->
-    <div class="page" id="pg-result">
-      <div class="ph" id="resultPH">
-        <div class="ph-icon">📊</div>
-        <div class="ph-title">해석 결과 대기</div>
-        <div class="ph-sub">입력 탭에서 조건 입력 후<br>▶ 탄소성 해석 실행 버튼 클릭</div>
-      </div>
-      <div id="resultContent" style="display:none;">
-        <div class="result-cards" id="rcGrid"></div>
-
-        <!-- Diagram -->
-        <div class="diag-card">
-          <div class="diag-tabs">
-            <button class="dtab active" onclick="switchDtab('disp',this)">변위</button>
-            <button class="dtab" onclick="switchDtab('pressure',this)">토압</button>
-            <button class="dtab" onclick="switchDtab('bmd',this)">단면력</button>
-          </div>
-          <div class="diag-body">
-            <svg id="mainSVG" viewBox="0 0 320 400" preserveAspectRatio="xMidYMid meet"></svg>
-          </div>
-        </div>
-
-        <!-- Management levels -->
-        <div class="mgmt-card">
-          <div class="mgmt-title">// 계측 관리기준치</div>
-          <div id="mgmtRows"></div>
-        </div>
-
-        <!-- Stability -->
-        <div class="stab-card">
-          <div class="mgmt-title" style="margin-bottom:14px;">// 안정성 검토</div>
-          <div id="stabRows"></div>
-        </div>
-
-        <div style="height:8px;"></div>
-      </div>
-    </div><!-- /pg-result -->
-
-    <!-- ══ PAGE 3: AI ══ -->
-    <div class="page" id="pg-ai" style="display:flex;flex-direction:column;">
-      <div class="qp-scroll" id="qpScroll">
-        <span class="qp" onclick="sq('변위 초과 원인 분석')">변위 원인</span>
-        <span class="qp" onclick="sq('히빙 안전율 상세 검토')">히빙 검토</span>
-        <span class="qp" onclick="sq('파이핑 위험 평가')">파이핑</span>
-        <span class="qp" onclick="sq('보강 대책 제안')">보강 대책</span>
-        <span class="qp" onclick="sq('최적 근입깊이 산정')">근입깊이</span>
-        <span class="qp" onclick="sq('계측 관리기준치 산정')">계측기준</span>
-        <span class="qp" onclick="sq('현재 현장 리스크 종합 평가')">종합 평가</span>
-      </div>
-      <div class="chat-area" id="chatArea">
-        <div class="msg ai">
-          <div class="msg-role ai">SUNEX-AI</div>
-          <div class="bubble">
-            <b>SUNEX-AI 해석 에이전트</b>입니다.<br><br>
-            좌측 입력 탭에서 현장 조건을 입력하고 해석을 실행하면, 결과를 자동 분석하여 공학적 판단을 제공합니다.<br><br>
-            • 탄소성 스프링 모델 변위 예측<br>
-            • 히빙·파이핑·전도 안정성 검토<br>
-            • 보강 대책 및 계측기준 산정<br>
-            • KDS/KCS 21 30 00 : 2024 적용
-          </div>
-        </div>
-      </div>
-      <div class="chat-input-area">
-        <textarea class="chat-input" id="chatInput" placeholder="질문 입력…" rows="1"
-          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-        <button class="send-btn" id="sendBtn" onclick="sendMsg()">➤</button>
-      </div>
-    </div><!-- /pg-ai -->
-
-  </div><!-- /pages -->
-
-  <!-- BOTTOM NAV -->
-  <div class="nav">
-    <button class="nav-btn active" id="nb-input" onclick="goPage('input')">
-      <span class="nav-icon">⌨️</span>
-      <span class="nav-lbl">입력</span>
-    </button>
-    <button class="nav-btn" id="nb-result" onclick="goPage('result')">
-      <span class="nav-icon">📈</span>
-      <span class="nav-lbl">결과</span>
-    </button>
-    <button class="nav-btn" id="nb-ai" onclick="goPage('ai')">
-      <span class="nav-icon">🤖</span>
-      <span class="nav-lbl">AI 에이전트</span>
-    </button>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-icon">🌍</span>
+      <span class="card-title">지층 조건</span>
+    </div>
+    <div class="card-body">
+      <div id="layerList"></div>
+      <button class="add" onclick="addLayer()">+ 지층 추가</button>
+    </div>
   </div>
 
-</div><!-- /app -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-icon">💧</span>
+      <span class="card-title">지하수 · 하중</span>
+    </div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="field">
+          <label>지하수위 <span class="u">m(GL-)</span></label>
+          <input type="number" id="gwl" value="3.0" step="0.5" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>수압 조건</label>
+          <select id="waterCond">
+            <option value="hydrostatic">정수압</option>
+            <option value="seepage">침투압</option>
+            <option value="none">무시</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>상재하중 q <span class="u">kPa</span></label>
+          <input type="number" id="surcharge" value="10" step="5" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>시공단계</label>
+          <select id="stages">
+            <option value="1">1단계</option>
+            <option value="2">2단계</option>
+            <option value="3" selected>3단계</option>
+            <option value="4">4단계</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-icon">⚙️</span>
+      <span class="card-title">지지공 (버팀대 · 앵커)</span>
+    </div>
+    <div class="card-body">
+      <div id="supList"></div>
+      <button class="add" onclick="addSupport()">+ 지지공 추가</button>
+    </div>
+  </div>
+
+  <div class="prog"><div class="prog-fill" id="progFill"></div></div>
+  <button class="run" id="runBtn" onclick="runAnalysis()">▶ 탄소성 해석 실행</button>
+
+</div>
+
+<!-- ══ TAB 2: RESULT ══ -->
+<div class="panel" id="panel-result">
+
+  <div id="resultEmpty" class="empty">
+    <div class="empty-icon">📊</div>
+    <div class="empty-title">해석 결과 대기</div>
+    <div class="empty-sub">입력 탭에서 조건 설정 후<br>▶ 탄소성 해석 실행 클릭</div>
+  </div>
+
+  <div id="resultBody" style="display:none;">
+    <div class="rc-grid" id="rcGrid"></div>
+
+    <div class="card">
+      <div class="diag-tabs">
+        <button class="dt on" data-dt="disp" onclick="setDtab('disp')">변위</button>
+        <button class="dt" data-dt="pressure" onclick="setDtab('pressure')">토압</button>
+        <button class="dt" data-dt="bmd" onclick="setDtab('bmd')">단면력</button>
+      </div>
+      <div class="diag-body">
+        <svg id="mainSVG" viewBox="0 0 320 400" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="mtitle">// 계측 관리기준치</div>
+        <div id="mgmtRows"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="mtitle">// 안정성 검토</div>
+        <div id="stabRows"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ TAB 3: AI ══ -->
+<div class="panel" id="panel-ai">
+
+  <div class="qp-bar">
+    <span class="qp" onclick="quickAsk('변위 초과 원인 분석')">변위 원인</span>
+    <span class="qp" onclick="quickAsk('히빙 안전율 상세 검토')">히빙 검토</span>
+    <span class="qp" onclick="quickAsk('파이핑 위험 평가')">파이핑</span>
+    <span class="qp" onclick="quickAsk('보강 대책 제안')">보강 대책</span>
+    <span class="qp" onclick="quickAsk('최적 근입깊이 산정')">근입깊이</span>
+    <span class="qp" onclick="quickAsk('계측 관리기준치 산정')">계측기준</span>
+    <span class="qp" onclick="quickAsk('현장 리스크 종합 평가')">종합 평가</span>
+  </div>
+
+  <div class="chat-list" id="chatList">
+    <div class="msg ai">
+      <div class="msg-role ai">SUNEX-AI</div>
+      <div class="bubble">
+        <b>SUNEX-AI 해석 에이전트</b>입니다.<br><br>
+        입력 탭에서 현장 조건을 입력하고 <b>▶ 탄소성 해석 실행</b>을 클릭하면 자동 분석합니다.<br><br>
+        • 탄소성 스프링 모델 변위 예측<br>
+        • 히빙·파이핑·전도 안정성<br>
+        • 보강 대책 / 계측 기준<br>
+        • KDS 21 30 00 : 2024 기준
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-form">
+    <textarea class="chat-input" id="chatInput" placeholder="질문 입력..." rows="1"
+      onkeydown="onKey(event)" oninput="autoSize(this)"></textarea>
+    <button class="send" onclick="sendMessage()">➤</button>
+  </div>
+
+</div>
 
 <script>
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
+// ══ STATE ══
 let layers = [
-  {name:'매립층', h:2.0, gamma:17, c:0,  phi:28, N:5 },
-  {name:'점토층', h:4.0, gamma:18, c:30, phi:5,  N:8 },
-  {name:'모래층', h:6.0, gamma:19, c:0,  phi:32, N:20},
+  { name: '매립층', h: 2.0, gamma: 17, c: 0,  phi: 28, N: 5  },
+  { name: '점토층', h: 4.0, gamma: 18, c: 30, phi: 5,  N: 8  },
+  { name: '모래층', h: 6.0, gamma: 19, c: 0,  phi: 32, N: 20 },
 ];
 let supports = [
-  {stage:1, depth:2.0, type:'strut',  k:50000},
-  {stage:2, depth:5.0, type:'anchor', k:35000},
+  { depth: 2.0, type: 'strut',  k: 50000 },
+  { depth: 5.0, type: 'anchor', k: 35000 },
 ];
 let result = null;
-let currentDtab = 'disp';
+let curDtab = 'disp';
 
-// ═══════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════
-function goPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('pg-'+id).classList.add('active');
-  document.getElementById('nb-'+id).classList.add('active');
+const COLOR_GREEN  = '#2dd47f';
+const COLOR_ORANGE = '#ffb547';
+const COLOR_RED    = '#ff5d5d';
+const COLOR_ACCENT = '#4d9eff';
+const COLOR_PURPLE = '#a78bff';
+
+// ══ TAB CONTROL ══
+function showTab(name) {
+  document.getElementById('panel-input').classList.remove('on');
+  document.getElementById('panel-result').classList.remove('on');
+  document.getElementById('panel-ai').classList.remove('on');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('panel-' + name).classList.add('on');
+  document.querySelector('.tab[data-tab="' + name + '"]').classList.add('on');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function toggleSec(id) {
-  document.getElementById(id).classList.toggle('collapsed');
-}
-
-// ═══════════════════════════════════════
-// LAYER UI
-// ═══════════════════════════════════════
+// ══ LAYERS ══
 function renderLayers() {
-  const el = document.getElementById('layerList');
-  el.innerHTML = layers.map((l,i) => `
-    <div class="layer-item">
-      <div class="layer-row1">
-        <input class="layer-nameinput" value="${l.name}" placeholder="층명"
-          onchange="layers[${i}].name=this.value">
-        <button class="layer-del" onclick="delLayer(${i})">✕</button>
-      </div>
-      <div class="layer-row2">
-        <div class="mini-field"><label>두께(m)</label>
-          <input type="number" value="${l.h}" step="0.5" inputmode="decimal"
-            onchange="layers[${i}].h=+this.value"></div>
-        <div class="mini-field"><label>γ(kN/m³)</label>
-          <input type="number" value="${l.gamma}" step="1" inputmode="decimal"
-            onchange="layers[${i}].gamma=+this.value"></div>
-        <div class="mini-field"><label>c(kPa)</label>
-          <input type="number" value="${l.c}" step="1" inputmode="decimal"
-            onchange="layers[${i}].c=+this.value"></div>
-        <div class="mini-field"><label>φ(°)</label>
-          <input type="number" value="${l.phi}" step="1" inputmode="decimal"
-            onchange="layers[${i}].phi=+this.value"></div>
-      </div>
-    </div>`).join('');
+  let html = '';
+  layers.forEach((l, i) => {
+    html += '<div class="item">';
+    html += '<div class="item-row1">';
+    html += '<input class="item-name" value="' + l.name + '" placeholder="층명" onchange="layers[' + i + '].name=this.value">';
+    html += '<button class="item-del" onclick="delLayer(' + i + ')">✕</button>';
+    html += '</div>';
+    html += '<div class="item-row2">';
+    html += '<div class="minif"><label>H(m)</label><input type="number" value="' + l.h + '" step="0.5" inputmode="decimal" onchange="layers[' + i + '].h=+this.value"></div>';
+    html += '<div class="minif"><label>γ(kN/m³)</label><input type="number" value="' + l.gamma + '" step="1" inputmode="decimal" onchange="layers[' + i + '].gamma=+this.value"></div>';
+    html += '<div class="minif"><label>c(kPa)</label><input type="number" value="' + l.c + '" step="1" inputmode="decimal" onchange="layers[' + i + '].c=+this.value"></div>';
+    html += '<div class="minif"><label>φ(°)</label><input type="number" value="' + l.phi + '" step="1" inputmode="decimal" onchange="layers[' + i + '].phi=+this.value"></div>';
+    html += '</div></div>';
+  });
+  document.getElementById('layerList').innerHTML = html;
 }
+
 function addLayer() {
-  layers.push({name:'지층'+(layers.length+1), h:3.0, gamma:18, c:0, phi:30, N:15});
+  layers.push({ name: '지층' + (layers.length + 1), h: 3.0, gamma: 18, c: 0, phi: 30, N: 15 });
   renderLayers();
 }
+
 function delLayer(i) {
-  if(layers.length > 1) { layers.splice(i,1); renderLayers(); }
+  if (layers.length > 1) { layers.splice(i, 1); renderLayers(); }
 }
 
-// ═══════════════════════════════════════
-// SUPPORT UI
-// ═══════════════════════════════════════
+// ══ SUPPORTS ══
 function renderSupports() {
-  const el = document.getElementById('supList');
-  el.innerHTML = supports.map((s,i) => `
-    <div class="sup-item">
-      <div class="sup-row1">
-        <div class="mini-field"><label>심도(m)</label>
-          <input type="number" value="${s.depth}" step="0.5" inputmode="decimal"
-            onchange="supports[${i}].depth=+this.value"></div>
-        <div class="mini-field"><label>종류</label>
-          <select onchange="supports[${i}].type=this.value"
-            style="font-size:11px;padding:6px 4px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;width:100%;">
-            <option value="strut" ${s.type==='strut'?'selected':''}>버팀대</option>
-            <option value="anchor" ${s.type==='anchor'?'selected':''}>앵커</option>
-            <option value="raker" ${s.type==='raker'?'selected':''}>경사버팀</option>
-          </select></div>
-        <div class="mini-field"><label>강성(kN/m²)</label>
-          <input type="number" value="${s.k}" step="1000" inputmode="numeric"
-            onchange="supports[${i}].k=+this.value"></div>
-        <button class="layer-del" onclick="delSupport(${i})" style="align-self:flex-end;margin-bottom:0;">✕</button>
-      </div>
-    </div>`).join('');
+  let html = '';
+  supports.forEach((s, i) => {
+    html += '<div class="item"><div class="sup-row">';
+    html += '<div class="minif"><label>심도(m)</label><input type="number" value="' + s.depth + '" step="0.5" inputmode="decimal" onchange="supports[' + i + '].depth=+this.value"></div>';
+    html += '<div class="minif"><label>종류</label><select onchange="supports[' + i + '].type=this.value">';
+    html += '<option value="strut" ' + (s.type === 'strut' ? 'selected' : '') + '>버팀대</option>';
+    html += '<option value="anchor" ' + (s.type === 'anchor' ? 'selected' : '') + '>앵커</option>';
+    html += '<option value="raker" ' + (s.type === 'raker' ? 'selected' : '') + '>경사</option>';
+    html += '</select></div>';
+    html += '<div class="minif"><label>강성</label><input type="number" value="' + s.k + '" step="1000" inputmode="numeric" onchange="supports[' + i + '].k=+this.value"></div>';
+    html += '<button class="item-del" onclick="delSupport(' + i + ')">✕</button>';
+    html += '</div></div>';
+  });
+  document.getElementById('supList').innerHTML = html;
 }
+
 function addSupport() {
-  supports.push({stage:supports.length+1, depth:3.0, type:'strut', k:40000});
+  supports.push({ depth: 3.0, type: 'strut', k: 40000 });
   renderSupports();
 }
-function delSupport(i) { supports.splice(i,1); renderSupports(); }
+
+function delSupport(i) {
+  supports.splice(i, 1);
+  renderSupports();
+}
 
 function onMethodChange() {
   const m = document.getElementById('method').value;
-  document.getElementById('hpileExtra').style.display = m==='hpile'?'grid':'none';
-  const E_map = {hpile:200,sheetpile:200,cip:25,scw:25,slurry:25};
-  const t_map = {hpile:350,sheetpile:10,cip:600,scw:650,slurry:800};
-  document.getElementById('wallE').value = E_map[m]||200;
-  document.getElementById('wallThick').value = t_map[m]||400;
+  document.getElementById('hpileRow').style.display = m === 'hpile' ? 'grid' : 'none';
+  const E_map = { hpile: 200, sheetpile: 200, cip: 25, scw: 25, slurry: 25 };
+  const t_map = { hpile: 350, sheetpile: 10, cip: 600, scw: 650, slurry: 800 };
+  document.getElementById('wallE').value = E_map[m] || 200;
+  document.getElementById('wallThick').value = t_map[m] || 400;
 }
 
-// ═══════════════════════════════════════
-// ANALYSIS ENGINE
-// ═══════════════════════════════════════
+// ══ ANALYSIS ══
 function runAnalysis() {
-  setStatus('분석중','orange');
-  animProg(0,100,1800);
+  setStatus('분석중', true);
+  animateProgress();
   document.getElementById('runBtn').disabled = true;
 
-  setTimeout(() => {
+  setTimeout(function () {
     result = compute();
     renderResult(result);
-    setStatus('완료','green');
+    setStatus('완료', false);
     document.getElementById('runBtn').disabled = false;
-    addAI(genAutoAnalysis(result));
-    goPage('result');
-  }, 1900);
+    addAIMsg(generateAutoSummary(result));
+    showTab('result');
+  }, 1800);
 }
 
 function compute() {
@@ -781,499 +735,518 @@ function compute() {
   const gwl  = +document.getElementById('gwl').value;
   const q    = +document.getElementById('surcharge').value;
   const meth = document.getElementById('method').value;
-  const waterCond = document.getElementById('waterCond').value;
+  const wc   = document.getElementById('waterCond').value;
 
-  let E_wall = +document.getElementById('wallE').value * 1e6;
-  let t = +document.getElementById('wallThick').value / 1000;
+  const E_wall = +document.getElementById('wallE').value * 1e6;
+  const t = +document.getElementById('wallThick').value / 1000;
   let EI;
-  if(meth==='hpile'){
-    const I = +document.getElementById('hpileI').value*1e-8;
-    const sp= +document.getElementById('hpileSpacing').value;
-    EI = E_wall*I/sp;
+  if (meth === 'hpile') {
+    const I  = +document.getElementById('hpileI').value * 1e-8;
+    const sp = +document.getElementById('hpileSpacing').value;
+    EI = E_wall * I / sp;
   } else {
-    EI = E_wall*Math.pow(t,3)/12;
+    EI = E_wall * Math.pow(t, 3) / 12;
   }
 
-  const dz=0.5, nN=Math.round(Htot/dz)+1;
-  const z=Array.from({length:nN},(_,i)=>i*dz);
+  const dz = 0.5;
+  const nN = Math.round(Htot / dz) + 1;
+  const z = [];
+  for (let i = 0; i < nN; i++) z.push(i * dz);
 
-  function soilAt(d){
-    let c=0; for(const l of layers){c+=l.h;if(d<c)return l;} return layers[layers.length-1];
-  }
-  const Ka=phi=>Math.pow(Math.tan(Math.PI/4-phi*Math.PI/360),2);
-  const Kp=phi=>Math.pow(Math.tan(Math.PI/4+phi*Math.PI/360),2);
-
-  const actP=z.map(d=>{
-    const s=soilAt(d), ka=Ka(s.phi), kp=Kp(s.phi);
-    let sv=0, ch=0;
-    for(const l of layers){
-      const zB=ch+l.h,zT=ch;
-      if(d<=zT)break;
-      const dh=Math.min(d,zB)-zT;
-      const gEff=(d>gwl&&ch<gwl)?(l.gamma-9.81):(d<=gwl?l.gamma:l.gamma-9.81);
-      sv+=gEff*dh; ch+=l.h;
+  function soilAt(d) {
+    let cum = 0;
+    for (const l of layers) {
+      cum += l.h;
+      if (d < cum) return l;
     }
-    sv+=q;
-    let pa=ka*sv-2*s.c*Math.sqrt(ka); if(pa<0)pa=0;
-    let pw=waterCond!=='none'&&d>gwl?9.81*(d-gwl):0;
-    return {pa:pa+pw, pp:kp*sv+2*s.c*Math.sqrt(kp)};
+    return layers[layers.length - 1];
+  }
+
+  const Ka = function (phi) { return Math.pow(Math.tan(Math.PI / 4 - phi * Math.PI / 360), 2); };
+  const Kp = function (phi) { return Math.pow(Math.tan(Math.PI / 4 + phi * Math.PI / 360), 2); };
+
+  const actP = z.map(function (d) {
+    const s = soilAt(d);
+    const ka = Ka(s.phi);
+    const kp = Kp(s.phi);
+    let sv = 0, ch = 0;
+    for (const l of layers) {
+      const zT = ch, zB = ch + l.h;
+      if (d <= zT) break;
+      const dh = Math.min(d, zB) - zT;
+      const gEff = (d > gwl && ch < gwl) ? (l.gamma - 9.81) : (d <= gwl ? l.gamma : l.gamma - 9.81);
+      sv += gEff * dh;
+      ch += l.h;
+    }
+    sv += q;
+    let pa = ka * sv - 2 * s.c * Math.sqrt(ka);
+    if (pa < 0) pa = 0;
+    const pw = (wc !== 'none' && d > gwl) ? 9.81 * (d - gwl) : 0;
+    return { pa: pa + pw, pp: kp * sv + 2 * s.c * Math.sqrt(kp) };
   });
 
-  const Ks=z.map(d=>{const s=soilAt(d);return Math.max(s.N*40,500);});
+  const Ks = z.map(function (d) { return Math.max(soilAt(d).N * 40, 500); });
 
-  let disp=new Array(nN).fill(0);
-  for(let it=0;it<80;it++){
-    const nd=disp.slice();
-    for(let i=2;i<nN-2;i++){
-      const d=z[i], netP=actP[i].pa;
-      let sup=0;
-      for(const s of supports) if(Math.abs(d-s.depth)<dz) sup=s.k*disp[i]/1000;
-      const d4w=(disp[Math.min(i+2,nN-1)]-4*disp[Math.min(i+1,nN-1)]+6*disp[i]
-               -4*disp[Math.max(i-1,0)]+disp[Math.max(i-2,0)])/Math.pow(dz,4);
-      const res=EI*d4w-(netP-Ks[i]*disp[i]/1000-sup);
-      nd[i]=disp[i]-0.008*res/(6*EI/Math.pow(dz,4)+Ks[i]/1000);
-      const lim=actP[i].pp*dz;
-      if(Math.abs(nd[i])*Ks[i]/1000>lim) nd[i]=Math.sign(nd[i])*lim*1000/Ks[i];
+  let disp = new Array(nN).fill(0);
+  for (let it = 0; it < 80; it++) {
+    const nd = disp.slice();
+    for (let i = 2; i < nN - 2; i++) {
+      const d = z[i];
+      let sup = 0;
+      for (const s of supports) if (Math.abs(d - s.depth) < dz) sup = s.k * disp[i] / 1000;
+      const d4w = (disp[i + 2] - 4 * disp[i + 1] + 6 * disp[i] - 4 * disp[i - 1] + disp[i - 2]) / Math.pow(dz, 4);
+      const res = EI * d4w - (actP[i].pa - Ks[i] * disp[i] / 1000 - sup);
+      nd[i] = disp[i] - 0.008 * res / (6 * EI / Math.pow(dz, 4) + Ks[i] / 1000);
+      const lim = actP[i].pp * dz;
+      if (Math.abs(nd[i]) * Ks[i] / 1000 > lim) nd[i] = Math.sign(nd[i]) * lim * 1000 / Ks[i];
     }
-    disp=nd;
+    disp = nd;
   }
 
-  const maxE=He*(meth==='slurry'?.002:meth==='hpile'?.006:.004)*1000;
-  const maxR=Math.max(...disp.map(Math.abs))||1;
-  const sc=maxE/maxR;
-  disp=disp.map(d=>d*sc);
+  const maxE = He * (meth === 'slurry' ? 0.002 : meth === 'hpile' ? 0.006 : 0.004) * 1000;
+  const maxR = Math.max.apply(null, disp.map(Math.abs)) || 1;
+  const sc = maxE / maxR;
+  disp = disp.map(function (d) { return d * sc; });
 
-  const dp=z.map((d,i)=>{
+  const dp = z.map(function (d, i) {
     let sh;
-    if(d<=He){
-      if(!supports.length) sh=Math.pow(d/He,1.5);
-      else {
-        const fs=Math.min(...supports.map(s=>s.depth));
-        sh=d<fs?Math.pow(d/fs,2)*.4:0.4+.6*Math.pow((d-fs)/(He-fs),1.2);
+    if (d <= He) {
+      if (!supports.length) {
+        sh = Math.pow(d / He, 1.5);
+      } else {
+        const fs = Math.min.apply(null, supports.map(function (s) { return s.depth; }));
+        sh = d < fs ? Math.pow(d / fs, 2) * 0.4 : 0.4 + 0.6 * Math.pow((d - fs) / (He - fs), 1.2);
       }
-    } else sh=Math.max(0,1-Math.pow((d-He)/Hem,1.5));
-    return disp[i]*sh;
+    } else {
+      sh = Math.max(0, 1 - Math.pow((d - He) / Hem, 1.5));
+    }
+    return disp[i] * sh;
   });
 
-  const maxD=Math.max(...dp.map(Math.abs));
-  const maxDi=dp.indexOf(Math.max(...dp.map(Math.abs)));
-  const maxDz=z[maxDi];
+  const maxD = Math.max.apply(null, dp.map(Math.abs));
+  const maxDi = dp.indexOf(Math.max.apply(null, dp.map(Math.abs)));
+  const maxDz = z[maxDi];
 
-  const mom=z.map((d,i)=>{
-    if(i===0||i===nN-1)return 0;
-    const d2w=(dp[Math.min(i+1,nN-1)]-2*dp[i]+dp[Math.max(i-1,0)])/(dz*dz);
-    return -EI*d2w/1000;
+  const mom = z.map(function (d, i) {
+    if (i === 0 || i === nN - 1) return 0;
+    const d2w = (dp[i + 1] - 2 * dp[i] + dp[i - 1]) / (dz * dz);
+    return -EI * d2w / 1000;
   });
-  const maxM=Math.max(...mom.map(Math.abs));
-  const shear=mom.map((m,i)=>i===0||i===nN-1?0:(mom[Math.min(i+1,nN-1)]-mom[Math.max(i-1,0)])/(2*dz));
+  const maxM = Math.max.apply(null, mom.map(Math.abs));
 
-  // Heave
-  const sb=soilAt(He);
-  const Nc=5.14*(1+0.2*(He/Math.max(1,He*2)))*(sb.phi>5?1.3:1);
-  const hr=sb.c*Nc;
-  const hd=layers.reduce((s,l,i)=>{
-    if(i===0)return l.gamma*Math.min(He,l.h);
-    const cp=layers.slice(0,i).reduce((a,x)=>a+x.h,0);
-    if(cp>=He)return s;
-    return s+l.gamma*Math.min(He-cp,l.h);
-  },0)+q;
-  const Fs_h=hr/Math.max(hd,1);
+  const sb = soilAt(He);
+  const Nc = 5.14 * (sb.phi > 5 ? 1.3 : 1.0);
+  const hr = sb.c * Nc;
+  let hd = 0, ch2 = 0;
+  for (const l of layers) {
+    if (ch2 >= He) break;
+    hd += l.gamma * Math.min(He - ch2, l.h);
+    ch2 += l.h;
+  }
+  hd += q;
+  const Fs_h = hr / Math.max(hd, 1);
 
-  // Piping
-  const Dw=Math.max(0,He-gwl);
-  const iAvg=Dw>0?Dw/(Hem+Dw):0;
-  const Fs_p=iAvg>0?1/iAvg:99;
+  const Dw = Math.max(0, He - gwl);
+  const iAvg = Dw > 0 ? Dw / (Hem + Dw) : 0;
+  const Fs_p = iAvg > 0 ? 1 / iAvg : 99;
 
-  const Fs_ov=1.5+Hem*0.1;
-  const maxSet=maxD*(meth==='slurry'?.5:meth==='hpile'?1.5:1)*0.6;
+  const Fs_ov = 1.5 + Hem * 0.1;
+  const maxSet = maxD * (meth === 'slurry' ? 0.5 : meth === 'hpile' ? 1.5 : 1) * 0.6;
 
   return {
-    He,Hem,Htot,z,dz,nN,dp,maxD,maxDz,
-    mom,maxM,shear,actP,Ks,
-    Fs_h,Fs_p,Fs_ov,maxSet,
-    meth,gwl,EI,waterCond,
-    lv1:maxD*.5, lv2:maxD*.75, lv3:maxD,
+    He: He, Hem: Hem, Htot: Htot, z: z, dz: dz, nN: nN,
+    dp: dp, maxD: maxD, maxDz: maxDz,
+    mom: mom, maxM: maxM, actP: actP, Ks: Ks,
+    Fs_h: Fs_h, Fs_p: Fs_p, Fs_ov: Fs_ov, maxSet: maxSet,
+    meth: meth, gwl: gwl, EI: EI,
+    lv1: maxD * 0.5, lv2: maxD * 0.75, lv3: maxD,
   };
 }
 
-// ═══════════════════════════════════════
-// RENDER RESULT
-// ═══════════════════════════════════════
+// ══ RENDER RESULT ══
 function renderResult(r) {
-  document.getElementById('resultPH').style.display='none';
-  document.getElementById('resultContent').style.display='block';
+  document.getElementById('resultEmpty').style.display = 'none';
+  document.getElementById('resultBody').style.display = 'block';
 
-  const dc=r.maxD<=30?'ok':r.maxD<=60?'warn':'danger';
-  const hc=r.Fs_h>=1.5?'ok':r.Fs_h>=1.2?'warn':'danger';
-  const pc=r.Fs_p>=3?'ok':r.Fs_p>=2?'warn':'danger';
-  const sc2=r.maxSet<=25?'ok':r.maxSet<=40?'warn':'danger';
+  const dc = r.maxD <= 30 ? 'ok' : r.maxD <= 60 ? 'warn' : 'danger';
+  const hc = r.Fs_h >= 1.5 ? 'ok' : r.Fs_h >= 1.2 ? 'warn' : 'danger';
+  const pc = r.Fs_p >= 3 ? 'ok' : r.Fs_p >= 2 ? 'warn' : 'danger';
+  const sc = r.maxSet <= 25 ? 'ok' : r.maxSet <= 40 ? 'warn' : 'danger';
 
-  document.getElementById('rcGrid').innerHTML=`
-    <div class="rc ${dc}">
-      <div class="rc-lbl">최대 수평변위</div>
-      <div class="rc-val ${dc}">${r.maxD.toFixed(1)}<span class="rc-unit">mm</span></div>
-      <div class="rc-sub">GL-${r.maxDz.toFixed(1)}m</div>
-    </div>
-    <div class="rc">
-      <div class="rc-lbl">최대 휨모멘트</div>
-      <div class="rc-val purple">${r.maxM.toFixed(1)}<span class="rc-unit">kN·m/m</span></div>
-      <div class="rc-sub">벽체 단면력</div>
-    </div>
-    <div class="rc ${sc2}">
-      <div class="rc-lbl">지표침하 (추정)</div>
-      <div class="rc-val ${sc2}">${r.maxSet.toFixed(1)}<span class="rc-unit">mm</span></div>
-      <div class="rc-sub">배면 최대</div>
-    </div>
-    <div class="rc ${hc}">
-      <div class="rc-lbl">히빙 안전율</div>
-      <div class="rc-val ${hc}">${r.Fs_h.toFixed(2)}</div>
-      <div class="rc-sub">${r.Fs_h>=1.5?'✓ OK (≥1.5)':'⚠ 기준미달'}</div>
-    </div>
-    <div class="rc ${pc}">
-      <div class="rc-lbl">파이핑 안전율</div>
-      <div class="rc-val ${pc}">${r.Fs_p>50?'∞':r.Fs_p.toFixed(2)}</div>
-      <div class="rc-sub">${r.Fs_p>=3?'✓ OK (≥3.0)':'⚠ 검토필요'}</div>
-    </div>
-    <div class="rc ok">
-      <div class="rc-lbl">전도 안전율</div>
-      <div class="rc-val ok">${r.Fs_ov.toFixed(2)}</div>
-      <div class="rc-sub">✓ OK (≥1.5)</div>
-    </div>`;
+  let h = '';
+  h += '<div class="rc ' + dc + '"><div class="rc-lbl">최대 수평변위</div><div class="rc-val ' + dc + '">' + r.maxD.toFixed(1) + '<span class="rc-unit">mm</span></div><div class="rc-sub">GL-' + r.maxDz.toFixed(1) + 'm</div></div>';
+  h += '<div class="rc"><div class="rc-lbl">최대 휨모멘트</div><div class="rc-val purple">' + r.maxM.toFixed(1) + '<span class="rc-unit">kN·m/m</span></div><div class="rc-sub">벽체 단면력</div></div>';
+  h += '<div class="rc ' + sc + '"><div class="rc-lbl">지표침하 (추정)</div><div class="rc-val ' + sc + '">' + r.maxSet.toFixed(1) + '<span class="rc-unit">mm</span></div><div class="rc-sub">배면 최대</div></div>';
+  h += '<div class="rc ' + hc + '"><div class="rc-lbl">히빙 안전율</div><div class="rc-val ' + hc + '">' + r.Fs_h.toFixed(2) + '</div><div class="rc-sub">' + (r.Fs_h >= 1.5 ? '✓ OK (≥1.5)' : '⚠ 기준미달') + '</div></div>';
+  h += '<div class="rc ' + pc + '"><div class="rc-lbl">파이핑 안전율</div><div class="rc-val ' + pc + '">' + (r.Fs_p > 50 ? '∞' : r.Fs_p.toFixed(2)) + '</div><div class="rc-sub">' + (r.Fs_p >= 3 ? '✓ OK (≥3.0)' : '⚠ 검토필요') + '</div></div>';
+  h += '<div class="rc ok"><div class="rc-lbl">전도 안전율</div><div class="rc-val ok">' + r.Fs_ov.toFixed(2) + '</div><div class="rc-sub">✓ OK (≥1.5)</div></div>';
+  document.getElementById('rcGrid').innerHTML = h;
 
-  // Management levels
-  const lvs=[
-    {name:'1단계 주의',val:r.lv1,color:var_green,pct:r.lv1/r.lv3},
-    {name:'2단계 경보',val:r.lv2,color:var_orange,pct:r.lv2/r.lv3},
-    {name:'3단계 위험',val:r.lv3,color:var_red,pct:1},
+  const lvs = [
+    { name: '1단계 주의', val: r.lv1, color: COLOR_GREEN, pct: r.lv1 / r.lv3 },
+    { name: '2단계 경보', val: r.lv2, color: COLOR_ORANGE, pct: r.lv2 / r.lv3 },
+    { name: '3단계 위험', val: r.lv3, color: COLOR_RED, pct: 1 },
   ];
-  document.getElementById('mgmtRows').innerHTML=lvs.map(lv=>`
-    <div class="mgmt-row">
-      <div class="mgmt-dot" style="background:${lv.color}"></div>
-      <div class="mgmt-name" style="font-size:11px">${lv.name}</div>
-      <div class="mgmt-bar-wrap">
-        <div class="mgmt-bar" style="width:${lv.pct*100}%;background:${lv.color};opacity:.7;"></div>
-      </div>
-      <div class="mgmt-val" style="color:${lv.color}">${lv.val.toFixed(1)}mm</div>
-    </div>`).join('');
+  let mh = '';
+  for (const l of lvs) {
+    mh += '<div class="mrow">';
+    mh += '<div class="mdot" style="background:' + l.color + '"></div>';
+    mh += '<div class="mname">' + l.name + '</div>';
+    mh += '<div class="mbar"><div class="mfill" style="width:' + (l.pct * 100) + '%;background:' + l.color + ';opacity:.75;"></div></div>';
+    mh += '<div class="mval" style="color:' + l.color + '">' + l.val.toFixed(1) + 'mm</div>';
+    mh += '</div>';
+  }
+  document.getElementById('mgmtRows').innerHTML = mh;
 
-  // Stability
-  const stabs=[
-    {name:'히빙 Fs',val:r.Fs_h,min:1.5,max:3,color:r.Fs_h>=1.5?var_green:var_red},
-    {name:'파이핑 Fs',val:Math.min(r.Fs_p,10),min:3,max:10,color:r.Fs_p>=3?var_green:var_red},
-    {name:'전도 Fs',val:r.Fs_ov,min:1.5,max:4,color:var_green},
+  const stabs = [
+    { name: '히빙 Fs',   val: r.Fs_h,                 min: 1.5, max: 3,  ok: r.Fs_h >= 1.5 },
+    { name: '파이핑 Fs', val: Math.min(r.Fs_p, 10),   min: 3,   max: 10, ok: r.Fs_p >= 3 },
+    { name: '전도 Fs',   val: r.Fs_ov,                min: 1.5, max: 4,  ok: true },
   ];
-  document.getElementById('stabRows').innerHTML=stabs.map(s=>{
-    const pct=Math.min(s.val/s.max,1)*100;
-    const mp=s.min/s.max*100;
-    return `<div class="stab-row">
-      <div class="stab-label-row">
-        <span class="stab-name">${s.name}</span>
-        <span class="stab-fs" style="color:${s.color}">${s.val>=9.9?'∞':s.val.toFixed(2)}</span>
-      </div>
-      <div class="stab-track">
-        <div class="stab-fill" style="width:${pct}%;background:${s.color};opacity:.75;"></div>
-        <div class="stab-min" style="left:${mp}%">
-          <div class="stab-min-lbl" style="left:${mp}%">${s.min}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  let sh = '';
+  for (const s of stabs) {
+    const pct = Math.min(s.val / s.max, 1) * 100;
+    const mp = s.min / s.max * 100;
+    const c = s.ok ? COLOR_GREEN : COLOR_RED;
+    sh += '<div class="stab-row">';
+    sh += '<div class="stab-top"><span class="stab-name">' + s.name + '</span><span class="stab-fs" style="color:' + c + '">' + (s.val >= 9.9 ? '∞' : s.val.toFixed(2)) + '</span></div>';
+    sh += '<div class="stab-track">';
+    sh += '<div class="stab-fill" style="width:' + pct + '%;background:' + c + ';opacity:.75;"></div>';
+    sh += '<div class="stab-min" style="left:' + mp + '%"><div class="stab-min-lbl" style="left:0">' + s.min + '</div></div>';
+    sh += '</div></div>';
+  }
+  document.getElementById('stabRows').innerHTML = sh;
 
-  drawSVG(r, currentDtab);
+  drawDiagram(r, curDtab);
 }
 
-const var_green='#0ecb81', var_orange='#f5a623', var_red='#f04e4e';
-
-// ═══════════════════════════════════════
-// SVG DIAGRAM
-// ═══════════════════════════════════════
-function switchDtab(tab, btn) {
-  currentDtab=tab;
-  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  if(result) drawSVG(result, tab);
+function setDtab(name) {
+  curDtab = name;
+  document.querySelectorAll('.dt').forEach(function (d) { d.classList.remove('on'); });
+  document.querySelector('.dt[data-dt="' + name + '"]').classList.add('on');
+  if (result) drawDiagram(result, name);
 }
 
-function drawSVG(r, tab) {
-  if(tab==='disp')     drawDisp(r);
-  else if(tab==='pressure') drawPressure(r);
-  else if(tab==='bmd') drawBMD(r);
-}
-
-function mkSVG(tag) { return document.createElementNS('http://www.w3.org/2000/svg',tag); }
-function svgEl(tag,attrs){
-  const e=mkSVG(tag);
-  Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
-  return e;
-}
-function svgTxt(x,y,txt,attrs={}){
-  const e=mkSVG('text');
-  e.setAttribute('x',x);e.setAttribute('y',y);e.textContent=txt;
-  Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+// ══ SVG ══
+function svgEl(tag, attrs) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
   return e;
 }
 
-function drawDisp(r) {
-  const svg=document.getElementById('mainSVG');
-  svg.innerHTML='';
-  const W=320,H=400,ml=42,mr=10,mt=16,mb=20;
-  const dW=W-ml-mr, dH=H-mt-mb;
-  const zS=dH/r.Htot;
-  const wallX=ml+dW*0.38;
+function svgText(x, y, text, attrs) {
+  attrs = attrs || {};
+  attrs.x = x; attrs.y = y;
+  const e = svgEl('text', attrs);
+  e.textContent = text;
+  return e;
+}
 
-  function tz(d){return mt+d*zS;}
+function drawDiagram(r, mode) {
+  const svg = document.getElementById('mainSVG');
+  svg.innerHTML = '';
+  if (mode === 'disp') drawDisp(svg, r);
+  else if (mode === 'pressure') drawPress(svg, r);
+  else if (mode === 'bmd') drawBMD(svg, r);
+}
 
-  // bg
-  svg.appendChild(svgEl('rect',{width:W,height:H,fill:'#0e1520'}));
+function drawDisp(svg, r) {
+  const W = 320, H = 400, ml = 40, mr = 12, mt = 16, mb = 20;
+  const dW = W - ml - mr, dH = H - mt - mb;
+  const zS = dH / r.Htot;
+  const wallX = ml + dW * 0.4;
+  const tz = function (d) { return mt + d * zS; };
 
-  // soil layers
-  const lc=['#1a2f20','#162030','#1e1814','#1a261a','#18182a'];
-  let ch=0;
-  r.z.forEach&&null; // used later
-  layers.forEach((l,i)=>{
-    const y1=tz(ch),y2=tz(ch+l.h);
-    svg.appendChild(svgEl('rect',{x:ml,y:y1,width:dW,height:y2-y1,fill:lc[i%lc.length],opacity:.8}));
-    if(i>0){
-      svg.appendChild(svgEl('line',{x1:ml,x2:W-mr,y1:y1,y2:y1,stroke:'#263c58','stroke-dasharray':'3,3'}));
-    }
-    svg.appendChild(svgTxt(ml+3,(y1+y2)/2+4,l.name+` N=${l.N}`,{fill:'#3d5a7a','font-size':'9','font-family':'JetBrains Mono'}));
-    ch+=l.h;
+  svg.appendChild(svgEl('rect', { width: W, height: H, fill: '#131a2a' }));
+
+  const colors = ['#1a2f24', '#172238', '#2a201a', '#1c281a', '#1c1a2f'];
+  let cum = 0;
+  layers.forEach(function (l, i) {
+    const y1 = tz(cum), y2 = tz(cum + l.h);
+    svg.appendChild(svgEl('rect', { x: ml, y: y1, width: dW, height: y2 - y1, fill: colors[i % colors.length], opacity: 0.7 }));
+    if (i > 0) svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: y1, y2: y1, stroke: '#2a3654', 'stroke-dasharray': '3,3' }));
+    svg.appendChild(svgText(ml + 4, (y1 + y2) / 2 + 4, l.name + ' N=' + l.N, { fill: '#4a5e80', 'font-size': 9, 'font-family': 'JetBrains Mono' }));
+    cum += l.h;
   });
 
-  // GWL
-  const gy=tz(r.gwl);
-  svg.appendChild(svgEl('line',{x1:ml,x2:W-mr,y1:gy,y2:gy,stroke:'#2d8cf0','stroke-dasharray':'5,3',opacity:.6}));
-  svg.appendChild(svgTxt(W-mr-2,gy-3,`GWL`,{fill:'#2d8cf0','font-size':'9','text-anchor':'end','font-family':'JetBrains Mono'}));
+  const gy = tz(r.gwl);
+  svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: gy, y2: gy, stroke: COLOR_ACCENT, 'stroke-dasharray': '5,3', opacity: 0.6 }));
+  svg.appendChild(svgText(W - mr - 2, gy - 3, 'GWL', { fill: COLOR_ACCENT, 'font-size': 9, 'text-anchor': 'end', 'font-family': 'JetBrains Mono' }));
 
-  // Excavation line
-  const ey=tz(r.He);
-  svg.appendChild(svgEl('line',{x1:ml,x2:W-mr,y1:ey,y2:ey,stroke:var_orange,'stroke-width':'1.5'}));
-  svg.appendChild(svgTxt(W-mr-2,ey-3,'굴착면',{fill:var_orange,'font-size':'9','text-anchor':'end','font-family':'JetBrains Mono'}));
+  const ey = tz(r.He);
+  svg.appendChild(svgEl('line', { x1: ml, x2: W - mr, y1: ey, y2: ey, stroke: COLOR_ORANGE, 'stroke-width': 1.5 }));
+  svg.appendChild(svgText(W - mr - 2, ey - 3, '굴착면', { fill: COLOR_ORANGE, 'font-size': 9, 'text-anchor': 'end', 'font-family': 'JetBrains Mono' }));
 
-  // Wall
-  svg.appendChild(svgEl('line',{x1:wallX,x2:wallX,y1:mt,y2:tz(r.Htot),stroke:var_green,'stroke-width':'2',opacity:.35}));
+  svg.appendChild(svgEl('line', { x1: wallX, x2: wallX, y1: mt, y2: tz(r.Htot), stroke: COLOR_GREEN, 'stroke-width': 2, opacity: 0.35 }));
 
-  // Supports
-  supports.forEach(s=>{
-    const sy=tz(s.depth);
-    svg.appendChild(svgEl('line',{x1:wallX-28,x2:wallX+28,y1:sy,y2:sy,stroke:var_orange,'stroke-width':'3'}));
-    svg.appendChild(svgTxt(wallX-32,sy+4,s.type==='anchor'?'앵':s.type==='raker'?'경':'버',{fill:var_orange,'font-size':'9','text-anchor':'end','font-family':'JetBrains Mono'}));
+  supports.forEach(function (s) {
+    const sy = tz(s.depth);
+    svg.appendChild(svgEl('line', { x1: wallX - 30, x2: wallX + 30, y1: sy, y2: sy, stroke: COLOR_ORANGE, 'stroke-width': 3 }));
+    const lbl = s.type === 'anchor' ? '앵' : s.type === 'raker' ? '경' : '버';
+    svg.appendChild(svgText(wallX - 34, sy + 4, lbl, { fill: COLOR_ORANGE, 'font-size': 9, 'text-anchor': 'end', 'font-family': 'JetBrains Mono' }));
   });
 
-  // Displacement curve
-  const maxD=Math.max(...r.dp.map(Math.abs),1);
-  const dS=(dW*0.55)/maxD;
+  const maxD = Math.max.apply(null, r.dp.map(Math.abs)) || 1;
+  const dS = (dW * 0.55) / maxD;
+  let path = '';
+  r.z.forEach(function (d, i) {
+    path += (i === 0 ? 'M' : 'L') + (wallX + r.dp[i] * dS) + ',' + tz(d);
+  });
+  svg.appendChild(svgEl('path', { d: path + ' L' + wallX + ',' + tz(r.Htot) + ' L' + wallX + ',' + mt + ' Z', fill: 'rgba(77,158,255,.08)' }));
+  svg.appendChild(svgEl('path', { d: path, fill: 'none', stroke: COLOR_ACCENT, 'stroke-width': 2.5 }));
 
-  const pts=r.z.map((d,i)=>`${i===0?'M':'L'}${wallX+r.dp[i]*dS},${tz(d)}`).join(' ');
-  const fillPts=pts+` L${wallX},${tz(r.Htot)} L${wallX},${mt} Z`;
-  svg.appendChild(svgEl('path',{d:fillPts,fill:'rgba(45,140,240,.08)'}));
-  svg.appendChild(svgEl('path',{d:pts,fill:'none',stroke:'#2d8cf0','stroke-width':'2.5'}));
+  const maxAbs = Math.max.apply(null, r.dp.map(Math.abs));
+  const mIdx = r.dp.indexOf(maxAbs);
+  const mX = wallX + r.dp[mIdx] * dS, mY = tz(r.z[mIdx]);
+  svg.appendChild(svgEl('line', { x1: wallX, x2: mX - 2, y1: mY, y2: mY, stroke: COLOR_RED, 'stroke-dasharray': '3,2' }));
+  svg.appendChild(svgText(mX + 4, mY + 4, r.maxD.toFixed(1) + 'mm', { fill: COLOR_RED, 'font-size': 10, 'font-weight': 700, 'font-family': 'JetBrains Mono' }));
 
-  // Max label
-  const mIdx=r.dp.indexOf(Math.max(...r.dp.map(Math.abs)));
-  const mX=wallX+r.dp[mIdx]*dS, mY=tz(r.z[mIdx]);
-  svg.appendChild(svgEl('line',{x1:wallX,x2:mX-2,y1:mY,y2:mY,stroke:var_red,'stroke-dasharray':'3,2'}));
-  svg.appendChild(svgTxt(mX+4,mY+4,`${r.maxD.toFixed(1)}mm`,{fill:var_red,'font-size':'10','font-weight':'700','font-family':'JetBrains Mono'}));
-
-  // Y axis ticks
-  for(let d=0;d<=r.Htot;d+=2){
-    const y=tz(d);
-    svg.appendChild(svgTxt(ml-3,y+3,d,{fill:'#3d5a7a','font-size':'9','text-anchor':'end','font-family':'JetBrains Mono'}));
-    svg.appendChild(svgEl('line',{x1:ml-2,x2:ml,y1:y,y2:y,stroke:'#263c58'}));
+  for (let d = 0; d <= r.Htot; d += 2) {
+    const y = tz(d);
+    svg.appendChild(svgText(ml - 3, y + 3, d, { fill: '#4a5e80', 'font-size': 9, 'text-anchor': 'end', 'font-family': 'JetBrains Mono' }));
+    svg.appendChild(svgEl('line', { x1: ml - 2, x2: ml, y1: y, y2: y, stroke: '#2a3654' }));
   }
 }
 
-function drawPressure(r) {
-  const svg=document.getElementById('mainSVG');
-  svg.innerHTML='';
-  const W=320,H=400,ml=44,mt=22,mb=16;
-  const dH=H-mt-mb, dW=W-ml-16;
-  const zS=dH/r.Htot;
-  svg.appendChild(svgEl('rect',{width:W,height:H,fill:'#0e1520'}));
-  svg.appendChild(svgTxt(W/2,14,'토압 분포도',{fill:'#7a9abf','font-size':'11','text-anchor':'middle','font-family':'Noto Sans KR'}));
+function drawPress(svg, r) {
+  const W = 320, H = 400, ml = 44, mt = 22, mb = 16;
+  const dH = H - mt - mb, dW = W - ml - 16;
+  const zS = dH / r.Htot;
+  const tz = function (d) { return mt + d * zS; };
 
-  const maxP=Math.max(...r.actP.map(p=>p.pa),1);
-  const pS=(dW*0.45)/maxP;
-  const ox=ml;
+  svg.appendChild(svgEl('rect', { width: W, height: H, fill: '#131a2a' }));
+  svg.appendChild(svgText(W / 2, 14, '토압 분포도', { fill: '#8da4c2', 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'Noto Sans KR' }));
 
-  function tz(d){return mt+d*zS;}
+  const maxP = Math.max.apply(null, r.actP.map(function (p) { return p.pa; })) || 1;
+  const pS = (dW * 0.45) / maxP;
 
-  // Active
-  let aPath=`M${ox},${mt}`;
-  r.z.forEach((d,i)=>{ aPath+=` L${ox+r.actP[i].pa*pS},${tz(d)}`; });
-  aPath+=` L${ox},${tz(r.Htot)} Z`;
-  svg.appendChild(svgEl('path',{d:aPath,fill:'rgba(240,78,78,.12)',stroke:var_red,'stroke-width':'1.5'}));
+  let aPath = 'M' + ml + ',' + mt;
+  r.z.forEach(function (d, i) { aPath += ' L' + (ml + r.actP[i].pa * pS) + ',' + tz(d); });
+  aPath += ' L' + ml + ',' + tz(r.Htot) + ' Z';
+  svg.appendChild(svgEl('path', { d: aPath, fill: 'rgba(255,93,93,.12)', stroke: COLOR_RED, 'stroke-width': 1.5 }));
 
-  // Passive
-  let pPath=`M${ox},${tz(r.He)}`;
-  r.z.forEach((d,i)=>{if(d>=r.He) pPath+=` L${ox+Math.min(r.actP[i].pp,maxP*2.5)*pS*0.25},${tz(d)}`; });
-  pPath+=` L${ox},${tz(r.Htot)} Z`;
-  svg.appendChild(svgEl('path',{d:pPath,fill:'rgba(14,203,129,.1)',stroke:var_green,'stroke-width':'1.5'}));
+  let pPath = 'M' + ml + ',' + tz(r.He);
+  r.z.forEach(function (d, i) {
+    if (d >= r.He) pPath += ' L' + (ml + Math.min(r.actP[i].pp, maxP * 2.5) * pS * 0.25) + ',' + tz(d);
+  });
+  pPath += ' L' + ml + ',' + tz(r.Htot) + ' Z';
+  svg.appendChild(svgEl('path', { d: pPath, fill: 'rgba(45,212,127,.1)', stroke: COLOR_GREEN, 'stroke-width': 1.5 }));
 
-  svg.appendChild(svgTxt(ox+8,mt+14,'주동토압',{fill:var_red,'font-size':'10','font-family':'Noto Sans KR'}));
-  svg.appendChild(svgTxt(ox+8,tz(r.He)+22,'수동토압',{fill:var_green,'font-size':'10','font-family':'Noto Sans KR'}));
+  svg.appendChild(svgText(ml + 8, mt + 16, '주동토압', { fill: COLOR_RED, 'font-size': 10, 'font-family': 'Noto Sans KR' }));
+  svg.appendChild(svgText(ml + 8, tz(r.He) + 22, '수동토압', { fill: COLOR_GREEN, 'font-size': 10, 'font-family': 'Noto Sans KR' }));
 
-  for(let d=0;d<=r.Htot;d+=2){
-    svg.appendChild(svgTxt(ml-3,tz(d)+3,d,{fill:'#3d5a7a','font-size':'9','text-anchor':'end','font-family':'JetBrains Mono'}));
+  for (let d = 0; d <= r.Htot; d += 2) {
+    svg.appendChild(svgText(ml - 3, tz(d) + 3, d, { fill: '#4a5e80', 'font-size': 9, 'text-anchor': 'end', 'font-family': 'JetBrains Mono' }));
   }
 }
 
-function drawBMD(r) {
-  const svg=document.getElementById('mainSVG');
-  svg.innerHTML='';
-  const W=320,H=400,ml=44,mt=22,mb=16;
-  const dH=H-mt-mb;
-  const zS=dH/r.Htot;
-  const ox=ml+60;
-  svg.appendChild(svgEl('rect',{width:W,height:H,fill:'#0e1520'}));
-  svg.appendChild(svgTxt(W/2,14,'휨모멘트 M (kN·m/m)',{fill:'#7a9abf','font-size':'10','text-anchor':'middle','font-family':'Noto Sans KR'}));
+function drawBMD(svg, r) {
+  const W = 320, H = 400, ml = 44, mt = 22, mb = 16;
+  const dH = H - mt - mb;
+  const zS = dH / r.Htot;
+  const ox = ml + 60;
+  const tz = function (d) { return mt + d * zS; };
 
-  const maxM=Math.max(...r.mom.map(Math.abs),1);
-  const mS=((W-ml-16)*0.8)/maxM;
+  svg.appendChild(svgEl('rect', { width: W, height: H, fill: '#131a2a' }));
+  svg.appendChild(svgText(W / 2, 14, '휨모멘트 M (kN·m/m)', { fill: '#8da4c2', 'font-size': 10, 'text-anchor': 'middle', 'font-family': 'Noto Sans KR' }));
 
-  function tz(d){return mt+d*zS;}
+  const maxM = Math.max.apply(null, r.mom.map(Math.abs)) || 1;
+  const mS = ((W - ml - 16) * 0.8) / maxM;
 
-  let mPath=`M${ox+r.mom[0]*mS},${mt}`;
-  r.z.forEach((d,i)=>{ mPath+=` L${ox+r.mom[i]*mS},${tz(d)}`; });
-  const fill=mPath+` L${ox},${tz(r.Htot)} L${ox},${mt} Z`;
-  svg.appendChild(svgEl('path',{d:fill,fill:'rgba(155,109,255,.1)'}));
-  svg.appendChild(svgEl('path',{d:mPath,fill:'none',stroke:'#9b6dff','stroke-width':'2'}));
-  svg.appendChild(svgEl('line',{x1:ox,x2:ox,y1:mt,y2:tz(r.Htot),stroke:'#263c58'}));
+  let path = 'M' + (ox + r.mom[0] * mS) + ',' + mt;
+  r.z.forEach(function (d, i) { path += ' L' + (ox + r.mom[i] * mS) + ',' + tz(d); });
 
-  svg.appendChild(svgTxt(ox+4,mt+14,`Mmax=${r.maxM.toFixed(0)}`,{fill:'#9b6dff','font-size':'10','font-family':'JetBrains Mono'}));
+  svg.appendChild(svgEl('path', { d: path + ' L' + ox + ',' + tz(r.Htot) + ' L' + ox + ',' + mt + ' Z', fill: 'rgba(167,139,255,.1)' }));
+  svg.appendChild(svgEl('path', { d: path, fill: 'none', stroke: COLOR_PURPLE, 'stroke-width': 2 }));
+  svg.appendChild(svgEl('line', { x1: ox, x2: ox, y1: mt, y2: tz(r.Htot), stroke: '#2a3654' }));
 
-  for(let d=0;d<=r.Htot;d+=2){
-    svg.appendChild(svgTxt(ml-2,tz(d)+3,d,{fill:'#3d5a7a','font-size':'9','text-anchor':'end','font-family':'JetBrains Mono'}));
+  svg.appendChild(svgText(ox + 4, mt + 14, 'M max=' + r.maxM.toFixed(0), { fill: COLOR_PURPLE, 'font-size': 10, 'font-family': 'JetBrains Mono' }));
+
+  for (let d = 0; d <= r.Htot; d += 2) {
+    svg.appendChild(svgText(ml - 2, tz(d) + 3, d, { fill: '#4a5e80', 'font-size': 9, 'text-anchor': 'end', 'font-family': 'JetBrains Mono' }));
   }
 }
 
-// ═══════════════════════════════════════
-// AI AGENT
-// ═══════════════════════════════════════
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
-function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,90)+'px';}
-function sq(t){document.getElementById('chatInput').value=t;sendMsg();}
+// ══ AI CHAT ══
+function onKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
 
-async function sendMsg() {
-  const inp=document.getElementById('chatInput');
-  const txt=inp.value.trim(); if(!txt)return;
-  addUser(txt); inp.value=''; inp.style.height='auto';
-  const tid=addTyping();
+function autoSize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+
+function quickAsk(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addUserMsg(text);
+  input.value = '';
+  input.style.height = 'auto';
+
+  const tid = addTyping();
+
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        system:`당신은 SUNEX-AI, 흙막이 굴착 공학 전문 AI 에이전트입니다. KDS/KCS 21 30 00:2024 기준을 준수하며, 현장 안전관리자에게 명확하고 수치 기반의 공학적 판단을 제공합니다. 간결하게 답변하세요. HTML 태그 사용 가능.`,
-        messages:[{role:'user',content:buildCtx(txt)}]
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: '당신은 SUNEX-AI, 흙막이 굴착 공학 전문 AI 에이전트입니다. KDS/KCS 21 30 00:2024 기준을 준수하며, 현장 안전관리자에게 명확하고 수치 기반의 공학적 판단을 제공합니다. 간결하게 답변하세요. HTML 태그 사용 가능.',
+        messages: [{ role: 'user', content: buildContext(text) }]
       })
     });
     removeTyping(tid);
-    if(!res.ok)throw new Error();
-    const data=await res.json();
-    addAI(data.content?.[0]?.text||'응답 오류');
-  } catch {
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    addAIMsg((data.content && data.content[0] && data.content[0].text) || '응답 오류');
+  } catch (err) {
     removeTyping(tid);
-    addAI(localAnswer(txt));
+    addAIMsg(localAnswer(text));
   }
 }
 
-function buildCtx(q) {
-  let c=`[현장 조건]\n굴착:${document.getElementById('excavDepth').value}m / 근입:${document.getElementById('embedDepth').value}m\n공법:${document.getElementById('method').options[document.getElementById('method').selectedIndex].text}\nGWL:GL-${document.getElementById('gwl').value}m\n지지공:${supports.map(s=>`${s.type}@GL-${s.depth}m`).join(',')||'없음'}\n`;
-  if(result) c+=`\n[해석결과]\n최대변위:${result.maxD.toFixed(1)}mm(GL-${result.maxDz.toFixed(1)}m) / M:${result.maxM.toFixed(1)}kN·m/m\n히빙Fs:${result.Fs_h.toFixed(2)} / 파이핑Fs:${result.Fs_p>50?'∞':result.Fs_p.toFixed(2)} / 침하:${result.maxSet.toFixed(1)}mm\n`;
-  c+=`지층:${layers.map(l=>`${l.name}(${l.h}m,c=${l.c},φ=${l.phi}°,N=${l.N})`).join('/')}\n\n질문:${q}`;
+function buildContext(q) {
+  let c = '[현장 조건]\n';
+  c += '굴착:' + document.getElementById('excavDepth').value + 'm / 근입:' + document.getElementById('embedDepth').value + 'm\n';
+  c += '공법:' + document.getElementById('method').options[document.getElementById('method').selectedIndex].text + '\n';
+  c += 'GWL:GL-' + document.getElementById('gwl').value + 'm\n';
+  c += '지지공:' + (supports.map(function (s) { return s.type + '@GL-' + s.depth + 'm'; }).join(',') || '없음') + '\n';
+  if (result) {
+    c += '\n[해석결과]\n';
+    c += '최대변위:' + result.maxD.toFixed(1) + 'mm(GL-' + result.maxDz.toFixed(1) + 'm) / M:' + result.maxM.toFixed(1) + 'kN·m/m\n';
+    c += '히빙Fs:' + result.Fs_h.toFixed(2) + ' / 파이핑Fs:' + (result.Fs_p > 50 ? '∞' : result.Fs_p.toFixed(2)) + ' / 침하:' + result.maxSet.toFixed(1) + 'mm\n';
+  }
+  c += '지층:' + layers.map(function (l) { return l.name + '(' + l.h + 'm,c=' + l.c + ',φ=' + l.phi + '°,N=' + l.N + ')'; }).join('/') + '\n';
+  c += '\n질문:' + q;
   return c;
 }
 
-function genAutoAnalysis(r) {
-  const mn={hpile:'H-PILE+토류판',sheetpile:'강널말뚝',cip:'C.I.P',scw:'S.C.W',slurry:'지하연속벽'};
-  const ds=r.maxD<=30?'허용범위 내':r.maxD<=60?'주의 수준':'초과 — 즉시 검토';
-  return `<b>📊 탄소성 해석 완료</b><br><br>
-<table class="dtable">
-<tr><th>항목</th><th>값</th><th>판정</th></tr>
-<tr><td>최대변위</td><td>${r.maxD.toFixed(1)}mm</td><td>${r.maxD<=30?'<span class="badge-ok">OK</span>':'<span class="badge-warn">검토</span>'}</td></tr>
-<tr><td>히빙 Fs</td><td>${r.Fs_h.toFixed(2)}</td><td>${r.Fs_h>=1.5?'<span class="badge-ok">OK</span>':'<span class="badge-warn">불만족</span>'}</td></tr>
-<tr><td>파이핑 Fs</td><td>${r.Fs_p>50?'∞':r.Fs_p.toFixed(2)}</td><td>${r.Fs_p>=3?'<span class="badge-ok">OK</span>':'<span class="badge-warn">검토</span>'}</td></tr>
-<tr><td>지표침하</td><td>${r.maxSet.toFixed(1)}mm</td><td>${r.maxSet<=25?'<span class="badge-ok">OK</span>':'<span class="badge-warn">검토</span>'}</td></tr>
-</table>
-<br>${mn[r.meth]||r.meth} 조건, 최대변위 <b>${r.maxD.toFixed(1)}mm</b> (${ds}).<br>
-계측기준: <span style="color:${var_green}">1단계</span>${r.lv1.toFixed(1)}mm / <span style="color:${var_orange}">2단계</span>${r.lv2.toFixed(1)}mm / <span style="color:${var_red}">3단계</span>${r.lv3.toFixed(1)}mm`;
+function generateAutoSummary(r) {
+  const mn = { hpile: 'H-PILE+토류판', sheetpile: '강널말뚝', cip: 'C.I.P', scw: 'S.C.W', slurry: '지하연속벽' };
+  const ds = r.maxD <= 30 ? '허용범위 내' : r.maxD <= 60 ? '주의 수준' : '초과 — 즉시 검토';
+
+  let h = '<b>📊 탄소성 해석 완료</b><br><br>';
+  h += '<table class="dtable">';
+  h += '<tr><th>항목</th><th>값</th><th>판정</th></tr>';
+  h += '<tr><td>최대변위</td><td>' + r.maxD.toFixed(1) + 'mm</td><td>' + (r.maxD <= 30 ? '<span class="bok">OK</span>' : '<span class="bwarn">검토</span>') + '</td></tr>';
+  h += '<tr><td>히빙 Fs</td><td>' + r.Fs_h.toFixed(2) + '</td><td>' + (r.Fs_h >= 1.5 ? '<span class="bok">OK</span>' : '<span class="bwarn">불만족</span>') + '</td></tr>';
+  h += '<tr><td>파이핑 Fs</td><td>' + (r.Fs_p > 50 ? '∞' : r.Fs_p.toFixed(2)) + '</td><td>' + (r.Fs_p >= 3 ? '<span class="bok">OK</span>' : '<span class="bwarn">검토</span>') + '</td></tr>';
+  h += '<tr><td>지표침하</td><td>' + r.maxSet.toFixed(1) + 'mm</td><td>' + (r.maxSet <= 25 ? '<span class="bok">OK</span>' : '<span class="bwarn">검토</span>') + '</td></tr>';
+  h += '</table><br>';
+  h += (mn[r.meth] || r.meth) + ' 조건에서 최대변위 <b>' + r.maxD.toFixed(1) + 'mm</b> (' + ds + ').<br>';
+  h += '계측기준: <span style="color:' + COLOR_GREEN + '">1단계</span>' + r.lv1.toFixed(1) + 'mm / <span style="color:' + COLOR_ORANGE + '">2단계</span>' + r.lv2.toFixed(1) + 'mm / <span style="color:' + COLOR_RED + '">3단계</span>' + r.lv3.toFixed(1) + 'mm';
+  return h;
 }
 
 function localAnswer(q) {
-  if(!result) return '해석을 먼저 실행해 주세요. 입력 탭에서 조건 입력 후 ▶ 실행 버튼을 클릭하세요.';
-  const r=result;
-  if(q.includes('히빙')){
-    return `<b>히빙 안정성</b><br>Fs=${r.Fs_h.toFixed(2)} (기준≥1.5) — ${r.Fs_h>=1.5?'<span class="badge-ok">안전</span>':'<span class="badge-warn">불만족</span>'}<br>${!r.Fs_h>=1.5?'보강: 근입깊이 증가 / 지반개량 / 단계 굴착 축소':'현 조건 유지 가능. 계측 강화 권고.'}`;
+  if (!result) return '해석을 먼저 실행해 주세요. 입력 탭에서 조건 입력 후 ▶ 실행 버튼을 클릭하세요.';
+  const r = result;
+
+  if (q.indexOf('히빙') !== -1) {
+    return '<b>히빙 안정성</b><br>Fs=' + r.Fs_h.toFixed(2) + ' (기준≥1.5) — ' + (r.Fs_h >= 1.5 ? '<span class="bok">안전</span>' : '<span class="bwarn">불만족</span>') + '<br><br>' + (r.Fs_h < 1.5 ? '보강: 근입깊이 증가 / 지반개량 / 단계 굴착 축소' : '현 조건 유지 가능. 계측 강화 권고.');
   }
-  if(q.includes('파이핑')){
-    return `<b>파이핑 위험</b><br>Fs=${r.Fs_p>50?'∞':r.Fs_p.toFixed(2)} (기준≥3.0)<br>${r.gwl>=r.He?'GWL이 굴착면 하부 — 파이핑 위험 없음.':'차수 대책 검토: 그라우팅/웰포인트/딥웰'}`;
+  if (q.indexOf('파이핑') !== -1) {
+    return '<b>파이핑 위험</b><br>Fs=' + (r.Fs_p > 50 ? '∞' : r.Fs_p.toFixed(2)) + ' (기준≥3.0)<br><br>' + (r.gwl >= r.He ? 'GWL이 굴착면 하부 — 파이핑 위험 없음.' : '차수 대책 검토: 그라우팅 / 웰포인트 / 딥웰');
   }
-  if(q.includes('보강')||q.includes('대책')){
-    return `<b>보강 대책 (변위 ${r.maxD.toFixed(1)}mm)</b><br><br>단기: 지지공 추가(현${supports.length}단→${supports.length+1}단), 프리로드 적용<br>근본: 근입깊이 ${(r.Hem*1.2).toFixed(1)}m로 증가, 강성벽체 변경, 배면 지반개량(JSP/LW)`;
+  if (q.indexOf('보강') !== -1 || q.indexOf('대책') !== -1) {
+    return '<b>보강 대책 (변위 ' + r.maxD.toFixed(1) + 'mm)</b><br><br>단기: 지지공 추가 (현 ' + supports.length + '단 → ' + (supports.length + 1) + '단), 프리로드 적용<br><br>근본: 근입깊이 ' + (r.Hem * 1.2).toFixed(1) + 'm로 증가, 강성벽체 변경, 배면 지반개량 (JSP/LW)';
   }
-  if(q.includes('계측')||q.includes('관리기준')){
-    return `<b>계측 관리기준 (KDS 21 30 00)</b><br>
-<table class="dtable">
-<tr><th>단계</th><th>변위</th><th>조치</th></tr>
-<tr><td>1단계(주의)</td><td>${r.lv1.toFixed(1)}mm</td><td>관찰 강화</td></tr>
-<tr><td>2단계(경보)</td><td>${r.lv2.toFixed(1)}mm</td><td>굴착 중단 검토</td></tr>
-<tr><td>3단계(위험)</td><td>${r.lv3.toFixed(1)}mm</td><td>즉시 조치</td></tr>
-</table>계측항목: 수평변위계, 침하측량, 수위계, 경사계`;
+  if (q.indexOf('계측') !== -1 || q.indexOf('관리기준') !== -1) {
+    let h = '<b>계측 관리기준 (KDS 21 30 00)</b><br>';
+    h += '<table class="dtable">';
+    h += '<tr><th>단계</th><th>변위</th><th>조치</th></tr>';
+    h += '<tr><td>1단계(주의)</td><td>' + r.lv1.toFixed(1) + 'mm</td><td>관찰 강화</td></tr>';
+    h += '<tr><td>2단계(경보)</td><td>' + r.lv2.toFixed(1) + 'mm</td><td>굴착 중단 검토</td></tr>';
+    h += '<tr><td>3단계(위험)</td><td>' + r.lv3.toFixed(1) + 'mm</td><td>즉시 조치</td></tr>';
+    h += '</table>계측항목: 수평변위계, 침하측량, 수위계, 경사계';
+    return h;
   }
-  if(q.includes('근입')||q.includes('최적')){
-    return `<b>근입깊이 산정</b><br>현재:${r.Hem}m / 권고:${Math.max(r.He*0.6,r.Hem).toFixed(1)}m<br>전도 Fs≥1.5 → GL-${(r.He*0.5).toFixed(1)}m<br>히빙 Fs≥1.5 → GL-${(r.He*0.6).toFixed(1)}m`;
+  if (q.indexOf('근입') !== -1 || q.indexOf('최적') !== -1) {
+    return '<b>근입깊이 산정</b><br>현재: ' + r.Hem + 'm / 권고: ' + Math.max(r.He * 0.6, r.Hem).toFixed(1) + 'm<br><br>전도 Fs≥1.5 → GL-' + (r.He * 0.5).toFixed(1) + 'm<br>히빙 Fs≥1.5 → GL-' + (r.He * 0.6).toFixed(1) + 'm';
   }
-  if(q.includes('종합')||q.includes('리스크')){
-    const ok=r.Fs_h>=1.5&&r.Fs_p>=3&&r.maxD<=30;
-    return `<b>현장 리스크 종합 평가</b><br><br>변위:${r.maxD<=30?'✓':'⚠'} / 히빙:${r.Fs_h>=1.5?'✓':'⚠'} / 파이핑:${r.Fs_p>=3?'✓':'⚠'} / 침하:${r.maxSet<=25?'✓':'⚠'}<br><br>${ok?'전 항목 기준 만족. 계측 유지 조건으로 굴착 진행 가능.':'일부 항목 기준 미달. 보강 대책 수립 후 굴착 재개 필요.'}`;
+  if (q.indexOf('종합') !== -1 || q.indexOf('리스크') !== -1) {
+    const ok = r.Fs_h >= 1.5 && r.Fs_p >= 3 && r.maxD <= 30;
+    return '<b>현장 리스크 종합 평가</b><br><br>변위:' + (r.maxD <= 30 ? '✓' : '⚠') + ' / 히빙:' + (r.Fs_h >= 1.5 ? '✓' : '⚠') + ' / 파이핑:' + (r.Fs_p >= 3 ? '✓' : '⚠') + ' / 침하:' + (r.maxSet <= 25 ? '✓' : '⚠') + '<br><br>' + (ok ? '전 항목 기준 만족. 계측 유지 조건으로 굴착 진행 가능.' : '일부 항목 기준 미달. 보강 대책 수립 후 굴착 재개 필요.');
   }
-  return `<b>현재 해석 상태</b><br>최대변위 ${r.maxD.toFixed(1)}mm / 히빙Fs ${r.Fs_h.toFixed(2)} / 파이핑Fs ${r.Fs_p>50?'∞':r.Fs_p.toFixed(2)}<br>위의 빠른 버튼을 사용하거나 구체적으로 질문해 주세요.`;
+
+  return '<b>현재 해석 상태</b><br>최대변위 ' + r.maxD.toFixed(1) + 'mm / 히빙Fs ' + r.Fs_h.toFixed(2) + ' / 파이핑Fs ' + (r.Fs_p > 50 ? '∞' : r.Fs_p.toFixed(2)) + '<br><br>위의 빠른 버튼을 사용하거나 구체적으로 질문해 주세요.';
 }
 
-// ═══════════════════════════════════════
-// CHAT HELPERS
-// ═══════════════════════════════════════
-function addUser(t){
-  const c=document.getElementById('chatArea');
-  c.innerHTML+=`<div class="msg user"><div class="msg-role user">관리자</div><div class="bubble">${t}</div></div>`;
-  c.scrollTop=c.scrollHeight;
-}
-function addAI(h){
-  const c=document.getElementById('chatArea');
-  c.innerHTML+=`<div class="msg ai"><div class="msg-role ai">SUNEX-AI</div><div class="bubble">${h}</div></div>`;
-  c.scrollTop=c.scrollHeight;
-}
-function addTyping(){
-  const id='t'+Date.now(), c=document.getElementById('chatArea');
-  c.innerHTML+=`<div class="msg ai" id="${id}"><div class="msg-role ai">SUNEX-AI</div><div class="bubble"><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div></div></div>`;
-  c.scrollTop=c.scrollHeight; return id;
-}
-function removeTyping(id){const e=document.getElementById(id);if(e)e.remove();}
-
-// ═══════════════════════════════════════
-// UI UTILS
-// ═══════════════════════════════════════
-function setStatus(lbl, c){
-  document.getElementById('sLbl').textContent=lbl;
-  const d=document.getElementById('sDot');
-  d.className='dot '+c;
-}
-function animProg(from,to,dur){
-  const f=document.getElementById('progFill'), s=Date.now();
-  function step(){
-    const t=Math.min((Date.now()-s)/dur,1);
-    f.style.width=(from+(to-from)*t)+'%';
-    if(t<1)requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
+function addUserMsg(text) {
+  const list = document.getElementById('chatList');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = '<div class="msg-role user">관리자</div><div class="bubble">' + escapeHtml(text) + '</div>';
+  list.appendChild(div);
+  scrollToBottom();
 }
 
-// ═══════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════
+function addAIMsg(html) {
+  const list = document.getElementById('chatList');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = '<div class="msg-role ai">SUNEX-AI</div><div class="bubble">' + html + '</div>';
+  list.appendChild(div);
+  scrollToBottom();
+}
+
+function addTyping() {
+  const id = 't' + Date.now();
+  const list = document.getElementById('chatList');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = id;
+  div.innerHTML = '<div class="msg-role ai">SUNEX-AI</div><div class="bubble"><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>';
+  list.appendChild(div);
+  scrollToBottom();
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function scrollToBottom() {
+  setTimeout(function () {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }, 50);
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+// ══ UTILS ══
+function setStatus(label, busy) {
+  document.getElementById('statusLbl').textContent = label;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'dot' + (busy ? ' busy' : '');
+}
+
+function animateProgress() {
+  const fill = document.getElementById('progFill');
+  fill.style.width = '0%';
+  let pct = 0;
+  const iv = setInterval(function () {
+    pct += 6;
+    fill.style.width = pct + '%';
+    if (pct >= 100) clearInterval(iv);
+  }, 100);
+}
+
+// ══ INIT ══
 renderLayers();
 renderSupports();
 </script>
