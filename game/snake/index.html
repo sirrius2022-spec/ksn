@@ -9,13 +9,14 @@
             margin: 0;
             padding: 0;
             background-color: #050510;
+            /* 배경 그리드 조금 더 촘촘하게 */
             background-image: 
-                linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
+                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 15px 15px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between; /* 상하 분배 */
             align-items: center;
             height: 100vh;
             color: #0f0;
@@ -23,27 +24,46 @@
             overflow: hidden;
             touch-action: none;
         }
-        #gameArea {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #scoreBoard {
+        
+        #topArea {
             width: 100%;
-            text-align: left;
-            font-size: 20px;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #scoreBoard {
+            font-size: 22px;
             font-weight: bold;
             text-shadow: 0 0 5px #0f0;
-            margin-bottom: 10px;
         }
+
+        #gameArea {
+            position: relative;
+            width: 100%;
+            flex-grow: 1; /* 남은 공간을 모두 차지하도록 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
         canvas {
             background: rgba(0, 0, 0, 0.8);
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.1);
             border: 2px solid #0f0;
             border-radius: 5px;
             display: block;
+            /* 캔버스가 부모 영역을 꽉 채우되 비율 유지 */
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; 
         }
+
         #ui {
             position: absolute;
             top: 50%;
@@ -53,37 +73,47 @@
             text-shadow: 0 0 10px #0f0;
             width: 100%;
             pointer-events: none;
+            z-index: 20;
         }
+        
         button.actionBtn {
             margin-top: 20px;
-            padding: 10px 20px;
+            padding: 15px 30px;
             background: rgba(0, 255, 0, 0.1);
             color: #0f0;
-            border: 1px solid #0f0;
+            border: 2px solid #0f0;
+            border-radius: 8px;
             font-family: inherit;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 0 10px #0f0;
+            box-shadow: 0 0 15px #0f0;
             pointer-events: auto;
         }
         button.actionBtn:active { background: #0f0; color: #000; }
         
-        /* 모바일용 가상 방향키 */
-        #dpad {
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-template-rows: repeat(2, 60px);
-            gap: 10px;
+        /* 모바일용 가상 방향키 (하단 고정) */
+        #dpadArea {
+            width: 100%;
+            padding-bottom: 30px;
+            display: flex;
             justify-content: center;
+            z-index: 10;
         }
+
+        #dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            grid-template-rows: repeat(2, 70px);
+            gap: 10px;
+        }
+        
         .dirBtn {
             background: rgba(0, 255, 0, 0.1);
             border: 2px solid #0f0;
-            border-radius: 10px;
+            border-radius: 15px;
             color: #0f0;
-            font-size: 24px;
+            font-size: 28px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -91,7 +121,7 @@
             touch-action: manipulation;
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
         }
-        .dirBtn:active { background: rgba(0, 255, 0, 0.5); }
+        .dirBtn:active { background: rgba(0, 255, 0, 0.6); box-shadow: 0 0 20px #0f0; }
         #btnUp { grid-column: 2; grid-row: 1; }
         #btnLeft { grid-column: 1; grid-row: 2; }
         #btnDown { grid-column: 2; grid-row: 2; }
@@ -101,17 +131,19 @@
 </head>
 <body>
 
-<div id="gameArea">
+<div id="topArea">
     <div id="scoreBoard">SCORE: <span id="score">0</span></div>
-    <div style="position: relative;">
-        <canvas id="gameCanvas" width="300" height="300"></canvas>
-        <div id="ui">
-            <h1 id="title">NEON SNAKE</h1>
-            <button id="startBtn" class="actionBtn">GAME START</button>
-        </div>
+</div>
+
+<div id="gameArea">
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+        <h1 id="title" style="font-size: 32px; margin-bottom: 10px;">NEON SNAKE</h1>
+        <button id="startBtn" class="actionBtn">START</button>
     </div>
+</div>
     
-    <!-- 모바일 터치 패드 -->
+<div id="dpadArea">
     <div id="dpad">
         <div class="dirBtn" id="btnUp">▲</div>
         <div class="dirBtn" id="btnLeft">◀</div>
@@ -128,16 +160,31 @@
     const title = document.getElementById('title');
     const scoreEl = document.getElementById('score');
 
-    // 캔버스 크기를 화면에 맞게 유동적으로 조절 (정사각형 유지)
+    let tileCount = 20; // 맵을 20x20 칸으로 나누어 조금 더 넓게 설정
+    let gridSize;
+
+    // 모바일 화면을 꽉 채우도록 캔버스 크기 계산
     function resizeCanvas() {
-        const size = Math.min(window.innerWidth * 0.9, 400); // 최대 400px
+        const gameArea = document.getElementById('gameArea');
+        // 부모 영역의 너비와 높이 중 작은 값을 기준으로 정사각형 생성
+        const size = Math.min(gameArea.clientWidth - 20, gameArea.clientHeight - 20); 
+        
         canvas.width = size;
         canvas.height = size;
+        gridSize = size / tileCount;
     }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+    
+    // 리사이즈 이벤트 시 다시 그리기 위함
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        if(!isPlaying && snake.length > 0) {
+            clearCanvas();
+            drawFood();
+            drawSnake();
+        }
+    });
 
-    // 오디오 컨텍스트
+    // 오디오 설정
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx;
 
@@ -165,16 +212,13 @@
         }
     }
 
-    // 게임 변수
-    let tileCount = 15; // 격자 칸 수 (가로세로 15칸)
-    let gridSize = canvas.width / tileCount;
-    
+    // 게임 상태 변수
     let snake = [];
     let dx = 0;
     let dy = 0;
     let food = { x: 5, y: 5 };
     let score = 0;
-    let speed = 7;
+    let speed = 8;
     
     let gameLoopTimeout;
     let isPlaying = false;
@@ -188,10 +232,10 @@
         const goingRight = dx === 1;
         const goingLeft = dx === -1;
 
-        if (newDx === -1 && !goingRight) { dx = -1; dy = 0; changingDirection = true; } // 좌
-        if (newDy === -1 && !goingDown) { dx = 0; dy = -1; changingDirection = true; } // 상
-        if (newDx === 1 && !goingLeft) { dx = 1; dy = 0; changingDirection = true; } // 우
-        if (newDy === 1 && !goingUp) { dx = 0; dy = 1; changingDirection = true; } // 하
+        if (newDx === -1 && !goingRight) { dx = -1; dy = 0; changingDirection = true; } 
+        if (newDy === -1 && !goingDown) { dx = 0; dy = -1; changingDirection = true; } 
+        if (newDx === 1 && !goingLeft) { dx = 1; dy = 0; changingDirection = true; } 
+        if (newDy === 1 && !goingUp) { dx = 0; dy = 1; changingDirection = true; } 
     }
 
     // PC 키보드
@@ -202,7 +246,7 @@
         if (e.key === 'ArrowDown') setDirection(0, 1);
     });
 
-    // 모바일 터치 패드 이벤트 (마우스 클릭도 지원)
+    // 모바일 터치 패드
     const addTouch = (id, nx, ny) => {
         const btn = document.getElementById(id);
         const handler = (e) => { e.preventDefault(); setDirection(nx, ny); };
@@ -223,7 +267,6 @@
         }
 
         changingDirection = false;
-        gridSize = canvas.width / tileCount; // 리사이즈 대비
         
         gameLoopTimeout = setTimeout(() => {
             clearCanvas();
@@ -243,6 +286,7 @@
         ctx.shadowColor = '#f00';
         ctx.fillStyle = '#f00';
         ctx.beginPath();
+        // 먹이 크기도 셀 크기에 맞춰 조정
         ctx.arc(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize / 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
@@ -254,13 +298,28 @@
             if (index === 0) {
                 ctx.fillStyle = '#fff';
                 ctx.shadowColor = '#fff';
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 8;
             } else {
                 ctx.fillStyle = '#0f0';
                 ctx.shadowColor = '#0f0';
-                ctx.shadowBlur = 5;
+                ctx.shadowBlur = 4;
             }
-            ctx.fillRect(part.x * gridSize + 1, part.y * gridSize + 1, gridSize - 2, gridSize - 2);
+            
+            // 사진의 참고 이미지처럼 셀(마디) 간의 간격을 주어 띄워 그리기
+            // 각 칸의 크기(gridSize)에서 여백(margin)을 뺌
+            const margin = 2; // 마디 사이의 간격
+            const rectSize = gridSize - (margin * 2); 
+            
+            // 모서리를 살짝 둥글게 처리 (선택사항, 지워도 됨)
+            ctx.lineJoin = "round";
+            ctx.lineWidth = margin;
+            
+            ctx.fillRect(
+                (part.x * gridSize) + margin, 
+                (part.y * gridSize) + margin, 
+                rectSize, 
+                rectSize
+            );
             ctx.shadowBlur = 0;
         });
     }
@@ -273,7 +332,7 @@
             score += 10;
             scoreEl.innerText = score;
             playSound('eat');
-            if (score % 50 === 0 && speed < 20) speed += 1; // 속도 증가
+            if (score % 50 === 0 && speed < 20) speed += 1; 
             generateFood();
         } else {
             snake.pop();
@@ -283,16 +342,18 @@
     function generateFood() {
         food.x = Math.floor(Math.random() * tileCount);
         food.y = Math.floor(Math.random() * tileCount);
+        
+        let onSnake = false;
         snake.forEach((part) => {
-            if (part.x === food.x && part.y === food.y) generateFood();
+            if (part.x === food.x && part.y === food.y) onSnake = true;
         });
+        
+        if(onSnake) generateFood();
     }
 
     function hasGameEnded() {
         const head = snake[0];
-        // 벽 충돌 (0 미만이거나 타일 수 이상일 때)
         if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) return true;
-        // 자기 몸 충돌
         for (let i = 4; i < snake.length; i++) {
             if (snake[i].x === head.x && snake[i].y === head.y) return true;
         }
@@ -309,7 +370,10 @@
         startBtn.innerText = 'RESTART';
     }
 
-    // --- 게임 시작 ---
+    // --- 초기화 및 시작 ---
+    // 첫 로드 시 캔버스 설정
+    resizeCanvas();
+
     startBtn.addEventListener('click', () => {
         if (!audioCtx) audioCtx = new AudioContext();
         audioCtx.resume();
@@ -318,7 +382,9 @@
         title.style.display = 'none';
         startBtn.style.display = 'none';
         
-        // 초기화 (중앙에서 약간 왼쪽에서 시작)
+        // 화면 크기가 변했을 수 있으므로 다시 리사이즈
+        resizeCanvas();
+        
         const startX = Math.floor(tileCount / 2);
         const startY = Math.floor(tileCount / 2);
         snake = [
@@ -326,10 +392,10 @@
             { x: startX - 1, y: startY },
             { x: startX - 2, y: startY }
         ];
-        dx = 1; // 오른쪽 방향으로 출발
+        dx = 1; 
         dy = 0;
         score = 0;
-        speed = 7;
+        speed = 8;
         scoreEl.innerText = score;
         generateFood();
         
