@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <!-- 모바일 최적화 뷰포트 설정 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Neon Cyber Breakout</title>
     <style>
@@ -41,18 +42,21 @@
             text-align: center;
             text-shadow: 0 0 10px #0ff;
             pointer-events: none;
+            width: 100%;
         }
         button {
             margin-top: 20px;
             padding: 10px 20px;
-            background: transparent;
+            background: rgba(0, 255, 255, 0.1);
             color: #0ff;
             border: 1px solid #0ff;
             font-family: inherit;
             font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
             box-shadow: 0 0 10px #0ff;
             pointer-events: auto;
+            transition: all 0.2s;
         }
         button:hover { background: #0ff; color: #000; }
     </style>
@@ -78,8 +82,8 @@
     function resizeCanvas() {
         const scale = Math.min(window.innerWidth / 420, window.innerHeight / 620);
         if (scale < 1) {
-            canvas.style.width = `${400 * scale}px`;
-            canvas.style.height = `${600 * scale}px`;
+            canvas.style.transform = `scale(${scale})`;
+            canvas.style.transformOrigin = 'center center';
         }
     }
     window.addEventListener('resize', resizeCanvas);
@@ -118,28 +122,42 @@
             gainNode.gain.setValueAtTime(0.1, now);
             gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
             osc.start(now); osc.stop(now + 0.1);
+        } else if (type === 'clear') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.setValueAtTime(554, now + 0.2); // C#
+            osc.frequency.setValueAtTime(659, now + 0.4); // E
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.8);
+            osc.start(now); osc.stop(now + 0.8);
         }
     }
 
-    // --- 게임 변수 ---
+    // --- 게임 상태 및 변수 ---
     let animationId;
     let isPlaying = false;
     let score = 0;
+    let currentStage = 1;
 
     const paddle = { x: 160, y: 550, w: 80, h: 10, speed: 6, color: '#0ff' };
     const ball = { x: 200, y: 530, radius: 6, dx: 4, dy: -4, color: '#f0f' };
     let bullets = [];
     let bricks = [];
 
-    const brickConfig = { row: 6, col: 7, w: 45, h: 20, padding: 8, offsetTop: 50, offsetLeft: 18 };
-    const colors = ['#ff0055', '#ff00ff', '#00ffff', '#00ff00', '#ffff00', '#ffaa00'];
+    // 스테이지별 블록 최대 8줄 색상
+    const colors = ['#ff0055', '#ff00ff', '#00ffff', '#00ff00', '#ffff00', '#ffaa00', '#ff5500', '#ffffff'];
+    const brickConfig = { col: 7, w: 45, h: 20, padding: 8, offsetTop: 50, offsetLeft: 18 };
+    let currentRows = 3;
 
     function initBricks() {
         bricks = [];
+        // 스테이지가 올라갈수록 블록 줄 수 증가 (최대 8줄)
+        currentRows = Math.min(3 + Math.floor((currentStage - 1) / 2), 8);
+        
         for (let c = 0; c < brickConfig.col; c++) {
             bricks[c] = [];
-            for (let r = 0; r < brickConfig.row; r++) {
-                bricks[c][r] = { x: 0, y: 0, status: 1, color: colors[r] };
+            for (let r = 0; r < currentRows; r++) {
+                bricks[c][r] = { x: 0, y: 0, status: 1, color: colors[r % colors.length] };
             }
         }
     }
@@ -148,22 +166,24 @@
     let isLeftPressed = false;
     let isRightPressed = false;
 
-    // 터치 및 마우스 드래그로 패들 이동
-    function handleMove(e) {
-        if (!isPlaying) return;
+    // 모바일 배율을 고려한 위치 계산
+    function getCanvasPos(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const scaleX = canvas.width / rect.width;
-        let relativeX = (clientX - rect.left) * scaleX;
+        return (clientX - rect.left) * (canvas.width / rect.width);
+    }
+
+    function handleMove(e) {
+        if (!isPlaying) return;
+        let relativeX = getCanvasPos(e);
         if (relativeX > 0 && relativeX < canvas.width) {
             paddle.x = relativeX - paddle.w / 2;
         }
     }
 
-    // 터치 및 클릭으로 총 쏘기
     function handleShoot(e) {
         if (!isPlaying) return;
-        e.preventDefault();
+        e.preventDefault(); // 더블 탭 확대 방지
         bullets.push({ x: paddle.x + paddle.w / 2, y: paddle.y, radius: 3, speed: 7 });
         playSound('shoot');
     }
@@ -207,13 +227,22 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 패들 그리기
+        // UI 텍스트 (점수 및 스테이지)
+        ctx.font = "bold 16px Courier New";
+        ctx.fillStyle = "#0ff";
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = "#0ff";
+        ctx.fillText("STAGE: " + currentStage, 8, 20);
+        ctx.fillText("SCORE: " + score, 280, 20);
+        ctx.shadowBlur = 0;
+
+        // 패들
         drawNeonRect(paddle.x, paddle.y, paddle.w, paddle.h, paddle.color);
 
-        // 공 그리기
+        // 공
         drawNeonCircle(ball.x, ball.y, ball.radius, ball.color);
 
-        // 총알 그리기 및 업데이트
+        // 총알 업데이트 및 그리기
         for (let i = 0; i < bullets.length; i++) {
             let b = bullets[i];
             drawNeonCircle(b.x, b.y, b.radius, '#fff');
@@ -221,10 +250,10 @@
             if (b.y < 0) bullets.splice(i, 1);
         }
 
-        // 블록 그리기 및 충돌 처리
+        // 블록 충돌 및 그리기
         let allBroken = true;
         for (let c = 0; c < brickConfig.col; c++) {
-            for (let r = 0; r < brickConfig.row; r++) {
+            for (let r = 0; r < currentRows; r++) {
                 let b = bricks[c][r];
                 if (b.status === 1) {
                     allBroken = false;
@@ -234,15 +263,16 @@
                     b.y = brickY;
                     drawNeonRect(brickX, brickY, brickConfig.w, brickConfig.h, b.color);
 
-                    // 공 충돌
-                    if (ball.x > b.x && ball.x < b.x + brickConfig.w && ball.y > b.y && ball.y < b.y + brickConfig.h) {
+                    // 공과 블록 충돌
+                    if (ball.x + ball.radius > b.x && ball.x - ball.radius < b.x + brickConfig.w && 
+                        ball.y + ball.radius > b.y && ball.y - ball.radius < b.y + brickConfig.h) {
                         ball.dy = -ball.dy;
                         b.status = 0;
                         score += 10;
                         playSound('brick');
                     }
 
-                    // 총알 충돌
+                    // 총알과 블록 충돌
                     for (let j = 0; j < bullets.length; j++) {
                         let bullet = bullets[j];
                         if (bullet.x > b.x && bullet.x < b.x + brickConfig.w && bullet.y > b.y && bullet.y < b.y + brickConfig.h) {
@@ -257,43 +287,64 @@
             }
         }
 
-        if (allBroken) gameOver("STAGE CLEAR!");
+        if (allBroken) {
+            stageClear();
+            return;
+        }
 
-        // 점수
-        ctx.font = "16px Courier New";
-        ctx.fillStyle = "#0ff";
-        ctx.fillText("SCORE: " + score, 8, 20);
-
-        // 공 이동 및 벽 충돌
+        // 공 이동
         ball.x += ball.dx;
         ball.y += ball.dy;
 
+        // 좌우 벽 충돌
         if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
             ball.dx = -ball.dx;
             playSound('hit');
         }
+        // 위쪽 벽 충돌
         if (ball.y + ball.dy < ball.radius) {
             ball.dy = -ball.dy;
             playSound('hit');
-        } else if (ball.y + ball.dy > canvas.height - ball.radius) {
+        } 
+        // 바닥으로 떨어짐 (게임 오버)
+        else if (ball.y + ball.dy > canvas.height - ball.radius) {
             gameOver("GAME OVER");
             return;
         }
 
         // 공과 패들 충돌
-        if (ball.y + ball.dy > paddle.y - ball.radius && ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
-            ball.dy = -ball.dy;
-            // 타격 위치에 따른 각도 변화
+        if (ball.y + ball.radius >= paddle.y && ball.y - ball.radius <= paddle.y + paddle.h &&
+            ball.x + ball.radius >= paddle.x && ball.x - ball.radius <= paddle.x + paddle.w) {
+            
+            ball.dy = -Math.abs(ball.dy); // 무조건 위로 튕기도록
+            
+            // 패들 맞는 위치에 따라 X축 반사각 조절
             let hitPoint = ball.x - (paddle.x + paddle.w / 2);
-            ball.dx = hitPoint * 0.15;
+            // 난이도에 따른 스피드 반영 비율 조절
+            let speedFactor = 0.15 + (currentStage * 0.01);
+            ball.dx = hitPoint * speedFactor;
+            
             playSound('hit');
         }
 
-        // 패들 이동 (키보드)
+        // 키보드 패들 이동
         if (isRightPressed && paddle.x < canvas.width - paddle.w) paddle.x += paddle.speed;
         else if (isLeftPressed && paddle.x > 0) paddle.x -= paddle.speed;
 
         if (isPlaying) animationId = requestAnimationFrame(draw);
+    }
+
+    // --- 게임 제어 함수 ---
+    function stageClear() {
+        isPlaying = false;
+        cancelAnimationFrame(animationId);
+        playSound('clear');
+        ui.style.pointerEvents = 'auto';
+        title.innerText = `STAGE ${currentStage} CLEAR!`;
+        title.style.display = 'block';
+        startBtn.style.display = 'inline-block';
+        startBtn.innerText = 'NEXT STAGE';
+        currentStage++; // 스테이지 증가
     }
 
     function gameOver(msg) {
@@ -304,23 +355,44 @@
         title.style.display = 'block';
         startBtn.style.display = 'inline-block';
         startBtn.innerText = 'RESTART';
+        currentStage = 1; // 게임 오버 시 스테이지 초기화
     }
 
     startBtn.addEventListener('click', () => {
-        if (!audioCtx) audioCtx = new AudioContext(); // 사용자 인터랙션 후 오디오 활성화
+        if (!audioCtx) audioCtx = new AudioContext(); 
         audioCtx.resume();
         
         ui.style.pointerEvents = 'none';
         title.style.display = 'none';
         startBtn.style.display = 'none';
         
+        // 처음 시작하거나 게임 오버 후 재시작일 때 점수 초기화
+        if (startBtn.innerText === 'GAME START' || startBtn.innerText === 'RESTART') {
+            score = 0;
+            currentStage = 1;
+        }
+
+        // --- 난이도 조정 (스테이지 비례) ---
+        // 1. 공 속도 증가
+        let speedMultiplier = 1 + ((currentStage - 1) * 0.15); 
+        let currentSpeedX = 4 * speedMultiplier;
+        let currentSpeedY = -4 * speedMultiplier;
+        
+        // 2. 패들 크기 감소 (최소 40px까지)
+        paddle.w = Math.max(40, 80 - ((currentStage - 1) * 5));
+
         initBricks();
-        score = 0;
-        ball.x = 200; ball.y = 530;
-        ball.dx = 4; ball.dy = -4;
-        paddle.x = 160;
+        
+        // 위치 및 스피드 리셋
+        ball.x = 200; 
+        ball.y = 500;
+        ball.dx = (Math.random() > 0.5 ? currentSpeedX : -currentSpeedX);
+        ball.dy = currentSpeedY;
+        
+        paddle.x = (canvas.width - paddle.w) / 2; // 중앙 정렬
         bullets = [];
         isPlaying = true;
+        
         draw();
     });
 
