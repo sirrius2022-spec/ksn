@@ -9,14 +9,14 @@
             margin: 0;
             padding: 0;
             background-color: #050510;
-            /* 배경 그리드 조금 더 촘촘하게 */
+            /* 배경 그리드 */
             background-image: 
                 linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
             background-size: 15px 15px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* 상하 분배 */
+            justify-content: space-between; 
             align-items: center;
             height: 100vh;
             color: #0f0;
@@ -27,7 +27,7 @@
         
         #topArea {
             width: 100%;
-            padding: 10px 20px;
+            padding: 15px 20px 5px 20px;
             box-sizing: border-box;
             display: flex;
             justify-content: space-between;
@@ -44,7 +44,7 @@
         #gameArea {
             position: relative;
             width: 100%;
-            flex-grow: 1; /* 남은 공간을 모두 차지하도록 */
+            flex-grow: 1; /* 남는 위아래 공간을 모두 차지하도록 설정 */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -58,10 +58,6 @@
             border: 2px solid #0f0;
             border-radius: 5px;
             display: block;
-            /* 캔버스가 부모 영역을 꽉 채우되 비율 유지 */
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; 
         }
 
         #ui {
@@ -96,6 +92,7 @@
         #dpadArea {
             width: 100%;
             padding-bottom: 30px;
+            padding-top: 10px;
             display: flex;
             justify-content: center;
             z-index: 10;
@@ -160,21 +157,27 @@
     const title = document.getElementById('title');
     const scoreEl = document.getElementById('score');
 
-    let tileCount = 20; // 맵을 20x20 칸으로 나누어 조금 더 넓게 설정
-    let gridSize;
+    let cols, rows, gridSize;
 
-    // 모바일 화면을 꽉 채우도록 캔버스 크기 계산
+    // 모바일 직사각형 화면에 맞게 캔버스 및 격자 크기 계산
     function resizeCanvas() {
         const gameArea = document.getElementById('gameArea');
-        // 부모 영역의 너비와 높이 중 작은 값을 기준으로 정사각형 생성
-        const size = Math.min(gameArea.clientWidth - 20, gameArea.clientHeight - 20); 
+        const maxWidth = gameArea.clientWidth - 20;  // 좌우 여백 10px씩
+        const maxHeight = gameArea.clientHeight - 20; // 상하 여백 10px씩
         
-        canvas.width = size;
-        canvas.height = size;
-        gridSize = size / tileCount;
+        // 가로를 35칸으로 나눔 (숫자가 커질수록 뱀 마디가 작아집니다. 기존 20 -> 35)
+        const targetCols = 35; 
+        gridSize = Math.floor(maxWidth / targetCols);
+        
+        // 계산된 마디 크기(gridSize)를 바탕으로 세로에 들어갈 수 있는 최대 칸 수 계산
+        cols = Math.floor(maxWidth / gridSize);
+        rows = Math.floor(maxHeight / gridSize);
+        
+        // 캔버스 실제 픽셀 크기 적용
+        canvas.width = cols * gridSize;
+        canvas.height = rows * gridSize;
     }
     
-    // 리사이즈 이벤트 시 다시 그리기 위함
     window.addEventListener('resize', () => {
         resizeCanvas();
         if(!isPlaying && snake.length > 0) {
@@ -224,7 +227,7 @@
     let isPlaying = false;
     let changingDirection = false;
 
-    // --- 방향 제어 로직 ---
+    // 방향 제어 로직
     function setDirection(newDx, newDy) {
         if (changingDirection || !isPlaying) return;
         const goingUp = dy === -1;
@@ -258,7 +261,7 @@
     addTouch('btnRight', 1, 0);
     addTouch('btnDown', 0, 1);
 
-    // --- 게임 루프 ---
+    // 게임 루프
     function drawGame() {
         if (!isPlaying) return;
         if (hasGameEnded()) {
@@ -286,7 +289,6 @@
         ctx.shadowColor = '#f00';
         ctx.fillStyle = '#f00';
         ctx.beginPath();
-        // 먹이 크기도 셀 크기에 맞춰 조정
         ctx.arc(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize / 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
@@ -305,15 +307,11 @@
                 ctx.shadowBlur = 4;
             }
             
-            // 사진의 참고 이미지처럼 셀(마디) 간의 간격을 주어 띄워 그리기
-            // 각 칸의 크기(gridSize)에서 여백(margin)을 뺌
-            const margin = 2; // 마디 사이의 간격
+            // 마디 사이의 틈(여백)을 1px로 주어 세련되게 분리되도록 함
+            const margin = 1; 
             const rectSize = gridSize - (margin * 2); 
             
-            // 모서리를 살짝 둥글게 처리 (선택사항, 지워도 됨)
             ctx.lineJoin = "round";
-            ctx.lineWidth = margin;
-            
             ctx.fillRect(
                 (part.x * gridSize) + margin, 
                 (part.y * gridSize) + margin, 
@@ -332,7 +330,7 @@
             score += 10;
             scoreEl.innerText = score;
             playSound('eat');
-            if (score % 50 === 0 && speed < 20) speed += 1; 
+            if (score % 50 === 0 && speed < 25) speed += 1; 
             generateFood();
         } else {
             snake.pop();
@@ -340,8 +338,8 @@
     }
 
     function generateFood() {
-        food.x = Math.floor(Math.random() * tileCount);
-        food.y = Math.floor(Math.random() * tileCount);
+        food.x = Math.floor(Math.random() * cols);
+        food.y = Math.floor(Math.random() * rows);
         
         let onSnake = false;
         snake.forEach((part) => {
@@ -353,7 +351,8 @@
 
     function hasGameEnded() {
         const head = snake[0];
-        if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) return true;
+        // 직사각형이 되었으므로 가로는 cols, 세로는 rows 기준으로 충돌 체크
+        if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows) return true;
         for (let i = 4; i < snake.length; i++) {
             if (snake[i].x === head.x && snake[i].y === head.y) return true;
         }
@@ -370,8 +369,7 @@
         startBtn.innerText = 'RESTART';
     }
 
-    // --- 초기화 및 시작 ---
-    // 첫 로드 시 캔버스 설정
+    // 초기화 및 시작
     resizeCanvas();
 
     startBtn.addEventListener('click', () => {
@@ -382,11 +380,11 @@
         title.style.display = 'none';
         startBtn.style.display = 'none';
         
-        // 화면 크기가 변했을 수 있으므로 다시 리사이즈
         resizeCanvas();
         
-        const startX = Math.floor(tileCount / 2);
-        const startY = Math.floor(tileCount / 2);
+        // 정중앙에서 시작하도록 좌표 계산
+        const startX = Math.floor(cols / 2);
+        const startY = Math.floor(rows / 2);
         snake = [
             { x: startX, y: startY },
             { x: startX - 1, y: startY },
@@ -395,7 +393,7 @@
         dx = 1; 
         dy = 0;
         score = 0;
-        speed = 8;
+        speed = 10; // 칸이 좁아졌으므로 기본 체감 속도를 약간 올림
         scoreEl.innerText = score;
         generateFood();
         
