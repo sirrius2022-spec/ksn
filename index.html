@@ -6,7 +6,24 @@
     <title>김성남 - 스마트 건설안전 강의 포털</title>
     <style>
         body { font-family: 'Pretendard', sans-serif; line-height: 1.6; margin: 0; padding: 0; color: #333; }
-        header { background: #2c3e50; color: white; padding: 2rem text-align: center; }
+
+        /* <style> 태그 안의 header 부분을 찾아 아래와 같이 수정하세요 */
+        header { 
+            background: #2c3e50; 
+            color: white; 
+            padding: 2rem; 
+            text-align: center;
+            /* 🔗 아래 두 줄을 추가하여 플렉스 박스로 만듭니다 */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 30px; /* 글자와 QR코드 사이 간격 */
+            flex-wrap: wrap; /* 모바일에서는 세로로 배치되도록 설정 */
+        }
+
+
+    
+        
         .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
         .section { margin-bottom: 3rem; }
         h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 0.5rem; }
