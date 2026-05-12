@@ -21,6 +21,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            height: 100dvh; /* 모바일 동적 뷰포트 지원 */
             width: 100vw;
         }
 
@@ -52,7 +53,6 @@
             width: 100%;
             height: 100%;
             max-width: 500px; /* 태블릿/PC 최대 너비 */
-            max-height: 800px;
             display: flex;
             flex-direction: column;
         }
@@ -66,35 +66,43 @@
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255,255,255,0.1);
             z-index: 5;
+            height: 70px;
+            flex-shrink: 0;
         }
 
         .hud-box {
             background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(0, 255, 255, 0.3);
             border-radius: 8px;
-            padding: 5px 15px;
+            padding: 5px 20px;
             text-align: center;
             box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+            min-width: 90px;
         }
 
-        .hud-title { font-size: 0.6rem; color: #0ff; letter-spacing: 1px; }
-        .hud-value { font-size: 1.2rem; font-weight: bold; text-shadow: 0 0 5px #fff; }
+        .hud-title { font-size: 0.65rem; color: #0ff; letter-spacing: 1px; }
+        .hud-value { font-size: 1.3rem; font-weight: bold; text-shadow: 0 0 5px #fff; }
         #turns { color: #f0f; text-shadow: 0 0 5px #f0f; }
 
         #game-container {
             flex: 1;
             position: relative;
             width: 100%;
+            height: calc(100% - 70px);
             overflow: hidden;
             background: linear-gradient(to bottom, rgba(20,20,40,0.8), rgba(0,0,0,1));
-            box-shadow: inset 0 0 50px rgba(0,255,255,0.1);
+            box-shadow: inset 0 0 50px rgba(0,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         canvas {
             display: block;
             width: 100%;
             height: 100%;
-            /* 모바일에서 터치 시 하이라이트 방지 */
+            /* 모바일 화면 비율에 맞춰 잘리지 않도록 캔버스 크기를 강제 조정 */
+            object-fit: contain; 
             -webkit-tap-highlight-color: transparent; 
         }
 
@@ -171,14 +179,17 @@
         </div>
 
         <div id="game-container">
-            <canvas id="gameCanvas" width="400" height="700"></canvas>
+            <!-- 캔버스 해상도 고정, CSS object-fit으로 화면에 맞춤 -->
+            <canvas id="gameCanvas" width="400" height="750"></canvas>
             
+            <!-- 시작 화면 -->
             <div id="startScreen" class="overlay">
                 <h1 class="title-glow">NEON<br>BUBBLE</h1>
-                <p class="text-gray-300 mb-8 text-center px-6">드래그하여 조준선을 맞추고<br>손을 떼서 발사하세요!</p>
+                <p class="text-gray-300 mb-8 text-center px-6" style="line-height: 1.6;">화면을 누르고 움직여 조준선으로 겨냥,<br>손을 떼서 발사하세요!</p>
                 <button id="startBtn" class="btn-neon">GAME START</button>
             </div>
 
+            <!-- 게임 오버 화면 -->
             <div id="gameOverScreen" class="overlay hidden">
                 <h2 class="title-glow" style="font-size: 2.5rem; background: linear-gradient(to right, #f00, #f0f); -webkit-background-clip: text;">SYSTEM OFFLINE</h2>
                 <div class="text-xl mb-2 mt-4 text-gray-300">FINAL SCORE</div>
@@ -190,9 +201,7 @@
 
 <script>
 /**
- * ------------------------------
- * 오디오 (사운드) 시스템 - Web Audio API
- * ------------------------------
+ * 오디오 (사운드) 시스템
  */
 let audioCtx = null;
 
@@ -225,8 +234,8 @@ function playTone(freq, type, duration, vol) {
 const sounds = {
     shoot: () => {
         if(!audioCtx) return;
-        const osc = playTone(300, 'sine', 0.15, 0.2);
-        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
+        const osc = playTone(400, 'sine', 0.1, 0.2);
+        osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
     },
     pop: () => {
         if(!audioCtx) return;
@@ -234,7 +243,7 @@ const sounds = {
     },
     drop: () => {
         if(!audioCtx) return;
-        const osc = playTone(400, 'square', 0.3, 0.1);
+        const osc = playTone(300, 'square', 0.3, 0.1);
         osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
     },
     gameover: () => {
@@ -245,9 +254,7 @@ const sounds = {
 };
 
 /**
- * ------------------------------
  * 게임 코어 및 렌더링 로직
- * ------------------------------
  */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -257,17 +264,20 @@ const startScreen = document.getElementById('startScreen');
 const gameOverScreen = document.getElementById('gameOverScreen');
 const finalScoreEl = document.getElementById('finalScore');
 
-// 게임 내부 해상도 (모바일 비율에 맞게 세로를 길게)
+// 게임 해상도 설정
 const GAME_WIDTH = 400;
-const GAME_HEIGHT = 700;
-const BUBBLE_RADIUS = 18; // 약간 줄여서 더 쾌적하게
+const GAME_HEIGHT = 750; 
+const BUBBLE_RADIUS = 18; 
 const BUBBLE_DIAMETER = BUBBLE_RADIUS * 2;
 const ROWS = 16; 
 const COLS = 11;
 const ROW_HEIGHT = BUBBLE_DIAMETER * Math.sqrt(3) / 2;
+
+// 슈터 위치: 화면 하단에서 넉넉하게 120px 띄워서 배치 (잘림 방지)
 const SHOOTER_X = GAME_WIDTH / 2;
-const SHOOTER_Y = GAME_HEIGHT - 60;
-const BUBBLE_SPEED = 20;
+const SHOOTER_Y = GAME_HEIGHT - 120; 
+
+const BUBBLE_SPEED = 22;
 const TURNS_TO_DROP = 5;
 
 // 네온 컬러 팔레트
@@ -282,16 +292,17 @@ let shooterAngle = -Math.PI / 2;
 let score = 0;
 let turnsLeft = TURNS_TO_DROP;
 let dropCount = 0;
-let gameState = 'START'; // START, PLAYING, GAMEOVER
+let gameState = 'START'; 
 let animFrameId;
-let isAiming = false; // 드래그 조준 상태
+let isAiming = false;
+let globalTime = 0; // 이펙트용 시간 변수
 
-// 버블 그래픽 캐싱
+// 버블 그래픽 렌더링 최적화 캐시
 const bubbleImages = {};
 function createBubbleImages() {
     COLORS.forEach(color => {
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = BUBBLE_DIAMETER + 10; // 글로우 효과를 위한 여백
+        tempCanvas.width = BUBBLE_DIAMETER + 10; 
         tempCanvas.height = BUBBLE_DIAMETER + 10;
         const tCtx = tempCanvas.getContext('2d');
         const center = BUBBLE_RADIUS + 5;
@@ -312,7 +323,7 @@ function createBubbleImages() {
         );
         gradient.addColorStop(0, '#ffffff');
         gradient.addColorStop(0.2, color);
-        gradient.addColorStop(1, '#000000'); // 테두리를 어둡게
+        gradient.addColorStop(1, '#000000'); 
 
         tCtx.beginPath();
         tCtx.arc(center, center, BUBBLE_RADIUS - 1, 0, Math.PI * 2);
@@ -343,7 +354,7 @@ function getAvailableRandomColor() {
 }
 
 function initGame() {
-    initAudio(); // 오디오 컨텍스트 초기화 (사용자 제스처 내에서 실행됨)
+    initAudio(); 
     board = [];
     particles = [];
     score = 0;
@@ -351,8 +362,8 @@ function initGame() {
     turnsLeft = TURNS_TO_DROP;
     scoreEl.innerText = score;
     turnsEl.innerText = turnsLeft;
+    globalTime = 0;
     
-    // 초기 보드 셋업 (상단 6줄)
     for (let r = 0; r < ROWS; r++) {
         board[r] = [];
         for (let c = 0; c < COLS; c++) {
@@ -382,7 +393,6 @@ function initGame() {
 function getGridCoord(r, c) {
     const gy = r * ROW_HEIGHT + BUBBLE_RADIUS;
     const isOddRow = (r + dropCount) % 2 !== 0;
-    // 그리드를 중앙 정렬하기 위한 오프셋 계산
     const rowWidth = isOddRow ? (COLS - 1) * BUBBLE_DIAMETER : COLS * BUBBLE_DIAMETER;
     const startX = (GAME_WIDTH - rowWidth) / 2 + BUBBLE_RADIUS;
     
@@ -526,31 +536,26 @@ function createPopParticles(r, c, color, isFalling = false) {
             isWhole: true
         });
     } else {
-        // 폭발 파티클 (네온 스타일)
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 15; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = 2 + Math.random() * 8;
+            const speed = 3 + Math.random() * 8;
             particles.push({
                 x: coord.x, y: coord.y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
-                gravity: 0.1,
+                gravity: 0.15,
                 life: 1,
                 color: color,
                 isWhole: false
             });
         }
-        // 화면 흔들림 효과 (옵션)
-        canvas.style.transform = `translate(${(Math.random()-0.5)*5}px, ${(Math.random()-0.5)*5}px)`;
-        setTimeout(() => canvas.style.transform = 'translate(0,0)', 50);
     }
 }
 
 function addScore(points) {
     score += points;
-    // 점수 오르는 애니메이션
     scoreEl.innerText = score;
-    scoreEl.style.transform = 'scale(1.5)';
+    scoreEl.style.transform = 'scale(1.3)';
     scoreEl.style.color = '#fff';
     setTimeout(() => {
         scoreEl.style.transform = 'scale(1)';
@@ -578,11 +583,12 @@ function dropCeiling() {
 function update() {
     if (gameState !== 'PLAYING') return;
 
+    globalTime += 0.05;
+
     if (flyingBubble) {
         flyingBubble.x += flyingBubble.vx;
         flyingBubble.y += flyingBubble.vy;
 
-        // 벽 바운스
         if (flyingBubble.x <= BUBBLE_RADIUS || flyingBubble.x >= GAME_WIDTH - BUBBLE_RADIUS) {
             flyingBubble.vx *= -1;
             flyingBubble.x = Math.max(BUBBLE_RADIUS, Math.min(GAME_WIDTH - BUBBLE_RADIUS, flyingBubble.x));
@@ -642,7 +648,7 @@ function update() {
         p.y += p.vy;
         
         if (!p.isWhole) {
-            p.life -= 0.03; // 서서히 사라짐
+            p.life -= 0.03; 
         }
 
         if (p.life <= 0 || p.y > GAME_HEIGHT + BUBBLE_DIAMETER) {
@@ -653,7 +659,8 @@ function update() {
 
 function checkGameOver() {
     for (let c = 0; c < COLS; c++) {
-        if (board[ROWS - 2][c] !== null || board[ROWS - 1][c] !== null) {
+        // 데드라인(14번째 줄, 인덱스 13)에 버블이 닿으면 아웃
+        if (board[ROWS - 3][c] !== null || board[ROWS - 2][c] !== null) {
             gameState = 'GAMEOVER';
             sounds.gameover();
             finalScoreEl.innerText = score;
@@ -663,7 +670,6 @@ function checkGameOver() {
     }
 }
 
-// 명확한 조준선 (Raycasting)
 function drawAimLine() {
     if (!isAiming || !currentBubble) return;
 
@@ -675,32 +681,28 @@ function drawAimLine() {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     
-    // 점선 스타일 설정 (네온 효과)
     ctx.strokeStyle = currentBubble;
     ctx.setLineDash([15, 15]);
+    ctx.lineDashOffset = -globalTime * 20; 
     ctx.lineWidth = 4;
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 15;
     ctx.shadowColor = currentBubble;
 
-    // 가상의 광선 발사 (벽에 튕기는 모습 계산)
-    for (let i = 0; i < 40; i++) { // 최대 길이
+    for (let i = 0; i < 40; i++) { 
         cx += dx * 15;
         cy += dy * 15;
         
-        // 벽 충돌 (좌우)
         if (cx <= BUBBLE_RADIUS || cx >= GAME_WIDTH - BUBBLE_RADIUS) {
             dx *= -1;
             cx = Math.max(BUBBLE_RADIUS, Math.min(GAME_WIDTH - BUBBLE_RADIUS, cx));
             ctx.lineTo(cx, cy);
         }
         
-        // 천장에 닿으면 멈춤
         if (cy <= BUBBLE_RADIUS) {
             ctx.lineTo(cx, cy);
             break;
         }
 
-        // 다른 버블과 충돌 예상 시 멈춤
         let hit = false;
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
@@ -720,46 +722,49 @@ function drawAimLine() {
     
     ctx.stroke();
     
-    // 초기화
     ctx.setLineDash([]);
+    ctx.lineDashOffset = 0;
     ctx.shadowBlur = 0;
 }
 
 function draw() {
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    // 데드라인 표시 (경고성 네온)
-    const deadLineY = (ROWS - 2) * ROW_HEIGHT + BUBBLE_RADIUS;
+    // 1. 데드라인 (부드러운 네온 레이저 바닥)
+    const deadLineY = (ROWS - 3) * ROW_HEIGHT + BUBBLE_RADIUS + 10;
+    const grad = ctx.createLinearGradient(0, 0, GAME_WIDTH, 0);
+    const alpha = 0.5 + Math.sin(globalTime * 3) * 0.3; 
+    grad.addColorStop(0, `rgba(255, 0, 85, 0)`);
+    grad.addColorStop(0.5, `rgba(255, 0, 85, ${alpha})`);
+    grad.addColorStop(1, `rgba(255, 0, 85, 0)`);
+    
     ctx.beginPath();
     ctx.moveTo(0, deadLineY);
     ctx.lineTo(GAME_WIDTH, deadLineY);
-    ctx.strokeStyle = 'rgba(255, 0, 85, 0.5)';
-    ctx.setLineDash([20, 10]);
-    ctx.lineWidth = 3;
-    ctx.shadowBlur = 10;
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 20;
     ctx.shadowColor = '#f05';
     ctx.stroke();
-    ctx.setLineDash([]);
     ctx.shadowBlur = 0;
 
-    // 조준선 그리기
+    // 2. 조준선 그리기
     if (gameState === 'PLAYING') {
         drawAimLine();
     }
 
-    // 버블 그리기
+    // 3. 보드 위 버블 그리기
     for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
             if (board[r] && board[r][c] !== null) {
                 const coord = getGridCoord(r, c);
-                // 렌더링 최적화를 위해 캐싱된 이미지(-5는 글로우 여백 오프셋)
                 ctx.drawImage(bubbleImages[board[r][c]], coord.x - BUBBLE_RADIUS - 5, coord.y - BUBBLE_RADIUS - 5);
             }
         }
     }
 
-    // 파티클 (폭발 효과)
-    ctx.globalCompositeOperation = 'lighter'; // 글로우 겹침 효과 극대화
+    // 4. 파티클
+    ctx.globalCompositeOperation = 'lighter';
     particles.forEach(p => {
         if (p.isWhole) {
             ctx.globalCompositeOperation = 'source-over';
@@ -768,7 +773,7 @@ function draw() {
         } else {
             ctx.globalAlpha = Math.max(0, p.life);
             ctx.beginPath();
-            ctx.arc(p.x, p.y, Math.random()*5 + 2, 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, Math.random()*4 + 2, 0, Math.PI * 2);
             ctx.fillStyle = p.color;
             ctx.shadowBlur = 10;
             ctx.shadowColor = p.color;
@@ -779,46 +784,59 @@ function draw() {
     });
     ctx.globalCompositeOperation = 'source-over';
 
-    // UI (발사대)
+    // 5. 하단 UI 및 슈터
     if (gameState === 'PLAYING') {
-        // 발사 대기 버블
-        if (!flyingBubble && currentBubble) {
-            ctx.drawImage(bubbleImages[currentBubble], SHOOTER_X - BUBBLE_RADIUS - 5, SHOOTER_Y - BUBBLE_RADIUS - 5);
-        }
-
-        // NEXT 버블 표시 (작게)
+        
+        // NEXT 버블 표시 (왼쪽 안전 영역)
         if (nextBubble) {
-            ctx.globalAlpha = 0.6;
-            ctx.drawImage(bubbleImages[nextBubble], SHOOTER_X - 70, SHOOTER_Y + 5, BUBBLE_DIAMETER*0.7, BUBBLE_DIAMETER*0.7);
+            const nextX = 50;
+            const nextY = GAME_HEIGHT - 60; // 잘리지 않도록 위치 조절
+            ctx.globalAlpha = 0.5;
+            ctx.drawImage(bubbleImages[nextBubble], nextX - BUBBLE_RADIUS - 5, nextY - BUBBLE_RADIUS - 5, BUBBLE_DIAMETER, BUBBLE_DIAMETER);
             ctx.globalAlpha = 1.0;
             ctx.fillStyle = '#0ff';
-            ctx.font = '12px Orbitron';
-            ctx.fillText('NEXT', SHOOTER_X - 65, SHOOTER_Y + 45);
+            ctx.font = 'bold 12px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText('NEXT', nextX, nextY + BUBBLE_RADIUS + 15);
         }
 
-        // 비행 중
-        if (flyingBubble) {
-            ctx.drawImage(bubbleImages[flyingBubble.color], flyingBubble.x - BUBBLE_RADIUS - 5, flyingBubble.y - BUBBLE_RADIUS - 5);
-        }
-        
-        // 슈터 베이스 (미래지향적 디자인)
+        // 슈터 베이스 (발사대 - 공 아래에 깔림)
         ctx.save();
         ctx.translate(SHOOTER_X, SHOOTER_Y);
         ctx.rotate(shooterAngle + Math.PI/2);
         
+        // 네온 링 형태의 조준경
         ctx.beginPath();
-        ctx.moveTo(-15, 25);
-        ctx.lineTo(15, 25);
-        ctx.lineTo(5, -20);
-        ctx.lineTo(-5, -20);
+        ctx.arc(0, 0, BUBBLE_RADIUS + 8, Math.PI, 0); 
+        ctx.lineTo(0, -BUBBLE_RADIUS - 20); 
         ctx.closePath();
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+        
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.1)';
         ctx.strokeStyle = '#0ff';
         ctx.lineWidth = 2;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#0ff';
         ctx.fill();
         ctx.stroke();
         
+        ctx.beginPath();
+        ctx.arc(0, 0, BUBBLE_RADIUS + 4, Math.PI + 0.5, -0.5);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = 0;
+        ctx.stroke();
+
         ctx.restore();
+
+        // 발사 대기 버블 (가장 마지막에 그려서 선명하게)
+        if (!flyingBubble && currentBubble) {
+            ctx.drawImage(bubbleImages[currentBubble], SHOOTER_X - BUBBLE_RADIUS - 5, SHOOTER_Y - BUBBLE_RADIUS - 5);
+        }
+
+        // 비행 중인 버블
+        if (flyingBubble) {
+            ctx.drawImage(bubbleImages[flyingBubble.color], flyingBubble.x - BUBBLE_RADIUS - 5, flyingBubble.y - BUBBLE_RADIUS - 5);
+        }
     }
 }
 
@@ -828,10 +846,12 @@ function gameLoop() {
     animFrameId = requestAnimationFrame(gameLoop);
 }
 
-// 화면 좌표계를 캔버스 좌표계로 변환 및 각도 업데이트
+// 터치 및 마우스 좌표를 캔버스 비율에 맞게 정확히 계산
 function updateAngle(clientX, clientY) {
     if (gameState !== 'PLAYING') return;
     const rect = canvas.getBoundingClientRect();
+    
+    // object-fit: contain 에 의해 계산되는 실제 렌더링 스케일 파악
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     
@@ -848,12 +868,6 @@ function updateAngle(clientX, clientY) {
     shooterAngle = angle;
 }
 
-/**
- * ------------------------------
- * 모바일 및 PC 입력 이벤트
- * ------------------------------
- */
-// PC 마우스
 canvas.addEventListener('mousedown', (e) => {
     isAiming = true;
     updateAngle(e.clientX, e.clientY);
@@ -868,18 +882,15 @@ window.addEventListener('mouseup', () => {
     }
 });
 
-// 모바일 터치 (드래그 조준 -> 손 떼서 발사)
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     isAiming = true;
     updateAngle(e.touches[0].clientX, e.touches[0].clientY);
 }, { passive: false });
-
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
     if (isAiming) updateAngle(e.touches[0].clientX, e.touches[0].clientY);
 }, { passive: false });
-
 canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
     if (isAiming) {
@@ -888,11 +899,9 @@ canvas.addEventListener('touchend', (e) => {
     }
 }, { passive: false });
 
-// 버튼 리스너
 document.getElementById('startBtn').addEventListener('click', initGame);
 document.getElementById('restartBtn').addEventListener('click', initGame);
 
-// 초기화
 createBubbleImages();
 draw();
 
