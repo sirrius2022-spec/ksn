@@ -4,637 +4,153 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>김성남 - 스마트 건설안전 강의 포털</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
     <style>
-        :root {
-            --bg: #0a0e1a;
-            --bg2: #0f1422;
-            --surface: #141928;
-            --surface2: #1a2035;
-            --border: rgba(255,255,255,0.07);
-            --accent: #00c2ff;
-            --accent2: #ff6b35;
-            --accent3: #00e5a0;
-            --text: #e8ecf0;
-            --text-muted: #7a8599;
-            --yellow: #ffd60a;
-        }
+        body { font-family: 'Pretendard', sans-serif; line-height: 1.6; margin: 0; padding: 0; color: #333; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Noto Sans KR', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* ── BACKGROUND GRID ── */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(0,194,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,194,255,0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* ── HEADER ── */
-        header {
-            position: relative;
-            z-index: 10;
-            padding: 3rem 2rem 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 2rem;
-            flex-wrap: wrap;
-            border-bottom: 1px solid var(--border);
-            background: linear-gradient(180deg, rgba(0,194,255,0.05) 0%, transparent 100%);
-        }
-
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-        }
-
-        .header-text {}
-
-        .header-badge {
-            display: inline-block;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.65rem;
-            letter-spacing: 0.15em;
-            color: var(--accent);
-            border: 1px solid rgba(0,194,255,0.3);
-            padding: 0.25rem 0.75rem;
-            border-radius: 2px;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-        }
-
-        header h1 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(2.2rem, 5vw, 3.8rem);
-            letter-spacing: 0.05em;
-            line-height: 1;
-            color: #fff;
-        }
-
-        header h1 span {
-            color: var(--accent);
-        }
-
-        .header-sub {
-            margin-top: 0.75rem;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 300;
-            letter-spacing: 0.05em;
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .header-sub span {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .header-sub span::before {
-            content: '▸';
-            color: var(--accent);
-            font-size: 0.7rem;
-        }
-
-        .qr-wrap {
-            flex-shrink: 0;
-            position: relative;
-        }
-
-        .qr-wrap::before {
-            content: '';
-            position: absolute;
-            inset: -6px;
-            border: 1px solid rgba(0,194,255,0.25);
-            border-radius: 10px;
-        }
-
-        .qr-wrap img {
-            display: block;
-            width: 110px;
-            height: 110px;
-            border-radius: 6px;
-            object-fit: cover;
-        }
-
-        .qr-label {
+        /* <style> 태그 안의 header 부분을 찾아 아래와 같이 수정하세요 */
+        header { 
+            background: #2c3e50; 
+            color: white; 
+            padding: 2rem; 
             text-align: center;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.55rem;
-            color: var(--text-muted);
-            margin-top: 6px;
-            letter-spacing: 0.1em;
+            /* 🔗 아래 두 줄을 추가하여 플렉스 박스로 만듭니다 */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 30px; /* 글자와 QR코드 사이 간격 */
+            flex-wrap: wrap; /* 모바일에서는 세로로 배치되도록 설정 */
         }
 
-        /* ── MAIN ── */
-        main {
-            position: relative;
-            z-index: 1;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 3rem 1.5rem 5rem;
-        }
 
-        /* ── INTRO ── */
-        .intro {
-            margin-bottom: 3.5rem;
-            padding: 1.8rem 2rem;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--accent);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .intro-icon {
-            font-size: 2rem;
-            flex-shrink: 0;
-        }
-
-        .intro p {
-            font-size: 0.95rem;
-            color: #b0bac8;
-            line-height: 1.8;
-        }
-
-        .intro strong {
-            color: var(--accent);
-        }
-
-        /* ── SECTION TITLE ── */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-tag {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.6rem;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .section-title .icon {
-            font-size: 1.2rem;
-        }
-
-        .section-line {
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        /* ── FOLDER ── */
-        .folder {
-            margin-bottom: 3.5rem;
-        }
-
-        /* ── FOLDER TOGGLE HEADER ── */
-        .folder-toggle {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.1rem 1.5rem;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px 8px 0 0;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .folder-toggle::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 2px;
-        }
-
-        .folder-game .folder-toggle::before { background: linear-gradient(90deg, var(--accent2), var(--yellow)); }
-        .folder-safety .folder-toggle::before { background: linear-gradient(90deg, var(--accent), var(--accent3)); }
-
-        .folder-toggle:hover { background: var(--surface2); }
-
-        .folder-toggle-icon {
-            font-size: 1.5rem;
-        }
-
-        .folder-toggle-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .folder-game .folder-toggle-title { color: var(--accent2); }
-        .folder-safety .folder-toggle-title { color: var(--accent); }
-
-        .folder-count {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            background: rgba(255,255,255,0.05);
-            padding: 0.15rem 0.55rem;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-        }
-
-        .folder-chevron {
-            margin-left: auto;
-            transition: transform 0.3s;
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        .folder-toggle.open .folder-chevron {
-            transform: rotate(180deg);
-        }
-
-        .folder-body {
-            border: 1px solid var(--border);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            padding: 1.5rem;
-            background: rgba(10,14,26,0.6);
-            display: none;
-        }
-
-        .folder-body.open { display: block; }
-
-        /* ── GRID ── */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 1rem;
-        }
-
-        .standalone-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1rem;
-            margin-bottom: 3.5rem;
-        }
-
-        /* ── CARD ── */
-        .card {
-            display: block;
-            text-decoration: none;
-            color: inherit;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.3rem 1.4rem;
-            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 3px; height: 100%;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .card-game::before { background: linear-gradient(180deg, var(--accent2), var(--yellow)); }
-        .card-safety::before { background: linear-gradient(180deg, var(--accent), var(--accent3)); }
-        .card-other::before { background: linear-gradient(180deg, var(--accent3), var(--accent)); }
-
-        .card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255,255,255,0.15);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-        }
-
-        .card:hover::before { opacity: 1; }
-
-        .card-game:hover { box-shadow: 0 12px 40px rgba(255,107,53,0.15); }
-        .card-safety:hover { box-shadow: 0 12px 40px rgba(0,194,255,0.15); }
-        .card-other:hover { box-shadow: 0 12px 40px rgba(0,229,160,0.15); }
-
-        .card-emoji {
-            font-size: 1.6rem;
-            margin-bottom: 0.7rem;
-            display: block;
-        }
-
-        .card h3 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
-        }
-
-        .card p {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        /* ── STANDALONE SECTION LABEL ── */
-        .standalone-section {
-            margin-bottom: 3.5rem;
-        }
-
-        /* ── PADLET CARDS ── */
-        .card-padlet {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-padlet .btn {
-            margin-top: auto;
-            padding-top: 1rem;
-        }
-
-        .btn {
-            display: inline-block;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.72rem;
-            letter-spacing: 0.08em;
-            color: var(--accent3);
-            text-decoration: none;
-            border: 1px solid rgba(0,229,160,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 3px;
-            transition: background 0.2s, color 0.2s;
-            width: fit-content;
-            margin-top: 0.8rem;
-        }
-
-        .btn:hover {
-            background: var(--accent3);
-            color: #000;
-        }
-
-        /* ── FOOTER ── */
-        footer {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            padding: 2.5rem 1rem;
-            border-top: 1px solid var(--border);
-            font-family: 'Space Mono', monospace;
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            letter-spacing: 0.05em;
-        }
-
-        footer a { color: var(--accent); text-decoration: none; }
-        footer p + p { margin-top: 0.4rem; }
-
-        /* ── ANIMATIONS ── */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .intro { animation: fadeUp 0.5s ease both; }
-        .folder { animation: fadeUp 0.5s ease both; }
-        .folder:nth-child(2) { animation-delay: 0.1s; }
-        .folder:nth-child(3) { animation-delay: 0.2s; }
-        .standalone-section { animation: fadeUp 0.5s 0.3s ease both; }
-
-        /* ── RESPONSIVE ── */
-        @media (max-width: 600px) {
-            header { padding: 2rem 1.2rem; }
-            .qr-wrap img { width: 80px; height: 80px; }
-            main { padding: 2rem 1rem 4rem; }
-            .intro { flex-direction: column; gap: 0.8rem; padding: 1.3rem; }
-        }
+    
+        
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .section { margin-bottom: 3rem; }
+        h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 0.5rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .card { border: 1px solid #ddd; padding: 1.5rem; border-radius: 8px; transition: 0.3s; text-decoration: none; color: inherit; display: block; }
+        .card:hover { border-color: #3498db; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card h3 { margin-top: 0; color: #2980b9; }
+        .btn { display: inline-block; background: #3498db; color: white; padding: 0.8rem 1.5rem; border-radius: 5px; text-decoration: none; margin-top: 1rem; }
+        footer { text-align: center; padding: 2rem; background: #f9f9f9; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
-    <div class="header-text">
-        <div class="header-badge">Smart Lecture Portal · 2026</div>
-        <h1>김성남 <span>강의</span> 포털</h1>
-        <div class="header-sub">
-            <span>건설안전공학</span>
-            <span>생성형 AI 위험성 평가</span>
-            <span>스마트 안전 기술</span>
-        </div>
+    <div style="text-align: left;"> 
+        <h1>김성남 스마트 강의 포털</h1>
+        <p style="margin-top: -10px; font-size: 1.1rem;">건설안전공학 | 생성형 AI 활용 위험성 평가 | 스마트 안전 기술</p>
     </div>
-    <div class="qr-wrap">
-        <img src="homepage_qr.jpg" alt="홈페이지 QR코드">
-        <div class="qr-label">SCAN · HOMEPAGE</div>
-    </div>
+    
+    <img src="homepage_qr.jpg" alt="홈페이지 접속 QR코드" style="max-width: 130px; height: auto; border-radius: 8px; border: 4px solid white;">
 </header>
 
-<main>
 
-    <!-- INTRO -->
-    <div class="intro">
-        <div class="intro-icon">👋</div>
-        <p>안녕하세요, <strong>김성남</strong>입니다. 본 포털은 스마트 건설안전 및 공학 강의를 위한 통합 플랫폼입니다.<br>
-        교육생 여러분의 실무 역량 강화를 위해 직접 개발한 <strong>AI 도구</strong>와 <strong>강의 자료</strong>를 제공합니다.</p>
+<div class="container">
+    <div class="section">
+        <h2>소개</h2>
+        <p>안녕하세요, <strong>김성남</strong>입니다. 본 포털은 스마트 건설안전 및 공학 강의를 위한 통합 플랫폼입니다. 교육생 여러분의 실무 역량 강화를 위해 직접 개발한 AI 도구와 강의 자료를 제공합니다.</p>
     </div>
 
-    <!-- ── FOLDER 1 : 게임 ── -->
-    <div class="folder folder-game">
-        <div class="folder-toggle open" onclick="toggleFolder(this)">
-            <span class="folder-toggle-icon">🎮</span>
-            <span class="folder-toggle-title">게임 폴더</span>
-            <span class="folder-count">7개</span>
-            <span class="folder-chevron">▼</span>
-        </div>
-        <div class="folder-body open">
-            <div class="grid">
+    <div class="section">
+        <h2>AI 에이전트 & 실습 도구</h2>
+        <div class="grid">
+                       <a href="/game/tetris/index.html" class="card">
+    <h3>🧩 테트리스 게임</h3>
+    <p>강의 중 집중력 환기 및 조별 이벤트를 위한 쉬어가는 코너</p>
+</a> 
 
-                <a href="/game/tetris/index.html" class="card card-game">
-                    <span class="card-emoji">🧩</span>
-                    <h3>테트리스 게임</h3>
-                    <p>강의 중 집중력 환기 및 조별 이벤트용 쉬어가는 코너</p>
-                </a>
+<a href="/game/puzzlebubble/index.html" class="card">
+    <h3>🧩 퍼즐버블 게임</h3>
+    <p>강의 중 집중력 환기 및 조별 이벤트를 위한 쉬어가는 코너</p>
+</a> 
+            
+<a href="https://sirrius2022-spec.github.io/ksn/game/block/" class="card">
+    <h3>🎮 블록깨기 게임</h3>
+    <p>웹 브라우저에서 가볍게 즐길 수 있는 클래식 블록 깨기 게임 (학습 및 휴식용 도구)</p>
+</a>
 
-                <a href="/game/puzzlebubble/index.html" class="card card-game">
-                    <span class="card-emoji">🫧</span>
-                    <h3>퍼즐버블 게임</h3>
-                    <p>강의 중 집중력 환기 및 조별 이벤트용 쉬어가는 코너</p>
-                </a>
+            <a href="https://sirrius2022-spec.github.io/ksn/game/snake" class="card">
+    <h3>🐍 스네이크 게임</h3>
+    <p>방향키를 이용하여 먹이를 먹고 몸집을 키워가는 클래식 스네이크 게임</p>
+</a>
 
-                <a href="https://sirrius2022-spec.github.io/ksn/game/block/" class="card card-game">
-                    <span class="card-emoji">🟦</span>
-                    <h3>블록깨기 게임</h3>
-                    <p>웹 브라우저에서 즐기는 클래식 블록 깨기 게임 (학습·휴식용)</p>
-                </a>
+<a href="https://sirrius2022-spec.github.io/ksn/game/lotto" class="card">
+    <h3>🔮 로또 번호 생성기</h3>
+    <p>행운의 숫자를 무작위로 추출하여 최적의 로또 번호 조합을 제안하는 도구</p>
+</a>
 
-                <a href="https://sirrius2022-spec.github.io/ksn/game/snake" class="card card-game">
-                    <span class="card-emoji">🐍</span>
-                    <h3>스네이크 게임</h3>
-                    <p>방향키로 먹이를 먹고 몸집을 키워가는 클래식 스네이크 게임</p>
-                </a>
 
-                <a href="https://sirrius2022-spec.github.io/ksn/game/lotto" class="card card-game">
-                    <span class="card-emoji">🔮</span>
-                    <h3>로또 번호 생성기</h3>
-                    <p>무작위 추출로 최적의 로또 번호 조합을 제안하는 도구</p>
-                </a>
+            
+            <a href="/game/roulet/index.html" class="card">
+                <h3>🎯 룰렛 게임</h3>
+                <p>발표자 추첨 및 무작위 조별 이벤트를 위한 재미있는 랜덤 룰렛 도구</p>
+            </a>   
 
-                <a href="/game/roulet/index.html" class="card card-game">
-                    <span class="card-emoji">🎯</span>
-                    <h3>룰렛 게임</h3>
-                    <p>발표자 추첨 및 무작위 조별 이벤트를 위한 랜덤 룰렛 도구</p>
-                </a>
-
-                <a href="/game/roulet-eng/index.html" class="card card-game">
-                    <span class="card-emoji">🎯</span>
-                    <h3>룰렛 게임 (Eng)</h3>
-                    <p>발표자 추첨 및 조별 이벤트용 랜덤 룰렛 도구 — 영어버전</p>
-                </a>
-
-                <a href="/game/mableroulet/index.html" class="card card-game">
-                    <span class="card-emoji">🏎️</span>
-                    <h3>마블레이싱 (Gemini)</h3>
-                    <p>강의 집중력 환기 및 조별 레이싱 경연용 이벤트 도구</p>
-                </a>
-
-                <a href="/game/mablerace/index.html" class="card card-game">
-                    <span class="card-emoji">🏁</span>
-                    <h3>마블레이싱 (Claude)</h3>
-                    <p>강의 집중력 환기 및 조별 레이싱 경연용 이벤트 도구</p>
-                </a>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- ── FOLDER 2 : 안전 & 에이전트 ── -->
-    <div class="folder folder-safety">
-        <div class="folder-toggle open" onclick="toggleFolder(this)">
-            <span class="folder-toggle-icon">🛡️</span>
-            <span class="folder-toggle-title">안전 & AI 에이전트 폴더</span>
-            <span class="folder-count">5개</span>
-            <span class="folder-chevron">▼</span>
-        </div>
-        <div class="folder-body open">
-            <div class="grid">
-
-                <a href="/agent/cal/index.html" class="card card-safety">
-                    <span class="card-emoji">🔢</span>
-                    <h3>스마트 공학용 계산기</h3>
-                    <p>강의 및 현장 실무에서 복잡한 수식을 즉시 해결하는 웹 기반 공학 계산 도구</p>
-                </a>
-
-                <a href="https://sirrius2022-spec.github.io/pe-safety/" class="card card-safety">
-                    <span class="card-emoji">🏗️</span>
-                    <h3>스마트 건설안전 (PE-Safety)</h3>
-                    <p>건설안전 실무 및 전문 안전관리를 위한 특화 가이드 & 자료 플랫폼</p>
-                </a>
-
-                <a href="https://lawagent123.vercel.app" class="card card-safety">
-                    <span class="card-emoji">⚖️</span>
-                    <h3>건설안전 법령 에이전트</h3>
-                    <p>건설기술인을 위한 실시간 스마트 건설안전 법령 검색 및 안내 서비스</p>
-                </a>
-
-                <a href="/agent/4m/index.html" class="card card-safety">
-                    <span class="card-emoji">🤖</span>
-                    <h3>4M 위험성 평가 에이전트</h3>
-                    <p>현장 사진 기반 4M(인적·기계적·작업적·관리적) 위험 요인 분석 전문 도구</p>
-                </a>
-
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/sunex-ai" class="card card-safety">
-                    <span class="card-emoji">📐</span>
-                    <h3>흙막이 탄소성 해석 에이전트</h3>
-                    <p>굴착 단계별 지반-구조물 상호작용을 정밀 분석하여 안전성을 검토하는 전문 도구</p>
-                </a>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- ── STANDALONE : 독립 항목 ── -->
-    <div class="standalone-section">
-
-        <div class="section-header">
-            <span class="section-title"><span class="icon">📌</span>독립 메뉴</span>
-            <div class="section-line"></div>
-            <span class="section-tag">Standalone</span>
-        </div>
-
-        <div class="standalone-grid">
-
-            <a href="https://sirrius2022-spec.github.io/ksn/guide/homepage/index.html" class="card card-other">
-                <span class="card-emoji">🌐</span>
-                <h3>홈페이지 제작 가이드</h3>
-                <p>건설기술인을 위한 개인 지식 공유 플랫폼 및 에이전트 웹사이트 구축 단계별 매뉴얼</p>
+  <a href="/game/roulet-eng/index.html" class="card">
+                <h3>🎯 룰렛 게임(Eng)</h3>
+                <p>발표자 추첨 및 무작위 조별 이벤트를 위한 재미있는 랜덤 룰렛 도구(영어버전)</p>
+            </a>   
+            
+                       <a href="/game/mableroulet/index.html" class="card">
+                <h3>🏎️ 마블레이싱 게임(제미나이)</h3>
+                <p>강의 중 집중력 환기 및 조별 레이싱 경연을 위한 역동적인 이벤트 도구</p>
+            </a>
+            
+                    <a href="/game/mablerace/index.html" class="card">
+                <h3>🏎️ 마블레이싱 게임(클로드)</h3>
+                <p>강의 중 집중력 환기 및 조별 레이싱 경연을 위한 역동적인 이벤트 도구</p>
             </a>
 
-            <div class="card card-other card-padlet">
-                <span class="card-emoji">📦</span>
-                <h3>창고</h3>
-                <p>레시피 및 강의 자료 보관함</p>
-                <a href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" class="btn" target="_blank">→ 창고 바로가기</a>
-            </div>
+            <a href="/agent/cal/index.html" class="card">
+                <h3>🔢 스마트 공학용 계산기</h3>
+                <p>강의 및 현장 실무에서 복잡한 수식을 즉시 해결할 수 있는 웹 기반 공학 계산 도구</p>
+            </a>
 
-            <div class="card card-other card-padlet">
-                <span class="card-emoji">📝</span>
-                <h3>방명록</h3>
-                <p>강의에 대한 의견이나 궁금한 점을 편하게 남겨주세요.</p>
-                <a href="https://padlet.com/sirrius2022/padlet-9cd0j2khbmx7m2ec" class="btn" target="_blank">→ 방명록 바로가기</a>
-            </div>
+            <a href="https://sirrius2022-spec.github.io/pe-safety/" class="card">
+                <h3>🛡️ 스마트 건설안전 (PE-Safety)</h3>
+                <p>건설안전 실무 및 전문적인 안전 관리를 위한 특화 가이드 및 자료</p>
+            </a>
 
-        </div>
+                        <a href="https://lawagent123.vercel.app" class="card">
+                <h3>⚖️ 건설안전 법령 에이전트</h3>
+                <p>건설기술인을 위한 실시간 스마트 건설안전 법령 검색 및 안내 서비스</p>
+            </a>
+            
+            <a href="/agent/4m/index.html" class="card">
+                <h3>🤖 4M 위험성 평가 에이전트</h3>
+                <p>현장 사진을 기반으로 4M(인적, 기계적, 작업적, 관리적) 위험 요인을 분석하는 전문 도구</p>
+            </a>
+
+<a href="https://sirrius2022-spec.github.io/ksn/agent/sunex-ai" class="card">
+    <h3>🏗️ 흙막이 탄소성 해석 에이전트</h3>
+    <p>굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 정밀하게 분석하여 안전성을 검토하는 전문 도구</p>
+</a>
+
+<a href="https://sirrius2022-spec.github.io/ksn/guide/homepage/index.html" class="card">
+    <h3>🌐 홈페이지 제작 가이드</h3>
+    <p>건설 기술인을 위한 개인 지식 공유 플랫폼 및 에이전트 웹사이트 구축을 위한 단계별 매뉴얼</p>
+</a>
+
+       <div class="section">
+        <h2>창고</h2>
+        <p>레시피</p>
+        <a href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" class="btn" target="_blank">창고 바로가기</a>
+       </div>     
+         
+       <div class="section">
+        <h2>방명록</h2>
+        <p>강의에 대한 의견이나 궁금한 점을 편하게 남겨주세요.</p>
+        <a href="https://padlet.com/sirrius2022/padlet-9cd0j2khbmx7m2ec" class="btn" target="_blank">방명록 바로가기</a>
     </div>
-
-</main>
+ 
+</div>
 
 <footer>
-    <p>제작자 : 김성남 &nbsp;|&nbsp; 본 사이트는 강의 목적으로 운영됩니다.</p>
-    <p>&copy; 2026 Kim Sung-nam. All rights reserved. &nbsp;
-       <a href="mailto:sirrius@naver.com">sirrius@naver.com</a>
-    </p>
+    <p>제작자 : 김성남 | 본 사이트는 강의 목적으로 운영됩니다.</p>
+    <p>&copy; 2026 Kim Sung-nam. All rights reserved.sirrius@naver.com </p>
 </footer>
 
-<script>
-    function toggleFolder(btn) {
-        btn.classList.toggle('open');
-        const body = btn.nextElementSibling;
-        body.classList.toggle('open');
-    }
-</script>
-
 </body>
-</html>
+    </html>
