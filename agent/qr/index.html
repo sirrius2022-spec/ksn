@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:#0a0a0a;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Courier New',monospace;
+  padding:24px;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.card{
+  width:100%;max-width:420px;
+  background:#111;border:1px solid #2a2a2a;
+  border-radius:4px;padding:36px 28px;
+  box-shadow:0 0 60px rgba(0,255,180,0.05);
+}
+.badge{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.dot{width:8px;height:8px;border-radius:50%;background:#00ffb4;box-shadow:0 0 8px #00ffb4;}
+.badge-text{color:#00ffb4;font-size:11px;letter-spacing:.15em;text-transform:uppercase;}
+h1{color:#f0f0f0;font-size:22px;font-weight:700;margin-bottom:4px;}
+.sub{color:#555;font-size:12px;margin-bottom:28px;}
+label{display:block;color:#666;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;}
+input{
+  width:100%;background:#0d0d0d;border:1px solid #2a2a2a;
+  color:#e0e0e0;font-size:14px;padding:12px 14px;
+  border-radius:3px;outline:none;font-family:inherit;
+  transition:border-color .2s;margin-bottom:6px;
+}
+input:focus{border-color:#00ffb4;}
+.err{color:#ff5f5f;font-size:12px;min-height:18px;margin-bottom:10px;}
+.sizes{display:flex;gap:8px;margin-bottom:22px;}
+.sz{
+  flex:1;padding:8px 0;background:#0d0d0d;color:#666;
+  border:1px solid #2a2a2a;border-radius:3px;
+  font-size:12px;cursor:pointer;font-family:inherit;
+  letter-spacing:.05em;transition:all .15s;
+}
+.sz.on{background:#00ffb4;color:#000;border-color:#00ffb4;font-weight:700;}
+#genbtn{
+  width:100%;padding:14px 0;background:#00ffb4;color:#000;
+  border:none;border-radius:3px;font-size:13px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+  font-family:inherit;transition:opacity .15s;
+}
+#genbtn:hover{opacity:.85;}
+.out{margin-top:28px;border-top:1px solid #1e1e1e;padding-top:28px;text-align:center;display:none;}
+.qrwrap{display:inline-block;background:#fff;padding:14px;border-radius:3px;box-shadow:0 0 40px rgba(0,255,180,0.1);}
+#qrc canvas{display:block;}
+.urltext{color:#444;font-size:11px;margin-top:12px;word-break:break-all;}
+#dlbtn{
+  margin-top:14px;padding:11px 28px;
+  background:transparent;color:#00ffb4;
+  border:1px solid #00ffb4;border-radius:3px;
+  font-size:12px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;cursor:pointer;font-family:inherit;
+  transition:all .15s;
+}
+#dlbtn:hover{background:#00ffb4;color:#000;}
+.foot{margin-top:24px;border-top:1px solid #1a1a1a;padding-top:12px;display:flex;justify-content:space-between;}
+.foot span{color:#2a2a2a;font-size:10px;letter-spacing:.07em;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge"><div class="dot"></div><span class="badge-text">QR Generator</span></div>
+  <h1>URL → QR Code</h1>
+  <p class="sub">URL 입력 → Generate → Download</p>
+
+  <label>Target URL</label>
+  <input type="text" id="urlinput" placeholder="https://example.com">
+  <div class="err" id="errmsg"></div>
+
+  <label>Size: <span id="szlabel">300</span>px</label>
+  <div class="sizes">
+    <button class="sz" onclick="setSize(200)">200px</button>
+    <button class="sz on" onclick="setSize(300)">300px</button>
+    <button class="sz" onclick="setSize(500)">500px</button>
+  </div>
+
+  <button id="genbtn" onclick="generate()">⬡ Generate QR Code</button>
+
+  <div class="out" id="out">
+    <div class="qrwrap"><div id="qrc"></div></div>
+    <p class="urltext" id="urltxt"></p>
+    <button id="dlbtn" onclick="dlQR()">↓ Download PNG</button>
+  </div>
+
+  <div class="foot">
+    <span>CLIENT-SIDE · NO SERVER</span>
+    <span>FREE TO USE</span>
+  </div>
+</div>
+
+<script>
+let sz = 300;
+
+function setSize(n){
+  sz = n;
+  document.getElementById('szlabel').textContent = n;
+  document.querySelectorAll('.sz').forEach(b=>b.classList.remove('on'));
+  event.target.classList.add('on');
+}
+
+function norm(u){ return /^https?:\/\//i.test(u) ? u : 'https://'+u; }
+function valid(u){ try{new URL(u);return true;}catch{return false;} }
+
+function generate(){
+  const raw = document.getElementById('urlinput').value.trim();
+  const err = document.getElementById('errmsg');
+  err.textContent='';
+  if(!raw){err.textContent='⚠ URL을 입력하세요.';return;}
+  const url = norm(raw);
+  if(!valid(url)){err.textContent='⚠ 유효하지 않은 URL입니다.';return;}
+
+  const c = document.getElementById('qrc');
+  c.innerHTML='';
+  new QRCode(c,{text:url,width:sz,height:sz,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+
+  document.getElementById('urltxt').textContent = url;
+  document.getElementById('out').style.display='block';
+}
+
+function dlQR(){
+  // canvas 우선, 없으면 img
+  const canvas = document.querySelector('#qrc canvas');
+  if(canvas){
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='qrcode.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    return;
+  }
+  const img = document.querySelector('#qrc img');
+  if(img){
+    const a=document.createElement('a');
+    a.href=img.src;
+    a.download='qrcode.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+  }
+}
+
+document.getElementById('urlinput').addEventListener('keydown',e=>{if(e.key==='Enter')generate();});
+</script>
+</body>
+</html>
