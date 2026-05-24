@@ -34,6 +34,22 @@
         .btn { display: inline-block; background: #3498db; color: white; padding: 0.8rem 1.5rem; border-radius: 5px; text-decoration: none; margin-top: 1rem; }
         footer { text-align: center; padding: 2rem; background: #f9f9f9; font-size: 0.9rem; }
     </style>
+
+
+    <script>
+        function openInExternalBrowser(url) {
+            var userAgent = navigator.userAgent.toLowerCase();
+            if (userAgent.match(/kakaotalk/i)) {
+                // 카카오톡 환경: 외부 브라우저(크롬, 사파리 등) 강제 호출
+                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
+            } else {
+                // 일반 환경: 새 창으로 열기
+                window.open(url, '_blank');
+            }
+        }
+    </script>
+
+    
 </head>
 <body>
 
@@ -138,10 +154,12 @@
     <p>QR 코드 이미지 생성기</p>
 </a>
 
-<a href="https://sirrius2022-spec.github.io/ksn/agent/memo/index.html" class="card">
+
+<a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/memo/index.html')" class="card">
     <h3>메모장</h3>
     <p>무료 메모장</p>
 </a>
+            
 
             
        <div class="section">
