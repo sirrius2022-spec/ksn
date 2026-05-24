@@ -1,240 +1,326 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ENG CALC</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0c0f;
-    --panel: #111418;
-    --border: #2a3040;
-    --border-bright: #3d4f6e;
-    --accent: #00d4ff;
-    --display-bg: #020e08;
-    --display-text: #39ff14;
-    --display-dim: #0d3318;
-    --btn-base: #1a1f28;
-    --btn-active: #0d1520;
-    --btn-num: #1e2530;
-    --btn-op: #1a2535;
-    --btn-fn: #15202e;
-    --btn-eq: #0d3a1a;
-    --text-main: #c8d8e8;
-    --text-dim: #5a6a80;
-    --text-fn: #7db8d8;
-    --text-op: #ff9955;
-    --text-eq: #39ff14;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { width:100%; height:100%; background:var(--bg); overflow:hidden; font-family:'Exo 2',sans-serif; }
+    <meta charset="UTF-8">
+    <!-- 모바일 전체화면 및 핀치줌 방지, 주소창 영역 대응(viewport-fit=cover) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- 홈 화면 추가 시 앱처럼 보이게 하는 설정 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#252525">
 
-  .calc {
-    display:flex; flex-direction:column;
-    width:100%; height:100dvh;
-    background:var(--panel);
-  }
+    <title>Sharp EL-5500X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400&display=swap');
 
-  /* HEADER */
-  .hdr { display:flex; align-items:center; justify-content:space-between; padding:5px 12px 4px; border-bottom:1px solid var(--border); flex-shrink:0; }
-  .brand { font-family:'Orbitron',monospace; font-size:10px; font-weight:700; letter-spacing:3px; color:var(--accent); text-shadow:0 0 8px var(--accent); }
-  .model { font-family:'Share Tech Mono',monospace; font-size:6.5px; letter-spacing:1.5px; color:var(--text-dim); margin-top:1px; }
-  .dots { display:flex; gap:4px; }
-  .dot { width:5px; height:5px; border-radius:50%; }
-  .dg { background:#39ff14; box-shadow:0 0 5px #39ff14; animation:blink 3s infinite; }
-  .do { background:#ff6b35; opacity:.4; }
-  .db { background:var(--accent); opacity:.3; }
-  @keyframes blink { 0%,90%,100%{opacity:1} 95%{opacity:.2} }
+        /* 기본 바디 설정 - 모바일에서 스크롤 및 바운스 현상 완벽 방지 */
+        body {
+            background-color: #000;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            user-select: none;
+            overflow: hidden;
+            touch-action: none; /* 화면 당기기 새로고침 방지 */
+        }
 
-  /* TABS */
-  .tabs { display:flex; padding:4px 10px 0; gap:2px; flex-shrink:0; }
-  .tab { font-family:'Share Tech Mono',monospace; font-size:8px; letter-spacing:1.5px; padding:3px 9px; border-radius:4px 4px 0 0; cursor:pointer; color:var(--text-dim); border:1px solid transparent; border-bottom:none; background:transparent; user-select:none; }
-  .tab.active { color:var(--accent); background:rgba(0,212,255,.07); border-color:var(--border-bright); text-shadow:0 0 6px var(--accent); }
+        /* 계산기 본체: 모바일은 100% 꽉 채우고, PC에서는 폰 모양 유지 */
+        .calc-body {
+            background: linear-gradient(180deg, #333333 0%, #1a1a1a 100%);
+            width: 100vw;
+            height: 100dvh; /* 브라우저 주소창 제외한 실제 화면 높이 */
+            max-width: 100%;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 10px env(safe-area-inset-bottom) 10px;
+        }
 
-  /* DISPLAY */
-  .disp-wrap { margin:0 10px 5px; background:var(--display-bg); border-radius:0 5px 5px 5px; border:1px solid #0d2010; box-shadow:inset 0 2px 8px rgba(0,0,0,.8); padding:5px 12px; flex-shrink:0; position:relative; overflow:hidden; }
-  .disp-wrap::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 4px); pointer-events:none; }
-  .dinfo { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; }
-  .flags { display:flex; gap:6px; }
-  .flag { font-family:'Share Tech Mono',monospace; font-size:7px; letter-spacing:1px; color:var(--display-dim); transition:all .2s; }
-  .flag.on { color:var(--display-text); text-shadow:0 0 5px var(--display-text); }
-  .d-label { font-family:'Share Tech Mono',monospace; font-size:7px; color:var(--text-dim); letter-spacing:1px; }
-  .d-expr { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(57,255,20,.35); text-align:right; min-height:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .d-main { font-family:'Share Tech Mono',monospace; font-size:clamp(18px,6.5vw,28px); color:var(--display-text); text-align:right; text-shadow:0 0 15px rgba(57,255,20,.5),0 0 30px rgba(57,255,20,.15); letter-spacing:2px; line-height:1.1; word-break:break-all; }
-  .d-main.sm { font-size:clamp(13px,4.5vw,20px); }
-  .d-main.xs { font-size:clamp(10px,3.5vw,14px); }
-  .d-main.err { color:#ff4444; text-shadow:0 0 12px rgba(255,50,50,.5); font-size:clamp(12px,4vw,17px); }
+        /* 데스크탑(PC) 환경일 경우 기존처럼 둥근 폰 모양으로 표시 */
+        @media (min-width: 640px) {
+            .calc-body {
+                width: 100%;
+                max-width: 420px;
+                height: 90vh;
+                max-height: 850px;
+                margin: 5vh auto;
+                border-radius: 2rem;
+                padding: 20px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 0 4px #444, 0 0 0 8px #111;
+            }
+            body { background-color: #202124; touch-action: auto; overflow: auto; }
+        }
 
-  /* INFO ROW */
-  .irow { display:flex; gap:5px; margin:0 10px 4px; flex-shrink:0; }
-  .mbar { flex:1; padding:3px 8px; background:rgba(0,0,0,.3); border:1px solid var(--border); border-radius:5px; display:flex; justify-content:space-between; align-items:center; }
-  .mlbl { font-family:'Share Tech Mono',monospace; font-size:6.5px; color:var(--text-dim); letter-spacing:1px; }
-  .mval { font-family:'Share Tech Mono',monospace; font-size:9px; color:#cc88ff; }
-  .hbar { flex:2; padding:2px 8px; background:rgba(0,0,0,.3); border:1px solid var(--border); border-radius:5px; overflow:hidden; min-height:22px; }
-  .hi { font-family:'Share Tech Mono',monospace; font-size:7.5px; color:var(--text-dim); display:flex; justify-content:space-between; cursor:pointer; white-space:nowrap; overflow:hidden; }
-  .hi:hover { color:var(--text-main); }
-  .hr { color:rgba(57,255,20,.5); margin-left:5px; flex-shrink:0; }
+        /* LCD 화면 디자인 */
+        .lcd-screen {
+            background-color: #c0ccb5;
+            box-shadow: inset 3px 3px 10px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(255,255,255,0.4), 0 2px 0 rgba(255,255,255,0.05);
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+        }
+        .lcd-screen::after {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 3px 3px; pointer-events: none;
+        }
 
-  /* SEP */
-  .sep { margin:0 10px 3px; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); flex-shrink:0; }
+        /* 상단 태양광 패널 */
+        .solar-panel {
+            background: linear-gradient(to right, #3d2424 0%, #1c0f0f 20%, #3d2424 40%, #1c0f0f 60%, #3d2424 80%, #1c0f0f 100%);
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.9);
+            border: 1px solid #000;
+        }
 
-  /* BUTTON AREA */
-  .barea { flex:1; display:flex; flex-direction:column; padding:0 8px 5px; gap:3px; min-height:0; }
-  .g5 { display:grid; grid-template-columns:repeat(5,1fr); gap:3px; flex:1; min-height:0; }
+        /* 공통 버튼 스타일 (높이를 부모 flex 영역에 맞게 꽉 채움) */
+        .btn {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 6px;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 5px 5px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
+        }
 
-  button { border:none; cursor:pointer; border-radius:6px; position:relative; transition:all .07s; user-select:none; outline:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; width:100%; height:100%; }
-  .btn { background:var(--btn-base); border:1px solid var(--border); color:var(--text-main); font-family:'Exo 2',sans-serif; font-size:clamp(8px,2.8vw,13px); font-weight:600; box-shadow:0 2px 3px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05); }
-  .btn:active { background:var(--btn-active); transform:translateY(1px); box-shadow:0 1px 2px rgba(0,0,0,.5); }
-  .fn  { background:var(--btn-fn); color:var(--text-fn); font-size:clamp(7px,2.5vw,11px); }
-  .op  { background:var(--btn-op); color:var(--text-op); font-size:clamp(11px,3.8vw,17px); border-color:rgba(255,100,50,.15); }
-  .num { background:var(--btn-num); font-size:clamp(11px,3.8vw,17px); font-weight:600; }
-  .eq  { background:var(--btn-eq); color:var(--text-eq); font-size:clamp(13px,4.5vw,20px); font-weight:700; border-color:rgba(57,255,20,.2); text-shadow:0 0 8px var(--text-eq); box-shadow:0 2px 3px rgba(0,0,0,.4),0 0 8px rgba(57,255,20,.08),inset 0 1px 0 rgba(255,255,255,.05); }
-  .clr { background:#2a1215; color:#ff4444; border-color:rgba(255,50,50,.2); font-weight:700; }
-  .sft { background:#1a1830; color:#9988ff; border-color:rgba(120,100,255,.2); font-size:clamp(6px,2.2vw,9px); letter-spacing:1px; font-family:'Share Tech Mono',monospace; }
-  .sft.on { background:#251e50; color:#bbaaff; border-color:rgba(150,130,255,.4); box-shadow:0 0 10px rgba(120,100,255,.2); }
-  .mb  { background:#1a1428; color:#cc88ff; border-color:rgba(180,100,255,.15); font-size:clamp(7px,2.5vw,11px); }
-  .sub { font-size:clamp(4.5px,1.7vw,7.5px); color:#9988ff; font-family:'Share Tech Mono',monospace; letter-spacing:.3px; opacity:.65; line-height:1; }
-  .fn .sub { color:#4a7a9a; }
-  .span2 { grid-column:span 2; }
+        .btn-func { background: linear-gradient(180deg, #4a4a4a, #333333); color: #f0f0f0; }
+        .btn-num { background: linear-gradient(180deg, #2a2a2a, #111111); color: #ffffff; }
+        .btn-action { background: linear-gradient(180deg, #2a2a2a, #111111); color: #4ade80; }
+        
+        .lbl-orange { color: #f59e0b; }
+        .lbl-green { color: #10b981; }
 
-  /* FOOTER */
-  .ftr { padding:2px 12px 3px; display:flex; justify-content:space-between; border-top:1px solid var(--border); flex-shrink:0; }
-  .ftr span { font-family:'Share Tech Mono',monospace; font-size:6.5px; color:var(--text-dim); letter-spacing:1px; }
-
-  @keyframes flash { 0%,100%{opacity:1} 50%{opacity:.3} }
-  .flash { animation:flash .15s 2; }
-</style>
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
 </head>
 <body>
-<div class="calc">
 
-  <div class="hdr">
-    <div><div class="brand">ENG CALC</div><div class="model">SC-9800X · SCIENTIFIC</div></div>
-    <div class="dots"><div class="dot dg"></div><div class="dot do"></div><div class="dot db"></div></div>
-  </div>
+    <div class="calc-body">
+        
+        <!-- 상단 헤더 (로고 누르면 전체화면) -->
+        <div class="flex-none flex justify-between items-start px-2 pt-2 pb-1">
+            <div onclick="toggleFullScreen()" class="text-[#e0e0e0] font-bold text-xl md:text-2xl tracking-wider cursor-pointer active:text-white">SHARP</div>
+            <div class="solar-panel w-32 md:w-40 h-8 md:h-10 rounded-sm"></div>
+        </div>
 
-  <div class="tabs">
-    <div class="tab active" id="t-DEG" onclick="setMode('DEG')">DEG</div>
-    <div class="tab" id="t-RAD" onclick="setMode('RAD')">RAD</div>
-    <div class="tab" id="t-GRAD" onclick="setMode('GRAD')">GRAD</div>
-  </div>
+        <!-- 디스플레이 영역 -->
+        <div class="flex-none relative mt-1">
+            <div class="lcd-screen w-full h-24 md:h-28 rounded-lg p-2 flex flex-col justify-between overflow-hidden">
+                <div class="flex justify-between text-[10px] md:text-xs font-bold text-black/70 z-10">
+                    <div class="flex gap-3">
+                        <span id="ind-shift" class="opacity-0 transition-opacity">2ndF</span>
+                        <span id="ind-alpha" class="opacity-0">ALPHA</span>
+                        <span class="opacity-100">DEG</span>
+                    </div>
+                    <span class="opacity-100">W-VIEW</span>
+                </div>
+                <div id="display-expr" class="w-full text-right text-base md:text-lg text-black/90 whitespace-nowrap overflow-x-auto scrollbar-hide z-10 font-mono mt-1 min-h-[1.5rem]"></div>
+                <div id="display-result" class="w-full text-right text-3xl md:text-4xl font-bold text-black z-10 truncate font-mono pb-1">0</div>
+            </div>
+            <div class="flex justify-between text-[#888] text-[11px] md:text-[13px] mt-1 px-2 font-bold tracking-wide">
+                <span class="italic">WriteView</span>
+                <span>EL-5500X</span>
+            </div>
+        </div>
 
-  <div class="disp-wrap">
-    <div class="dinfo">
-      <div class="flags">
-        <span class="flag" id="f-shift">SHIFT</span>
-        <span class="flag on" id="f-mode">DEG</span>
-        <span class="flag" id="f-mem">M</span>
-      </div>
-      <span class="d-label">NORMAL</span>
-    </div>
-    <div class="d-expr" id="d-expr"></div>
-    <div class="d-main" id="d-main">0</div>
-  </div>
+        <!-- 네비게이션 및 기본 조작부 -->
+        <div class="flex-none flex justify-between items-center px-2 mt-2 md:mt-4">
+            <button class="btn bg-[#333] text-white text-[10px] md:text-xs w-14 h-7 md:w-16 md:h-8 rounded-full border border-[#555]">HOME</button>
+            
+            <div class="relative w-28 h-14 md:w-32 md:h-16 flex justify-center items-center">
+                <div class="absolute w-full h-6 md:h-7 bg-gradient-to-b from-[#777] to-[#555] rounded-full shadow-lg flex justify-between px-2 items-center cursor-pointer active:scale-95 transition-transform">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M15 19l-7-7 7-7v14z"/></svg>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M9 5l7 7-7 7V5z"/></svg>
+                </div>
+                <div class="absolute w-7 md:w-8 h-full bg-gradient-to-r from-[#666] via-[#777] to-[#666] rounded-full shadow-lg flex flex-col justify-between py-1 items-center cursor-pointer active:scale-95 transition-transform">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M5 15l7-7 7 7H5z"/></svg>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M19 9l-7 7-7-7h14z"/></svg>
+                </div>
+                <div class="absolute w-5 h-5 bg-[#666] rounded-full shadow-inner"></div>
+            </div>
 
-  <div class="irow">
-    <div class="mbar"><span class="mlbl">MEM</span><span class="mval" id="mem-v">0</span></div>
-    <div class="hbar" id="hbar"><div class="hi" style="justify-content:center;color:var(--text-dim);font-size:7px">— 이력 —</div></div>
-  </div>
+            <button onclick="clearAll()" class="btn bg-[#222] text-[#ff6b6b] text-[10px] md:text-xs w-14 h-7 md:w-16 md:h-8 rounded-full font-black border border-[#4a1c1c]">ON/C</button>
+        </div>
 
-  <div class="sep"></div>
+        <div class="flex-none h-px w-full bg-[#555] opacity-50 my-2 md:my-4"></div>
 
-  <div class="barea">
-    <div class="g5">
-      <button class="btn sft" id="b-shift" onclick="toggleShift()">SHIFT</button>
-      <button class="btn mb" onclick="memClear()"><span>MC</span><span class="sub">CLR</span></button>
-      <button class="btn mb" onclick="memRecall()"><span>MR</span><span class="sub">RCL</span></button>
-      <button class="btn mb" onclick="memAdd()"><span>M+</span><span class="sub">ADD</span></button>
-      <button class="btn clr" onclick="clearAll()">AC</button>
-    </div>
-    <div class="g5">
-      <button class="btn fn" onclick="pressFn('sin')"><span id="l-sin">sin</span><span class="sub">asin</span></button>
-      <button class="btn fn" onclick="pressFn('cos')"><span id="l-cos">cos</span><span class="sub">acos</span></button>
-      <button class="btn fn" onclick="pressFn('tan')"><span id="l-tan">tan</span><span class="sub">atan</span></button>
-      <button class="btn fn" onclick="pressFn('log')"><span id="l-log">log</span><span class="sub">10^x</span></button>
-      <button class="btn fn" onclick="pressFn('ln')"><span>ln</span><span class="sub">e^x</span></button>
-    </div>
-    <div class="g5">
-      <button class="btn fn" onclick="pressFn('sqrt')"><span>√x</span><span class="sub">x²</span></button>
-      <button class="btn fn" onclick="pressFn('cbrt')"><span>∛x</span><span class="sub">x³</span></button>
-      <button class="btn fn" onclick="pressFn('pow')"><span>xʸ</span><span class="sub">ʸ√x</span></button>
-      <button class="btn fn" onclick="pressFn('recip')"><span>1/x</span><span class="sub">|x|</span></button>
-      <button class="btn fn" onclick="pressFn('percent')"><span>%</span><span class="sub">mod</span></button>
-    </div>
-    <div class="g5">
-      <button class="btn fn" onclick="pressConst('pi')"><span>π</span><span class="sub">2π</span></button>
-      <button class="btn fn" onclick="pressConst('e')"><span>e</span><span class="sub">e²</span></button>
-      <button class="btn fn" onclick="pressFn('fact')"><span>n!</span><span class="sub">nCr</span></button>
-      <button class="btn op" onclick="pressOp('/')">÷</button>
-      <button class="btn clr" onclick="backspace()">⌫</button>
-    </div>
-    <div class="g5">
-      <button class="btn num" onclick="pressNum('7')">7</button>
-      <button class="btn num" onclick="pressNum('8')">8</button>
-      <button class="btn num" onclick="pressNum('9')">9</button>
-      <button class="btn op" onclick="pressOp('*')">×</button>
-      <button class="btn fn" onclick="pressFn('neg')">±</button>
-    </div>
-    <div class="g5">
-      <button class="btn num" onclick="pressNum('4')">4</button>
-      <button class="btn num" onclick="pressNum('5')">5</button>
-      <button class="btn num" onclick="pressNum('6')">6</button>
-      <button class="btn op" onclick="pressOp('-')">−</button>
-      <button class="btn fn" onclick="pressParen('(')">(</button>
-    </div>
-    <div class="g5">
-      <button class="btn num" onclick="pressNum('1')">1</button>
-      <button class="btn num" onclick="pressNum('2')">2</button>
-      <button class="btn num" onclick="pressNum('3')">3</button>
-      <button class="btn op" onclick="pressOp('+')">+</button>
-      <button class="btn fn" onclick="pressParen(')')">)</button>
-    </div>
-    <div class="g5">
-      <button class="btn num span2" onclick="pressNum('0')">0</button>
-      <button class="btn num" onclick="pressDecimal()">.</button>
-      <button class="btn fn" onclick="pressEE()">EE</button>
-      <button class="btn eq" onclick="calculate()">=</button>
-    </div>
-  </div>
+        <!-- 공학용 기능 버튼부 (화면 비율에 따라 높이 유연하게 조절됨) -->
+        <div class="flex-[3] grid grid-cols-6 grid-rows-3 gap-x-1.5 gap-y-1 px-1 mb-2">
+            <!-- 1행 -->
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[9px] text-transparent h-3 md:h-4 mb-0.5">.</span><button onclick="toggleShift()" id="btn-shift" class="btn flex-1 bg-gradient-to-b from-[#fbbf24] to-[#d97706] text-black text-[10px] md:text-xs">2ndF</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[9px] lbl-orange h-3 md:h-4 mb-0.5 font-bold">SET UP</span><button class="btn flex-1 btn-func text-[10px] md:text-xs">MATH</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[9px] lbl-orange h-3 md:h-4 mb-0.5 font-bold">ALGB</span><button class="btn flex-1 btn-func text-[10px] md:text-xs">D1</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[9px] lbl-orange h-3 md:h-4 mb-0.5 font-bold">SOLVER</span><button class="btn flex-1 btn-func text-[10px] md:text-xs">D2</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[9px] lbl-orange h-3 md:h-4 mb-0.5 font-bold"></span><button class="btn flex-1 btn-func text-[10px] md:text-xs">D3</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[9px] lbl-orange h-3 md:h-4 mb-0.5 font-bold">DEL</span><button onclick="deleteLast()" class="btn flex-1 btn-func text-[10px] md:text-xs">BS</button></div>
 
-  <div class="ftr">
-    <span>SCIENTIFIC v9.8</span>
-    <span id="f-clock"></span>
-  </div>
+            <!-- 2행 -->
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">arc hyp</span><span class="lbl-green">NOT</span></div><button class="btn flex-1 btn-func text-[10px] md:text-xs">hyp</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">sin⁻¹</span><span class="lbl-green">AND</span></div><button onclick="addFunc('sin(')" class="btn flex-1 btn-func text-[10px] md:text-xs">sin</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">cos⁻¹</span><span class="lbl-green">OR</span></div><button onclick="addFunc('cos(')" class="btn flex-1 btn-func text-[10px] md:text-xs">cos</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">tan⁻¹</span><span class="lbl-green">XOR</span></div><button onclick="addFunc('tan(')" class="btn flex-1 btn-func text-[10px] md:text-xs">tan</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange"></span><span class="lbl-green">XNOR</span></div><button onclick="addChar('π')" class="btn flex-1 btn-func text-[10px] md:text-xs">π</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">↔DEG</span></div><button class="btn flex-1 btn-func text-[10px] md:text-xs">D°M'S</button></div>
 
-</div>
-<script>
-let cur='0',prevVal=null,operator=null,waitOp=false,memory=0,angleMode='DEG',shiftMode=false,hist=[];
-const dM=document.getElementById('d-main'),dE=document.getElementById('d-expr'),mV=document.getElementById('mem-v'),hb=document.getElementById('hbar');
-function upD(v,err){dM.className='d-main';if(err){dM.className+=' err';dM.textContent=err;return;}let s=String(v);if(s.length>14)s=parseFloat(v).toExponential(5);dM.className='d-main'+(s.length>14?' xs':s.length>10?' sm':'');dM.textContent=s;}
-function toR(x){return angleMode==='DEG'?x*Math.PI/180:angleMode==='GRAD'?x*Math.PI/200:x;}
-function frR(x){return angleMode==='DEG'?x*180/Math.PI:angleMode==='GRAD'?x*200/Math.PI:x;}
-function fact(n){n=Math.round(n);if(n<0||n>170)throw 0;let r=1;for(let i=2;i<=n;i++)r*=i;return r;}
-function fmt(n){if(typeof n!=='number')n=parseFloat(n);if(!isFinite(n))return String(n);let s=String(n);if(s.length>12)s=n.toPrecision(7);return s;}
-function setMode(m){angleMode=m;['DEG','RAD','GRAD'].forEach(x=>{document.getElementById('t-'+x).classList.toggle('active',x===m);});document.getElementById('f-mode').textContent=m;}
-function toggleShift(){shiftMode=!shiftMode;document.getElementById('b-shift').classList.toggle('on',shiftMode);document.getElementById('f-shift').classList.toggle('on',shiftMode);document.getElementById('l-sin').textContent=shiftMode?'asin':'sin';document.getElementById('l-cos').textContent=shiftMode?'acos':'cos';document.getElementById('l-tan').textContent=shiftMode?'atan':'tan';document.getElementById('l-log').textContent=shiftMode?'10^x':'log';}
-function clrShift(){if(!shiftMode)return;shiftMode=false;document.getElementById('b-shift').classList.remove('on');document.getElementById('f-shift').classList.remove('on');document.getElementById('l-sin').textContent='sin';document.getElementById('l-cos').textContent='cos';document.getElementById('l-tan').textContent='tan';document.getElementById('l-log').textContent='log';}
-function pressNum(n){if(waitOp){cur=n;waitOp=false;}else cur=cur==='0'?n:cur+n;upD(cur);}
-function pressDecimal(){if(waitOp){cur='0.';waitOp=false;}else if(!cur.includes('.'))cur+='.';upD(cur);}
-function pressEE(){if(!cur.includes('e')&&!cur.includes('E'))cur+='e+';upD(cur);}
-function pressOp(op){let v=parseFloat(cur);if(prevVal!==null&&!waitOp){v=cmp(prevVal,v,operator);if(v===null)return;cur=fmt(v);upD(cur);}prevVal=parseFloat(cur);operator=op;waitOp=true;dE.textContent=fmt(prevVal)+' '+({'+':'+','-':'−','*':'×','/':'÷'}[op]||op);}
-function cmp(a,b,op){try{let r;switch(op){case'+':r=a+b;break;case'-':r=a-b;break;case'*':r=a*b;break;case'/':if(b===0){showErr('DIV/ZERO');return null;}r=a/b;break;default:r=b;}if(!isFinite(r)){showErr('OVERFLOW');return null;}return r;}catch(e){showErr('ERROR');return null;}}
-function calculate(){if(operator===null||prevVal===null){addH(cur,cur);return;}let b=parseFloat(cur),sym={'+':'+','-':'−','*':'×','/':'÷'}[operator]||operator,ex=fmt(prevVal)+' '+sym+' '+fmt(b),r=cmp(prevVal,b,operator);if(r===null)return;addH(ex,r);cur=fmt(r);upD(cur);dE.textContent=ex+' =';prevVal=null;operator=null;waitOp=true;}
-function pressFn(fn){let v=parseFloat(cur),r,lb;try{if(shiftMode){switch(fn){case'sin':r=frR(Math.asin(v));lb='asin';break;case'cos':r=frR(Math.acos(v));lb='acos';break;case'tan':r=frR(Math.atan(v));lb='atan';break;case'log':r=Math.pow(10,v);lb='10^x';break;case'ln':r=Math.exp(v);lb='e^x';break;case'sqrt':r=v*v;lb='x²';break;case'cbrt':r=v*v*v;lb='x³';break;case'recip':r=Math.abs(v);lb='|x|';break;default:r=v;lb=fn;}clrShift();}else{switch(fn){case'sin':r=Math.sin(toR(v));lb='sin';break;case'cos':r=Math.cos(toR(v));lb='cos';break;case'tan':if(Math.abs(Math.cos(toR(v)))<1e-10){showErr('UNDEF');return;}r=Math.tan(toR(v));lb='tan';break;case'log':if(v<=0){showErr('DOMAIN');return;}r=Math.log10(v);lb='log';break;case'ln':if(v<=0){showErr('DOMAIN');return;}r=Math.log(v);lb='ln';break;case'sqrt':if(v<0){showErr('DOMAIN');return;}r=Math.sqrt(v);lb='√';break;case'cbrt':r=Math.cbrt(v);lb='∛';break;case'pow':prevVal=v;operator='pow';waitOp=true;dE.textContent=fmt(v)+'^';return;case'recip':if(v===0){showErr('DIV/ZERO');return;}r=1/v;lb='1/x';break;case'percent':r=v/100;lb='%';break;case'neg':r=-v;lb='±';break;case'fact':r=fact(v);lb='n!';break;}}if(r===undefined||r===null)return;if(!isFinite(r)){showErr('OVERFLOW');return;}dE.textContent=lb+'('+fmt(v)+')';cur=fmt(r);upD(cur);addH(lb+'('+fmt(v)+')',r);waitOp=true;}catch(e){showErr('ERROR');}}
-function pressConst(c){let v=c==='pi'?(shiftMode?2*Math.PI:Math.PI):(shiftMode?Math.E*Math.E:Math.E);cur=String(v);upD(cur);waitOp=false;clrShift();}
-function pressParen(p){dE.textContent=(dE.textContent||'')+p;}
-function memClear(){memory=0;mV.textContent='0';document.getElementById('f-mem').classList.remove('on');}
-function memRecall(){cur=String(memory);upD(cur);waitOp=false;}
-function memAdd(){memory+=parseFloat(cur);mV.textContent=fmt(memory);document.getElementById('f-mem').classList.add('on');fl();}
-function clearAll(){cur='0';prevVal=null;operator=null;waitOp=false;dE.textContent='';upD('0');fl();}
-function backspace(){if(waitOp)return;cur=cur.length<=1?'0':cur.slice(0,-1);upD(cur);}
-function showErr(m){dM.className='d-main err';dM.textContent=m;dE.textContent='';setTimeout(()=>{cur='0';upD('0');},2000);}
-function fl(){dM.classList.add('flash');setTimeout(()=>dM.classList.remove('flash'),300);}
-function addH(ex,r){hist.unshift({ex,r:fmt(r)});if(hist.length>4)hist.pop();renderH();}
-function renderH(){hb.innerHTML='';if(!hist.length){hb.innerHTML='<div class="hi" style="justify-content:center;color:var(--text-dim);font-size:7px">— 이력 —</div>';return;}hist.slice(0,3).forEach(h=>{let d=document.createElement('div');d.className='hi';d.innerHTML=`<span style="overflow:hidden;text-overflow:ellipsis">${h.ex}</span><span class="hr">=${h.r}</span>`;d.onclick=()=>{cur=h.r;upD(h.r);waitOp=false;};hb.appendChild(d);});}
-document.addEventListener('keydown',e=>{if(e.key>='0'&&e.key<='9')pressNum(e.key);else if(e.key==='.')pressDecimal();else if(e.key==='+')pressOp('+');else if(e.key==='-')pressOp('-');else if(e.key==='*')pressOp('*');else if(e.key==='/'){e.preventDefault();pressOp('/');}else if(e.key==='Enter'||e.key==='=')calculate();else if(e.key==='Backspace')backspace();else if(e.key==='Escape')clearAll();});
-setInterval(()=>{let n=new Date();document.getElementById('f-clock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');},1000);
-</script>
+            <!-- 3행 -->
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">ˣ√</span><span class="lbl-green">A</span></div><button onclick="addChar('^')" class="btn flex-1 btn-func text-[10px] md:text-xs">yˣ</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">³√</span><span class="lbl-green">B</span></div><button onclick="addFunc('sqrt(')" class="btn flex-1 btn-func text-[10px] md:text-xs">√</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">x³</span><span class="lbl-green">C</span></div><button onclick="addChar('²')" class="btn flex-1 btn-func text-[10px] md:text-xs">x²</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">10ˣ</span><span class="lbl-green">D</span></div><button onclick="addFunc('log(')" class="btn flex-1 btn-func text-[10px] md:text-xs">log</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange">eˣ</span><span class="lbl-green">E</span></div><button onclick="addFunc('ln(')" class="btn flex-1 btn-func text-[10px] md:text-xs">ln</button></div>
+            <div class="flex flex-col items-center"><div class="flex justify-between w-full px-0.5 text-[7px] md:text-[8px] h-3 md:h-4 mb-0.5"><span class="lbl-orange"></span><span class="lbl-green">F</span></div><button class="btn flex-1 btn-func text-[10px] md:text-xs">(x,y)</button></div>
+        </div>
+
+        <!-- 숫자 및 연산자 패드 (가장 넓은 공간 차지) -->
+        <div class="flex-[5] grid grid-cols-5 grid-rows-4 gap-x-2 gap-y-2 px-1 pb-2 md:pb-4">
+            <!-- 1행 -->
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">RANDOM</span><button onclick="addChar('7')" class="btn flex-1 btn-num text-xl md:text-2xl">7</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">→rθ</span><button onclick="addChar('8')" class="btn flex-1 btn-num text-xl md:text-2xl">8</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">→xy</span><button onclick="addChar('9')" class="btn flex-1 btn-num text-xl md:text-2xl">9</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5"></span><button onclick="addChar('(')" class="btn flex-1 btn-num text-base md:text-xl">(</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5"></span><button onclick="addChar(')')" class="btn flex-1 btn-num text-base md:text-xl">)</button></div>
+
+            <!-- 2행 -->
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">n!</span><button onclick="addChar('4')" class="btn flex-1 btn-num text-xl md:text-2xl">4</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">nCr</span><button onclick="addChar('5')" class="btn flex-1 btn-num text-xl md:text-2xl">5</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">nPr</span><button onclick="addChar('6')" class="btn flex-1 btn-num text-xl md:text-2xl">6</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5"></span><button onclick="addChar('×')" class="btn flex-1 btn-num text-2xl md:text-3xl">×</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5"></span><button onclick="addChar('÷')" class="btn flex-1 btn-num text-2xl md:text-3xl">÷</button></div>
+
+            <!-- 3행 -->
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">%</span><button onclick="addChar('1')" class="btn flex-1 btn-num text-xl md:text-2xl">1</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5"></span><button onclick="addChar('2')" class="btn flex-1 btn-num text-xl md:text-2xl">2</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5"></span><button onclick="addChar('3')" class="btn flex-1 btn-num text-xl md:text-2xl">3</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5"></span><button onclick="addChar('+')" class="btn flex-1 btn-num text-2xl md:text-3xl">+</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5"></span><button onclick="addChar('-')" class="btn flex-1 btn-num text-3xl md:text-4xl">-</button></div>
+
+            <!-- 4행 -->
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">MDF</span><button onclick="addChar('0')" class="btn flex-1 btn-num text-xl md:text-2xl">0</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">DRG►</span><button onclick="addChar('.')" class="btn flex-1 btn-num text-2xl md:text-3xl flex items-start justify-center pt-1 md:pt-2">.</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">abs</span><button onclick="addChar('-')" class="btn flex-1 btn-num text-base md:text-xl">(-)</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">ANS</span><button onclick="calculate()" class="btn flex-1 btn-num text-2xl md:text-3xl bg-gradient-to-b from-[#333] to-[#111]">=</button></div>
+            <div class="flex flex-col items-center"><span class="text-[8px] md:text-[10px] lbl-orange h-3 md:h-4 mb-0.5">LENTERJ</span><button onclick="calculate()" class="btn flex-1 btn-action text-[11px] md:text-sm font-bold">ENTER</button></div>
+        </div>
+    </div>
+
+    <script>
+        // 전체화면 토글 기능 (상단 로고 터치 시 작동)
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+                    document.documentElement.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        let expression = "";
+        let isShift = false;
+
+        const exprDisplay = document.getElementById('display-expr');
+        const resDisplay = document.getElementById('display-result');
+        const indShift = document.getElementById('ind-shift');
+
+        function toggleShift() {
+            isShift = !isShift;
+            indShift.style.opacity = isShift ? "1" : "0";
+        }
+
+        function addChar(char) {
+            if(char === '²') expression += '^2';
+            else expression += char;
+            updateDisplay();
+        }
+
+        function addFunc(func) {
+            if (isShift) {
+                const shiftMap = {
+                    'sin(': 'asin(', 'cos(': 'acos(', 'tan(': 'atan(',
+                    'sqrt(': 'cbrt(', 'log(': '10^(', 'ln(': 'e^('
+                };
+                expression += shiftMap[func] || func;
+                toggleShift(); 
+            } else {
+                expression += func;
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            let visualExpr = expression
+                .replace(/\^2/g, '²').replace(/asin\(/g, 'sin⁻¹(')
+                .replace(/acos\(/g, 'cos⁻¹(').replace(/atan\(/g, 'tan⁻¹(')
+                .replace(/sqrt\(/g, '√(');
+                
+            exprDisplay.innerText = visualExpr || "";
+            exprDisplay.scrollLeft = exprDisplay.scrollWidth;
+        }
+
+        function clearAll() {
+            expression = ""; resDisplay.innerText = "0";
+            isShift = false; indShift.style.opacity = "0";
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            expression = expression.slice(0, -1);
+            updateDisplay();
+        }
+
+        function calculate() {
+            if (!expression) return;
+            try {
+                let jsExpr = expression
+                    .replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'Math.PI')
+                    .replace(/e\^\(/g, 'Math.exp(').replace(/sin\(/g, 'Math.sin(')
+                    .replace(/cos\(/g, 'Math.cos(').replace(/tan\(/g, 'Math.tan(')
+                    .replace(/asin\(/g, 'Math.asin(').replace(/acos\(/g, 'Math.acos(')
+                    .replace(/atan\(/g, 'Math.atan(').replace(/log\(/g, 'Math.log10(')
+                    .replace(/ln\(/g, 'Math.log(').replace(/sqrt\(/g, 'Math.sqrt(')
+                    .replace(/cbrt\(/g, 'Math.cbrt(').replace(/\^/g, '**');
+
+                const openCount = (jsExpr.match(/\(/g) || []).length;
+                const closeCount = (jsExpr.match(/\)/g) || []).length;
+                for (let i = 0; i < openCount - closeCount; i++) jsExpr += ')';
+
+                const result = eval(jsExpr);
+                
+                if (isNaN(result) || !isFinite(result)) resDisplay.innerText = "Error";
+                else resDisplay.innerText = Number.isInteger(result) ? result : parseFloat(result.toFixed(9)).toString();
+            } catch (e) {
+                resDisplay.innerText = "Syntax Error";
+            }
+        }
+        
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            if (/[0-9]/.test(key)) addChar(key);
+            if (key === '+' || key === '-' || key === '(' || key === ')' || key === '.') addChar(key);
+            if (key === '*') addChar('×');
+            if (key === '/') addChar('÷');
+            if (key === 'Enter' || key === '=') { event.preventDefault(); calculate(); }
+            if (key === 'Backspace') deleteLast();
+            if (key === 'Escape') clearAll();
+        });
+    </script>
 </body>
 </html>
+
+
