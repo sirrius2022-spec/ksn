@@ -209,7 +209,7 @@
             }
         });
 
-        // 창 닫기 로직
+                // 창 닫기 로직 (수정됨)
         btnClose.addEventListener('click', () => {
             if (editor.value.length > 0) {
                 if (!confirm("작성 중인 내용이 있습니다. 정말 메모장을 닫으시겠습니까?")) {
@@ -217,14 +217,18 @@
                 }
             }
             
-            // 1. 새 창으로 열렸을 경우 창 닫기 시도
+            // 1. 브라우저 탭 닫기 강제 시도 (우회 기법)
+            window.opener = null;
+            window.open('', '_self');
             window.close();
             
-            // 2. 창 닫기가 안 먹히는 환경(같은 탭에서 열렸을 경우 등)을 대비해 이전 페이지로 돌아가기
+            // 2. 모바일 브라우저 보안 정책상 창 닫기가 안 먹힐 경우를 대비한 안전장치
+            // 방명록 등 이전 기록으로 가지 않고 메인 홈페이지로 확실하게 이동합니다.
             setTimeout(() => {
-                history.back();
+                location.href = 'https://sirrius2022-spec.github.io/ksn/';
             }, 300);
         });
+
 
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
