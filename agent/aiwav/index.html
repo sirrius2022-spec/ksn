@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Agent Studio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #0f172a;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col">
+
+    <!-- 상단 네비게이션 바 -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+                <i data-lucide="mic" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">AI Voice Studio</h1>
+                <p class="text-xs text-slate-400">맞춤형 고음질 TTS 에이전트</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- 상태 인디케이터 -->
+            <div id="apiStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>시스템 준비 완료</span>
+            </div>
+            <div id="fallbackModeBadge" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium border border-amber-500/20">
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <span>로컬 브라우저 엔진 모드</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 대시보드 구조 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- 왼쪽 컨트롤 타워 (설정 및 텍스트 작성) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- 보이스 성우 셀렉터 카드 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="user-check" class="text-indigo-400 w-5 h-5"></i>
+                        AI 목소리 및 성우 설정
+                    </h2>
+                    <!-- 멀티스피커 토글 -->
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <span class="text-xs text-slate-400">다자간 대화 모드</span>
+                        <div class="relative">
+                            <input type="checkbox" id="multiSpeakerToggle" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- 싱글 스피커 모드 설정 -->
+                <div id="singleVoiceSection" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-2">보이스 선택 (Gemini TTS 전용)</label>
+                        <select id="voiceSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Kore" selected>Kore (신뢰감 있고 대중적인 목소리)</option>
+                            <option value="Puck">Puck (밝고 에너지가 느껴지는 톤)</option>
+                            <option value="Zephyr">Zephyr (차분하고 정돈된 내레이션 목소리)</option>
+                            <option value="Charon">Charon (지적이고 깊이 있는 목소리)</option>
+                            <option value="Fenrir">Fenrir (무겁고 카리스마 넘치는 스타일)</option>
+                            <option value="Leda">Leda (부드럽고 친근한 안내 멘트형)</option>
+                            <option value="Aoede">Aoede (예술적이고 감성적인 스타일)</option>
+                            <option value="Callirrhoe">Callirrhoe (자연스럽고 맑은 목소리)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-2">감정 및 말하는 스타일 지시 (AI 한정)</label>
+                        <select id="styleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="말하듯이 자연스럽게" selected>일반 대화 (자연스러운 기본 톤)</option>
+                            <option value="최대한 밝고 경쾌하게 기쁜 소식을 전하듯">즐거움 (밝고 경쾌하게)</option>
+                            <option value="조심스럽게 소곤소곤 비밀스럽게">비밀 (소곤소곤 속삭이듯)</option>
+                            <option value="깊은 슬픔과 감정이 묻어나는 무거운 톤으로">슬픔 (조용하고 차분하게)</option>
+                            <option value="전문적인 뉴스 아나운서처럼 단호하고 지적이게">전문성 (신뢰감 있고 선명하게)</option>
+                            <option value="매우 다급하고 흥분된 톤으로 긴박하게">흥분/긴박 (속도가 조금 빠르고 상기된)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 멀티 스피커 모드 설정 -->
+                <div id="multiVoiceSection" class="hidden border border-slate-800/80 bg-slate-950/50 rounded-xl p-4 mt-2">
+                    <p class="text-xs text-indigo-300 mb-3">💡 대화 가이드: 텍스트 입력창에 <code class="bg-slate-950 px-1 py-0.5 rounded text-rose-400">화자이름: 할말</code> 형식으로 각 행을 분리해서 작성해 주세요.</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="block text-xs text-slate-400 mb-1">참여자 1 보이스</span>
+                            <select id="multiSpeaker1" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs">
+                                <option value="Kore" selected>Kore (지적이고 안정적인 여론)</option>
+                                <option value="Zephyr">Zephyr (조용하고 차분한 캐릭터)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-slate-400 mb-1">참여자 2 보이스</span>
+                            <select id="multiSpeaker2" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs">
+                                <option value="Puck" selected>Puck (명랑하고 빠른 반응)</option>
+                                <option value="Charon">Charon (깊은 목소리의 상대방)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 텍스트 작성 영역 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="file-text" class="text-indigo-400 w-5 h-5"></i>
+                        변환할 텍스트 대본 작성
+                    </h2>
+                    <span id="charCount" class="text-xs text-slate-500">0자 작성됨</span>
+                </div>
+                
+                <div class="relative flex-1 min-h-[250px] flex flex-col mb-4">
+                    <textarea id="textInput" placeholder="이곳에 인공지능 성우가 읽어줄 스크립트를 입력해 주세요.&#10;&#10;(멀티 스피커 활성화 시 양식 예:)&#10;Kore: 안녕하세요! 오늘 날씨가 참 맑네요.&#10;Puck: 맞아요! 산책하기에 정말 완벽한 날이에요." 
+                        class="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none leading-relaxed"></textarea>
+                </div>
+
+                <!-- 빠른 프리셋 문구 -->
+                <div class="mb-4">
+                    <span class="text-xs text-slate-500 block mb-2">💡 빠른 테스트 프리셋</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="loadPreset(1)" class="text-xs bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-300 px-3 py-1.5 rounded-lg transition-all">
+                            📢 가이드 안내
+                        </button>
+                        <button type="button" onclick="loadPreset(2)" class="text-xs bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-300 px-3 py-1.5 rounded-lg transition-all">
+                            🎉 웰컴 인사말
+                        </button>
+                        <button type="button" onclick="loadPreset(3)" class="text-xs bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-300 px-3 py-1.5 rounded-lg transition-all">
+                            🎭 2인 대화극 (멀티 보이스 전용)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 오디오 합성 작동 트리거 버튼 -->
+                <button id="generateBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-3 transition-all transform hover:scale-[1.01] shadow-lg shadow-indigo-600/20 active:scale-[0.99]">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    <span id="generateBtnText">목소리 변환 및 음성 저장하기</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 오른쪽 목록 (변환 내역 및 WAV 저장소) -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- 플레이어 및 상태 보드 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-4">
+                <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
+                    <i data-lucide="headphones" class="text-purple-400 w-5 h-5"></i>
+                    현재 생성된 실시간 오디오
+                </h2>
+
+                <div id="noCurrentAudio" class="border border-dashed border-slate-800 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+                    <i data-lucide="disc" class="w-10 h-10 text-slate-700 animate-spin mb-3"></i>
+                    <p class="text-sm text-slate-400 font-medium">합성된 오디오가 없습니다</p>
+                    <p class="text-xs text-slate-600 mt-1">텍스트를 입력하고 변환하기를 눌러주세요.</p>
+                </div>
+
+                <div id="activePlayerCard" class="hidden bg-slate-950 border border-slate-800/80 rounded-xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-indigo-500/10 p-2 rounded-lg text-indigo-400" id="currentVoiceAvatar">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center">
+                                <h4 id="currentAudioName" class="text-sm font-semibold text-slate-200 truncate">Kore</h4>
+                                <span id="currentAudioSource" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">GEMINI API</span>
+                            </div>
+                            <p id="currentAudioText" class="text-xs text-slate-400 truncate mt-0.5">읽은 문구 내용이 여기에 들어갑니다.</p>
+                        </div>
+                    </div>
+
+                    <!-- 오디오 인터페이스 -->
+                    <audio id="mainAudioPlayer" controls class="w-full h-10 accent-indigo-600 bg-slate-900 rounded-lg mt-2 mb-3"></audio>
+
+                    <!-- 빠른 로컬 저장 및 다른 이름으로 저장 기능 버튼 단추 -->
+                    <div class="flex flex-col gap-2">
+                        <div class="flex gap-2">
+                            <button id="downloadActiveBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                기본 이름 저장
+                            </button>
+                            <button id="saveAsActiveBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/10">
+                                <i data-lucide="file-output" class="w-4 h-4"></i>
+                                다른 이름으로 저장
+                            </button>
+                            <button id="resetActiveBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 px-3 rounded-lg transition-all" title="초기화">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 변환 보이스 보관함 / 내역 저장 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col min-h-[300px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="folder-heart" class="text-indigo-400 w-5 h-5"></i>
+                        오디오 히스토리 보관함
+                    </h2>
+                    <button id="clearHistoryBtn" class="text-xs text-rose-400 hover:text-rose-300 transition-all flex items-center gap-1 hidden">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        전체 삭제
+                    </button>
+                </div>
+
+                <div id="historyList" class="flex-1 flex flex-col gap-3 overflow-y-auto max-h-[350px] pr-1">
+                    <!-- 비었을 시 표시 -->
+                    <div id="emptyHistory" class="flex-1 flex flex-col items-center justify-center text-center p-8">
+                        <i data-lucide="inbox" class="w-8 h-8 text-slate-700 mb-2"></i>
+                        <p class="text-xs text-slate-500">생성된 파일 내역이 비어있습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 다른 이름으로 저장 커스텀 모달 다이얼로그 -->
+    <div id="saveAsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-6 rounded-2xl shadow-2xl transform scale-95 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-indigo-600/10 p-2.5 rounded-xl text-indigo-400">
+                    <i data-lucide="file-output" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-100">다른 이름으로 오디오 저장</h3>
+                    <p class="text-xs text-slate-400">저장할 파일의 이름을 입력해 주세요.</p>
+                </div>
+            </div>
+            
+            <div class="mb-5">
+                <label class="block text-xs font-semibold text-slate-400 mb-2">파일명 입력</label>
+                <div class="relative flex items-center">
+                    <input type="text" id="customFileNameInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-16 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="파일명">
+                    <span class="absolute right-4 text-xs font-bold text-slate-500">.wav</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1.5">특수기호(\, /, :, *, ?, ", <, >, |)는 사용할 수 없습니다.</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" id="closeSaveAsModal" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2.5 rounded-xl text-xs transition-all">
+                    취소
+                </button>
+                <button type="button" id="confirmSaveAsBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-indigo-600/20">
+                    다운로드 저장
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 피드백 메시지 모달 토스트 -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-950 border border-slate-800 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toastIcon" class="bg-indigo-500/10 p-1.5 rounded-lg text-indigo-400">
+            <i data-lucide="info" class="w-4 h-4"></i>
+        </div>
+        <p id="toastMessage" class="text-xs font-medium text-slate-300">안내 메시지 공간</p>
+    </div>
+
+    <!-- 푸터 개발 정보 -->
+    <footer class="border-t border-slate-800/80 bg-slate-950/40 px-6 py-4 text-center">
+        <p class="text-xs text-slate-600">© 2026 AI Voice Agent Studio. All sound processing logic executes locally and directly with advanced AI layers.</p>
+    </footer>
+
+    <!-- Firebase App/Auth/Firestore SDK CDN (요청 규칙 충족) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // 변수 및 설정 정의
+        const apiKey = ""; // 런타임에 주입되는 환경 변수를 사용하므로 빈 값으로 설정
+        const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+        // 로컬 상태 변수
+        let activeAudioBlob = null;
+        let activeAudioUrl = null;
+        let generatedHistory = [];
+        let forceLocalFallback = false; // API 작동 불가 시 로컬 브라우저 TTS(SpeechSynthesis)로 전환
+
+        // 다른이름으로 저장용 대기 버퍼
+        let currentSavingBlob = null;
+        let defaultSavingName = "";
+
+        // 엘리먼트 수집
+        const textInput = document.getElementById('textInput');
+        const charCount = document.getElementById('charCount');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const styleSelect = document.getElementById('styleSelect');
+        const generateBtn = document.getElementById('generateBtn');
+        const generateBtnText = document.getElementById('generateBtnText');
+        const apiStatusBadge = document.getElementById('apiStatusBadge');
+        const fallbackModeBadge = document.getElementById('fallbackModeBadge');
+
+        const multiSpeakerToggle = document.getElementById('multiSpeakerToggle');
+        const singleVoiceSection = document.getElementById('singleVoiceSection');
+        const multiVoiceSection = document.getElementById('multiVoiceSection');
+        const multiSpeaker1 = document.getElementById('multiSpeaker1');
+        const multiSpeaker2 = document.getElementById('multiSpeaker2');
+
+        const noCurrentAudio = document.getElementById('noCurrentAudio');
+        const activePlayerCard = document.getElementById('activePlayerCard');
+        const mainAudioPlayer = document.getElementById('mainAudioPlayer');
+        const currentVoiceAvatar = document.getElementById('currentVoiceAvatar');
+        const currentAudioName = document.getElementById('currentAudioName');
+        const currentAudioSource = document.getElementById('currentAudioSource');
+        const currentAudioText = document.getElementById('currentAudioText');
+        
+        const downloadActiveBtn = document.getElementById('downloadActiveBtn');
+        const saveAsActiveBtn = document.getElementById('saveAsActiveBtn');
+        const resetActiveBtn = document.getElementById('resetActiveBtn');
+
+        // 다른이름으로 저장 모달 요소들
+        const saveAsModal = document.getElementById('saveAsModal');
+        const customFileNameInput = document.getElementById('customFileNameInput');
+        const confirmSaveAsBtn = document.getElementById('confirmSaveAsBtn');
+        const closeSaveAsModal = document.getElementById('closeSaveAsModal');
+
+        const historyList = document.getElementById('historyList');
+        const emptyHistory = document.getElementById('emptyHistory');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+        // 이니셜라이저
+        window.addEventListener('DOMContentLoaded', () => {
+            // Lucide 아이콘 활성화
+            lucide.createIcons();
+            
+            // 초기 UI 갱신
+            updateCharCount();
+            detectApiAvailability();
+        });
+
+        // 텍스트 글자 수 연동
+        textInput.addEventListener('input', updateCharCount);
+        function updateCharCount() {
+            const count = textInput.value.length;
+            charCount.textContent = `${count.toLocaleString()}자 작성됨`;
+        }
+
+        // 멀티 보이스 다자간 모드 토글 액션
+        multiSpeakerToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                singleVoiceSection.classList.add('hidden');
+                multiVoiceSection.classList.remove('hidden');
+                showToast("다자간 대화 극단 모드가 활성화되었습니다.");
+            } else {
+                singleVoiceSection.classList.remove('hidden');
+                multiVoiceSection.classList.add('hidden');
+            }
+        });
+
+        // API 사용가능 여부 진단
+        function detectApiAvailability() {
+            if (!apiKey && typeof __firebase_config === 'undefined') {
+                switchToFallbackMode(true);
+            }
+        }
+
+        function switchToFallbackMode(state) {
+            forceLocalFallback = state;
+            if (state) {
+                apiStatusBadge.classList.add('hidden');
+                fallbackModeBadge.classList.remove('hidden');
+            } else {
+                apiStatusBadge.classList.remove('hidden');
+                fallbackModeBadge.classList.add('hidden');
+            }
+        }
+
+        // 빠른 테스트 프리셋 템플릿 로더
+        function loadPreset(type) {
+            if (type === 1) {
+                textInput.value = "이 에이전트는 기계음이 아닌 인공지능 성우의 숨소리와 억양을 살려 고음질의 음성으로 출력해 주는 지능형 도구입니다. 대본을 자유롭게 편집하고 저장하여 언제든지 다시 다운로드할 수 있습니다.";
+                if (multiSpeakerToggle.checked) multiSpeakerToggle.click();
+            } else if (type === 2) {
+                textInput.value = "안녕하세요! 당신만의 프라이빗한 목소리 스튜디오에 오신 것을 대단히 환영합니다. 무엇이든 입력해주시면 듣기 편안한 최고의 어조로 읽어드리겠습니다.";
+                if (multiSpeakerToggle.checked) multiSpeakerToggle.click();
+            } else if (type === 3) {
+                multiSpeakerToggle.checked = true;
+                singleVoiceSection.classList.add('hidden');
+                multiVoiceSection.classList.remove('hidden');
+                textInput.value = "Kore: 안녕하세요! 오늘 스튜디오 녹음 상태가 아주 훌륭하네요.\nPuck: 그렇고말고요! 실시간 변환 응답 속도도 훨씬 빨라졌어요.\nKore: 맞아요, 특히 감정을 자연어 지시사항으로 직접 조율할 수 있어서 더욱 매력적이에요.\nPuck: 어서 다른 스크립트도 직접 더 만들어서 테스트해봐요!";
+            }
+            updateCharCount();
+            showToast("선택한 대본 템플릿이 성공적으로 로드되었습니다.");
+        }
+
+        // 원본 PCM-16비트 오디오 데이터를 WAV 포맷 헤더로 패킹해주는 고성능 컨버터
+        function pcmToWav(pcmBuffer, sampleRate = 24000) {
+            const buffer = new ArrayBuffer(44 + pcmBuffer.byteLength);
+            const view = new DataView(buffer);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcmBuffer.byteLength, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcmBuffer.byteLength, true);
+
+            const pcmView = new DataView(pcmBuffer);
+            for (let i = 0; i < pcmBuffer.byteLength; i++) {
+                view.setUint8(44 + i, pcmView.getUint8(i));
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // 지수 백오프 기반 API 리트라이 구조가 포함된 요청 실행
+        async function fetchGeminiTtsWithRetry(payload, maxRetries = 5) {
+            let delay = 1000;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(ttsUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (err) {
+                    // 사일런스 모드 재시도
+                }
+                
+                if (attempt < maxRetries - 1) {
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2;
+                }
+            }
+            throw new Error("모든 요청 시도가 제한시간 초과로 실패했습니다.");
+        }
+
+        // 메인 합성 트리거 동작
+        generateBtn.addEventListener('click', async () => {
+            const rawText = textInput.value.trim();
+            if (!rawText) {
+                showToast("음성으로 바꿀 대본 내용을 적어주세요!", "warning");
+                return;
+            }
+
+            setLoadingState(true);
+
+            if (forceLocalFallback) {
+                await generateLocalSpeech(rawText);
+                setLoadingState(false);
+                return;
+            }
+
+            try {
+                let payload = {};
+                const isMulti = multiSpeakerToggle.checked;
+                const activeVoice = voiceSelect.value;
+                const activeStyle = styleSelect.value;
+
+                if (!isMulti) {
+                    const formattedText = `Say contextually [style: ${activeStyle}]: ${rawText}`;
+                    payload = {
+                        contents: [{ parts: [{ text: formattedText }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: {
+                                voiceConfig: {
+                                    prebuiltVoiceConfig: {
+                                        voiceName: activeVoice
+                                    }
+                                }
+                            }
+                        },
+                        model: "gemini-2.5-flash-preview-tts"
+                    };
+                } else {
+                    const speaker1 = multiSpeaker1.value;
+                    const speaker2 = multiSpeaker2.value;
+                    
+                    payload = {
+                        contents: [{ parts: [{ text: rawText }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: {
+                                voiceConfig: {
+                                    multiSpeakerVoiceConfig: {
+                                        speakerVoiceConfigs: [
+                                            { speaker: speaker1, voiceConfig: { prebuiltVoiceConfig: { voiceName: speaker1 } } },
+                                            { speaker: speaker2, voiceConfig: { prebuiltVoiceConfig: { voiceName: speaker2 } } }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        model: "gemini-2.5-flash-preview-tts"
+                    };
+                }
+
+                const result = await fetchGeminiTtsWithRetry(payload);
+                const base64Audio = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                
+                if (!base64Audio) {
+                    throw new Error("결과 응답 패킷 내에 오디오 스트림 데이터가 존재하지 않습니다.");
+                }
+
+                const binaryString = window.atob(base64Audio);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+
+                const wavBlob = pcmToWav(bytes.buffer, 24000);
+                setupActiveAudio(wavBlob, isMulti ? "다자간 대화극" : activeVoice, rawText, "gemini");
+
+                showToast("음성 오디오 파일 합성이 완료되었습니다!");
+            } catch (err) {
+                console.error("Gemini TTS Fail:", err);
+                showToast("AI API 호출에 오류가 생겨 브라우저 자체 로컬 합성 엔진으로 대체합니다.", "info");
+                switchToFallbackMode(true);
+                await generateLocalSpeech(rawText);
+            } finally {
+                setLoadingState(false);
+            }
+        });
+
+        // 브라우저 내장 웹스피치 API 지원용 로컬 엔진 (오프라인/에러 우회 대비)
+        async function generateLocalSpeech(text) {
+            return new Promise((resolve) => {
+                if (!('speechSynthesis' in window)) {
+                    showToast("이 브라우저에서는 내장 음성 합성을 지원하지 않습니다.", "error");
+                    resolve();
+                    return;
+                }
+
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/[A-Za-z0-9]+:/g, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                
+                const voices = window.speechSynthesis.getVoices();
+                const koVoice = voices.find(v => v.lang.includes('ko') || v.lang.includes('KR'));
+                if (koVoice) utterance.voice = koVoice;
+                
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+
+                utterance.onstart = () => {
+                    setupActiveAudioFallback(text);
+                };
+
+                utterance.onend = () => {
+                    resolve();
+                };
+
+                utterance.onerror = () => {
+                    showToast("로컬 음성 합성에 실패했습니다.", "error");
+                    resolve();
+                };
+
+                window.speechSynthesis.speak(utterance);
+            });
+        }
+
+        // 변환 로딩 상태 관리자
+        function setLoadingState(isLoading) {
+            if (isLoading) {
+                generateBtn.disabled = true;
+                generateBtn.classList.add('opacity-75', 'cursor-wait');
+                generateBtnText.textContent = "AI 성우와 실시간 합성 중입니다...";
+            } else {
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('opacity-75', 'cursor-wait');
+                generateBtnText.textContent = "목소리 변환 및 음성 저장하기";
+            }
+        }
+
+        // 생성 완료된 오디오 플레이어 탑재 프로세스
+        function setupActiveAudio(blob, voiceName, textPreview, mode) {
+            if (activeAudioUrl) {
+                URL.revokeObjectURL(activeAudioUrl);
+            }
+
+            activeAudioBlob = blob;
+            activeAudioUrl = URL.createObjectURL(blob);
+
+            noCurrentAudio.classList.add('hidden');
+            activePlayerCard.classList.remove('hidden');
+
+            mainAudioPlayer.src = activeAudioUrl;
+            mainAudioPlayer.load();
+            mainAudioPlayer.play();
+
+            currentAudioName.textContent = voiceName;
+            currentAudioSource.textContent = mode === "gemini" ? "GEMINI AI" : "Local TTS";
+            currentAudioText.textContent = textPreview;
+
+            // 다운로드 버튼 기본 액션 바인딩
+            downloadActiveBtn.onclick = () => {
+                downloadBlob(activeAudioBlob, `voice_studio_${voiceName}.wav`);
+            };
+
+            // "다른 이름으로 저장" 버튼 액션 바인딩
+            saveAsActiveBtn.onclick = () => {
+                openSaveAsDialog(activeAudioBlob, `voice_studio_${voiceName}`);
+            };
+
+            addHistoryItem(blob, voiceName, textPreview, mode);
+        }
+
+        // 브라우저 로컬 합성을 위한 플레이어 처리부
+        function setupActiveAudioFallback(textPreview) {
+            noCurrentAudio.classList.add('hidden');
+            activePlayerCard.classList.remove('hidden');
+
+            currentAudioName.textContent = "브라우저 시스템 목소리";
+            currentAudioSource.textContent = "로컬 브라우저 엔진";
+            currentAudioText.textContent = textPreview;
+            
+            mainAudioPlayer.src = "";
+            
+            const localWarning = () => {
+                showToast("로컬 브라우저 합성 모드는 시스템 사운드 보안으로 직접 파일 저장이 제한됩니다.", "warning");
+            };
+            downloadActiveBtn.onclick = localWarning;
+            saveAsActiveBtn.onclick = localWarning;
+        }
+
+        // 로컬 오디오 리셋
+        resetActiveBtn.addEventListener('click', () => {
+            if (activeAudioUrl) {
+                URL.revokeObjectURL(activeAudioUrl);
+                activeAudioUrl = null;
+                activeAudioBlob = null;
+            }
+            mainAudioPlayer.removeAttribute('src');
+            activePlayerCard.classList.add('hidden');
+            noCurrentAudio.classList.remove('hidden');
+            showToast("오디오가 성공적으로 초기화되었습니다.");
+        });
+
+        // --- 다른 이름으로 저장 커스텀 다이얼로그 모달 처리 ---
+        function openSaveAsDialog(blob, defaultName) {
+            currentSavingBlob = blob;
+            // 특수문자 안전하게 치환 필터링
+            defaultSavingName = defaultName.replace(/[\\/:*?"<>|]/g, "_");
+            customFileNameInput.value = defaultSavingName;
+            
+            saveAsModal.classList.remove('opacity-0', 'pointer-events-none');
+            saveAsModal.querySelector('div').classList.remove('scale-95');
+            saveAsModal.querySelector('div').classList.add('scale-100');
+            customFileNameInput.focus();
+        }
+
+        function closeSaveAsDialog() {
+            saveAsModal.classList.add('opacity-0', 'pointer-events-none');
+            saveAsModal.querySelector('div').classList.remove('scale-100');
+            saveAsModal.querySelector('div').classList.add('scale-95');
+            currentSavingBlob = null;
+            defaultSavingName = "";
+        }
+
+        closeSaveAsModal.addEventListener('click', closeSaveAsDialog);
+        
+        // 배경 어두운 레이어 터치/클릭시 모달 닫기
+        saveAsModal.addEventListener('click', (e) => {
+            if (e.target === saveAsModal) {
+                closeSaveAsDialog();
+            }
+        });
+
+        // 모달 내 최종 저장 확인 버튼 바인딩
+        confirmSaveAsBtn.addEventListener('click', () => {
+            let userFileName = customFileNameInput.value.trim();
+            if (!userFileName) {
+                showToast("저장할 파일 이름을 바르게 입력해 주세요.", "warning");
+                return;
+            }
+
+            // 파일명에 허용되지 않는 윈도우/맥 금지문자 최종 필터링
+            userFileName = userFileName.replace(/[\\/:*?"<>|]/g, "_");
+
+            if (currentSavingBlob) {
+                downloadBlob(currentSavingBlob, `${userFileName}.wav`);
+                closeSaveAsDialog();
+            } else {
+                showToast("다운로드할 오디오 개체를 찾지 못했습니다.", "error");
+            }
+        });
+
+        // 엔터키 입력시 다운로드 바로 실행되도록 추가 지원
+        customFileNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                confirmSaveAsBtn.click();
+            }
+        });
+
+        // 보관함에 항목 동적 주입
+        function addHistoryItem(blob, voiceName, text, mode) {
+            const timeString = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const historyId = Date.now();
+            const tempUrl = URL.createObjectURL(blob);
+
+            const item = {
+                id: historyId,
+                voice: voiceName,
+                text: text,
+                time: timeString,
+                url: tempUrl,
+                blob: blob
+            };
+
+            generatedHistory.unshift(item);
+            renderHistory();
+        }
+
+        // 히스토리 다시 그리기
+        function renderHistory() {
+            if (generatedHistory.length === 0) {
+                emptyHistory.classList.remove('hidden');
+                clearHistoryBtn.classList.add('hidden');
+                historyList.querySelectorAll('.history-card-item').forEach(el => el.remove());
+                return;
+            }
+
+            emptyHistory.classList.add('hidden');
+            clearHistoryBtn.classList.remove('hidden');
+
+            historyList.querySelectorAll('.history-card-item').forEach(el => el.remove());
+
+            generatedHistory.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "history-card-item bg-slate-950 border border-slate-800/60 rounded-xl p-4 flex flex-col gap-2 hover:border-slate-700 transition-all";
+                
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                            <span class="text-xs font-semibold text-slate-200">${item.voice} 성우</span>
+                        </div>
+                        <span class="text-[10px] text-slate-500">${item.time}</span>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed truncate">${item.text}</p>
+                    <div class="flex items-center justify-between gap-2 mt-1">
+                        <audio src="${item.url}" controls class="w-full max-w-[150px] h-7 accent-indigo-500 bg-slate-900 rounded-md"></audio>
+                        <div class="flex gap-1.5">
+                            <button onclick="downloadHistoryItem(${item.id})" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg transition-all" title="기본 이름 저장">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="saveAsHistoryItem(${item.id})" class="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white p-1.5 rounded-lg transition-all" title="다른 이름으로 저장">
+                                <i data-lucide="file-output" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteHistoryItem(${item.id})" class="bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white p-1.5 rounded-lg transition-all" title="삭제">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                historyList.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // 히스토리 기본 저장 연계
+        window.downloadHistoryItem = function(id) {
+            const item = generatedHistory.find(i => i.id === id);
+            if (item) {
+                downloadBlob(item.blob, `voice_studio_${item.voice}_archive.wav`);
+            }
+        };
+
+        // 히스토리 다른 이름으로 저장 연계
+        window.saveAsHistoryItem = function(id) {
+            const item = generatedHistory.find(i => i.id === id);
+            if (item) {
+                openSaveAsDialog(item.blob, `voice_studio_${item.voice}_archive`);
+            }
+        };
+
+        // 히스토리 개별 항목 지우기
+        window.deleteHistoryItem = function(id) {
+            const index = generatedHistory.findIndex(i => i.id === id);
+            if (index !== -1) {
+                URL.revokeObjectURL(generatedHistory[index].url);
+                generatedHistory.splice(index, 1);
+                renderHistory();
+                showToast("해당 보관 항목을 성공적으로 삭제했습니다.");
+            }
+        };
+
+        // 전체 히스토리 삭제
+        clearHistoryBtn.addEventListener('click', () => {
+            generatedHistory.forEach(item => URL.revokeObjectURL(item.url));
+            generatedHistory = [];
+            renderHistory();
+            showToast("보관함이 비워졌습니다.");
+        });
+
+        // 헬퍼: Blob 파일 브라우저 다운로드 다운 트리거
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+            showToast(`"${filename}" 파일이 성공적으로 저장되었습니다.`);
+        }
+
+        // 토스트 알림창 출력 제어기
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.textContent = message;
+
+            if (type === "warning") {
+                toastIcon.className = "bg-amber-500/10 p-1.5 rounded-lg text-amber-400";
+                toastIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4"></i>`;
+            } else if (type === "error") {
+                toastIcon.className = "bg-rose-500/10 p-1.5 rounded-lg text-rose-400";
+                toastIcon.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4"></i>`;
+            } else {
+                toastIcon.className = "bg-indigo-500/10 p-1.5 rounded-lg text-indigo-400";
+                toastIcon.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i>`;
+            }
+
+            lucide.createIcons();
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
