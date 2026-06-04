@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Voice Agent Studio</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
@@ -31,6 +33,20 @@
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col">
 
+    <!-- ⚠️ 카카오톡 브라우저 접속 감지 경고 배너 (인앱 브라우저 차단 우회 가이드) -->
+    <div id="kakaotalkWarningBanner" class="hidden bg-gradient-to-r from-amber-600 to-rose-600 border-b border-rose-500 text-white px-4 py-3 text-center sticky top-0 z-[100] shadow-xl">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
+            <div class="flex items-center gap-2 font-bold text-sm">
+                <i data-lucide="alert-triangle" class="w-5 h-5 animate-bounce"></i>
+                <span>카카오톡 브라우저에서는 인공지능 통신 및 파일 다운로드가 전면 제한됩니다!</span>
+            </div>
+            <div class="text-xs sm:text-sm bg-black/30 px-3 py-1 rounded-full font-medium">
+                👉 우측 상단 <span class="font-bold">세로 삼점(⋮)</span> 또는 <span class="font-bold">지구본 아이콘</span> 누른 후 <span class="underline font-bold text-yellow-300">"다른 브라우저로 열기"</span>를 선택해 주세요.
+            </div>
+        </div>
+    </div>
+
+    <!-- 상단 네비게이션 바 -->
     <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/20">
@@ -42,6 +58,7 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
+            <!-- 상태 인디케이터 -->
             <div id="apiStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>제미나이 AI 온라인</span>
@@ -53,16 +70,20 @@
         </div>
     </header>
 
+    <!-- 메인 대시보드 구조 -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
+        <!-- 왼쪽 컨트롤 타워 (설정 및 텍스트 작성) -->
         <section class="lg:col-span-7 flex flex-col gap-6">
             
+            <!-- 보이스 성우 셀렉터 카드 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
                         <i data-lucide="user-check" class="text-indigo-400 w-5 h-5"></i>
                         AI 목소리 및 성우 설정
                     </h2>
+                    <!-- 멀티스피커 토글 -->
                     <label class="flex items-center gap-2 cursor-pointer">
                         <span class="text-xs text-slate-400">다자간 대화 모드</span>
                         <div class="relative">
@@ -72,6 +93,7 @@
                     </label>
                 </div>
 
+                <!-- 싱글 스피커 모드 설정 -->
                 <div id="singleVoiceSection" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-2">보이스 선택 (Gemini TTS 전용)</label>
@@ -100,6 +122,7 @@
                     </div>
                 </div>
 
+                <!-- 멀티 스피커 모드 설정 -->
                 <div id="multiVoiceSection" class="hidden border border-slate-800/80 bg-slate-950/50 rounded-xl p-4 mt-2">
                     <p class="text-xs text-indigo-300 mb-3">💡 대화 가이드: 텍스트 입력창에 <code class="bg-slate-950 px-1 py-0.5 rounded text-rose-400">화자이름: 할말</code> 형식으로 각 행을 분리해서 작성해 주세요.</p>
                     <div class="grid grid-cols-2 gap-4">
@@ -121,6 +144,7 @@
                 </div>
             </div>
 
+            <!-- 텍스트 작성 영역 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col">
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
@@ -135,6 +159,7 @@
                         class="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none leading-relaxed"></textarea>
                 </div>
 
+                <!-- 빠른 프리셋 문구 -->
                 <div class="mb-4">
                     <span class="text-xs text-slate-500 block mb-2">💡 빠른 테스트 프리셋</span>
                     <div class="flex flex-wrap gap-2">
@@ -150,6 +175,7 @@
                     </div>
                 </div>
 
+                <!-- 오디오 합성 작동 트리거 버튼 -->
                 <button id="generateBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-3 transition-all transform hover:scale-[1.01] shadow-lg shadow-indigo-600/20 active:scale-[0.99]">
                     <i data-lucide="sparkles" class="w-5 h-5"></i>
                     <span id="generateBtnText">목소리 변환 및 음성 저장하기</span>
@@ -157,8 +183,10 @@
             </div>
         </section>
 
+        <!-- 오른쪽 목록 -->
         <section class="lg:col-span-5 flex flex-col gap-6">
             
+            <!-- 플레이어 및 상태 보드 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-4">
                 <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
                     <i data-lucide="headphones" class="text-purple-400 w-5 h-5"></i>
@@ -185,8 +213,10 @@
                         </div>
                     </div>
 
+                    <!-- 오디오 인터페이스 -->
                     <audio id="mainAudioPlayer" controls class="w-full h-10 accent-indigo-600 bg-slate-900 rounded-lg mt-2 mb-3"></audio>
 
+                    <!-- 버튼 조합 단추 -->
                     <div class="flex flex-col gap-2">
                         <div class="flex gap-2">
                             <button id="downloadActiveBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all">
@@ -205,6 +235,7 @@
                 </div>
             </div>
 
+            <!-- 변환 보이스 보관함 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col min-h-[300px]">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
@@ -228,6 +259,7 @@
 
     </main>
 
+    <!-- 다른 이름으로 저장 커스텀 모달 -->
     <div id="saveAsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-6 rounded-2xl shadow-2xl transform scale-95 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
@@ -260,6 +292,7 @@
         </div>
     </div>
 
+    <!-- 토스트 알림 -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-950 border border-slate-800 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toastIcon" class="bg-indigo-500/10 p-1.5 rounded-lg text-indigo-400">
             <i data-lucide="info" class="w-4 h-4"></i>
@@ -271,12 +304,13 @@
         <p class="text-xs text-slate-600">© 2026 AI Voice Agent Studio. All sound processing logic executes locally.</p>
     </footer>
 
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
-        // 발급받으신 고유 제미나이 API Key 설정 연동
+        // 사용자가 제공한 API Key
         const apiKey = "AIzaSyD5C3OAKz0ugdTR3aCHGqbchKUIZ2RuKCA"; 
         const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
 
@@ -296,6 +330,7 @@
         const generateBtnText = document.getElementById('generateBtnText');
         const apiStatusBadge = document.getElementById('apiStatusBadge');
         const fallbackModeBadge = document.getElementById('fallbackModeBadge');
+        const kakaotalkWarningBanner = document.getElementById('kakaotalkWarningBanner');
 
         const multiSpeakerToggle = document.getElementById('multiSpeakerToggle');
         const singleVoiceSection = document.getElementById('singleVoiceSection');
@@ -326,7 +361,16 @@
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             updateCharCount();
-            detectApiAvailability();
+            
+            // 💡 카카오톡 앱 내부 접속 여부 확인 및 배너 표출
+            const isKakaotalk = /KAKAOTALK/i.test(navigator.userAgent);
+            if (isKakaotalk) {
+                kakaotalkWarningBanner.classList.remove('hidden');
+                switchToFallbackMode(true); // 카카오톡은 강제로 기본 로컬엔진 모드로 전환
+                showToast("카카오톡 앱에서는 '다른 브라우저로 열기'를 권장합니다.", "warning");
+            } else {
+                detectApiAvailability();
+            }
         });
 
         textInput.addEventListener('input', updateCharCount);
@@ -441,7 +485,7 @@
                     delay *= 1.5;
                 }
             }
-            throw new Error("API 요청 한도 초과 혹은 통신 정책으로 실패했습니다.");
+            throw new Error("API 요청 실패");
         }
 
         generateBtn.addEventListener('click', async () => {
@@ -514,12 +558,12 @@
                 }
 
                 const wavBlob = pcmToWav(bytes.buffer, 24000);
-                switchToFallbackMode(false); // 성공 시 정상 상태 유지
+                switchToFallbackMode(false);
                 setupActiveAudio(wavBlob, isMulti ? "다자간 대화극" : activeVoice, rawText, "gemini");
                 showToast("음성 파일 합성이 완료되었습니다!");
             } catch (err) {
                 console.warn("Gemini API Switch to Fallback:", err);
-                showToast("보안 정책 또는 키 만료로 인해 시스템 엔진 모드로 자동 변환합니다.", "info");
+                showToast("카카오 브라우저 제한 또는 차단으로 시스템 엔진으로 변환합니다.", "info");
                 switchToFallbackMode(true);
                 await generateLocalSpeech(rawText);
             } finally {
@@ -598,7 +642,7 @@
             mainAudioPlayer.src = "";
             
             const localWarning = () => {
-                showToast("로컬 브라우저 모드는 사운드 보안으로 직접 파일 저장이 제한됩니다.", "warning");
+                showToast("카카오 브라우저는 보안 제한으로 직접 파일 저장이 불가능합니다.", "warning");
             };
             downloadActiveBtn.onclick = localWarning;
             saveAsActiveBtn.onclick = localWarning;
@@ -615,6 +659,11 @@
         });
 
         function openSaveAsDialog(blob, defaultName) {
+            // 카카오톡 내 다운로드 차단 사전 방어
+            if (/KAKAOTALK/i.test(navigator.userAgent)) {
+                showToast("카카오톡 앱에서는 파일 다운로드가 불가능합니다. 크롬/사파리로 열어주세요.", "error");
+                return;
+            }
             currentSavingBlob = blob;
             defaultSavingName = defaultName.replace(/[\\/:*?"<>|]/g, "_");
             customFileNameInput.value = defaultSavingName;
@@ -706,6 +755,10 @@
         }
 
         window.downloadHistoryItem = function(id) {
+            if (/KAKAOTALK/i.test(navigator.userAgent)) {
+                showToast("카카오톡 브라우저에서는 파일 다운로드가 불가능합니다.", "error");
+                return;
+            }
             const item = generatedHistory.find(i => i.id === id);
             if (item) downloadBlob(item.blob, `voice_${item.voice}_archive.wav`);
         };
@@ -733,6 +786,10 @@
         });
 
         function downloadBlob(blob, filename) {
+            if (/KAKAOTALK/i.test(navigator.userAgent)) {
+                showToast("카카오톡 앱에서는 파일 다운로드가 완전히 차단되어 있습니다.", "error");
+                return;
+            }
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';
