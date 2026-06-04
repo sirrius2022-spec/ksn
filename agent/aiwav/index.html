@@ -38,10 +38,10 @@
         <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
             <div class="flex items-center gap-2 font-bold text-sm">
                 <i data-lucide="alert-triangle" class="w-5 h-5 animate-pulse"></i>
-                <span>스마트폰 로컬 파일뷰어나 카카오톡에서는 구글 보안 정책(CORS)으로 저장이 차단됩니다!</span>
+                <span>스마트폰 로컬 파일뷰어나 카카오톡에서는 구글 보안 정책(CORS)으로 저장이 차단될 수 있습니다!</span>
             </div>
             <div class="text-xs sm:text-sm bg-black/30 px-3 py-1 rounded-full font-medium">
-                💡 반드시 <span class="font-bold text-yellow-300">PC(컴퓨터) 크롬 브라우저</span>에서 실행하거나 무료 웹 서버에 업로드해 실행해 주세요.
+                💡 다운로드가 안 된다면 <span class="font-bold text-yellow-300">PC(컴퓨터) 크롬 브라우저</span>에서 실행하거나 외부 웹 브라우저로 열어주세요.
             </div>
         </div>
     </div>
@@ -73,10 +73,10 @@
     <!-- 메인 대시보드 구조 -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- 왼쪽 컨트롤 타워 (설정 및 텍스트 작성) -->
+        <!-- 왼쪽 컨트롤 타워 -->
         <section class="lg:col-span-7 flex flex-col gap-6">
 
-            <!-- 🔑 실시간 API Key 자가진단 및 입력 패널 (가장 중요) -->
+            <!-- 🔑 실시간 API Key 자가진단 및 입력 패널 -->
             <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
                 <div class="flex flex-col gap-4">
@@ -86,7 +86,7 @@
                                 <i data-lucide="key" class="w-4 h-4"></i>
                                 제미나이 API 자가 진단 및 키 설정
                             </h2>
-                            <p class="text-xs text-slate-400 mt-1">파일 다운로드가 안 된다면 먼저 아래 진단하기를 실행해 주세요.</p>
+                            <p class="text-xs text-slate-400 mt-1">오류가 발생할 시 먼저 자가진단 실행 버튼을 눌러 점검해 주세요.</p>
                         </div>
                         <button id="diagnosticBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all">
                             <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
@@ -344,8 +344,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
-        // 초기 기본 API 키 설정 (Local Storage 캐싱 지원)
-        let customApiKey = localStorage.getItem('user_gemini_api_key') || "";
+        // 초기 기본 API 키 설정 (Local Storage 캐싱 연동)
+        let customApiKey = localStorage.getItem('user_gemini_api_key') || "AQ.Ab8RN6LKvkFXileF1fPNBoq0B2wI";
 
         let activeAudioBlob = null;
         let activeAudioUrl = null;
@@ -387,7 +387,7 @@
         const confirmSaveAsBtn = document.getElementById('confirmSaveAsBtn');
         const closeSaveAsModal = document.getElementById('closeSaveAsModal');
 
-        // 자가진단 / 키 설정 요소들
+        // 자가진단 요소들
         const mainApiKeyInput = document.getElementById('mainApiKeyInput');
         const applyKeyBtn = document.getElementById('applyKeyBtn');
         const diagnosticBtn = document.getElementById('diagnosticBtn');
@@ -397,15 +397,18 @@
         const emptyHistory = document.getElementById('emptyHistory');
         const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
+        // 낭독 강제 규제 명령문 (중요: AI가 텍스트 생성을 우회 방지하도록 셋업)
+        const systemInstructionText = "You are a specialized Text-to-Speech (TTS) converter. Read the input text exactly as provided. Do not translate, do not answer, do not reply, and do NOT generate any conversational text of your own. Under no circumstances are you allowed to output text.";
+
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             updateCharCount();
             
-            // 모바일 인앱 브라우저 및 카카오톡 접속 상태 진단
+            // 모바일 및 파일프로토콜 접속 상태 체크
             const isKakaotalk = /KAKAOTALK/i.test(navigator.userAgent);
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             
-            if (isKakaotalk || (isMobile && window.location.protocol === 'file:')) {
+            if (isKakaotalk) {
                 mobileWarningBanner.classList.remove('hidden');
                 switchToFallbackMode(true);
             } else {
@@ -453,16 +456,16 @@
             }
         }
 
-        // 임시 API Key 수동 적용 로직
+        // 임시 API Key 적용
         applyKeyBtn.addEventListener('click', () => {
             const inputVal = mainApiKeyInput.value.trim();
             customApiKey = inputVal;
             localStorage.setItem('user_gemini_api_key', inputVal);
             detectApiAvailability();
-            showToast("API 키가 임시 반영되었습니다. 자가 진단 테스트를 해보세요.");
+            showToast("API 키가 임시 반영되었습니다. 자가 진단 테스트를 실행해 주세요.");
         });
 
-        // 🩺 실시간 3단계 원인 자가진단 도구 구동부 (에이전트 고성능 진단 모듈)
+        // 🩺 실시간 3단계 원인 자가진단 도구 구동부
         diagnosticBtn.addEventListener('click', async () => {
             diagnosticResult.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-400');
             diagnosticResult.classList.add('bg-slate-950', 'border-slate-800', 'text-slate-300');
@@ -479,14 +482,16 @@
             const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${targetKey}`;
             
             try {
-                // 테스트용 1단어 페이로드 전송
+                // 패치: "Hello"를 그대로 읽으라고 지정하여 답변 생성을 완벽 차단!
                 const response = await fetch(testUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Hello" }] }],
-                        generationConfig: { responseModalities: ["AUDIO"] },
-                        model: "gemini-2.5-flash-preview-tts"
+                        contents: [{ parts: [{ text: "Read this exact word: Hello" }] }],
+                        systemInstruction: {
+                            parts: [{ text: systemInstructionText }]
+                        },
+                        generationConfig: { responseModalities: ["AUDIO"] }
                     })
                 });
 
@@ -501,7 +506,6 @@
                     diagnosticResult.innerHTML = `❌ <strong>진단 결과: 구글 AI 응답 에러 (코드 ${response.status})</strong><br>사유: ${errMsg}<br>💡 입력하신 API Key가 만료되었거나, 복사 도중 글자가 누락되었는지 재차 대조 확인해 주십시오.`;
                 }
             } catch (e) {
-                // 통신 단계에서 터졌을 때 (네트워크 CORS 에러 유력)
                 if (window.location.protocol === 'file:') {
                     diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
                     diagnosticResult.innerHTML = `🚫 <strong>통신 원천 차단: 브라우저 CORS 보안 블록 감지</strong><br>사유: 로컬 파일 상태(file://)로 스마트폰이나 PC에서 다이렉트로 더블클릭해 호출하여 구글 통신 가드라인이 접근을 거부했습니다.<br>💡 <strong>해결책</strong>: 컴퓨터(PC) 크롬 브라우저에서 실행하시거나, 이 파일을 무료 웹 호스팅(GitHub Pages 등)에 전송 업로드해 구동하셔야 합니다.`;
@@ -614,9 +618,13 @@
                 const activeStyle = styleSelect.value;
 
                 if (!isMulti) {
-                    const formattedText = `Say contextually [style: ${activeStyle}]: ${rawText}`;
+                    // 패치: 제미나이가 멋대로 대답을 지어내지 않고 오직 텍스트만 낭독하게끔 명시 가이드 적용
+                    const formattedText = `Read the following text exactly as-is. Speak in a style that is ${activeStyle}. Do not say anything else. Just read: "${rawText}"`;
                     payload = {
                         contents: [{ parts: [{ text: formattedText }] }],
+                        systemInstruction: {
+                            parts: [{ text: systemInstructionText }]
+                        },
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: {
@@ -624,8 +632,7 @@
                                     prebuiltVoiceConfig: { voiceName: activeVoice }
                                 }
                             }
-                        },
-                        model: "gemini-2.5-flash-preview-tts"
+                        }
                     };
                 } else {
                     const speaker1 = multiSpeaker1.value;
@@ -633,6 +640,9 @@
                     
                     payload = {
                         contents: [{ parts: [{ text: rawText }] }],
+                        systemInstruction: {
+                            parts: [{ text: systemInstructionText }]
+                        },
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: {
@@ -645,8 +655,7 @@
                                     }
                                 }
                             }
-                        },
-                        model: "gemini-2.5-flash-preview-tts"
+                        }
                     };
                 }
 
@@ -669,7 +678,7 @@
                 showToast("음성 파일 합성이 완료되었습니다!");
             } catch (err) {
                 console.warn("Gemini API Switch to Fallback:", err);
-                showToast("API 키 오류 또는 로컬 모바일 보안 정책으로 시스템 엔진으로 자동 전환합니다.", "warning");
+                showToast("API 설정 오류 또는 보안 차단으로 가상 시스템 엔진으로 전환합니다.", "warning");
                 switchToFallbackMode(true);
                 await generateLocalSpeech(rawText);
             } finally {
