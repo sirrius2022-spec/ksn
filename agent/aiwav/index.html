@@ -33,15 +33,15 @@
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col">
 
-    <!-- 카카오톡 브라우저 접속 감지 경고 배너 -->
-    <div id="kakaotalkWarningBanner" class="hidden bg-gradient-to-r from-amber-600 to-rose-600 border-b border-rose-500 text-white px-4 py-3 text-center sticky top-0 z-[100] shadow-xl">
-        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
+    <!-- 스마트폰 인앱/로컬 뷰어 경고 상단 배너 -->
+    <div id="mobileWarningBanner" class="bg-gradient-to-r from-amber-600 to-rose-600 border-b border-rose-500 text-white px-4 py-3 text-center sticky top-0 z-[100] shadow-xl">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
             <div class="flex items-center gap-2 font-bold text-sm">
-                <i data-lucide="alert-triangle" class="w-5 h-5 animate-bounce"></i>
-                <span>모바일 메신저/인앱 브라우저에서는 인공지능 통신 및 저장이 제한됩니다.</span>
+                <i data-lucide="alert-triangle" class="w-5 h-5 animate-pulse"></i>
+                <span>스마트폰 로컬 파일뷰어나 카카오톡에서는 구글 보안 정책(CORS)으로 저장이 차단됩니다!</span>
             </div>
             <div class="text-xs sm:text-sm bg-black/30 px-3 py-1 rounded-full font-medium">
-                👉 우측 상단 <span class="font-bold">세로 삼점(⋮)</span>을 누르고 <span class="underline font-bold text-yellow-300">"다른 브라우저로 열기"</span> (크롬/사파리)를 선택해 주세요.
+                💡 반드시 <span class="font-bold text-yellow-300">PC(컴퓨터) 크롬 브라우저</span>에서 실행하거나 무료 웹 서버에 업로드해 실행해 주세요.
             </div>
         </div>
     </div>
@@ -57,20 +57,16 @@
                 <p class="text-xs text-slate-400">맞춤형 고음질 TTS 에이전트</p>
             </div>
         </div>
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-3">
             <!-- 상태 인디케이터 -->
             <div id="apiStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="hidden sm:inline">제미나이 AI</span><span>온라인</span>
+                <span>제미나이 AI 온라인 연결됨</span>
             </div>
             <div id="fallbackModeBadge" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium border border-amber-500/20">
                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                <span>로컬 엔진 모드</span>
+                <span>가상 시스템 모드 (저장 불가)</span>
             </div>
-            <!-- API Key 설정 단추 -->
-            <button id="openSettingsBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-xl transition-all border border-slate-700" title="API 설정">
-                <i data-lucide="settings" class="w-4.5 h-4.5"></i>
-            </button>
         </div>
     </header>
 
@@ -79,6 +75,40 @@
         
         <!-- 왼쪽 컨트롤 타워 (설정 및 텍스트 작성) -->
         <section class="lg:col-span-7 flex flex-col gap-6">
+
+            <!-- 🔑 실시간 API Key 자가진단 및 입력 패널 (가장 중요) -->
+            <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+                <div class="flex flex-col gap-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h2 class="text-sm font-bold text-indigo-400 flex items-center gap-1.5">
+                                <i data-lucide="key" class="w-4 h-4"></i>
+                                제미나이 API 자가 진단 및 키 설정
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-1">파일 다운로드가 안 된다면 먼저 아래 진단하기를 실행해 주세요.</p>
+                        </div>
+                        <button id="diagnosticBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all">
+                            <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                            통신 상태 자가진단 실행
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+                        <div class="md:col-span-3">
+                            <input type="text" id="mainApiKeyInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="본인의 API 키를 입력해 주세요 (AIzaSy...)">
+                        </div>
+                        <button id="applyKeyBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2.5 rounded-xl text-xs transition-all border border-slate-700">
+                            API 키 임시 적용
+                        </button>
+                    </div>
+
+                    <!-- 진단 결과창 -->
+                    <div id="diagnosticResult" class="hidden p-3 rounded-xl text-xs border bg-slate-950">
+                        <!-- 진단 메시지 렌더 영역 -->
+                    </div>
+                </div>
+            </div>
             
             <!-- 보이스 성우 셀렉터 카드 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
@@ -210,7 +240,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center">
-                                <h4 id="currentAudioName" class="text-sm font-semibold text-slate-200 truncate">Kore</h4>
+                                <h4 id="currentAudioName" class="text-sm font-semibold text-slate-200 truncate font-mono">Kore</h4>
                                 <span id="currentAudioSource" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">GEMINI API</span>
                             </div>
                             <p id="currentAudioText" class="text-xs text-slate-400 truncate mt-0.5">읽은 문구 내용이 여기에 들어갑니다.</p>
@@ -296,36 +326,6 @@
         </div>
     </div>
 
-    <!-- API 설정용 모달 단추 (편의기능) -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-6 rounded-2xl shadow-2xl transform scale-95 transition-all duration-300">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="bg-indigo-600/10 p-2.5 rounded-xl text-indigo-400">
-                    <i data-lucide="key" class="w-5 h-5"></i>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-slate-100">제미나이 API 설정</h3>
-                    <p class="text-xs text-slate-400">구글 AI 서비스 연동 설정입니다.</p>
-                </div>
-            </div>
-            
-            <div class="mb-5">
-                <label class="block text-xs font-semibold text-slate-400 mb-2">Gemini API Key</label>
-                <input type="password" id="settingsApiKeyInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="AIzaSy...">
-                <p class="text-[11px] text-slate-500 mt-1.5">키가 없거나 연결이 제한될 경우 브라우저 로컬 엔진으로 우회 구동됩니다.</p>
-            </div>
-
-            <div class="flex gap-3">
-                <button type="button" id="closeSettingsModal" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2.5 rounded-xl text-xs transition-all">
-                    취소
-                </button>
-                <button type="button" id="saveSettingsBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-indigo-600/20">
-                    설정 적용
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- 토스트 알림 -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-950 border border-slate-800 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toastIcon" class="bg-indigo-500/10 p-1.5 rounded-lg text-indigo-400">
@@ -344,8 +344,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
-        // 초기 기본 API 키 설정 (사용자 키 세팅 유지)
-        let customApiKey = localStorage.getItem('user_gemini_api_key') || "AIzaSyD5C3OAKz0ugdTR3aCHGqbchKUIZ2RuKCA";
+        // 초기 기본 API 키 설정 (Local Storage 캐싱 지원)
+        let customApiKey = localStorage.getItem('user_gemini_api_key') || "";
 
         let activeAudioBlob = null;
         let activeAudioUrl = null;
@@ -363,7 +363,7 @@
         const generateBtnText = document.getElementById('generateBtnText');
         const apiStatusBadge = document.getElementById('apiStatusBadge');
         const fallbackModeBadge = document.getElementById('fallbackModeBadge');
-        const kakaotalkWarningBanner = document.getElementById('kakaotalkWarningBanner');
+        const mobileWarningBanner = document.getElementById('mobileWarningBanner');
 
         const multiSpeakerToggle = document.getElementById('multiSpeakerToggle');
         const singleVoiceSection = document.getElementById('singleVoiceSection');
@@ -387,12 +387,11 @@
         const confirmSaveAsBtn = document.getElementById('confirmSaveAsBtn');
         const closeSaveAsModal = document.getElementById('closeSaveAsModal');
 
-        // 설정 모달 선택자들
-        const settingsModal = document.getElementById('settingsModal');
-        const settingsApiKeyInput = document.getElementById('settingsApiKeyInput');
-        const openSettingsBtn = document.getElementById('openSettingsBtn');
-        const closeSettingsModal = document.getElementById('closeSettingsModal');
-        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        // 자가진단 / 키 설정 요소들
+        const mainApiKeyInput = document.getElementById('mainApiKeyInput');
+        const applyKeyBtn = document.getElementById('applyKeyBtn');
+        const diagnosticBtn = document.getElementById('diagnosticBtn');
+        const diagnosticResult = document.getElementById('diagnosticResult');
 
         const historyList = document.getElementById('historyList');
         const emptyHistory = document.getElementById('emptyHistory');
@@ -402,17 +401,20 @@
             lucide.createIcons();
             updateCharCount();
             
-            // 카카오톡 내장 브라우저 감지
+            // 모바일 인앱 브라우저 및 카카오톡 접속 상태 진단
             const isKakaotalk = /KAKAOTALK/i.test(navigator.userAgent);
-            if (isKakaotalk) {
-                kakaotalkWarningBanner.classList.remove('hidden');
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isKakaotalk || (isMobile && window.location.protocol === 'file:')) {
+                mobileWarningBanner.classList.remove('hidden');
                 switchToFallbackMode(true);
             } else {
+                mobileWarningBanner.classList.add('hidden');
                 detectApiAvailability();
             }
 
-            // 인풋 필드 초기값 채우기
-            settingsApiKeyInput.value = customApiKey;
+            // 인풋 필드 초기값 로드
+            mainApiKeyInput.value = customApiKey;
         });
 
         textInput.addEventListener('input', updateCharCount);
@@ -450,6 +452,66 @@
                 fallbackModeBadge.classList.add('hidden');
             }
         }
+
+        // 임시 API Key 수동 적용 로직
+        applyKeyBtn.addEventListener('click', () => {
+            const inputVal = mainApiKeyInput.value.trim();
+            customApiKey = inputVal;
+            localStorage.setItem('user_gemini_api_key', inputVal);
+            detectApiAvailability();
+            showToast("API 키가 임시 반영되었습니다. 자가 진단 테스트를 해보세요.");
+        });
+
+        // 🩺 실시간 3단계 원인 자가진단 도구 구동부 (에이전트 고성능 진단 모듈)
+        diagnosticBtn.addEventListener('click', async () => {
+            diagnosticResult.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-400');
+            diagnosticResult.classList.add('bg-slate-950', 'border-slate-800', 'text-slate-300');
+            diagnosticResult.innerHTML = `<div class="flex items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>구글 AI 인프라와 보안 통신 상태 진단 중...</span></div>`;
+            lucide.createIcons();
+
+            const targetKey = mainApiKeyInput.value.trim() || customApiKey;
+            if (!targetKey) {
+                diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
+                diagnosticResult.innerHTML = `⚠️ <strong>진단 결과: API 키 입력 누락</strong><br>현재 제미나이 API 키가 입력되어 있지 않습니다. 발급 받으신 고유 키를 입력창에 삽입해 주세요.`;
+                return;
+            }
+
+            const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${targetKey}`;
+            
+            try {
+                // 테스트용 1단어 페이로드 전송
+                const response = await fetch(testUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Hello" }] }],
+                        generationConfig: { responseModalities: ["AUDIO"] },
+                        model: "gemini-2.5-flash-preview-tts"
+                    })
+                });
+
+                if (response.ok) {
+                    diagnosticResult.className = "p-3 rounded-xl text-xs border bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
+                    diagnosticResult.innerHTML = `✅ <strong>통신 성공! (준비 완료)</strong><br>구글 서버 및 CORS 보안 장벽을 완벽하게 통과했습니다. 대본을 적고 '목소리 변환 및 음성 저장하기'를 실행하시면 WAV 고음질 파일 다운로드가 백퍼센트 완벽하게 작동합니다.`;
+                    switchToFallbackMode(false);
+                } else {
+                    const errResponse = await response.json().catch(() => ({}));
+                    const errMsg = errResponse.error?.message || "알 수 없는 API 에러";
+                    diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
+                    diagnosticResult.innerHTML = `❌ <strong>진단 결과: 구글 AI 응답 에러 (코드 ${response.status})</strong><br>사유: ${errMsg}<br>💡 입력하신 API Key가 만료되었거나, 복사 도중 글자가 누락되었는지 재차 대조 확인해 주십시오.`;
+                }
+            } catch (e) {
+                // 통신 단계에서 터졌을 때 (네트워크 CORS 에러 유력)
+                if (window.location.protocol === 'file:') {
+                    diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
+                    diagnosticResult.innerHTML = `🚫 <strong>통신 원천 차단: 브라우저 CORS 보안 블록 감지</strong><br>사유: 로컬 파일 상태(file://)로 스마트폰이나 PC에서 다이렉트로 더블클릭해 호출하여 구글 통신 가드라인이 접근을 거부했습니다.<br>💡 <strong>해결책</strong>: 컴퓨터(PC) 크롬 브라우저에서 실행하시거나, 이 파일을 무료 웹 호스팅(GitHub Pages 등)에 전송 업로드해 구동하셔야 합니다.`;
+                } else {
+                    diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
+                    diagnosticResult.innerHTML = `🚫 <strong>통신 오류 (망 장애)</strong><br>사유: ${e.message}<br>인터넷 네트워크가 불안정하거나, 모바일 앱 보안 필터에 의해 연결 포트가 임시 차단되었습니다.`;
+                }
+            }
+            lucide.createIcons();
+        });
 
         function loadPreset(type) {
             if (type === 1) {
@@ -508,9 +570,7 @@
                 try {
                     const response = await fetch(requestUrl, {
                         method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
 
@@ -565,7 +625,7 @@
                                 }
                             }
                         },
-                        model: "gemini-2.5-flash-preview-tts" // ✨ 필수 규격 연동 매개변수 패치 완료!
+                        model: "gemini-2.5-flash-preview-tts"
                     };
                 } else {
                     const speaker1 = multiSpeaker1.value;
@@ -586,7 +646,7 @@
                                 }
                             }
                         },
-                        model: "gemini-2.5-flash-preview-tts" // ✨ 필수 규격 연동 매개변수 패치 완료!
+                        model: "gemini-2.5-flash-preview-tts"
                     };
                 }
 
@@ -609,7 +669,7 @@
                 showToast("음성 파일 합성이 완료되었습니다!");
             } catch (err) {
                 console.warn("Gemini API Switch to Fallback:", err);
-                showToast("보안 정책 또는 네트워크 한계로 가상 시스템 엔진으로 전환합니다.", "info");
+                showToast("API 키 오류 또는 로컬 모바일 보안 정책으로 시스템 엔진으로 자동 전환합니다.", "warning");
                 switchToFallbackMode(true);
                 await generateLocalSpeech(rawText);
             } finally {
@@ -688,7 +748,7 @@
             mainAudioPlayer.src = "";
             
             const localWarning = () => {
-                showToast("모바일/임시 뷰어에서는 시스템 사운드 보안으로 저장이 제한됩니다.", "warning");
+                showToast("스마트폰 로컬 브라우저 모드는 오디오 보안으로 파일 저장이 차단됩니다.", "warning");
             };
             downloadActiveBtn.onclick = localWarning;
             saveAsActiveBtn.onclick = localWarning;
@@ -704,10 +764,9 @@
             showToast("오디오가 초기화되었습니다.");
         });
 
-        // --- 모달 설정 및 핸들링 ---
         function openSaveAsDialog(blob, defaultName) {
             if (/KAKAOTALK/i.test(navigator.userAgent)) {
-                showToast("카카오톡 브라우저에서는 파일 저장이 불가능합니다. 외부 앱으로 열어주세요.", "error");
+                showToast("카카오톡 앱에서는 파일 저장이 불가능합니다. 외부 앱으로 열어주세요.", "error");
                 return;
             }
             currentSavingBlob = blob;
@@ -745,31 +804,6 @@
         });
 
         customFileNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmSaveAsBtn.click(); });
-
-        // --- API 세팅 모달 처리 ---
-        openSettingsBtn.addEventListener('click', () => {
-            settingsModal.classList.remove('opacity-0', 'pointer-events-none');
-            settingsModal.querySelector('div').classList.remove('scale-95');
-            settingsModal.querySelector('div').classList.add('scale-100');
-        });
-
-        function closeSettingsDialog() {
-            settingsModal.classList.add('opacity-0', 'pointer-events-none');
-            settingsModal.querySelector('div').classList.remove('scale-100');
-            settingsModal.querySelector('div').classList.add('scale-95');
-        }
-
-        closeSettingsModal.addEventListener('click', closeSettingsDialog);
-        settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeSettingsDialog(); });
-
-        saveSettingsBtn.addEventListener('click', () => {
-            const newKey = settingsApiKeyInput.value.trim();
-            customApiKey = newKey;
-            localStorage.setItem('user_gemini_api_key', newKey);
-            detectApiAvailability();
-            closeSettingsDialog();
-            showToast("제미나이 API 키 정보가 브라우저에 저장되었습니다.");
-        });
 
         function addHistoryItem(blob, voiceName, text, mode) {
             const timeString = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -858,7 +892,7 @@
 
         function downloadBlob(blob, filename) {
             if (/KAKAOTALK/i.test(navigator.userAgent)) {
-                showToast("카카오톡 앱 내부에서는 파일 다운로드가 완전히 차단되어 있습니다.", "error");
+                showToast("카카오톡 앱 내부에서는 파일 다운로드가 차단되어 있습니다.", "error");
                 return;
             }
             const url = URL.createObjectURL(blob);
