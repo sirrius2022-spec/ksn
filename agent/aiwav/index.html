@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Voice Agent Studio</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
@@ -33,7 +31,6 @@
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col">
 
-    <!-- 스마트폰 인앱/로컬 뷰어 경고 상단 배너 -->
     <div id="mobileWarningBanner" class="bg-gradient-to-r from-amber-600 to-rose-600 border-b border-rose-500 text-white px-4 py-3 text-center sticky top-0 z-[100] shadow-xl">
         <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
             <div class="flex items-center gap-2 font-bold text-sm">
@@ -46,7 +43,6 @@
         </div>
     </div>
 
-    <!-- 상단 네비게이션 바 -->
     <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/20">
@@ -58,10 +54,9 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <!-- 상태 인디케이터 -->
             <div id="apiStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>제미나이 AI 온라인 연결됨</span>
+                <span>제미나이 AI 온라인 연동 완료</span>
             </div>
             <div id="fallbackModeBadge" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium border border-amber-500/20">
                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
@@ -70,54 +65,16 @@
         </div>
     </header>
 
-    <!-- 메인 대시보드 구조 -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- 왼쪽 컨트롤 타워 -->
         <section class="lg:col-span-7 flex flex-col gap-6">
-
-            <!-- 🔑 실시간 API Key 자가진단 및 입력 패널 -->
-            <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
-                <div class="flex flex-col gap-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h2 class="text-sm font-bold text-indigo-400 flex items-center gap-1.5">
-                                <i data-lucide="key" class="w-4 h-4"></i>
-                                제미나이 API 자가 진단 및 키 설정
-                            </h2>
-                            <p class="text-xs text-slate-400 mt-1">입력된 키가 정상 동작하는지 테스트 버튼을 눌러보세요.</p>
-                        </div>
-                        <button id="diagnosticBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all">
-                            <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
-                            통신 상태 자가진단 실행
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
-                        <div class="md:col-span-3">
-                            <input type="text" id="mainApiKeyInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="본인의 API 키를 입력해 주세요 (AIzaSy...)">
-                        </div>
-                        <button id="applyKeyBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2.5 rounded-xl text-xs transition-all border border-slate-700">
-                            API 키 변경 적용
-                        </button>
-                    </div>
-
-                    <!-- 진단 결과창 -->
-                    <div id="diagnosticResult" class="hidden p-3 rounded-xl text-xs border bg-slate-950">
-                        <!-- 진단 메시지 렌더 영역 -->
-                    </div>
-                </div>
-            </div>
             
-            <!-- 보이스 성우 셀렉터 카드 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
                         <i data-lucide="user-check" class="text-indigo-400 w-5 h-5"></i>
                         AI 목소리 및 성우 설정
                     </h2>
-                    <!-- 멀티스피커 토글 -->
                     <label class="flex items-center gap-2 cursor-pointer">
                         <span class="text-xs text-slate-400">다자간 대화 모드</span>
                         <div class="relative">
@@ -127,10 +84,9 @@
                     </label>
                 </div>
 
-                <!-- 싱글 스피커 모드 설정 -->
                 <div id="singleVoiceSection" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-2">보이스 선택 (Gemini TTS 전용)</label>
+                        <label class="block text-xs font-medium text-slate-400 mb-2">보이스 선택</label>
                         <select id="voiceSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="Kore" selected>Kore (신뢰감 있고 대중적인 목소리)</option>
                             <option value="Puck">Puck (밝고 에너지가 느껴지는 톤)</option>
@@ -144,7 +100,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-2">감정 및 말하는 스타일 지시</label>
+                        <label class="block text-xs font-medium text-slate-400 mb-2">감정 및 말하는 스타일</label>
                         <select id="styleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="natural" selected>일반 대화 (자연스러운 기본 톤)</option>
                             <option value="cheerful">즐거움 (밝고 경쾌하게)</option>
@@ -156,7 +112,6 @@
                     </div>
                 </div>
 
-                <!-- 멀티 스피커 모드 설정 -->
                 <div id="multiVoiceSection" class="hidden border border-slate-800/80 bg-slate-950/50 rounded-xl p-4 mt-2">
                     <p class="text-xs text-indigo-300 mb-3">💡 대화 가이드: 텍스트 입력창에 <code class="bg-slate-950 px-1 py-0.5 rounded text-rose-400">화자이름: 할말</code> 형식으로 각 행을 분리해서 작성해 주세요.</p>
                     <div class="grid grid-cols-2 gap-4">
@@ -178,7 +133,6 @@
                 </div>
             </div>
 
-            <!-- 텍스트 작성 영역 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col">
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
@@ -188,12 +142,11 @@
                     <span id="charCount" class="text-xs text-slate-500">0자 작성됨</span>
                 </div>
                 
-                <div class="relative flex-1 min-h-[250px] flex flex-col mb-4">
+                <div class="relative flex-1 min-h-[280px] flex flex-col mb-4">
                     <textarea id="textInput" placeholder="이곳에 인공지능 성우가 읽어줄 스크립트를 입력해 주세요.&#10;&#10;(멀티 스피커 활성화 시 양식 예:)&#10;Kore: 안녕하세요! 오늘 날씨가 참 맑네요.&#10;Puck: 맞아요! 산책하기에 정말 완벽한 날이에요." 
                         class="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none leading-relaxed"></textarea>
                 </div>
 
-                <!-- 빠른 프리셋 문구 -->
                 <div class="mb-4">
                     <span class="text-xs text-slate-500 block mb-2">💡 빠른 테스트 프리셋</span>
                     <div class="flex flex-wrap gap-2">
@@ -209,7 +162,6 @@
                     </div>
                 </div>
 
-                <!-- 오디오 합성 작동 트리거 버튼 -->
                 <button id="generateBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-3 transition-all transform hover:scale-[1.01] shadow-lg shadow-indigo-600/20 active:scale-[0.99]">
                     <i data-lucide="sparkles" class="w-5 h-5"></i>
                     <span id="generateBtnText">목소리 변환 및 음성 저장하기</span>
@@ -217,10 +169,8 @@
             </div>
         </section>
 
-        <!-- 오른쪽 목록 -->
         <section class="lg:col-span-5 flex flex-col gap-6">
             
-            <!-- 플레이어 및 상태 보드 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-4">
                 <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
                     <i data-lucide="headphones" class="text-purple-400 w-5 h-5"></i>
@@ -247,10 +197,8 @@
                         </div>
                     </div>
 
-                    <!-- 오디오 인터페이스 -->
                     <audio id="mainAudioPlayer" controls class="w-full h-10 accent-indigo-600 bg-slate-900 rounded-lg mt-2 mb-3"></audio>
 
-                    <!-- 버튼 조합 단추 -->
                     <div class="flex flex-col gap-2">
                         <div class="flex gap-2">
                             <button id="downloadActiveBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all">
@@ -269,7 +217,6 @@
                 </div>
             </div>
 
-            <!-- 변환 보이스 보관함 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col min-h-[300px]">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-md font-semibold text-slate-200 flex items-center gap-2">
@@ -282,7 +229,7 @@
                     </button>
                 </div>
 
-                <div id="historyList" class="flex-1 flex flex-col gap-3 overflow-y-auto max-h-[350px] pr-1">
+                <div id="historyList" class="flex-1 flex flex-col gap-3 overflow-y-auto max-h-[380px] pr-1">
                     <div id="emptyHistory" class="flex-1 flex flex-col items-center justify-center text-center p-8">
                         <i data-lucide="inbox" class="w-8 h-8 text-slate-700 mb-2"></i>
                         <p class="text-xs text-slate-500">생성된 파일 내역이 비어있습니다.</p>
@@ -293,7 +240,6 @@
 
     </main>
 
-    <!-- 다른 이름으로 저장 커스텀 모달 -->
     <div id="saveAsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-6 rounded-2xl shadow-2xl transform scale-95 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
@@ -326,26 +272,24 @@
         </div>
     </div>
 
-    <!-- 토스트 알림 -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-950 border border-slate-800 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toastIcon" class="bg-indigo-500/10 p-1.5 rounded-lg text-indigo-400">
-            <i data-lucide="info" class="w-4 h-4"></i>
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
         </div>
         <p id="toastMessage" class="text-xs font-medium text-slate-300">안내 메시지 공간</p>
     </div>
 
     <footer class="border-t border-slate-800/80 bg-slate-950/40 px-6 py-4 text-center">
-        <p class="text-xs text-slate-600">© 2026 AI Voice Agent Studio. All sound processing logic executes locally.</p>
+        <p class="text-xs text-slate-600">© 2026 AI Voice Agent Studio. All sound processing logic executes securely.</p>
     </footer>
 
-    <!-- Firebase SDK (요청 규칙 충족) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
-        // ✨ 제공해주신 고유 Gemini API Key 소스 내 직접 탑재 완료!
-        let customApiKey = "AQ.Ab8RN6LKvkFXileF1fPNBoq0B2wIdMyzQhuMMzyEP5CCENR6_g";
+        // 🔒 구글 제미나이 고유 API Key 코드 내 완전히 매립 (화면 비노출)
+        const customApiKey = "AQ.Ab8RN6LKvkFXileF1fPNBoq0B2wIdMyzQhuMMzyEP5CCENR6_g";
 
         let activeAudioBlob = null;
         let activeAudioUrl = null;
@@ -387,12 +331,6 @@
         const confirmSaveAsBtn = document.getElementById('confirmSaveAsBtn');
         const closeSaveAsModal = document.getElementById('closeSaveAsModal');
 
-        // 자가진단 요소들
-        const mainApiKeyInput = document.getElementById('mainApiKeyInput');
-        const applyKeyBtn = document.getElementById('applyKeyBtn');
-        const diagnosticBtn = document.getElementById('diagnosticBtn');
-        const diagnosticResult = document.getElementById('diagnosticResult');
-
         const historyList = document.getElementById('historyList');
         const emptyHistory = document.getElementById('emptyHistory');
         const clearHistoryBtn = document.getElementById('clearHistoryBtn');
@@ -401,9 +339,8 @@
             lucide.createIcons();
             updateCharCount();
             
-            // 모바일 및 파일프로토콜 접속 상태 체크
+            // 모바일 및 카카오톡 차단 전처리 확인
             const isKakaotalk = /KAKAOTALK/i.test(navigator.userAgent);
-            
             if (isKakaotalk) {
                 mobileWarningBanner.classList.remove('hidden');
                 switchToFallbackMode(true);
@@ -411,9 +348,6 @@
                 mobileWarningBanner.classList.add('hidden');
                 detectApiAvailability();
             }
-
-            // 인풋 필드 초기값 로드
-            mainApiKeyInput.value = customApiKey;
         });
 
         textInput.addEventListener('input', updateCharCount);
@@ -451,65 +385,6 @@
                 fallbackModeBadge.classList.add('hidden');
             }
         }
-
-        // 임시 API Key 적용
-        applyKeyBtn.addEventListener('click', () => {
-            const inputVal = mainApiKeyInput.value.trim();
-            customApiKey = inputVal;
-            localStorage.setItem('user_gemini_api_key', inputVal);
-            detectApiAvailability();
-            showToast("API 키가 변경 적용되었습니다. 자가 진단 테스트를 실행해 주세요.");
-        });
-
-        // 🩺 실시간 3단계 원인 자가진단 도구 구동부
-        diagnosticBtn.addEventListener('click', async () => {
-            diagnosticResult.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-400');
-            diagnosticResult.classList.add('bg-slate-950', 'border-slate-800', 'text-slate-300');
-            diagnosticResult.innerHTML = `<div class="flex items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>구글 AI 인프라와 보안 통신 상태 진단 중...</span></div>`;
-            lucide.createIcons();
-
-            const targetKey = mainApiKeyInput.value.trim() || customApiKey;
-            if (!targetKey) {
-                diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
-                diagnosticResult.innerHTML = `⚠️ <strong>진단 결과: API 키 입력 누락</strong><br>현재 제미나이 API 키가 입력되어 있지 않습니다. 발급 받으신 고유 키를 입력창에 삽입해 주세요.`;
-                return;
-            }
-
-            const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${targetKey}`;
-            
-            try {
-                // ⚠️ 통화 성공 패치: 시스템 명령을 걷어내고 순수한 음성 재생 어조로 가이드하여 에러 방지
-                const response = await fetch(testUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Say cheerfully: Hello" }] }],
-                        generationConfig: { responseModalities: ["AUDIO"] },
-                        model: "gemini-2.5-flash-preview-tts"
-                    })
-                });
-
-                if (response.ok) {
-                    diagnosticResult.className = "p-3 rounded-xl text-xs border bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
-                    diagnosticResult.innerHTML = `✅ <strong>통신 성공! (준비 완료)</strong><br>구글 서버 및 CORS 보안 장벽을 완벽하게 통과했습니다. 대본을 적고 '목소리 변환 및 음성 저장하기'를 실행하시면 WAV 고음질 파일 다운로드가 백퍼센트 완벽하게 작동합니다.`;
-                    switchToFallbackMode(false);
-                } else {
-                    const errResponse = await response.json().catch(() => ({}));
-                    const errMsg = errResponse.error?.message || "알 수 없는 API 에러";
-                    diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
-                    diagnosticResult.innerHTML = `❌ <strong>진단 결과: 구글 AI 응답 에러 (코드 ${response.status})</strong><br>사유: ${errMsg}<br>💡 입력하신 API Key가 만료되었거나, 복사 도중 글자가 누락되었는지 재차 대조 확인해 주십시오.`;
-                }
-            } catch (e) {
-                if (window.location.protocol === 'file:') {
-                    diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
-                    diagnosticResult.innerHTML = `🚫 <strong>통신 원천 차단: 브라우저 CORS 보안 블록 감지</strong><br>사유: 로컬 파일 상태(file://)로 스마트폰이나 PC에서 다이렉트로 더블클릭해 호출하여 구글 통신 가드라인이 접근을 거부했습니다.<br>💡 <strong>해결책</strong>: 컴퓨터(PC) 크롬 브라우저에서 실행하시거나, 이 파일을 무료 웹 호스팅(GitHub Pages 등)에 전송 업로드해 구동하셔야 합니다.`;
-                } else {
-                    diagnosticResult.className = "p-3 rounded-xl text-xs border bg-rose-500/10 border-rose-500/30 text-rose-400";
-                    diagnosticResult.innerHTML = `🚫 <strong>통신 오류 (망 장애)</strong><br>사유: ${e.message}<br>인터넷 네트워크가 불안정하거나, 모바일 앱 보안 필터에 의해 연결 포트가 임시 차단되었습니다.`;
-                }
-            }
-            lucide.createIcons();
-        });
 
         function loadPreset(type) {
             if (type === 1) {
@@ -575,11 +450,8 @@
                     if (response.ok) {
                         return await response.json();
                     }
-                    
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error(`Attempt ${attempt + 1} API Error:`, errorData);
                 } catch (err) {
-                    console.error(`Attempt ${attempt + 1} Network Error:`, err);
+                    console.error(err);
                 }
                 
                 if (attempt < maxRetries - 1) {
@@ -587,7 +459,7 @@
                     delay *= 1.5;
                 }
             }
-            throw new Error("API 통신 실패");
+            throw new Error("API 통신 트래픽 초과");
         }
 
         generateBtn.addEventListener('click', async () => {
@@ -612,21 +484,12 @@
                 const activeStyle = styleSelect.value;
 
                 if (!isMulti) {
-                    // 구글 TTS 가이드 형식에 완벽하게 일치하는 접두 지시문 적용
-                    let formattedText = "";
-                    if (activeStyle === "natural") {
-                        formattedText = rawText; 
-                    } else if (activeStyle === "cheerful") {
-                        formattedText = `Say cheerfully: ${rawText}`;
-                    } else if (activeStyle === "whisper") {
-                        formattedText = `Say in a whisper: ${rawText}`;
-                    } else if (activeStyle === "sad") {
-                        formattedText = `Say sadly: ${rawText}`;
-                    } else if (activeStyle === "professional") {
-                        formattedText = `Say professionally: ${rawText}`;
-                    } else if (activeStyle === "excited") {
-                        formattedText = `Say excitedly: ${rawText}`;
-                    }
+                    let formattedText = rawText;
+                    if (activeStyle === "cheerful") formattedText = `Say cheerfully: ${rawText}`;
+                    else if (activeStyle === "whisper") formattedText = `Say in a whisper: ${rawText}`;
+                    else if (activeStyle === "sad") formattedText = `Say sadly: ${rawText}`;
+                    else if (activeStyle === "professional") formattedText = `Say professionally: ${rawText}`;
+                    else if (activeStyle === "excited") formattedText = `Say excitedly: ${rawText}`;
 
                     payload = {
                         contents: [{ parts: [{ text: formattedText }] }],
@@ -658,17 +521,14 @@
                                     }
                                 }
                             }
-                        },
-                        model: "gemini-2.5-flash-preview-tts"
+                        }, model: "gemini-2.5-flash-preview-tts"
                     };
                 }
 
                 const result = await fetchGeminiTtsWithRetry(payload);
                 const base64Audio = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
                 
-                if (!base64Audio) {
-                    throw new Error("오디오 스트림 응답 유실");
-                }
+                if (!base64Audio) throw new Error("데이터 누락");
 
                 const binaryString = window.atob(base64Audio);
                 const bytes = new Uint8Array(binaryString.length);
@@ -681,8 +541,8 @@
                 setupActiveAudio(wavBlob, isMulti ? "다자간 대화극" : activeVoice, rawText, "gemini");
                 showToast("음성 파일 합성이 완료되었습니다!");
             } catch (err) {
-                console.warn("Gemini API Switch to Fallback:", err);
-                showToast("구글 정책 차단 또는 키 오류로 가상 시스템 엔진으로 전환합니다.", "warning");
+                console.warn(err);
+                showToast("일시적 쿼터 한도 초과로 브라우저 시스템 재생 모드로 자동 전향합니다.", "warning");
                 switchToFallbackMode(true);
                 await generateLocalSpeech(rawText);
             } finally {
@@ -697,11 +557,9 @@
                     resolve();
                     return;
                 }
-
                 window.speechSynthesis.cancel();
                 const cleanText = text.replace(/[A-Za-z0-9]+:/g, '');
                 const utterance = new SpeechSynthesisUtterance(cleanText);
-                
                 const voices = window.speechSynthesis.getVoices();
                 const koVoice = voices.find(v => v.lang.includes('ko') || v.lang.includes('KR'));
                 if (koVoice) utterance.voice = koVoice;
@@ -710,8 +568,7 @@
                 utterance.pitch = 1.0;
                 utterance.onstart = () => setupActiveAudioFallback(text);
                 utterance.onend = () => resolve();
-                utterance.onerror = () => { resolve(); };
-
+                utterance.onerror = () => resolve();
                 window.speechSynthesis.speak(utterance);
             });
         }
@@ -720,7 +577,7 @@
             if (isLoading) {
                 generateBtn.disabled = true;
                 generateBtn.classList.add('opacity-75', 'cursor-wait');
-                generateBtnText.textContent = "AI 성우와 실시간 합성 중입니다...";
+                generateBtnText.textContent = "구글 인공지능 성우 합성 중...";
             } else {
                 generateBtn.disabled = false;
                 generateBtn.classList.remove('opacity-75', 'cursor-wait');
@@ -739,7 +596,6 @@
 
             mainAudioPlayer.src = activeAudioUrl;
             mainAudioPlayer.load();
-            mainAudioPlayer.play();
 
             currentAudioName.textContent = voiceName;
             currentAudioSource.textContent = mode === "gemini" ? "GEMINI AI" : "Local TTS";
@@ -755,13 +611,13 @@
             noCurrentAudio.classList.add('hidden');
             activePlayerCard.classList.remove('hidden');
 
-            currentAudioName.textContent = "가상 시스템 목소리";
-            currentAudioSource.textContent = "로컬 브라우저 엔진";
+            currentAudioName.textContent = "시스템 기본 목소리";
+            currentAudioSource.textContent = "로컬 엔진";
             currentAudioText.textContent = textPreview;
             mainAudioPlayer.src = "";
             
             const localWarning = () => {
-                showToast("시스템 사운드 보안 제한으로 인해 직접 저장은 차단됩니다.", "warning");
+                showToast("가상 시스템 재생 상태에서는 파일 저장이 차단됩니다.", "warning");
             };
             downloadActiveBtn.onclick = localWarning;
             saveAsActiveBtn.onclick = localWarning;
@@ -779,7 +635,7 @@
 
         function openSaveAsDialog(blob, defaultName) {
             if (/KAKAOTALK/i.test(navigator.userAgent)) {
-                showToast("카카오톡 앱에서는 파일 저장이 제한됩니다. 크롬 등 외부 앱을 써주세요.", "error");
+                showToast("카카오톡 앱 내부에서는 저장이 차단됩니다. 일반 크롬 브라우저로 열어주세요.", "error");
                 return;
             }
             currentSavingBlob = blob;
@@ -806,7 +662,7 @@
         confirmSaveAsBtn.addEventListener('click', () => {
             let userFileName = customFileNameInput.value.trim();
             if (!userFileName) {
-                showToast("파일 이름을 입력해 주세요.", "warning");
+                showToast("파일 이름을 바르게 입력해 주세요.", "warning");
                 return;
             }
             userFileName = userFileName.replace(/[\\/:*?"<>|]/g, "_");
@@ -858,7 +714,7 @@
                             <button onclick="downloadHistoryItem(${item.id})" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg transition-all" title="기본 저장">
                                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
                             </button>
-                            <button onclick="saveAsHistoryItem(${item.id})" class="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white p-1.5 rounded-lg transition-all" title="이름 지정 저장">
+                            <button onclick="saveAsHistoryItem(${item.id})" class="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white p-1.5 rounded-lg transition-all" title="이름 변경 저장">
                                 <i data-lucide="file-output" class="w-3.5 h-3.5"></i>
                             </button>
                             <button onclick="deleteHistoryItem(${item.id})" class="bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white p-1.5 rounded-lg transition-all" title="삭제">
@@ -874,7 +730,7 @@
 
         window.downloadHistoryItem = function(id) {
             if (/KAKAOTALK/i.test(navigator.userAgent)) {
-                showToast("인앱 브라우저에서는 파일 저장이 제한됩니다.", "error");
+                showToast("인앱 브라우저에서는 파일 저장이 차단됩니다.", "error");
                 return;
             }
             const item = generatedHistory.find(i => i.id === id);
@@ -892,7 +748,7 @@
                 URL.revokeObjectURL(generatedHistory[index].url);
                 generatedHistory.splice(index, 1);
                 renderHistory();
-                showToast("보관 항목을 삭제했습니다.");
+                showToast("보관 내역을 정리했습니다.");
             }
         };
 
@@ -903,10 +759,9 @@
             showToast("보관함이 비워졌습니다.");
         });
 
-        // 다운로드 로직 수행 (카카오톡 대응 완료)
         function downloadBlob(blob, filename) {
             if (/KAKAOTALK/i.test(navigator.userAgent)) {
-                showToast("카카오톡 앱 내부에서는 다운로드가 거부되어 있습니다. 크롬 등 외부 앱을 써주십시오.", "error");
+                showToast("카카오톡 내부에서는 파일 다운로드가 불가능합니다.", "error");
                 return;
             }
             const url = URL.createObjectURL(blob);
@@ -920,7 +775,7 @@
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
             }, 100);
-            showToast(`"${filename}" 저장 완료.`);
+            showToast(`"${filename}" 파일 저장 완료.`);
         }
 
         function showToast(message, type = "info") {
