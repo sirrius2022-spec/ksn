@@ -38,10 +38,10 @@
         <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
             <div class="flex items-center gap-2 font-bold text-sm">
                 <i data-lucide="alert-triangle" class="w-5 h-5 animate-pulse"></i>
-                <span>스마트폰 로컬 파일뷰어나 카카오톡에서는 구글 보안 정책(CORS)으로 저장이 차단될 수 있습니다!</span>
+                <span>스마트폰 로컬 파일뷰어나 카카오톡에서는 구글 보안 정책(CORS)으로 파일 다운로드가 차단될 수 있습니다.</span>
             </div>
             <div class="text-xs sm:text-sm bg-black/30 px-3 py-1 rounded-full font-medium">
-                💡 다운로드가 안 된다면 <span class="font-bold text-yellow-300">PC(컴퓨터) 크롬 브라우저</span>에서 실행하거나 외부 웹 브라우저로 열어주세요.
+                💡 저장이 안 된다면 <span class="font-bold text-yellow-300">PC(컴퓨터) 크롬 브라우저</span>에서 실행하거나 외부 브라우저로 열어주세요.
             </div>
         </div>
     </div>
@@ -86,7 +86,7 @@
                                 <i data-lucide="key" class="w-4 h-4"></i>
                                 제미나이 API 자가 진단 및 키 설정
                             </h2>
-                            <p class="text-xs text-slate-400 mt-1">오류가 발생할 시 먼저 자가진단 실행 버튼을 눌러 점검해 주세요.</p>
+                            <p class="text-xs text-slate-400 mt-1">입력된 키가 정상 동작하는지 테스트 버튼을 눌러보세요.</p>
                         </div>
                         <button id="diagnosticBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all">
                             <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
@@ -99,7 +99,7 @@
                             <input type="text" id="mainApiKeyInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="본인의 API 키를 입력해 주세요 (AIzaSy...)">
                         </div>
                         <button id="applyKeyBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2.5 rounded-xl text-xs transition-all border border-slate-700">
-                            API 키 임시 적용
+                            API 키 변경 적용
                         </button>
                     </div>
 
@@ -144,14 +144,14 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-2">감정 및 말하는 스타일 지시 (AI 한정)</label>
+                        <label class="block text-xs font-medium text-slate-400 mb-2">감정 및 말하는 스타일 지시</label>
                         <select id="styleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="말하듯이 자연스럽게" selected>일반 대화 (자연스러운 기본 톤)</option>
-                            <option value="최대한 밝고 경쾌하게 기쁜 소식을 전하듯">즐거움 (밝고 경쾌하게)</option>
-                            <option value="조심스럽게 소곤소곤 비밀스럽게">비밀 (소곤소곤 속삭이듯)</option>
-                            <option value="깊은 슬픔과 감정이 묻어나는 무거운 톤으로">슬픔 (조용하고 차분하게)</option>
-                            <option value="전문적인 뉴스 아나운서처럼 단호하고 지적이게">전문성 (신뢰감 있고 선명하게)</option>
-                            <option value="매우 다급하고 흥분된 톤으로 긴박하게">흥분/긴박 (속도가 조금 빠르고 상기된)</option>
+                            <option value="natural" selected>일반 대화 (자연스러운 기본 톤)</option>
+                            <option value="cheerful">즐거움 (밝고 경쾌하게)</option>
+                            <option value="whisper">비밀 (소곤소곤 속삭이듯)</option>
+                            <option value="sad">슬픔 (조용하고 차분하게)</option>
+                            <option value="professional">전문성 (신뢰감 있고 선명하게)</option>
+                            <option value="excited">흥분/긴박 (속도가 조금 빠르고 상기된)</option>
                         </select>
                     </div>
                 </div>
@@ -344,8 +344,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
-        // 초기 기본 API 키 설정 (Local Storage 캐싱 연동)
-        let customApiKey = localStorage.getItem('user_gemini_api_key') || "AQ.Ab8RN6LKvkFXileF1fPNBoq0B2wI";
+        // ✨ 제공해주신 고유 Gemini API Key 소스 내 직접 탑재 완료!
+        let customApiKey = "AQ.Ab8RN6LKvkFXileF1fPNBoq0B2wIdMyzQhuMMzyEP5CCENR6_g";
 
         let activeAudioBlob = null;
         let activeAudioUrl = null;
@@ -397,16 +397,12 @@
         const emptyHistory = document.getElementById('emptyHistory');
         const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
-        // 낭독 강제 규제 명령문 (중요: AI가 텍스트 생성을 우회 방지하도록 셋업)
-        const systemInstructionText = "You are a specialized Text-to-Speech (TTS) converter. Read the input text exactly as provided. Do not translate, do not answer, do not reply, and do NOT generate any conversational text of your own. Under no circumstances are you allowed to output text.";
-
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             updateCharCount();
             
             // 모바일 및 파일프로토콜 접속 상태 체크
             const isKakaotalk = /KAKAOTALK/i.test(navigator.userAgent);
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             
             if (isKakaotalk) {
                 mobileWarningBanner.classList.remove('hidden');
@@ -462,7 +458,7 @@
             customApiKey = inputVal;
             localStorage.setItem('user_gemini_api_key', inputVal);
             detectApiAvailability();
-            showToast("API 키가 임시 반영되었습니다. 자가 진단 테스트를 실행해 주세요.");
+            showToast("API 키가 변경 적용되었습니다. 자가 진단 테스트를 실행해 주세요.");
         });
 
         // 🩺 실시간 3단계 원인 자가진단 도구 구동부
@@ -482,16 +478,14 @@
             const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${targetKey}`;
             
             try {
-                // 패치: "Hello"를 그대로 읽으라고 지정하여 답변 생성을 완벽 차단!
+                // ⚠️ 통화 성공 패치: 시스템 명령을 걷어내고 순수한 음성 재생 어조로 가이드하여 에러 방지
                 const response = await fetch(testUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Read this exact word: Hello" }] }],
-                        systemInstruction: {
-                            parts: [{ text: systemInstructionText }]
-                        },
-                        generationConfig: { responseModalities: ["AUDIO"] }
+                        contents: [{ parts: [{ text: "Say cheerfully: Hello" }] }],
+                        generationConfig: { responseModalities: ["AUDIO"] },
+                        model: "gemini-2.5-flash-preview-tts"
                     })
                 });
 
@@ -618,13 +612,24 @@
                 const activeStyle = styleSelect.value;
 
                 if (!isMulti) {
-                    // 패치: 제미나이가 멋대로 대답을 지어내지 않고 오직 텍스트만 낭독하게끔 명시 가이드 적용
-                    const formattedText = `Read the following text exactly as-is. Speak in a style that is ${activeStyle}. Do not say anything else. Just read: "${rawText}"`;
+                    // 구글 TTS 가이드 형식에 완벽하게 일치하는 접두 지시문 적용
+                    let formattedText = "";
+                    if (activeStyle === "natural") {
+                        formattedText = rawText; 
+                    } else if (activeStyle === "cheerful") {
+                        formattedText = `Say cheerfully: ${rawText}`;
+                    } else if (activeStyle === "whisper") {
+                        formattedText = `Say in a whisper: ${rawText}`;
+                    } else if (activeStyle === "sad") {
+                        formattedText = `Say sadly: ${rawText}`;
+                    } else if (activeStyle === "professional") {
+                        formattedText = `Say professionally: ${rawText}`;
+                    } else if (activeStyle === "excited") {
+                        formattedText = `Say excitedly: ${rawText}`;
+                    }
+
                     payload = {
                         contents: [{ parts: [{ text: formattedText }] }],
-                        systemInstruction: {
-                            parts: [{ text: systemInstructionText }]
-                        },
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: {
@@ -632,7 +637,8 @@
                                     prebuiltVoiceConfig: { voiceName: activeVoice }
                                 }
                             }
-                        }
+                        },
+                        model: "gemini-2.5-flash-preview-tts"
                     };
                 } else {
                     const speaker1 = multiSpeaker1.value;
@@ -640,9 +646,6 @@
                     
                     payload = {
                         contents: [{ parts: [{ text: rawText }] }],
-                        systemInstruction: {
-                            parts: [{ text: systemInstructionText }]
-                        },
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: {
@@ -655,7 +658,8 @@
                                     }
                                 }
                             }
-                        }
+                        },
+                        model: "gemini-2.5-flash-preview-tts"
                     };
                 }
 
@@ -678,7 +682,7 @@
                 showToast("음성 파일 합성이 완료되었습니다!");
             } catch (err) {
                 console.warn("Gemini API Switch to Fallback:", err);
-                showToast("API 설정 오류 또는 보안 차단으로 가상 시스템 엔진으로 전환합니다.", "warning");
+                showToast("구글 정책 차단 또는 키 오류로 가상 시스템 엔진으로 전환합니다.", "warning");
                 switchToFallbackMode(true);
                 await generateLocalSpeech(rawText);
             } finally {
@@ -757,7 +761,7 @@
             mainAudioPlayer.src = "";
             
             const localWarning = () => {
-                showToast("스마트폰 로컬 브라우저 모드는 오디오 보안으로 파일 저장이 차단됩니다.", "warning");
+                showToast("시스템 사운드 보안 제한으로 인해 직접 저장은 차단됩니다.", "warning");
             };
             downloadActiveBtn.onclick = localWarning;
             saveAsActiveBtn.onclick = localWarning;
@@ -775,7 +779,7 @@
 
         function openSaveAsDialog(blob, defaultName) {
             if (/KAKAOTALK/i.test(navigator.userAgent)) {
-                showToast("카카오톡 앱에서는 파일 저장이 불가능합니다. 외부 앱으로 열어주세요.", "error");
+                showToast("카카오톡 앱에서는 파일 저장이 제한됩니다. 크롬 등 외부 앱을 써주세요.", "error");
                 return;
             }
             currentSavingBlob = blob;
@@ -870,7 +874,7 @@
 
         window.downloadHistoryItem = function(id) {
             if (/KAKAOTALK/i.test(navigator.userAgent)) {
-                showToast("인앱 브라우저에서는 파일 저장이 불가능합니다.", "error");
+                showToast("인앱 브라우저에서는 파일 저장이 제한됩니다.", "error");
                 return;
             }
             const item = generatedHistory.find(i => i.id === id);
@@ -899,9 +903,10 @@
             showToast("보관함이 비워졌습니다.");
         });
 
+        // 다운로드 로직 수행 (카카오톡 대응 완료)
         function downloadBlob(blob, filename) {
             if (/KAKAOTALK/i.test(navigator.userAgent)) {
-                showToast("카카오톡 앱 내부에서는 파일 다운로드가 차단되어 있습니다.", "error");
+                showToast("카카오톡 앱 내부에서는 다운로드가 거부되어 있습니다. 크롬 등 외부 앱을 써주십시오.", "error");
                 return;
             }
             const url = URL.createObjectURL(blob);
