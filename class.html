@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1조(건설 공종별 안전관리)</title>
+<style>
+  :root{
+    --navy:#0f1e33;
+    --navy2:#16273f;
+    --gold:#e8b64c;
+    --teal:#3fb8af;
+    --ink:#e9eef5;
+    --line:#2b3d58;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Malgun Gothic","맑은 고딕",sans-serif;
+    background:var(--navy);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  header{
+    background:var(--navy2);
+    border-bottom:3px solid var(--gold);
+    padding:28px 20px 20px;
+    text-align:center;
+  }
+  header h1{
+    font-size:1.7rem;
+    letter-spacing:1px;
+  }
+  header h1 .team{color:var(--gold);}
+  header p{
+    margin-top:8px;
+    font-size:.9rem;
+    color:#9db1cc;
+  }
+  nav{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:8px;
+    padding:14px 12px;
+    background:var(--navy2);
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+  }
+  nav button{
+    font-family:inherit;
+    font-size:.95rem;
+    padding:9px 16px;
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--line);
+    border-radius:6px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  nav button:hover{border-color:var(--gold);color:var(--gold);}
+  nav button.active{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:bold;}
+  nav button.board{border-color:var(--teal);color:var(--teal);}
+  nav button.board:hover,nav button.board.active{background:var(--teal);color:var(--navy);}
+  main{
+    max-width:860px;
+    margin:0 auto;
+    padding:48px 20px 80px;
+    text-align:center;
+  }
+  .content{
+    display:none;
+    animation:fade .3s;
+  }
+  .content.show{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .sample-text{
+    font-size:2.2rem;
+    font-weight:bold;
+    color:var(--gold);
+    padding:70px 0;
+  }
+  /* 메인화면 */
+  #home .intro{
+    font-size:1.15rem;
+    line-height:1.7;
+    margin-bottom:40px;
+  }
+  .qr-box{
+    width:200px;
+    height:200px;
+    margin:0 auto;
+    border:2px dashed var(--gold);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#9db1cc;
+    font-size:.9rem;
+    line-height:1.6;
+  }
+  .qr-caption{
+    margin-top:12px;
+    font-size:.85rem;
+    color:#9db1cc;
+  }
+  /* 게시판 */
+  #board .placeholder{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:60px 20px;
+    color:#9db1cc;
+    font-size:1.05rem;
+    line-height:1.8;
+  }
+  footer{
+    text-align:center;
+    padding:20px;
+    font-size:.8rem;
+    color:#6f83a1;
+    border-top:1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="team">1조</span> (건설 공종별 안전관리)</h1>
+  <p>AI + 건설안전 포트폴리오 실습 · 샘플 홈페이지</p>
+</header>
+
+<nav id="menu">
+  <button class="active" data-target="home">홈</button>
+  <button data-target="m1">1번</button>
+  <button data-target="m2">2번</button>
+  <button data-target="m3">3번</button>
+  <button data-target="m4">4번</button>
+  <button data-target="m5">5번</button>
+  <button data-target="m6">6번</button>
+  <button data-target="m7">7번</button>
+  <button data-target="m8">8번</button>
+  <button data-target="m9">9번</button>
+  <button data-target="m10">10번</button>
+  <button class="board" data-target="board">게시판</button>
+</nav>
+
+<main>
+  <!-- 메인화면 -->
+  <section id="home" class="content show">
+    <p class="intro">건설 공종별 안전관리 포트폴리오에 오신 것을 환영합니다.<br>
+    상단 메뉴를 클릭하면 각 콘텐츠를 확인할 수 있습니다.</p>
+    <div class="qr-box">QR 코드 자리<br>(Vercel 배포 주소 입력 예정)</div>
+    <p class="qr-caption">※ 배포 완료 후 QR 코드를 이 자리에 삽입하세요</p>
+  </section>
+
+  <!-- 샘플 1~10 -->
+  <section id="m1" class="content"><p class="sample-text">샘플1</p></section>
+  <section id="m2" class="content"><p class="sample-text">샘플2</p></section>
+  <section id="m3" class="content"><p class="sample-text">샘플3</p></section>
+  <section id="m4" class="content"><p class="sample-text">샘플4</p></section>
+  <section id="m5" class="content"><p class="sample-text">샘플5</p></section>
+  <section id="m6" class="content"><p class="sample-text">샘플6</p></section>
+  <section id="m7" class="content"><p class="sample-text">샘플7</p></section>
+  <section id="m8" class="content"><p class="sample-text">샘플8</p></section>
+  <section id="m9" class="content"><p class="sample-text">샘플9</p></section>
+  <section id="m10" class="content"><p class="sample-text">샘플10</p></section>
+
+  <!-- 게시판 -->
+  <section id="board" class="content">
+    <div class="placeholder">
+      게시판 영역<br>
+      추후 Padlet 임베드(iframe) 연결 예정
+    </div>
+  </section>
+</main>
+
+<footer>1조 · 건설 공종별 안전관리 · AI+건설안전 실습</footer>
+
+<script>
+document.getElementById('menu').addEventListener('click', function(e){
+  if(e.target.tagName !== 'BUTTON') return;
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  document.querySelectorAll('.content').forEach(s => s.classList.remove('show'));
+  document.getElementById(e.target.dataset.target).classList.add('show');
+});
+</script>
+
+</body>
+</html>
