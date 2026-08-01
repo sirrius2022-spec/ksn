@@ -1,1 +1,807 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이동식 크레인 양중 안전성 검토 에이전트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --ink:#0E1319; --paper:#fff; --field:#EDF1F5; --line:#C9D3DD; --line2:#E3E9EF;
+  --slate:#4A5B6E; --mute:#7C8B9C;
+  --boom:#E8A317; --boom-d:#B87F06;
+  --ok:#0B7A63; --ok-bg:#E6F3EF;
+  --ng:#C0341D; --ng-bg:#FBEAE6;
+  --warn:#B4690E; --warn-bg:#FCF3E3;
+  --sans:'Pretendard','Pretendard Variable',-apple-system,'Malgun Gothic','맑은 고딕',sans-serif;
+  --mono:ui-monospace,'SFMono-Regular','Consolas',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans); color:var(--ink); background:#DFE5EB;
+  font-size:15px; line-height:1.55; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:960px;margin:0 auto;padding:0 0 80px}
 
+/* ---- 상단 바 ---- */
+header{
+  position:sticky; top:0; z-index:20; background:var(--ink); color:#fff;
+  border-bottom:3px solid var(--boom);
+}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;max-width:960px;margin:0 auto}
+.hd h1{font-size:15px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.25}
+.hd h1 small{display:block;font-size:11px;font-weight:500;color:#94A6B8;letter-spacing:.02em}
+.mark{width:30px;height:30px;flex:0 0 30px;background:var(--boom);position:relative;border-radius:2px}
+.mark::before{content:"";position:absolute;left:5px;top:5px;width:20px;height:3px;background:var(--ink);transform:rotate(-32deg);transform-origin:left center}
+.mark::after{content:"";position:absolute;right:6px;top:14px;width:2px;height:11px;background:var(--ink)}
+.total{margin-left:auto;display:flex;align-items:center;gap:8px}
+.badge{font-size:13px;font-weight:800;padding:6px 12px;border-radius:2px;background:#2A3542;color:#94A6B8;letter-spacing:.04em;white-space:nowrap}
+.badge.ok{background:var(--ok);color:#fff}
+.badge.ng{background:var(--ng);color:#fff}
+
+/* ---- 카드 ---- */
+.card{background:var(--paper);margin:14px 12px;border:1px solid var(--line);border-radius:3px}
+.card>h2{
+  display:flex;align-items:center;gap:10px;margin:0;padding:11px 14px;
+  font-size:14px;font-weight:800;letter-spacing:-.01em;border-bottom:1px solid var(--line2);
+}
+.no{flex:0 0 22px;height:22px;display:grid;place-items:center;background:var(--boom);color:var(--ink);font-size:12px;font-weight:800;border-radius:2px}
+.pill{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:2px;background:var(--field);color:var(--mute)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.ng{background:var(--ng-bg);color:var(--ng)}
+.body{padding:14px}
+.grid{display:grid;grid-template-columns:1fr;gap:10px 14px}
+@media(min-width:640px){.grid.c2{grid-template-columns:1fr 1fr}.grid.c3{grid-template-columns:1fr 1fr 1fr}}
+label{display:block;font-size:11.5px;font-weight:700;color:var(--slate);margin-bottom:4px;letter-spacing:.01em}
+input,select,textarea{
+  width:100%;font-family:var(--sans);font-size:14px;color:var(--ink);
+  background:var(--field);border:1px solid transparent;border-bottom:1px solid var(--line);
+  border-radius:2px 2px 0 0;padding:8px 9px;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--boom);outline-offset:-2px;background:#fff}
+input[type=number]{font-family:var(--mono);font-variant-numeric:tabular-nums}
+textarea{font-family:var(--mono);font-size:12px;line-height:1.4;min-height:110px;resize:vertical}
+.hint{font-size:11px;color:var(--mute);margin-top:4px}
+
+/* ---- 계산 결과 / LMI 게이지 ---- */
+.calc{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+.eq{font-family:var(--mono);font-size:12.5px;color:var(--slate);background:var(--field);padding:7px 9px;border-left:3px solid var(--line);margin:0 0 8px;word-break:break-all}
+.eq b{color:var(--ink)}
+.lmi{margin-top:10px}
+.lmi .top{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--slate);margin-bottom:5px}
+.lmi .top .val{font-family:var(--mono);color:var(--ink)}
+.track{position:relative;height:22px;background:var(--field);border:1px solid var(--line2);overflow:hidden}
+.fill{height:100%;width:0;background:var(--ok);transition:width .35s ease}
+.fill.ng{background:var(--ng)}
+.fill.warn{background:var(--warn)}
+.tick{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.55}
+.tick span{position:absolute;top:-1px;left:4px;font-size:9.5px;font-weight:800;color:var(--ink);white-space:nowrap;opacity:.75}
+.res{margin-top:9px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:13px}
+.res .fx{font-family:var(--mono);font-weight:700}
+.tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:2px}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.tag.ng{background:var(--ng-bg);color:var(--ng)}
+.note{font-size:11.5px;color:var(--warn);background:var(--warn-bg);padding:6px 8px;margin-top:8px;border-left:3px solid var(--boom)}
+
+/* ---- 탭 ---- */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tab{flex:1;padding:9px 6px;font-size:13px;font-weight:800;color:var(--mute);background:none;border:0;border-bottom:3px solid transparent;cursor:pointer;font-family:var(--sans)}
+.tab.on{color:var(--ink);border-bottom-color:var(--boom)}
+
+/* ---- 버튼 ---- */
+.btn{
+  font-family:var(--sans);font-size:13.5px;font-weight:800;padding:11px 16px;cursor:pointer;
+  border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:2px;
+}
+.btn.pri{background:var(--ink);color:#fff}
+.btn.acc{background:var(--boom);border-color:var(--boom-d);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---- 종합 / AI ---- */
+.sum{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line2);border:1px solid var(--line2)}
+@media(min-width:640px){.sum{grid-template-columns:1fr 1fr}}
+.sum .it{background:#fff;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.sum .it .k{font-size:12.5px;font-weight:700}
+.sum .it .v{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--slate)}
+table.ra{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+table.ra th,table.ra td{border:1px solid var(--line);padding:7px 8px;vertical-align:top;text-align:left}
+table.ra th{background:var(--field);font-size:11.5px;font-weight:800;color:var(--slate)}
+table.ra td.lv{text-align:center;font-weight:800;white-space:nowrap}
+.lv-상{color:var(--ng)}.lv-중{color:var(--warn)}.lv-하{color:var(--ok)}
+.opinion{background:var(--field);border-left:3px solid var(--boom);padding:10px 12px;font-size:13px;margin-top:10px;white-space:pre-wrap}
+.chk{font-size:13px;margin:8px 0 0;padding-left:18px}
+.chk li{margin-bottom:4px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.foot{font-size:11.5px;color:var(--slate);padding:0 24px;text-align:center;line-height:1.6}
+
+/* ---- 인쇄용 작업계획서 ---- */
+#doc{display:none}
+@media print{
+  body{background:#fff}
+  header,.card,.foot,.noprint{display:none!important}
+  #doc{display:block;padding:0;margin:0}
+  @page{size:A4;margin:12mm}
+}
+#doc table{width:100%;border-collapse:collapse;font-size:10.5px}
+#doc table th,#doc table td{border:1px solid #000;padding:3.5px 5px;vertical-align:middle}
+#doc th{background:#EEE;font-weight:800;text-align:center;width:15%}
+#doc h3{font-size:16px;text-align:center;margin:0 0 8px;letter-spacing:.3em}
+#doc .sec{background:#333;color:#fff;font-weight:800;text-align:left;padding:4px 6px;font-size:11px}
+#doc .sign{margin-top:14px;text-align:right;font-size:11px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="mark" aria-hidden="true"></div>
+    <h1>이동식 크레인 양중 안전성 검토<small id="siteLabel">00자동차 공장 · 차량계 하역운반기계 작업계획서</small></h1>
+    <div class="total"><span class="badge" id="totalBadge">검토 대기</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ① 작업 개요 -->
+<section class="card">
+  <h2><span class="no">1</span>작업 개요</h2>
+  <div class="body">
+    <div class="grid c2">
+      <div><label>사업장</label><input id="f_site" value="00자동차 공장"></div>
+      <div><label>업체명</label><input id="f_co" placeholder="공사업체명 (직접 대여 시 팀명)"></div>
+      <div><label>공종</label><input id="f_type" placeholder="예) 설비 반입"></div>
+      <div><label>관리책임자 / 연락처</label><input id="f_mgr" placeholder="성명 / 010-0000-0000"></div>
+      <div><label>작업기간</label><input id="f_period" placeholder="2026.00.00 ~ 00.00"></div>
+      <div><label>작업장소</label><input id="f_place" placeholder="예) 의장1공장 북측 야드"></div>
+      <div><label>운반·이동경로</label><input id="f_route" placeholder="주요 이동경로"></div>
+      <div><label>제한속도 / 노면상태</label><input id="f_road" placeholder="10km/h / 양호"></div>
+      <div><label>작업지휘자</label><input id="f_lead" placeholder="성명"></div>
+      <div><label>유도자(신호수) / 신호방법</label><input id="f_sig" placeholder="성명 / 무전기·수신호"></div>
+      <div><label>줄걸이 작업자</label><input id="f_rig" placeholder="성명 (자격 보유)"></div>
+      <div><label>줄걸이 보조자</label><input id="f_rig2" placeholder="성명"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ② 화물(중량물) 제원 -->
+<section class="card">
+  <h2><span class="no">2</span>중량물 제원</h2>
+  <div class="body">
+    <div class="grid c2">
+      <div><label>화물 종류</label><input id="f_cargo" placeholder="예) 컨베이어 프레임"></div>
+      <div><label>화물 규격 (가로×세로×높이)</label><input id="f_dim" placeholder="예) 3.2 × 1.8 × 1.5 m"></div>
+      <div><label>화물 중량 (ton)</label><input type="number" id="f_w" value="10" step="0.1" min="0"></div>
+      <div><label>인양보조구 중량 (ton)</label><input type="number" id="f_wa" value="0" step="0.1" min="0"><div class="hint">훅블록·슬링·스프레더빔 등</div></div>
+      <div><label>결속방법</label><input id="f_bind" placeholder="예) 슬링벨트 2줄 + 샤클 결속"></div>
+      <div><label>무게중심 / 편심 여부</label><input id="f_cog" placeholder="예) 중앙, 편심 없음"></div>
+    </div>
+    <div class="calc">
+      <div class="eq">설계 인양하중 = 화물중량 + 보조구중량 = <b id="o_total">10 ton</b></div>
+      <div class="hint">이하 모든 검토는 설계 인양하중을 기준으로 판정한다.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ 장비 제원 및 양중계획 -->
+<section class="card">
+  <h2><span class="no">3</span>장비 제원 및 양중계획<span class="pill" id="p_crane">–</span></h2>
+  <div class="body">
+    <div class="grid c2">
+      <div><label>장비명 / 차량번호</label><input id="f_eq" placeholder="이동식 크레인 / 00가0000"></div>
+      <div><label>제조사 · 모델명</label><input id="f_model" value="LIEBHERR LTM 1095-5.1"></div>
+      <div><label>검사유효기간</label><input id="f_insp" placeholder="~ 2027.00.00"></div>
+      <div><label>보험사 / 유효기간</label><input id="f_ins" placeholder="00화재 / ~ 2027.00.00"></div>
+      <div><label>운전자 성명 / 자격</label><input id="f_op" placeholder="성명 / 기중기 조종사면허"></div>
+      <div><label>아웃리거 전개 / 지반 보강</label><input id="f_out" placeholder="예) 100% 전개, 철판 900×1800×20t 4매"></div>
+    </div>
+    <div class="grid c3" style="margin-top:12px">
+      <div><label>붐 길이 (m)</label><select id="f_boom"></select></div>
+      <div><label>작업 반경 (m)</label><select id="f_rad"></select></div>
+      <div><label>정격하중 적용률</label>
+        <select id="f_ratio"><option value="0.85">85% (작업계획서 기준)</option><option value="0.9">90% (현장 자체기준)</option><option value="0.75">75% (특별관리)</option></select>
+      </div>
+    </div>
+    <div class="calc">
+      <div class="eq" id="e_crane">–</div>
+      <div class="lmi">
+        <div class="top"><span>정격하중 대비 하중률</span><span class="val" id="v_crane">–</span></div>
+        <div class="track"><div class="fill" id="b_crane"></div><div class="tick" id="t_crane" style="left:85%"><span>85%</span></div></div>
+      </div>
+      <div class="res"><span>판정 :</span><span class="fx" id="r_crane">–</span><span class="tag" id="g_crane">–</span></div>
+      <div id="n_crane"></div>
+      <details style="margin-top:12px">
+        <summary style="font-size:12.5px;font-weight:700;color:var(--slate);cursor:pointer">정격하중표 교체 (장비별 제원표 붙여넣기)</summary>
+        <div style="margin-top:8px">
+          <textarea id="f_chart" placeholder="1행 : (빈칸) 붐길이1 붐길이2 …&#10;2행~ : 작업반경  정격하중  정격하중 …&#10;엑셀에서 복사 후 붙여넣기 (탭 구분)"></textarea>
+          <div class="btnrow" style="margin-top:8px">
+            <button class="btn" id="btnChart">정격하중표 적용</button>
+            <button class="btn" id="btnChartReset">기본표(LTM 1095-5.1) 복원</button>
+          </div>
+          <div class="hint" id="chartMsg">현재 적용 : LIEBHERR LTM 1095-5.1</div>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ④ 줄걸이 검토 -->
+<section class="card">
+  <h2><span class="no">4</span>줄걸이 검토<span class="pill" id="p_rig">–</span></h2>
+  <div class="body">
+    <div class="tabs">
+      <button class="tab on" data-t="sling">슬링벨트</button>
+      <button class="tab" data-t="wire">와이어로프</button>
+    </div>
+
+    <div id="pane-sling">
+      <div class="grid c2">
+        <div><label>슬링벨트 타입</label><select id="s_type"><option>EYE &amp; EYE</option><option>ENDLESS</option></select></div>
+        <div><label>줄걸이 규격 (폭 mm)</label><select id="s_w"></select></div>
+        <div><label>양중방식</label><select id="s_mode"><option>Straight</option><option selected>Choker</option><option>Basket</option></select></div>
+        <div><label>줄걸이 각도 (끼인각)</label><select id="s_ang"><option value="0">0˚</option><option value="30">30˚</option><option value="45">45˚</option><option value="60">60˚</option><option value="90">90˚</option><option value="120">120˚</option></select></div>
+        <div><label>걸이 줄수 (EA)</label><input type="number" id="s_qty" value="2" min="1" step="1"></div>
+        <div><label>안전계수</label><input type="number" id="s_sf" value="5" min="1" step="1"><div class="hint">화물 지지 5 이상 / 근로자 탑승 10 이상</div></div>
+      </div>
+      <div class="calc">
+        <div class="eq">① 파단 검토 = 절단하중 × 줄수 ÷ 안전계수 = <b id="e_s1">–</b></div>
+        <div class="eq">② 사용방법 검토 = 방식별 하중 × 각도계수 × 줄수 = <b id="e_s2">–</b></div>
+        <div class="lmi">
+          <div class="top"><span>안전하중(①②중 작은 값) 대비 하중률</span><span class="val" id="v_sling">–</span></div>
+          <div class="track"><div class="fill" id="b_sling"></div><div class="tick" style="left:100%"><span></span></div></div>
+        </div>
+        <div class="res"><span>판정 :</span><span class="fx" id="r_sling">–</span><span class="tag" id="g_sling">–</span></div>
+      </div>
+    </div>
+
+    <div id="pane-wire" style="display:none">
+      <div class="grid c2">
+        <div><label>심(core) 종류</label><select id="w_core"><option>철심</option><option>마심</option></select></div>
+        <div><label>줄걸이 규격 (지름 mm)</label><select id="w_d"></select></div>
+        <div><label>줄걸이 각도 (수평각 ˚)</label><input type="number" id="w_ang" value="60" min="1" max="90" step="1"><div class="hint">수직 = 90˚ · 하중계수 1/cos(90−θ)</div></div>
+        <div><label>단말가공 방법</label><select id="w_term"></select></div>
+        <div><label>걸이 줄수 (EA)</label><input type="number" id="w_qty" value="2" min="1" step="1"></div>
+        <div><label>안전계수</label><input type="number" id="w_sf" value="5" min="1" step="1"><div class="hint">화물 지지 5 이상 / 근로자 탑승 10 이상</div></div>
+      </div>
+      <div class="calc">
+        <div class="eq">안전하중 = 절단하중 × 줄수 × 단말효율 ÷ 안전계수 ÷ 하중계수 = <b id="e_w1">–</b></div>
+        <div class="lmi">
+          <div class="top"><span>안전하중 대비 하중률</span><span class="val" id="v_wire">–</span></div>
+          <div class="track"><div class="fill" id="b_wire"></div><div class="tick" style="left:100%"><span></span></div></div>
+        </div>
+        <div class="res"><span>판정 :</span><span class="fx" id="r_wire">–</span><span class="tag" id="g_wire">–</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ 샤클 검토 -->
+<section class="card">
+  <h2><span class="no">5</span>샤클 검토<span class="pill" id="p_sh">–</span></h2>
+  <div class="body">
+    <div class="grid c3">
+      <div><label>샤클 규격 (inch)</label><select id="h_size"></select></div>
+      <div><label>사용 개수 (EA)</label><input type="number" id="h_qty" value="2" min="1" step="1"></div>
+      <div><label>안전계수</label><input type="number" id="h_sf" value="3" min="1" step="1"><div class="hint">산업안전보건기준규칙 제163조</div></div>
+    </div>
+    <div class="calc">
+      <div class="eq">안전하중 = 사용하중 × 사용개수 ÷ 안전계수 = <b id="e_h">–</b></div>
+      <div class="lmi">
+        <div class="top"><span>안전하중 대비 하중률</span><span class="val" id="v_sh">–</span></div>
+        <div class="track"><div class="fill" id="b_sh"></div><div class="tick" style="left:100%"><span></span></div></div>
+      </div>
+      <div class="res"><span>판정 :</span><span class="fx" id="r_sh">–</span><span class="tag" id="g_sh">–</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑥ 종합 판정 -->
+<section class="card">
+  <h2><span class="no">6</span>종합 판정 및 위험성평가<span class="pill" id="p_ai">AI 대기</span></h2>
+  <div class="body">
+    <div class="sum" id="sumBox"></div>
+    <div class="btnrow" style="margin-top:14px">
+      <button class="btn acc" id="btnAI">AI 안전성 종합검토 · 위험성평가 생성</button>
+      <button class="btn" id="btnPrint">작업계획서 인쇄 · PDF</button>
+    </div>
+    <div class="btnrow" style="margin-top:8px">
+      <button class="btn" id="btnSave">입력 저장</button>
+      <select id="loadSel" style="max-width:190px"><option value="">저장 이력 불러오기</option></select>
+    </div>
+    <div id="aiOut"></div>
+  </div>
+</section>
+
+<p class="foot">검토 기준 : 산업안전보건기준에 관한 규칙 제38·39·98·163조 · KOSHA GUIDE M-77 · 발주처 제공 「중량물 작업 안전성 검토」 워크시트<br>본 검토는 제원표 입력값에 근거한 사전 검토이며, 현장 지반·풍속·간섭물 조건은 반드시 별도 확인한다.</p>
+</div>
+
+<!-- ===== 인쇄용 작업계획서 ===== -->
+<div id="doc"></div>
+
+<script>
+/* ===== 데이터 테이블 (첨부 워크시트 <별첨> 시트 기준) ===== */
+
+/* 샤클 규격(inch) → 사용하중(ton) */
+const SHACKLE = {
+  "3/16": 0.33, "1/4": 0.5, "5/16": 0.75, "3/8": 1, "7/16": 1.5, "1/2": 2,
+  "5/8": 3.25, "3/4": 4.75, "7/8": 6.5, "1": 8.5, "1-1/8": 9.5, "1-1/4": 12,
+  "1-3/8": 13.5, "1-1/2": 17, "1-3/4": 25, "2": 35, "2-1/4": 42.5,
+  "2-1/2": 55, "3": 85, "3-1/2": 120, "4": 150
+};
+
+/* 슬링벨트 : 폭(mm) → [Straight, Choker, Basket(1ply), Basket(2ply), 절단하중, 색상] */
+const SLING = {
+  "EYE & EYE": {
+    25:[0.8,0.65,1.6,3.2,5,"보라색"], 50:[1.6,1.3,3.2,6.4,10,"녹색"],
+    75:[2.4,1.9,4.8,9.6,15,"노랑색"], 100:[3.2,2.55,6.4,12.8,20,"회색"],
+    125:[4,3.2,8,16,25,"빨간색"], 150:[4.8,3.85,9.6,19.2,30,"갈색"],
+    200:[6.4,5.1,12.8,25.6,40,"파랑색"], 250:[8,6.4,16,32,50,"주황색"],
+    300:[9.6,8.3,19.2,38.4,60,"주황색"]
+  },
+  "ENDLESS": {
+    25:[1.6,1.3,3.2,6.4,10,"보라색"], 50:[3.2,2.6,6.4,12.8,20,"녹색"],
+    75:[4.8,3.8,9.6,19.2,30,"노랑색"], 100:[6.4,5.1,12.8,25.6,40,"회색"],
+    125:[8,6.4,16,32,50,"빨간색"], 150:[9.6,7.7,19.2,38.4,60,"갈색"],
+    200:[12.8,10.2,25.6,51.2,80,"파랑색"], 250:[16,12.8,32,64,100,"주황색"],
+    300:[19.2,16.6,38.4,76.8,120,"주황색"]
+  }
+};
+const SLING_MODE = { "Straight":0, "Choker":1, "Basket":2 };
+/* 줄걸이 각도(끼인각)에 따른 안전하중율 */
+const SLING_ANGLE = { 0:1, 30:0.95, 45:0.9, 60:0.85, 90:0.7, 120:0.5 };
+
+/* 와이어로프 지름(mm) → 절단하중(ton) : 마심(6×24 FC) / 철심(6×25 IWRC) */
+const WIRE = {
+  "마심": {8:2.98,9:3.77,10:4.65,12:6.7,14:9.12,16:11.9,18:15.1,20:18.6,22:23.3,
+    24:26.8,26:31.4,28:36.5,30:41.9,32:47.6,36:60.3,38:67.2,40:74.4,42:82,46:98.4,50:116},
+  "철심": {8:4.31,9:5.46,10:6.74,12:9.7,14:13.2,16:17.2,18:21.8,19:24.3,20:26.9,22:33.8,
+    24:38.8,25:42.1,26:45.5,28:52.8,30:60.6,32:69,36:87.3,38:97.3,40:108,44:130,46:143,50:168}
+};
+/* 단말가공 방법 → 효율 */
+const TERM_EFF = {
+  "소켓":1, "스웨이징":0.95, "락크":0.95, "웨지":0.75, "클립":0.5,
+  "슬링(10mm≥)":0.85, "슬링(20mm≥)":0.75, "슬링(20mm＜)":0.7
+};
+
+/* 크레인 정격하중표 (기본 내장 : LIEBHERR LTM 1095-5.1) */
+const CRANE = {
+  maker:"LIEBHERR", model:"LTM 1095-5.1",
+  booms:["12.5(백)",12.5,16.6,20.8,25,29.2,33.4,37.6,41.8,46,50.2,54.4,58],
+  radii:[3,3.5,4,4.5,5,6,7,8,9,10,11,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54],
+  rows:{
+    3:[95,63.3,63.3],
+    3.5:[74,63.3,63.3,60.2],
+    4:[69.5,62.8,62.8,59.3,48.5],
+    4.5:[66.3,59.1,58.9,55.9,47.9,38],
+    5:[60.7,54.2,54.6,53.3,47.2,37.6,29.9],
+    6:[49.7,46.3,46.7,46.8,45.1,36.6,29.4,23],
+    7:[41.4,39.9,40.2,40.3,40.1,35.2,28.5,22.5,18.1],
+    8:[35.1,34.1,34.5,34.6,34.4,33.8,27.4,21.2,17.6,13.9],
+    9:[30.2,29.5,30.3,30,30.6,30.4,25.9,20,16.8,13.6,10.5],
+    10:[26.5,26,26.7,26.4,26.9,26.7,24.4,18.8,15.9,13.1,10.3,8.3],
+    11:[null,null,23.6,23.9,23.9,23.6,23.2,17.6,15,12.6,10,8.2,6.4],
+    12:[null,null,21.1,21.4,21.4,21.1,21.5,16.5,14.1,12.1,9.7,8,6.3],
+    14:[null,null,17.2,17.5,17.4,17.9,17.7,14.6,12.6,11,9.1,7.6,6],
+    16:[null,null,null,14.7,14.9,14.9,14.5,12.9,11.3,9.9,8.4,7.2,5.7],
+    18:[null,null,null,12.4,12.5,12.4,12.1,11.4,10.2,9,7.7,6.7,5.4],
+    20:[null,null,null,null,10.6,10.5,10.1,10.1,9.2,8.1,7.2,6.2,5.1],
+    22:[null,null,null,null,9.1,9,8.8,9.1,8.3,7.4,6.6,5.8,4.8],
+    24:[null,null,null,null,null,7.8,8.1,7.9,7.1,6.8,6.1,5.4,4.5],
+    26:[null,null,null,null,null,6.8,7.2,6.9,6.5,6.2,5.6,5,4.3],
+    28:[null,null,null,null,null,null,6.3,6,5.9,5.4,5.2,4.7,4],
+    30:[null,null,null,null,null,null,5.6,5.3,5.5,4.8,4.8,4.4,3.8],
+    32:[null,null,null,null,null,null,null,4.7,4.9,4.4,4.3,4.1,3.5],
+    34:[null,null,null,null,null,null,null,4.4,4.3,4.1,3.8,3.8,3.3],
+    36:[null,null,null,null,null,null,null,null,3.8,3.8,3.5,3.4,3.1],
+    38:[null,null,null,null,null,null,null,null,3.4,3.4,3.3,3,2.9],
+    40:[null,null,null,null,null,null,null,null,null,3,2.9,2.6,2.7],
+    42:[null,null,null,null,null,null,null,null,null,2.8,2.6,2.3,2.3],
+    44:[null,null,null,null,null,null,null,null,null,null,2.3,2,2],
+    46:[null,null,null,null,null,null,null,null,null,null,2,1.7,1.7],
+    48:[null,null,null,null,null,null,null,null,null,null,null,1.4,1.5],
+    50:[null,null,null,null,null,null,null,null,null,null,null,1.2,1.2],
+    52:[null,null,null,null,null,null,null,null,null,null,null,null,1],
+    54:[null,null,null,null,null,null,null,null,null,null,null,null,0.8]
+  }
+};
+
+/* ===== 검토 함수 ===== */
+const r2 = v => Math.round(v * 100) / 100;
+const verdict = (safe, load) => ({ ok: safe > load, sign: safe > load ? ">" : (safe < load ? "<" : "="), ratio: load > 0 ? load / safe : 0 });
+
+/* 1. 샤클 : 안전하중 = 사용하중 × 사용개수 / 안전율(3 이상) */
+function checkShackle({ size, qty, sf, load }) {
+  const wll = SHACKLE[size];
+  if (wll == null) return { error: "샤클 규격 미확인" };
+  const safe = wll * qty / sf;
+  return { wll, safe: r2(safe), load, ...verdict(safe, load),
+    formula: `${wll} ton × ${qty} EA ÷ ${sf} = ${r2(safe)} ton` };
+}
+
+/* 2-1. 슬링벨트 : 안전하중1(파단) / 안전하중2(사용방법) 중 작은 값 */
+function checkSling({ type, width, mode, angle, qty, sf, load }) {
+  const row = (SLING[type] || {})[width];
+  if (!row) return { error: "슬링벨트 규격 미확인" };
+  const breaking = row[4], color = row[5];
+  const modeCap = row[SLING_MODE[mode]];
+  const af = SLING_ANGLE[angle];
+  const safe1 = breaking * qty / sf;
+  const safe2 = modeCap * af * qty;
+  const safe = Math.min(safe1, safe2);
+  return { breaking, color, modeCap, af, safe1: r2(safe1), safe2: r2(safe2), safe: r2(safe), load,
+    ...verdict(safe, load),
+    f1: `${breaking} ton × ${qty} EA ÷ ${sf} = ${r2(safe1)} ton`,
+    f2: `${modeCap} ton × ${af} × ${qty} EA = ${r2(safe2)} ton` };
+}
+
+/* 2-2. 와이어로프 : 절단하중 × 개수 × 단말효율 / 안전율 / 줄걸이 하중계수 */
+function checkWire({ core, dia, hAngle, term, qty, sf, load }) {
+  const breaking = (WIRE[core] || {})[dia];
+  if (breaking == null) return { error: "와이어로프 규격 미확인" };
+  const eff = TERM_EFF[term];
+  const k = Math.round((1 / Math.cos((90 - hAngle) * Math.PI / 180)) * 1000) / 1000;
+  const safe = breaking * qty * eff / sf / k;
+  return { breaking, eff, k, safe: r2(safe), load, ...verdict(safe, load),
+    formula: `${breaking} ton × ${qty} EA × ${eff} ÷ ${sf} ÷ ${k} = ${r2(safe)} ton` };
+}
+
+/* 3. 장비 : 정격하중 조회(보수적 : 상위 반경 / 상위 붐길이) → × 안전율(0.85) */
+function lookupRated(radius, boom, chart) {
+  const c = chart || CRANE;
+  const bi = c.booms.findIndex(b => (typeof b === "number" ? b >= boom : String(b) === String(boom)));
+  const bIdx = bi === -1 ? c.booms.length - 1 : bi;
+  const ri = c.radii.find(r => r >= radius);
+  if (ri === undefined) return { rated: null, note: "정격하중표 작업반경 범위 초과" };
+  const rated = (c.rows[ri] || [])[bIdx];
+  const exact = (ri === radius) && (c.booms[bIdx] === boom);
+  return { rated: rated == null ? null : rated, usedRadius: ri, usedBoom: c.booms[bIdx], exact,
+    note: rated == null ? "해당 붐길이·작업반경 조합의 정격하중 없음(작업 불가)" :
+          (exact ? "" : `표 값 보간 없이 보수적 적용(반경 ${ri}m / 붐 ${c.booms[bIdx]}m)`) };
+}
+function checkCrane({ radius, boom, ratio, load, chart }) {
+  const lk = lookupRated(radius, boom, chart);
+  if (lk.rated == null) return { error: lk.note, ...lk };
+  const safe = lk.rated * ratio;
+  return { ...lk, safe: r2(safe), load, ...verdict(safe, load),
+    formula: `${lk.rated} ton × ${ratio} = ${r2(safe)} ton`,
+    util: r2(load / lk.rated * 100) };
+}
+
+if (false) module.exports = { SHACKLE, SLING, SLING_ANGLE, WIRE, TERM_EFF, CRANE, checkShackle, checkSling, checkWire, checkCrane, lookupRated };
+
+
+/* ===== 상태 ===== */
+let chart = CRANE;
+let ai = null;
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value) || 0;
+const fmt = v => (Math.round(v * 100) / 100).toLocaleString('ko-KR');
+
+/* ===== 셀렉트 초기화 ===== */
+function fillCraneSelects(){
+  $('f_boom').innerHTML = chart.booms.map(b => `<option value="${b}">${b}</option>`).join('');
+  $('f_rad').innerHTML = chart.radii.map(r => `<option value="${r}">${r}</option>`).join('');
+  const bi = chart.booms.indexOf(25); $('f_boom').selectedIndex = bi > -1 ? bi : 0;
+  const ri = chart.radii.indexOf(10); $('f_rad').selectedIndex = ri > -1 ? ri : 0;
+}
+function initSelects(){
+  fillCraneSelects();
+  $('h_size').innerHTML = Object.keys(SHACKLE).map(k => `<option value="${k}">${k}" — 사용하중 ${SHACKLE[k]} ton</option>`).join('');
+  $('h_size').value = '1-3/4';
+  $('w_d').innerHTML = Object.keys(WIRE['철심']).map(d => `<option value="${d}">${d} mm</option>`).join('');
+  $('w_d').value = '38';
+  $('w_term').innerHTML = Object.keys(TERM_EFF).map(k => `<option value="${k}">${k} — 효율 ${TERM_EFF[k]}</option>`).join('');
+  $('w_term').value = '슬링(10mm≥)';
+  fillSlingWidths();
+}
+function fillSlingWidths(){
+  const t = $('s_type').value, keep = $('s_w').value;
+  $('s_w').innerHTML = Object.keys(SLING[t]).map(w => `<option value="${w}">${w} mm (${SLING[t][w][5]})</option>`).join('');
+  $('s_w').value = SLING[t][keep] ? keep : '100';
+}
+function coreWidths(){
+  const c = $('w_core').value, keep = $('w_d').value;
+  $('w_d').innerHTML = Object.keys(WIRE[c]).map(d => `<option value="${d}">${d} mm</option>`).join('');
+  $('w_d').value = WIRE[c][keep] ? keep : Object.keys(WIRE[c])[0];
+}
+
+/* ===== 게이지 ===== */
+function gauge(barId, valId, ratio, ok){
+  const pct = Math.min(ratio * 100, 130);
+  const b = $(barId);
+  b.style.width = Math.min(pct, 100) + '%';
+  b.className = 'fill' + (ok ? (ratio > 0.85 ? ' warn' : '') : ' ng');
+  $(valId).textContent = isFinite(ratio) ? (Math.round(ratio * 1000) / 10) + ' %' : '–';
+}
+function stamp(pillId, tagId, resId, ok, safe, load){
+  const p = $(pillId), g = $(tagId);
+  p.textContent = ok ? 'OK' : 'NG'; p.className = 'pill ' + (ok ? 'ok' : 'ng');
+  g.textContent = ok ? 'OK' : 'NG'; g.className = 'tag ' + (ok ? 'ok' : 'ng');
+  $(resId).textContent = `안전하중 ${fmt(safe)} ton ${ok ? '>' : '≤'} 인양하중 ${fmt(load)} ton`;
+}
+function fail(pillId, tagId, resId, msg){
+  $(pillId).textContent = 'NG'; $(pillId).className = 'pill ng';
+  $(tagId).textContent = 'NG'; $(tagId).className = 'tag ng';
+  $(resId).textContent = msg;
+}
+
+/* ===== 검토 실행 ===== */
+let R = {};
+function run(){
+  const load = Math.round((num('f_w') + num('f_wa')) * 1000) / 1000;
+  $('o_total').textContent = fmt(load) + ' ton  ( 화물 ' + fmt(num('f_w')) + ' + 보조구 ' + fmt(num('f_wa')) + ' )';
+  $('siteLabel').textContent = ($('f_site').value || '00자동차 공장') + ' · 차량계 하역운반기계 작업계획서';
+
+  /* 장비 */
+  const boomRaw = $('f_boom').value;
+  const boom = isNaN(parseFloat(boomRaw)) ? boomRaw : (String(parseFloat(boomRaw)) === boomRaw ? parseFloat(boomRaw) : boomRaw);
+  const cr = checkCrane({ radius: parseFloat($('f_rad').value), boom: boom, ratio: parseFloat($('f_ratio').value), load, chart });
+  $('t_crane').style.left = (parseFloat($('f_ratio').value) * 100) + '%';
+  $('t_crane').querySelector('span').textContent = Math.round(parseFloat($('f_ratio').value) * 100) + '%';
+  if (cr.error){
+    $('e_crane').innerHTML = '정격하중 조회 불가';
+    fail('p_crane','g_crane','r_crane', cr.error);
+    gauge('b_crane','v_crane', 1.3, false);
+    $('n_crane').innerHTML = `<div class="note">${cr.error} — 붐길이·작업반경 재검토 또는 장비 상향 필요.</div>`;
+  } else {
+    $('e_crane').innerHTML = `정격하중 ${cr.rated} ton × 적용률 ${$('f_ratio').value} = <b>${fmt(cr.safe)} ton</b>`;
+    gauge('b_crane','v_crane', cr.load / cr.rated, cr.ok);
+    stamp('p_crane','g_crane','r_crane', cr.ok, cr.safe, load);
+    $('n_crane').innerHTML = cr.note ? `<div class="note">${cr.note}</div>` : '';
+  }
+
+  /* 슬링 */
+  const sl = checkSling({ type: $('s_type').value, width: parseInt($('s_w').value), mode: $('s_mode').value,
+    angle: parseInt($('s_ang').value), qty: num('s_qty'), sf: num('s_sf'), load });
+  if (sl.error){ $('e_s1').textContent = '–'; $('e_s2').textContent = '–'; fail('p_rig','g_sling','r_sling', sl.error); }
+  else {
+    $('e_s1').textContent = sl.f1; $('e_s2').textContent = sl.f2;
+    gauge('b_sling','v_sling', load / sl.safe, sl.ok);
+    stamp('p_rig','g_sling','r_sling', sl.ok, sl.safe, load);
+  }
+
+  /* 와이어 */
+  const wr = checkWire({ core: $('w_core').value, dia: parseInt($('w_d').value), hAngle: num('w_ang'),
+    term: $('w_term').value, qty: num('w_qty'), sf: num('w_sf'), load });
+  if (wr.error){ $('e_w1').textContent = '–'; fail('p_rig','g_wire','r_wire', wr.error); }
+  else {
+    $('e_w1').textContent = wr.formula;
+    gauge('b_wire','v_wire', load / wr.safe, wr.ok);
+    $('g_wire').textContent = wr.ok ? 'OK' : 'NG'; $('g_wire').className = 'tag ' + (wr.ok ? 'ok' : 'ng');
+    $('r_wire').textContent = `안전하중 ${fmt(wr.safe)} ton ${wr.ok ? '>' : '≤'} 인양하중 ${fmt(load)} ton`;
+  }
+
+  /* 줄걸이 통합 pill : 현재 선택 탭 기준 */
+  const useWire = $('pane-wire').style.display !== 'none';
+  const rig = useWire ? wr : sl;
+  $('p_rig').textContent = rig.error ? 'NG' : (rig.ok ? 'OK' : 'NG');
+  $('p_rig').className = 'pill ' + (!rig.error && rig.ok ? 'ok' : 'ng');
+
+  /* 샤클 */
+  const sh = checkShackle({ size: $('h_size').value, qty: num('h_qty'), sf: num('h_sf'), load });
+  if (sh.error){ $('e_h').textContent = '–'; fail('p_sh','g_sh','r_sh', sh.error); }
+  else {
+    $('e_h').textContent = sh.formula;
+    gauge('b_sh','v_sh', load / sh.safe, sh.ok);
+    stamp('p_sh','g_sh','r_sh', sh.ok, sh.safe, load);
+  }
+
+  R = { load, crane: cr, sling: sl, wire: wr, shackle: sh, rigType: useWire ? '와이어로프' : '슬링벨트', rig };
+  summarize();
+}
+
+function summarize(){
+  const rows = [
+    ['장비(정격하중)', R.crane.error ? null : R.crane, R.crane.error],
+    [R.rigType, R.rig.error ? null : R.rig, R.rig.error],
+    ['샤클', R.shackle.error ? null : R.shackle, R.shackle.error]
+  ];
+  $('sumBox').innerHTML = rows.map(([k, v, err]) => `
+    <div class="it"><span class="k">${k}</span>
+      <span class="v">${err ? '검토 불가' : `안전 ${fmt(v.safe)} / 인양 ${fmt(R.load)} ton`}</span>
+      <span class="tag ${!err && v.ok ? 'ok' : 'ng'}">${!err && v.ok ? 'OK' : 'NG'}</span></div>`).join('') +
+    `<div class="it"><span class="k">설계 인양하중</span><span class="v">${fmt(R.load)} ton</span></div>`;
+
+  const allOk = !R.crane.error && R.crane.ok && !R.rig.error && R.rig.ok && !R.shackle.error && R.shackle.ok;
+  const b = $('totalBadge');
+  b.textContent = allOk ? '종합 OK · 작업 가능' : '종합 NG · 보완 필요';
+  b.className = 'badge ' + (allOk ? 'ok' : 'ng');
+  R.allOk = allOk;
+  buildDoc();
+}
+
+/* ===== AI 종합검토 ===== */
+async function runAI(){
+  const btn = $('btnAI');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>검토 중…';
+  $('p_ai').textContent = '분석 중'; $('p_ai').className = 'pill';
+  const ctx = {
+    사업장: $('f_site').value, 공종: $('f_type').value, 작업장소: $('f_place').value,
+    화물종류: $('f_cargo').value, 화물규격: $('f_dim').value, 결속방법: $('f_bind').value,
+    무게중심: $('f_cog').value, 아웃리거: $('f_out').value, 이동경로: $('f_route').value,
+    설계인양하중_ton: R.load,
+    장비: R.crane.error ? { 오류: R.crane.error } : { 모델: $('f_model').value, 붐길이_m: $('f_boom').value, 작업반경_m: $('f_rad').value, 정격하중_ton: R.crane.rated, 적용률: $('f_ratio').value, 안전하중_ton: R.crane.safe, 하중률_퍼센트: R.crane.util, 판정: R.crane.ok ? 'OK' : 'NG' },
+    줄걸이: R.rig.error ? { 오류: R.rig.error } : (R.rigType === '슬링벨트'
+      ? { 종류: '슬링벨트', 타입: $('s_type').value, 폭_mm: $('s_w').value, 양중방식: $('s_mode').value, 끼인각: $('s_ang').value, 줄수: $('s_qty').value, 안전계수: $('s_sf').value, 절단하중_ton: R.sling.breaking, 안전하중_ton: R.sling.safe, 판정: R.sling.ok ? 'OK' : 'NG' }
+      : { 종류: '와이어로프', 심: $('w_core').value, 지름_mm: $('w_d').value, 수평각: $('w_ang').value, 단말가공: $('w_term').value, 줄수: $('w_qty').value, 안전계수: $('w_sf').value, 절단하중_ton: R.wire.breaking, 하중계수: R.wire.k, 안전하중_ton: R.wire.safe, 판정: R.wire.ok ? 'OK' : 'NG' }),
+    샤클: R.shackle.error ? { 오류: R.shackle.error } : { 규격_inch: $('h_size').value, 사용하중_ton: R.shackle.wll, 개수: $('h_qty').value, 안전계수: $('h_sf').value, 안전하중_ton: R.shackle.safe, 판정: R.shackle.ok ? 'OK' : 'NG' },
+    종합판정: R.allOk ? 'OK' : 'NG'
+  };
+  const prompt = `당신은 건설안전기술사이며 자동차 공장 내 이동식 크레인 중량물 양중작업의 작업계획서를 검토한다.
+아래 검토 데이터를 근거로 판정하라.
+
+${JSON.stringify(ctx, null, 1)}
+
+적용 법령·기준: 산업안전보건기준에 관한 규칙 제38조(작업계획서), 제39조(작업지휘자), 제98조(제한속도), 제132조(양중기), 제134조(방호장치), 제146조(크레인 사용 제한), 제163조(와이어로프 등 달기구의 안전계수), KOSHA GUIDE M-77(이동식크레인 안전보건작업 지침).
+
+다음 JSON 형식으로만 답하라. 마크다운·설명·코드펜스 금지.
+{
+ "opinion": "종합 검토의견 3~4문장. NG 항목이 있으면 구체적 보완방안(예: 슬링 폭 상향, 줄수 증가, 양중방식 변경, 붐길이·작업반경 조정)을 수치로 제시.",
+ "risks": [{"work":"작업단계","hazard":"위험요인","measure":"안전대책(법령·기준 근거 포함)","level":"상|중|하"}],
+ "checks": ["작업 전 반드시 확인할 사항 5개"]
+}
+risks는 6~8개. 작업단계는 장비 진입·설치 → 아웃리거 설치 → 줄걸이 → 인양 → 선회·이동 → 착지·해체 순으로 구성하라. 한국어로 작성하고 현장 실무 용어를 사용하라.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, messages: [{ role: "user", content: prompt }] })
+    });
+    const data = await res.json();
+    const text = data.content.filter(c => c.type === 'text').map(c => c.text).join('\n').replace(/```json|```/g, '').trim();
+    ai = JSON.parse(text);
+    renderAI();
+    $('p_ai').textContent = 'AI 검토완료'; $('p_ai').className = 'pill ok';
+  } catch (e) {
+    $('aiOut').innerHTML = `<div class="note">AI 검토를 불러오지 못했다. 네트워크 상태를 확인하고 다시 실행하라. (${e.message})</div>`;
+    $('p_ai').textContent = '실패'; $('p_ai').className = 'pill ng';
+  }
+  btn.disabled = false; btn.textContent = 'AI 안전성 종합검토 · 위험성평가 생성';
+}
+function renderAI(){
+  if (!ai) return;
+  $('aiOut').innerHTML = `
+    <div class="opinion">${ai.opinion || ''}</div>
+    <table class="ra"><thead><tr><th style="width:16%">작업내용</th><th style="width:27%">위험요인</th><th>안전대책</th><th style="width:8%">위험도</th></tr></thead>
+    <tbody>${(ai.risks || []).map(r => `<tr><td>${r.work}</td><td>${r.hazard}</td><td>${r.measure}</td><td class="lv lv-${r.level}">${r.level}</td></tr>`).join('')}</tbody></table>
+    <ul class="chk">${(ai.checks || []).map(c => `<li>${c}</li>`).join('')}</ul>`;
+  buildDoc();
+}
+
+/* ===== 인쇄용 작업계획서 ===== */
+function buildDoc(){
+  const v = id => $(id).value || '';
+  const rigDetail = R.rigType === '슬링벨트'
+    ? `슬링벨트 ${$('s_type').value} / 폭 ${$('s_w').value}mm / ${$('s_mode').value} / 끼인각 ${$('s_ang').value}˚ / ${$('s_qty').value}줄`
+    : `와이어로프 ${$('w_core').value} / Ø${$('w_d').value}mm / 수평각 ${$('w_ang').value}˚ / 단말 ${$('w_term').value} / ${$('w_qty').value}줄`;
+  const rigCalc = R.rig.error ? R.rig.error
+    : (R.rigType === '슬링벨트' ? `①${R.sling.f1} ②${R.sling.f2} → 안전하중 ${fmt(R.sling.safe)} ton` : R.wire.formula);
+  const craneCalc = R.crane.error ? R.crane.error : R.crane.formula;
+  const OK = x => (x && !x.error && x.ok) ? 'OK' : 'NG';
+
+  $('doc').innerHTML = `
+  <h3>차량계 하역운반기계 작업계획서</h3>
+  <table>
+    <tr><td class="sec" colspan="4">1. 작업개요</td></tr>
+    <tr><th>업체명</th><td>${v('f_co')}</td><th>관리책임자</th><td>${v('f_mgr')}</td></tr>
+    <tr><th>공종</th><td>${v('f_type')}</td><th>사업장</th><td>${v('f_site')}</td></tr>
+    <tr><th>작업기간</th><td>${v('f_period')}</td><th>작업장소</th><td>${v('f_place')}</td></tr>
+    <tr><th>운반·이동경로</th><td>${v('f_route')}</td><th>제한속도/노면</th><td>${v('f_road')}</td></tr>
+    <tr><th>작업지휘자</th><td>${v('f_lead')}</td><th>유도자/신호방법</th><td>${v('f_sig')}</td></tr>
+    <tr><th>줄걸이 작업자</th><td>${v('f_rig')}</td><th>줄걸이 보조자</th><td>${v('f_rig2')}</td></tr>
+    <tr><td class="sec" colspan="4">2. 건설기계 제원</td></tr>
+    <tr><th>장비명/차량번호</th><td>${v('f_eq')}</td><th>제조사·모델</th><td>${v('f_model')}</td></tr>
+    <tr><th>검사유효기간</th><td>${v('f_insp')}</td><th>보험/유효기간</th><td>${v('f_ins')}</td></tr>
+    <tr><th>운전자/자격</th><td>${v('f_op')}</td><th>아웃리거·지반보강</th><td>${v('f_out')}</td></tr>
+    <tr><td class="sec" colspan="4">3. 화물 제원</td></tr>
+    <tr><th>화물종류</th><td>${v('f_cargo')}</td><th>화물규격</th><td>${v('f_dim')}</td></tr>
+    <tr><th>인양하중</th><td>${fmt(R.load)} ton (화물 ${fmt(num('f_w'))} + 보조구 ${fmt(num('f_wa'))})</td><th>결속방법</th><td>${v('f_bind')}</td></tr>
+    <tr><th>작업반경</th><td>${v('f_rad')} m</td><th>붐길이</th><td>${v('f_boom')} m</td></tr>
+    <tr><td class="sec" colspan="4">4. 양중계획 (안전율 ${Math.round(parseFloat(v('f_ratio')) * 100)}% 적용)</td></tr>
+    <tr><th>정격하중</th><td>${R.crane.error ? '-' : R.crane.rated + ' ton'}</td><th>안전하중</th><td>${R.crane.error ? '-' : fmt(R.crane.safe) + ' ton'}</td></tr>
+    <tr><th>검토식</th><td colspan="2">${craneCalc}</td><th style="background:${OK(R.crane) === 'OK' ? '#DFF0EA' : '#F8DDD7'}">${OK(R.crane)}</th></tr>
+    <tr><td class="sec" colspan="4">5. 줄걸이 하중 확인</td></tr>
+    <tr><th>줄걸이 사양</th><td colspan="3">${rigDetail}</td></tr>
+    <tr><th>검토식</th><td colspan="2">${rigCalc}</td><th style="background:${OK(R.rig) === 'OK' ? '#DFF0EA' : '#F8DDD7'}">${OK(R.rig)}</th></tr>
+    <tr><td class="sec" colspan="4">6. 샤클 하중 확인</td></tr>
+    <tr><th>샤클 규격/개수</th><td>${v('h_size')}" × ${v('h_qty')} EA</td><th>안전계수</th><td>${v('h_sf')}</td></tr>
+    <tr><th>검토식</th><td colspan="2">${R.shackle.error ? R.shackle.error : R.shackle.formula}</td><th style="background:${OK(R.shackle) === 'OK' ? '#DFF0EA' : '#F8DDD7'}">${OK(R.shackle)}</th></tr>
+    <tr><td class="sec" colspan="4">7. 종합 검토의견</td></tr>
+    <tr><td colspan="4" style="height:auto">${ai ? (ai.opinion || '') : '종합판정 : ' + (R.allOk ? '적합(OK) — 안전하중 > 인양하중' : '부적합(NG) — 보완 후 재검토')}</td></tr>
+    <tr><td class="sec" colspan="4">8. 위험성평가</td></tr>
+    <tr><th style="width:16%">작업내용</th><th style="width:27%">위험요인</th><th style="width:47%">안전대책</th><th style="width:10%">위험도</th></tr>
+    ${ai && ai.risks ? ai.risks.map(r => `<tr><td>${r.work}</td><td>${r.hazard}</td><td>${r.measure}</td><td style="text-align:center">${r.level}</td></tr>`).join('')
+      : '<tr><td colspan="4" style="height:60px">별도 작업위험성평가 첨부</td></tr>'}
+    ${ai && ai.checks ? `<tr><td class="sec" colspan="4">작업 전 확인사항</td></tr><tr><td colspan="4">${ai.checks.map((c, i) => (i + 1) + '. ' + c).join('<br>')}</td></tr>` : ''}
+  </table>
+  <p style="font-size:9.5px;margin:6px 0 0">※ 첨부 : 건설기계 등록증 · 조종사면허증 · 보험가입증권 · 사업자등록증 · 산재보험 가입증명원 · 기초안전보건교육 이수증 · 크레인 안전검사증 및 하중제원표 · 줄걸이/샤클 제원표</p>
+  <div class="sign">20&nbsp;&nbsp;&nbsp;&nbsp;년&nbsp;&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;작성자 : ________________ (인)</div>`;
+}
+
+/* ===== 정격하중표 교체 ===== */
+function applyChart(){
+  const txt = $('f_chart').value.trim();
+  if (!txt){ $('chartMsg').textContent = '입력된 표가 없다.'; return; }
+  try {
+    const lines = txt.split(/\r?\n/).filter(l => l.trim());
+    const head = lines[0].split(/\t|\s{2,}|,/).map(s => s.trim()).filter(s => s !== '');
+    const booms = head.map(h => isNaN(parseFloat(h)) ? h : parseFloat(h));
+    const radii = [], rows = {};
+    lines.slice(1).forEach(l => {
+      const c = l.split(/\t|,/).map(s => s.trim());
+      const r = parseFloat(c[0]); if (isNaN(r)) return;
+      radii.push(r);
+      rows[r] = booms.map((_, i) => { const v = parseFloat(c[i + 1]); return isNaN(v) ? null : v; });
+    });
+    if (!radii.length) throw new Error('작업반경 행 없음');
+    chart = { maker: '사용자 입력', model: v_model(), booms, radii: radii.sort((a, b) => a - b), rows };
+    fillCraneSelects();
+    $('chartMsg').textContent = `적용 완료 : 붐 ${booms.length}구간 × 반경 ${radii.length}단`;
+    run();
+  } catch (e) { $('chartMsg').textContent = '표 형식을 확인하라. 1행=붐길이, 1열=작업반경, 탭 구분. (' + e.message + ')'; }
+}
+const v_model = () => $('f_model').value || '사용자 장비';
+
+/* ===== 저장 / 불러오기 ===== */
+const FIELDS = ['f_site','f_co','f_type','f_mgr','f_period','f_place','f_route','f_road','f_lead','f_sig','f_rig','f_rig2',
+  'f_cargo','f_dim','f_w','f_wa','f_bind','f_cog','f_eq','f_model','f_insp','f_ins','f_op','f_out','f_boom','f_rad','f_ratio',
+  's_type','s_w','s_mode','s_ang','s_qty','s_sf','w_core','w_d','w_ang','w_term','w_qty','w_sf','h_size','h_qty','h_sf'];
+async function save(){
+  const o = {}; FIELDS.forEach(f => o[f] = $(f).value);
+  const key = 'plan:' + Date.now();
+  const name = ($('f_place').value || $('f_cargo').value || '무제') + ' · ' + new Date().toLocaleDateString('ko-KR');
+  try {
+    await window.storage.set(key, JSON.stringify({ name, data: o }));
+    await loadList(); $('chartMsg').textContent = '';
+    $('btnSave').textContent = '저장 완료'; setTimeout(() => $('btnSave').textContent = '입력 저장', 1600);
+  } catch (e) { $('btnSave').textContent = '저장 실패'; setTimeout(() => $('btnSave').textContent = '입력 저장', 1600); }
+}
+async function loadList(){
+  try {
+    const r = await window.storage.list('plan:');
+    const keys = (r && r.keys) ? r.keys.slice().reverse() : [];
+    const opts = await Promise.all(keys.map(async k => {
+      try { const g = await window.storage.get(k); return `<option value="${k}">${JSON.parse(g.value).name}</option>`; } catch { return ''; }
+    }));
+    $('loadSel').innerHTML = '<option value="">저장 이력 불러오기</option>' + opts.join('');
+  } catch (e) {}
+}
+async function loadPlan(k){
+  if (!k) return;
+  try {
+    const g = await window.storage.get(k);
+    const o = JSON.parse(g.value).data;
+    fillSlingWidths(); coreWidths();
+    FIELDS.forEach(f => { if (o[f] !== undefined) $(f).value = o[f]; });
+    run();
+  } catch (e) {}
+}
+
+/* ===== 이벤트 ===== */
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+  t.classList.add('on');
+  $('pane-sling').style.display = t.dataset.t === 'sling' ? '' : 'none';
+  $('pane-wire').style.display = t.dataset.t === 'wire' ? '' : 'none';
+  run();
+});
+$('s_type').addEventListener('change', () => { fillSlingWidths(); run(); });
+$('w_core').addEventListener('change', () => { coreWidths(); run(); });
+$('btnChart').onclick = applyChart;
+$('btnChartReset').onclick = () => { chart = CRANE; fillCraneSelects(); $('chartMsg').textContent = '현재 적용 : LIEBHERR LTM 1095-5.1'; run(); };
+$('btnAI').onclick = runAI;
+$('btnPrint').onclick = () => { buildDoc(); window.print(); };
+$('btnSave').onclick = save;
+$('loadSel').onchange = e => loadPlan(e.target.value);
+document.addEventListener('input', e => { if (e.target.matches('input,select')) run(); });
+document.addEventListener('change', e => { if (e.target.matches('select')) run(); });
+
+initSelects();
+run();
+loadList();
+</script>
+</body>
+</html>
