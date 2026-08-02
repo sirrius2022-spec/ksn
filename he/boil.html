@@ -1,1 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>시험 성적서 (결과 페이지 샘플)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6; /* 문서 밖 배경은 회색으로 하여 문서가 돋보이게 함 */
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 실제 A4 용지/증명서 같은 느낌을 주는 스타일 */
+        .paper-container {
+            background-color: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-top: 8px solid #2563eb; /* 상단 파란색 포인트 줄 */
+        }
+
+        /* 테이블 기본 스타일링 */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .info-table th, .info-table td {
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+        .info-table th {
+            background-color: #f8fafc;
+            color: #334155;
+            font-weight: 600;
+            text-align: left;
+            width: 30%;
+        }
+        .info-table td {
+            color: #1e293b;
+        }
+
+        /* 도장(직인) CSS 애니메이션 및 스타일 */
+        .stamp-box {
+            position: relative;
+            display: inline-block;
+            margin-top: 2rem;
+            float: right;
+            text-align: center;
+        }
+        .stamp-mark {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 70px;
+            border: 3px solid #dc2626; /* 빨간색 테두리 */
+            border-radius: 50%;
+            color: #dc2626;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            transform: rotate(-15deg) scale(2); /* 초기 크기 확대 상태 */
+            position: absolute;
+            right: -10px;
+            bottom: -15px;
+            opacity: 0;
+            /* 도장이 찍히는 듯한 애니메이션 */
+            animation: stampIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards;
+        }
+
+        @keyframes stampIn {
+            0% { transform: rotate(-15deg) scale(2); opacity: 0; }
+            50% { transform: rotate(-15deg) scale(0.9); opacity: 1; }
+            100% { transform: rotate(-15deg) scale(1); opacity: 0.85; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex justify-center items-center min-h-screen">
+
+    <main class="paper-container w-full max-w-2xl mx-auto p-6 md:p-10 rounded-sm relative overflow-hidden">
+        
+        <!-- 상단 헤더 영역 -->
+        <header class="text-center border-b-2 border-gray-200 pb-6 mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">기기 점검 및 시험 성적서</h1>
+            <p class="text-gray-500 text-sm">발급번호: <span class="font-mono bg-gray-100 px-2 py-1 rounded">2026-B-00124</span></p>
+        </header>
+
+        <section class="mb-8">
+            <h2 class="text-lg font-bold text-blue-800 mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                1. 설비 기본 정보
+            </h2>
+            <table class="info-table">
+                <tbody>
+                    <tr>
+                        <th>설비명</th>
+                        <td class="font-bold text-blue-700">고효율 산업용 보일러 A형</td>
+                    </tr>
+                    <tr>
+                        <th>관리 번호</th>
+                        <td class="font-mono">BL-2023-A01</td>
+                    </tr>
+                    <tr>
+                        <th>설치 위치</th>
+                        <td>지하 2층 기계실 제1구역</td>
+                    </tr>
+                    <tr>
+                        <th>최근 점검일</th>
+                        <td>2026년 7월 15일</td>
+                    </tr>
+                    <tr>
+                        <th>차기 점검일</th>
+                        <td class="text-red-600 font-medium">2027년 1월 15일</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold text-blue-800 mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                2. 세부 점검 결과
+            </h2>
+            <table class="info-table">
+                <tbody>
+                    <tr>
+                        <th>연소실 상태 및 내화재</th>
+                        <td class="text-green-600 font-bold">양호 (이상 없음)</td>
+                    </tr>
+                    <tr>
+                        <th>안전 밸브 작동 테스트</th>
+                        <td class="text-green-600 font-bold">정상 작동 확인</td>
+                    </tr>
+                    <tr>
+                        <th>배기가스 성분 분석</th>
+                        <td class="text-green-600 font-bold">기준치 이내 (CO: 10ppm)</td>
+                    </tr>
+                    <tr>
+                        <th>순환 펌프 및 배관 누수</th>
+                        <td class="text-green-600 font-bold">양호 (누수 없음)</td>
+                    </tr>
+                    <tr class="bg-blue-50">
+                        <th class="text-lg py-4">종합 판정</th>
+                        <td class="text-2xl text-blue-700 font-extrabold text-center tracking-widest py-4">
+                            합 격
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 안내 문구 -->
+        <p class="text-xs text-gray-500 mt-4 text-justify">
+            ※ 본 성적서는 [시설물 안전관리에 관한 특별법] 제 00조에 의거하여 실시된 정기 점검 결과를 바탕으로 발급되었습니다. 차기 점검일까지 기기 주위에 가연성 물질을 적치하지 마시고 일상 점검을 생활화해 주시기 바랍니다.
+        </p>
+
+        <footer class="mt-8 pt-4 border-t border-gray-200">
+            <div class="stamp-box">
+                <p class="text-gray-800 font-bold text-lg mb-1">한국스마트시설안전협회</p>
+                <p class="text-gray-500 text-sm">점검 책임자 : 수석검사관 김 안 전 (인)</p>
+                <!-- CSS로 구현된 쾅! 찍히는 도장 -->
+                <div class="stamp-mark">합격</div>
+            </div>
+            <div class="clear-both"></div>
+        </footer>
+
+    </main>
+
+</body>
+</html>
