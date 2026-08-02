@@ -1,1 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI 스마트 시설 관리 (보일러)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
 
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 70px; /* 하단 네비게이션 바 공간 확보 */
+        }
+
+        /* 탭 컨텐츠 전환 애니메이션 */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 증명서 스타일 (기존 스타일 유지) */
+        .paper-container {
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 6px solid #2563eb;
+        }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table th, .info-table td { border: 1px solid #d1d5db; padding: 0.6rem; font-size: 0.85rem; }
+        .info-table th { background-color: #f8fafc; color: #334155; font-weight: 600; text-align: left; width: 35%; }
+
+        /* 도장 애니메이션 */
+        .stamp-box { position: relative; display: inline-block; margin-top: 1.5rem; float: right; text-align: center; }
+        .stamp-mark {
+            display: flex; align-items: center; justify-content: center;
+            width: 60px; height: 60px; border: 3px solid #dc2626; border-radius: 50%;
+            color: #dc2626; font-weight: 900; font-size: 1rem; letter-spacing: 1px;
+            transform: rotate(-15deg) scale(2); position: absolute; right: -5px; bottom: -10px; opacity: 0;
+        }
+        .tab-content.active .stamp-mark {
+            animation: stampIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.3s forwards;
+        }
+        @keyframes stampIn {
+            0% { transform: rotate(-15deg) scale(2); opacity: 0; }
+            50% { transform: rotate(-15deg) scale(0.9); opacity: 1; }
+            100% { transform: rotate(-15deg) scale(1); opacity: 0.85; }
+        }
+
+        /* 점검 이력 타임라인 스타일 */
+        .timeline { border-left: 2px solid #3b82f6; margin-left: 1rem; padding-left: 1.5rem; position: relative; }
+        .timeline-item { margin-bottom: 1.5rem; position: relative; }
+        .timeline-dot {
+            width: 14px; height: 14px; background-color: #3b82f6; border-radius: 50%;
+            position: absolute; left: -1.9rem; top: 0.2rem; border: 3px solid #eff6ff;
+        }
+
+        /* 하단 네비게이션 바 */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background-color: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-around; z-index: 50;
+        }
+        .nav-item {
+            flex: 1; text-align: center; padding: 0.75rem 0;
+            color: #94a3b8; font-size: 0.75rem; font-weight: 500; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; transition: all 0.2s;
+        }
+        .nav-item.active { color: #2563eb; }
+        .nav-item svg { width: 24px; height: 24px; margin-bottom: 2px; }
+        
+        /* AI 스코어 게이지 바 (CSS 구현) */
+        .score-circle {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: conic-gradient(#22c55e 92%, #e2e8f0 0); /* 92% 점수 */
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .score-circle-inner {
+            width: 100px; height: 100px; background-color: white; border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 상단 헤더 -->
+    <header class="bg-blue-700 text-white p-4 shadow-md sticky top-0 z-40">
+        <div class="max-w-2xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-lg font-bold">고효율 산업용 보일러 A형</h1>
+                <p class="text-xs text-blue-200">ID: BL-2023-A01 | 지하 2층 기계실</p>
+            </div>
+            <div class="bg-blue-600 px-2 py-1 rounded text-xs border border-blue-500">
+                정상 가동중
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-2xl mx-auto p-4">
+
+        <!-- [탭 1] 시험 성적서 -->
+        <section id="tab-certificate" class="tab-content active">
+            <div class="paper-container p-5 md:p-8 rounded-sm relative">
+                <header class="text-center border-b-2 border-gray-200 pb-4 mb-5">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-1">기기 점검 및 시험 성적서</h2>
+                    <p class="text-gray-500 text-xs">발급번호: <span class="font-mono bg-gray-100 px-1 rounded">2026-B-00124</span></p>
+                </header>
+
+                <h3 class="text-sm font-bold text-blue-800 mb-2 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    설비 기본 정보
+                </h3>
+                <table class="info-table mb-6">
+                    <tbody>
+                        <tr><th>최근 점검일</th><td>2026년 7월 15일</td></tr>
+                        <tr><th>차기 점검일</th><td class="text-red-600 font-medium">2027년 1월 15일</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 class="text-sm font-bold text-blue-800 mb-2 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    세부 점검 결과
+                </h3>
+                <table class="info-table mb-4">
+                    <tbody>
+                        <tr><th>연소실 상태</th><td class="text-green-600 font-bold">양호</td></tr>
+                        <tr><th>안전 밸브 작동</th><td class="text-green-600 font-bold">정상</td></tr>
+                        <tr><th>배기가스 성분</th><td class="text-green-600 font-bold">기준치 이내</td></tr>
+                        <tr class="bg-blue-50">
+                            <th class="py-3">종합 판정</th>
+                            <td class="text-xl text-blue-700 font-extrabold text-center tracking-widest py-3">합 격</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <footer class="mt-6 pt-3 border-t border-gray-200">
+                    <div class="stamp-box">
+                        <p class="text-gray-800 font-bold text-sm mb-1">한국스마트시설안전협회</p>
+                        <p class="text-gray-500" style="font-size: 0.7rem;">책임자 : 김 안 전 (인)</p>
+                        <div class="stamp-mark">합격</div>
+                    </div>
+                    <div class="clear-both"></div>
+                </footer>
+            </div>
+        </section>
+
+        <!-- [탭 2] 점검 이력 -->
+        <section id="tab-history" class="tab-content">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 px-2">상세 점검 및 정비 이력</h2>
+            
+            <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+                <div class="timeline">
+                    
+                    <!-- 이력 1 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <p class="text-xs text-gray-400 font-mono mb-1">2026-07-15</p>
+                        <h4 class="text-md font-bold text-gray-800">정기 안전 검사 (상반기)</h4>
+                        <p class="text-sm text-gray-600 mt-1">종합 판정: <span class="text-green-600 font-bold">합격</span></p>
+                        <p class="text-xs text-gray-500 mt-1">담당자: 외부기관 (김안전 검사관)</p>
+                    </div>
+
+                    <!-- 이력 2 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background-color: #f59e0b; border-color: #fef3c7;"></div>
+                        <p class="text-xs text-gray-400 font-mono mb-1">2026-03-10</p>
+                        <h4 class="text-md font-bold text-gray-800">자체 보수 (버너 교체)</h4>
+                        <p class="text-sm text-gray-600 mt-1">이상 소음 발생으로 인한 버너 노즐 교체 및 연소실 클리닝 진행.</p>
+                        <p class="text-xs text-gray-500 mt-1">담당자: 시설관리팀 (이수리 주임)</p>
+                    </div>
+
+                    <!-- 이력 3 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <p class="text-xs text-gray-400 font-mono mb-1">2025-12-20</p>
+                        <h4 class="text-md font-bold text-gray-800">정기 안전 검사 (하반기)</h4>
+                        <p class="text-sm text-gray-600 mt-1">종합 판정: <span class="text-green-600 font-bold">합격</span></p>
+                        <p class="text-xs text-gray-500 mt-1">담당자: 외부기관 (박검사 검사관)</p>
+                    </div>
+                    
+                    <!-- 이력 4 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <p class="text-xs text-gray-400 font-mono mb-1">2025-06-05</p>
+                        <h4 class="text-md font-bold text-gray-800">초기 설치 및 시운전</h4>
+                        <p class="text-sm text-gray-600 mt-1">신규 보일러 도입 및 배관 연결 완료. 시운전 정상.</p>
+                        <p class="text-xs text-gray-500 mt-1">담당자: 시공사 (정도건설)</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- [탭 3] AI 진단 -->
+        <section id="tab-ai" class="tab-content">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 px-2">AI 실시간 안전 진단</h2>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center mb-4">
+                <p class="text-sm text-gray-500 mb-4">현재 설비 안전 스코어</p>
+                <div class="score-circle mb-4">
+                    <div class="score-circle-inner">
+                        <span class="text-3xl font-black text-green-500">92</span>
+                        <span class="text-xs text-gray-400">/100</span>
+                    </div>
+                </div>
+                <h3 class="text-lg font-bold text-green-600">안정적 (안전)</h3>
+                <p class="text-xs text-center text-gray-500 mt-2">지난 달 대비 <span class="text-blue-500 font-bold">↑ 2점</span> 상승<br>최근 보수(3월)로 연소 효율이 개선되었습니다.</p>
+            </div>
+
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+                <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    AI 예측 분석
+                </h4>
+                <ul class="text-sm text-blue-900 space-y-2">
+                    <li class="flex justify-between">
+                        <span>예상 고장 확률(30일)</span>
+                        <span class="font-bold text-green-600">2.4%</span>
+                    </li>
+                    <li class="flex justify-between">
+                        <span>부품(패킹) 교체 권장일</span>
+                        <span class="font-bold">2026.11.20</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 하단 네비게이션 바 -->
+    <nav class="bottom-nav pb-safe">
+        <div class="nav-item active" onclick="switchTab('certificate', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            성적서
+        </div>
+        <div class="nav-item" onclick="switchTab('history', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            점검이력
+        </div>
+        <div class="nav-item" onclick="switchTab('ai', this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            AI 진단
+        </div>
+    </nav>
+
+    <script>
+        // 탭 전환 기능 담당 스크립트
+        function switchTab(tabId, clickedElement) {
+            // 1. 모든 탭 컨텐츠 숨기기
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 2. 모든 네비게이션 버튼 색상 초기화
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // 3. 선택된 탭 컨텐츠 보여주기
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            // 4. 클릭된 버튼 색상 활성화
+            clickedElement.classList.add('active');
+            
+            // 스마트폰 환경을 고려하여 탭 변경 시 화면 맨 위로 스크롤
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
