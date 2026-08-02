@@ -1,1 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>스마트 TBM 에이전트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        safety: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
 
+        .tab-content {
+            display: none;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* 서명 캔버스 */
+        #signature-pad {
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            width: 100%;
+            height: 150px;
+            background-color: #f8fafc;
+            touch-action: none; /* 모바일 스크롤 방지 */
+        }
+
+        /* 커스텀 체크박스 (안전장구용) */
+        .ppe-checkbox:checked + div {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            color: #15803d;
+        }
+        .ppe-checkbox:checked + div svg {
+            color: #16a34a;
+        }
+
+        /* 모바일 스크롤바 숨김 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* 토스트 알림 애니메이션 */
+        .toast-enter {
+            animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            100% { opacity: 1; transform: translate(-50%, 0); }
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden text-gray-800">
+
+    <header class="bg-safety-700 text-white shadow-md z-10 px-5 py-4 flex flex-col gap-1 relative shrink-0 rounded-b-2xl">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-lg font-bold tracking-tight">비대면 스마트 TBM</h1>
+                <p class="text-xs text-safety-100 mt-0.5" id="current-date">2026.08.02 (일) 오전 07:00</p>
+            </div>
+            <div class="flex items-center gap-1.5 bg-safety-600 px-3 py-1.5 rounded-full border border-safety-500 shadow-inner">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                <span class="text-xs font-semibold">화상회의 접속중</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto pb-24 pt-4 px-4 scroll-smooth" id="main-content">
+        
+        <!-- ==================== 탭 1: 대시보드 (스마트 TBM 안내) ==================== -->
+        <section id="tab-home" class="tab-content active">
+            <div class="max-w-md mx-auto space-y-4">
+                
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">오늘의 작업 개요</h2>
+                    <p class="text-sm text-gray-600 mb-4">현장: A동 신축 공사현장 3층 (밀폐공간)</p>
+                    
+                    <button onclick="switchTab('tbm')" class="w-full bg-safety-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:bg-safety-700 transition flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        TBM 5대 필수 항목 실시하기
+                    </button>
+                </div>
+
+                <div class="bg-blue-50 rounded-2xl p-5 border border-blue-100">
+                    <h3 class="text-sm font-bold text-blue-800 mb-3 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        스마트 TBM 운영 방식 (비대면)
+                    </h3>
+                    <ul class="text-xs text-blue-700 space-y-2">
+                        <li class="flex items-center gap-2"><span class="bg-blue-200 p-1 rounded"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></span> 실시 방법: Zoom/Teams 등 화상회의</li>
+                        <li class="flex items-center gap-2"><span class="bg-blue-200 p-1 rounded"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></span> 자료 공유: 화면 공유 및 링크 전송</li>
+                        <li class="flex items-center gap-2"><span class="bg-blue-200 p-1 rounded"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></span> 서명 방식: 전자 서명 (법적 효력 동일)</li>
+                        <li class="flex items-center gap-2"><span class="bg-blue-200 p-1 rounded"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg></span> 이력 보존: 클라우드 자동 저장 (3년 의무)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-tbm" class="tab-content">
+            <div class="max-w-md mx-auto">
+                <div class="flex items-center justify-between mb-4 px-1">
+                    <h2 class="text-xl font-bold text-gray-800">TBM 체크리스트</h2>
+                    <span class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-md font-medium">관리감독자용</span>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- 항목 1 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-safety-500">
+                        <h3 class="font-bold text-gray-800 mb-2 flex gap-2 items-center">
+                            <span class="bg-safety-100 text-safety-700 text-xs px-2 py-0.5 rounded font-black">01</span>
+                            당일 작업 내용 공유
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-2">작업 범위, 순서, 담당자 배정 및 변경 사항 고지</p>
+                        <textarea class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-safety-500" rows="2" placeholder="예: 3층 A구역 배관 용접 및 도장 작업 (담당: 홍길동 외 2명)"></textarea>
+                    </div>
+
+                    <!-- 항목 2 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-safety-500">
+                        <h3 class="font-bold text-gray-800 mb-2 flex gap-2 items-center">
+                            <span class="bg-safety-100 text-safety-700 text-xs px-2 py-0.5 rounded font-black">02</span>
+                            위험요인 공유 (최소 3가지)
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-3">근로자 직접 발표 및 토의 권장</p>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200"><input type="checkbox" class="accent-safety-500 w-4 h-4"> 용접 불티로 인한 화재 위험</label>
+                            <label class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200"><input type="checkbox" class="accent-safety-500 w-4 h-4"> 도장 작업 시 유해가스 질식 위험</label>
+                            <label class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200"><input type="checkbox" class="accent-safety-500 w-4 h-4"> 배관 자재 운반 중 협착 위험</label>
+                        </div>
+                    </div>
+
+                    <!-- 항목 3 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-safety-500">
+                        <h3 class="font-bold text-gray-800 mb-2 flex gap-2 items-center">
+                            <span class="bg-safety-100 text-safety-700 text-xs px-2 py-0.5 rounded font-black">03</span>
+                            안전조치 확인 (PPE)
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-3">개인보호구 착용 상태 및 방호설비 작동 확인</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- 체크박스를 커스텀 버튼 형태로 -->
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" class="sr-only ppe-checkbox">
+                                <div class="border border-gray-200 rounded-lg p-2 flex flex-col items-center justify-center gap-1 transition-colors text-gray-400 bg-gray-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01" /></svg>
+                                    <span class="text-xs font-medium">안전모</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" class="sr-only ppe-checkbox">
+                                <div class="border border-gray-200 rounded-lg p-2 flex flex-col items-center justify-center gap-1 transition-colors text-gray-400 bg-gray-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    <span class="text-xs font-medium">보안경/면면</span>
+                                </div>
+                            </label>
+                             <label class="relative cursor-pointer">
+                                <input type="checkbox" class="sr-only ppe-checkbox">
+                                <div class="border border-gray-200 rounded-lg p-2 flex flex-col items-center justify-center gap-1 transition-colors text-gray-400 bg-gray-50">
+                                    <!-- 마스크 아이콘 대용 -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <span class="text-xs font-medium">방독마스크</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="checkbox" class="sr-only ppe-checkbox">
+                                <div class="border border-gray-200 rounded-lg p-2 flex flex-col items-center justify-center gap-1 transition-colors text-gray-400 bg-gray-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>
+                                    <span class="text-xs font-medium">소화기 비치</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 항목 4 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-safety-500">
+                        <h3 class="font-bold text-gray-800 mb-2 flex gap-2 items-center">
+                            <span class="bg-safety-100 text-safety-700 text-xs px-2 py-0.5 rounded font-black">04</span>
+                            비상연락망 공유
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-2">응급상황 연락처, 대피경로, 담당자 확인</p>
+                        <div class="flex items-center justify-between bg-red-50 p-2 rounded border border-red-100">
+                            <span class="text-sm font-medium text-red-800">응급처치 담당: 김안전 반장</span>
+                            <a href="#" class="bg-red-500 text-white text-xs px-3 py-1 rounded-full shadow">010-1234-5678</a>
+                        </div>
+                    </div>
+
+                    <!-- 항목 5 (전자서명) -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-safety-500">
+                        <h3 class="font-bold text-gray-800 mb-2 flex justify-between items-center">
+                            <span class="flex gap-2 items-center">
+                                <span class="bg-safety-100 text-safety-700 text-xs px-2 py-0.5 rounded font-black">05</span>
+                                참여 확인 및 전자서명
+                            </span>
+                            <button type="button" onclick="clearSignature()" class="text-xs text-gray-400 hover:text-gray-600 underline">다시 쓰기</button>
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-3">비대면 화상회의 접속 로그 기록과 함께 보존됩니다.</p>
+                        
+                        <!-- 캔버스 영역 -->
+                        <canvas id="signature-pad"></canvas>
+                    </div>
+
+                    <!-- 제출 버튼 -->
+                    <button onclick="submitTBM()" class="w-full mt-4 bg-gray-800 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        클라우드 자동 저장 및 서명 완료
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-history" class="tab-content">
+            <div class="max-w-md mx-auto">
+                <div class="flex justify-between items-end mb-4 px-1">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">TBM 이력 보존</h2>
+                        <p class="text-xs text-gray-500 mt-1">법정 보존 기간: 3년 이상 (고용부 행정해석)</p>
+                    </div>
+                    <span class="text-xs text-safety-600 bg-safety-50 border border-safety-200 px-2 py-1 rounded font-bold flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        안전 보관중
+                    </span>
+                </div>
+
+                <div class="space-y-3">
+                    <!-- 더미 데이터 리스트 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-start justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-1.5 rounded">비대면</span>
+                                <span class="text-sm font-bold text-gray-800">2026.08.01 (토)</span>
+                            </div>
+                            <p class="text-xs text-gray-600">A동 2층 시스템 비계 설치 (참석: 5명)</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded mb-1">전자서명 완료</span>
+                            <a href="#" class="block text-xs text-safety-600 underline">상세보기</a>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-start justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-bold text-gray-500 border border-gray-200 px-1.5 rounded">대면</span>
+                                <span class="text-sm font-bold text-gray-800">2026.07.31 (금)</span>
+                            </div>
+                            <p class="text-xs text-gray-600">B구역 굴착 공사 (참석: 8명)</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded mb-1">종이문서 스캔</span>
+                            <a href="#" class="block text-xs text-safety-600 underline">상세보기</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full z-20 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <ul class="flex justify-around items-center h-16">
+            <li class="flex-1">
+                <button onclick="switchTab('home')" id="nav-home" class="w-full flex flex-col items-center justify-center gap-1 text-safety-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span class="text-[10px] font-bold">홈</span>
+                </button>
+            </li>
+            <li class="flex-1">
+                <button onclick="switchTab('tbm')" id="nav-tbm" class="w-full flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    <span class="text-[10px] font-bold">TBM 실시</span>
+                </button>
+            </li>
+            <li class="flex-1">
+                <button onclick="switchTab('history')" id="nav-history" class="w-full flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                    <span class="text-[10px] font-bold">이력 보존</span>
+                </button>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- iOS safe area -->
+    <style>
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        }
+    </style>
+
+    <script>
+        // 1. 탭 전환 기능
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-safety-600');
+                btn.classList.add('text-gray-400');
+            });
+            const activeNavBtn = document.getElementById(`nav-${tabName}`);
+            activeNavBtn.classList.remove('text-gray-400');
+            activeNavBtn.classList.add('text-safety-600');
+
+            document.getElementById('main-content').scrollTop = 0;
+            
+            // TBM 탭 진입 시 캔버스 리사이즈 처리 (숨겨져 있을 때 크기를 못 잡는 문제 방지)
+            if(tabName === 'tbm') {
+                resizeCanvas();
+            }
+        }
+
+        // 2. 캔버스 전자서명 로직
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        // 디바이스 픽셀 비율에 맞게 캔버스 크기 조정하여 선명하게 유지
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            // 패딩 32px(p-4 * 2) 고려
+            canvas.width = rect.width - 32; 
+            // 높이는 css 설정값(150) 유지
+            
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#1e293b'; // slate-800
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); // 스크롤 방지
+            
+            const rect = canvas.getBoundingClientRect();
+            let x, y;
+            
+            if(e.type.includes('touch')) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        // 마우스 이벤트
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        // 터치 이벤트 (모바일)
+        canvas.addEventListener('touchstart', startDrawing, {passive: false});
+        canvas.addEventListener('touchmove', draw, {passive: false});
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 3. 제출 및 토스트 애니메이션 로직
+        function submitTBM() {
+            // 커스텀 토스트 메시지 생성
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 z-50 text-sm font-medium toast-enter';
+            toast.innerHTML = `
+                <svg class="w-5 h-5 text-safety-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                클라우드에 안전하게 저장되었습니다.
+            `;
+            document.body.appendChild(toast);
+
+            // 폼 초기화 (간단한 시뮬레이션)
+            setTimeout(() => {
+                clearSignature();
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+                
+                // 3초 후 토스트 제거 및 이력 탭으로 이동
+                toast.remove();
+                switchTab('history');
+            }, 2000);
+        }
+
+        // 초기화
+        window.onload = () => {
+            resizeCanvas();
+        }
+    </script>
+</body>
+</html>
