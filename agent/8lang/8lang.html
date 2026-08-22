@@ -399,7 +399,8 @@ async function copyText(text) {
   }
 }
 
-async function callGemini(prompt, maxTokens) {
+async function callGemini(prompt, maxTokens, retriesLeft) {
+  if (retriesLeft === undefined) retriesLeft = 3;
   const apiKey = apiKeyEl.value.trim();
   if (!apiKey) {
     throw new Error("NO_API_KEY");
@@ -418,6 +419,11 @@ async function callGemini(prompt, maxTokens) {
     })
   });
   if (!response.ok) {
+    if (response.status === 429 && retriesLeft > 0) {
+      const waitMs = (4 - retriesLeft) * 4000 + 3000; // 3s, 7s, 11s
+      await sleep(waitMs);
+      return callGemini(prompt, maxTokens, retriesLeft - 1);
+    }
     let detail = "";
     try {
       const errBody = await response.json();
@@ -432,6 +438,10 @@ async function callGemini(prompt, maxTokens) {
     throw new Error("EMPTY_RESPONSE");
   }
   return text;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function detectLanguage(lyrics) {
@@ -625,6 +635,7 @@ translateBtn.onclick = async () => {
       translations[code] = { text: lyrics };
     } else {
       try {
+        await sleep(1500); // 구글 무료 API 분당 요청 제한(429) 방지용 대기
         const text = await translateOne(lyrics, nameEn);
         translations[code] = { text };
       } catch (e) {
