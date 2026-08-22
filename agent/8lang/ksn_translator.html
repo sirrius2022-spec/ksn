@@ -80,7 +80,7 @@
   .model-fetch-btn { padding: 8px 14px; font-size: 12px; white-space: nowrap; }
   .status-msg { font-size: 12px; font-weight: 600; }
 
-  .error { font-size: 13px; color: #c0392b; margin-top: 10px; display: none; }
+  .error { font-size: 13px; color: #c0392b; margin-top: 10px; display: none; padding: 10px; background: #fdf2f2; border: 1px solid #f2dede; border-radius: 6px; }
   .detected { font-size: 12px; color: var(--text-muted); margin-top: 10px; display: none; }
   .progress-wrap { display: none; margin-top: 16px; }
   .progress-bar-bg { width: 100%; height: 8px; background: #e8ebef; border-radius: 4px; overflow: hidden; }
@@ -99,13 +99,6 @@
   .top-actions { display: none; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
   .empty-hint { font-size: 13px; color: var(--text-muted); text-align: center; padding: 28px 0; }
 </style>
-<script type="importmap">
-  {
-    "imports": {
-      "@google/generative-ai": "https://esm.run/@google/generative-ai"
-    }
-  }
-</script>
 </head>
 <body>
 <div class="wrap">
@@ -150,9 +143,7 @@
   </div>
 </div>
 
-<script type="module">
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
+<script>
 const LANGUAGES = [
   ["한국어", "Korean", "ko"], ["영어", "English", "en"], ["중국어", "Chinese", "zh"],
   ["일본어", "Japanese", "ja"], ["프랑스어", "French", "fr"], ["베트남어", "Vietnamese", "vi"],
@@ -182,7 +173,7 @@ if (savedKey) apiKeyEl.value = savedKey;
 
 apiKeyEl.addEventListener("input", (e) => localStorage.setItem("gemini_api_key", e.target.value.trim()));
 
-// 💡 [핵심] API 키로 사용 가능한 모델 실시간 검증 및 불러오기
+// API 키로 사용 가능한 모델 실시간 검증 (순수 Fetch 유지)
 loadModelsBtn.onclick = async () => {
   const apiKey = apiKeyEl.value.trim();
   if (!apiKey) {
@@ -203,7 +194,6 @@ loadModelsBtn.onclick = async () => {
     }
     
     const data = await response.json();
-    // 번역(텍스트 생성)이 가능한 모델만 필터링
     const validModels = data.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
     
     modelSelectEl.innerHTML = "";
@@ -215,9 +205,8 @@ loadModelsBtn.onclick = async () => {
       modelSelectEl.appendChild(opt);
     });
 
-    // gemini-1.5-flash가 있으면 기본 선택
-    if (validModels.some(m => m.name.includes("gemini-1.5-flash"))) {
-      modelSelectEl.value = "gemini-1.5-flash";
+    if (validModels.some(m => m.name.includes("gemini-3.1-pro-preview"))) {
+      modelSelectEl.value = "gemini-3.1-pro-preview";
     }
 
     modelSelectEl.disabled = false;
@@ -250,17 +239,29 @@ let detectedCode = null;
 function showError(msg) { errorMsg.textContent = msg; errorMsg.style.display = "block"; }
 function clearError() { errorMsg.style.display = "none"; errorMsg.textContent = ""; }
 
-// 공식 SDK 기반 번역 요청
+// 번역 요청 함수: 외부 라이브러리(SDK) 제거, 순수 Fetch API 방식으로 회귀 (가장 안정적임)
 async function callGemini(prompt, apiKey, modelName) {
-  try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: modelName });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
-  } catch (error) {
-    throw new Error(`${error.message}`);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+  
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.2 }
+    })
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`API 오류: ${response.status} - ${errorData.error?.message || '알 수 없는 오류'}`);
   }
+  
+  const data = await response.json();
+  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+    return data.candidates[0].content.parts[0].text.trim();
+  }
+  throw new Error("유효한 응답을 받지 못했습니다.");
 }
 
 async function detectLanguage(lyrics, apiKey, modelName) {
@@ -340,12 +341,13 @@ clearBtn.onclick = () => {
   detectedMsg.style.display = "none"; progressWrap.style.display = "none"; renderResults();
 };
 
+// 메인 번역 실행 로직 (try-catch-finally로 무한 로딩 원천 차단)
 translateBtn.onclick = async () => {
   if (isRunning) return;
   const apiKey = apiKeyEl.value.trim();
   const modelName = modelSelectEl.value;
   
-  if (!apiKey || modelSelectEl.disabled) {
+  if (!apiKey || modelSelectEl.disabled || modelName.includes("불러오기 실패") || modelName.includes("먼저 불러와주세요")) {
     showError("API 키를 입력하고 '사용 가능한 모델 불러오기' 버튼을 먼저 눌러주세요.");
     return;
   }
@@ -353,31 +355,51 @@ translateBtn.onclick = async () => {
   const lyrics = lyricsEl.value.trim();
   if (!lyrics) { showError("가사를 먼저 입력해 주세요."); lyricsEl.focus(); return; }
 
-  isRunning = true; translateBtn.disabled = true; translateBtn.textContent = "번역 준비 중...";
-  clearError(); translations = {}; detectedCode = null; renderResults();
+  isRunning = true; 
+  translateBtn.disabled = true; 
+  translateBtn.textContent = "번역 준비 중...";
+  clearError(); 
+  translations = {}; 
+  detectedCode = null; 
+  renderResults();
 
-  progressWrap.style.display = "block"; progressFill.style.width = "0%"; progressLabel.textContent = "0 / 8 언어 완료";
+  try {
+    progressWrap.style.display = "block"; 
+    progressFill.style.width = "0%"; 
+    progressLabel.textContent = "0 / 8 언어 완료";
 
-  detectedCode = await detectLanguage(lyrics, apiKey, modelName);
-  const detectedEntry = LANGUAGES.find(l => l[2] === detectedCode);
-  detectedMsg.textContent = detectedEntry ? `💡 감지된 원곡 언어: ${detectedEntry[0]}` : "💡 원곡 언어를 자동 감지하지 못해 8개 언어로 모두 번역을 진행합니다.";
-  detectedMsg.style.display = "block";
+    detectedCode = await detectLanguage(lyrics, apiKey, modelName);
+    const detectedEntry = LANGUAGES.find(l => l[2] === detectedCode);
+    detectedMsg.textContent = detectedEntry ? `💡 감지된 원곡 언어: ${detectedEntry[0]}` : "💡 원곡 언어를 자동 감지하지 못해 8개 언어로 모두 번역을 진행합니다.";
+    detectedMsg.style.display = "block";
 
-  let done = 0;
-  for (const [nameKo, nameEn, code] of LANGUAGES) {
-    translateBtn.textContent = `${nameKo} 번역 중...`;
-    if (code === detectedCode) { translations[code] = { text: lyrics }; } 
-    else {
-      try {
-        const text = await translateOne(lyrics, nameEn, apiKey, modelName);
-        translations[code] = { text };
-      } catch (e) { translations[code] = { error: true, errorMsg: e.message }; }
-      await new Promise(resolve => setTimeout(resolve, 1500));
+    let done = 0;
+    for (const [nameKo, nameEn, code] of LANGUAGES) {
+      translateBtn.textContent = `${nameKo} 번역 중...`;
+      if (code === detectedCode) { 
+        translations[code] = { text: lyrics }; 
+      } else {
+        try {
+          const text = await translateOne(lyrics, nameEn, apiKey, modelName);
+          translations[code] = { text };
+        } catch (e) { 
+          translations[code] = { error: true, errorMsg: e.message }; 
+        }
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Rate Limit 방지 딜레이
+      }
+      done++; 
+      progressFill.style.width = Math.round((done / 8) * 100) + "%"; 
+      progressLabel.textContent = `${done} / 8 언어 완료`;
+      renderResults();
     }
-    done++; progressFill.style.width = Math.round((done / 8) * 100) + "%"; progressLabel.textContent = `${done} / 8 언어 완료`;
-    renderResults();
+  } catch (err) {
+    showError(`진행 중 치명적인 오류가 발생했습니다: ${err.message}`);
+  } finally {
+    // 성공하든 에러가 나든 무조건 버튼 상태를 원상 복구시킴
+    isRunning = false; 
+    translateBtn.disabled = false; 
+    translateBtn.textContent = "8개국어로 번역하기";
   }
-  isRunning = false; translateBtn.disabled = false; translateBtn.textContent = "8개국어로 번역하기";
 };
 </script>
 </body>
