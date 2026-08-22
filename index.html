@@ -32,6 +32,7 @@
     font-size: 13px;
     color: var(--text-muted);
     margin: 0 0 24px;
+    line-height: 1.5;
   }
   .card {
     background: var(--card);
@@ -48,10 +49,8 @@
     margin-bottom: 8px;
     color: var(--text);
   }
-  textarea {
+  textarea, input[type="password"] {
     width: 100%;
-    min-height: 180px;
-    resize: vertical;
     font-size: 14px;
     line-height: 1.6;
     padding: 12px;
@@ -59,8 +58,33 @@
     border-radius: 8px;
     font-family: inherit;
     background: #fafbfc;
+    transition: all 0.2s;
   }
-  textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  input[type="password"] {
+    margin-bottom: 6px;
+  }
+  textarea {
+    min-height: 180px;
+    resize: vertical;
+  }
+  textarea:focus, input[type="password"]:focus { 
+    outline: 2px solid var(--accent); 
+    outline-offset: -1px; 
+    background: #fff;
+  }
+  .api-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .api-hint a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .api-hint a:hover {
+    text-decoration: underline;
+  }
   .row {
     display: flex;
     gap: 12px;
@@ -76,7 +100,7 @@
     border-radius: 8px;
     border: none;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    transition: all 0.2s;
   }
   .btn-primary {
     background: var(--accent);
@@ -96,22 +120,22 @@
   .error {
     font-size: 13px;
     color: #c0392b;
-    margin-top: 8px;
+    margin-top: 12px;
     display: none;
-    background: #fdf2f2;
+    background: #fdf0ed;
     padding: 10px;
     border-radius: 6px;
-    border: 1px solid #f9d3d3;
+    border: 1px solid #f5c6cb;
   }
   .detected {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--accent-dark);
-    font-weight: 600;
-    margin-top: 8px;
-    display: none;
     background: #eef4ff;
-    padding: 8px 12px;
+    padding: 10px;
     border-radius: 6px;
+    margin-top: 12px;
+    display: none;
+    font-weight: 500;
   }
   .progress-wrap {
     display: none;
@@ -140,9 +164,10 @@
   .lang-item {
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
     background: var(--card);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.01);
   }
   .lang-item-head {
     display: flex;
@@ -150,22 +175,22 @@
     align-items: center;
     margin-bottom: 10px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #f1f3f6;
+    border-bottom: 1px solid #f0f0f0;
   }
   .lang-name {
     font-size: 14px;
     font-weight: 700;
     color: var(--accent-dark);
-    letter-spacing: 0.02em;
   }
   .src-badge {
     font-size: 11px;
     font-weight: 600;
     color: #1d9e75;
-    margin-left: 6px;
-    background: #e8f5f0;
+    background: #e5f6ef;
     padding: 2px 6px;
     border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
   }
   .copy-btn {
     font-size: 12px;
@@ -177,7 +202,7 @@
     color: var(--text-muted);
   }
   .copy-btn:hover { background: #f2f4f7; color: var(--text); }
-  .copy-btn.done { color: #1d9e75; border-color: #1d9e75; background: #f0faf6; }
+  .copy-btn.done { color: #1d9e75; border-color: #1d9e75; background: #f0faf5; }
   .lang-text {
     font-size: 14px;
     line-height: 1.7;
@@ -198,10 +223,10 @@
     font-size: 13px;
     color: var(--text-muted);
     text-align: center;
-    padding: 40px 0;
-    background: var(--card);
-    border-radius: 10px;
+    padding: 30px 0;
+    background: #fff;
     border: 1px dashed var(--border);
+    border-radius: 8px;
   }
 </style>
 </head>
@@ -210,15 +235,26 @@
   <h1>가사 8개국어 번역기 (Gemini AI)</h1>
   <p class="subtitle">가사를 붙여넣으면 원곡 언어를 자동 감지하고, 한국어·영어·중국어·일본어·프랑스어·베트남어·태국어·암하라어로 번역합니다. 유튜브 자막/설명란에 바로 붙여넣기 좋게 구성됩니다.</p>
 
+  <!-- API 키 입력 영역 추가 -->
   <div class="card">
-    <label for="lyrics">원곡 가사 입력 (언어 자동 감지)</label>
-    <textarea id="lyrics" placeholder="번역할 가사를 여기에 붙여넣으세요..."></textarea>
+    <label for="apiKey">Gemini API 키 입력 (필수)</label>
+    <input type="password" id="apiKey" placeholder="AIzaSy... 로 시작하는 API 키를 입력하세요">
+    <div class="api-hint">
+      개인 홈페이지(Vercel 등)에서 실행하려면 무료 API 키가 필요합니다. 
+      <a href="https://aistudio.google.com/app/apikey" target="_blank">[여기서 발급받기]</a> (키는 브라우저에만 안전하게 저장됩니다.)
+    </div>
+  </div>
+
+  <div class="card">
+    <label for="lyrics">원곡 가사 (언어 자동 감지)</label>
+    <textarea id="lyrics" placeholder="번역할 가사를 여기에 붙여넣으세요."></textarea>
     <div class="row">
       <button class="btn-primary" id="translateBtn">8개국어로 번역하기</button>
       <button class="btn-secondary" id="clearBtn">초기화</button>
     </div>
     <div class="error" id="errorMsg"></div>
     <div class="detected" id="detectedMsg"></div>
+    
     <div class="progress-wrap" id="progressWrap">
       <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
       <div class="progress-label" id="progressLabel">0 / 8 완료</div>
@@ -236,7 +272,6 @@
 </div>
 
 <script>
-// 전체 번역 순서 및 언어 매핑 설정
 const LANGUAGES = [
   ["한국어", "Korean", "ko"],
   ["영어", "English", "en"],
@@ -248,7 +283,7 @@ const LANGUAGES = [
   ["암하라어", "Amharic", "am"]
 ];
 
-// DOM Elements
+const apiKeyEl = document.getElementById("apiKey");
 const lyricsEl = document.getElementById("lyrics");
 const translateBtn = document.getElementById("translateBtn");
 const clearBtn = document.getElementById("clearBtn");
@@ -266,6 +301,26 @@ const downloadAllBtn = document.getElementById("downloadAllBtn");
 let translations = {};
 let isRunning = false;
 let detectedCode = null;
+
+// 저장된 API 키 불러오기
+const savedKey = localStorage.getItem("gemini_api_key");
+if (savedKey) {
+  apiKeyEl.value = savedKey;
+}
+
+// API 키 입력 시 자동 저장
+apiKeyEl.addEventListener("change", () => {
+  localStorage.setItem("gemini_api_key", apiKeyEl.value.trim());
+});
+
+function showError(msg) {
+  errorMsg.innerHTML = msg;
+  errorMsg.style.display = "block";
+}
+function clearError() {
+  errorMsg.style.display = "none";
+  errorMsg.innerHTML = "";
+}
 
 async function copyText(text) {
   try {
@@ -293,20 +348,14 @@ async function copyText(text) {
   }
 }
 
-function showError(msg) {
-  errorMsg.textContent = msg;
-  errorMsg.style.display = "block";
-}
-
-function clearError() {
-  errorMsg.style.display = "none";
-  errorMsg.textContent = "";
-}
-
-// Gemini API 호출 함수 (지수 백오프 기반 재시도 로직 포함)
 async function callGemini(prompt, systemInstruction = null, retries = 3) {
-  const apiKey = ""; // 플랫폼에서 자동으로 API 키를 주입합니다.
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+  const apiKey = apiKeyEl.value.trim();
+  if (!apiKey) {
+    throw new Error("API_KEY_MISSING");
+  }
+
+  // 최신 안정 버전인 gemini-1.5-flash 모델을 명시적으로 사용
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   const payload = {
     contents: [{ parts: [{ text: prompt }] }]
@@ -318,7 +367,7 @@ async function callGemini(prompt, systemInstruction = null, retries = 3) {
     };
   }
 
-  let delay = 1000; // 초기 대기 시간 1초
+  let delay = 1500; // 초기 재시도 대기 시간 (1.5초)
   
   for (let i = 0; i < retries; i++) {
     try {
@@ -329,23 +378,33 @@ async function callGemini(prompt, systemInstruction = null, retries = 3) {
       });
 
       if (!response.ok) {
-        // HTTP 429 Too Many Requests (Rate Limit) 에러 시 재시도
+        const errData = await response.json().catch(() => ({}));
+        const errorMessage = errData.error?.message || response.statusText;
+        
+        // 429 Too Many Requests 발생 시 지수 백오프 적용하여 재시도
         if (response.status === 429 && i < retries - 1) {
+          console.warn(`Rate limit hit (429). Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2; // 지수 백오프 적용 (2초, 4초...)
+          delay *= 2; 
           continue;
         }
-        throw new Error(`API error: ${response.status}`);
+
+        if (response.status === 400) {
+          throw new Error("API_KEY_INVALID");
+        }
+        throw new Error(`API 오류: ${response.status} - ${errorMessage}`);
       }
 
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) {
-        throw new Error("Empty response from Gemini");
+        throw new Error("응답 결과가 비어있습니다.");
       }
       return text.trim();
     } catch (err) {
-      if (i === retries - 1) throw err;
+      if (i === retries - 1 || err.message === "API_KEY_MISSING" || err.message === "API_KEY_INVALID") {
+        throw err;
+      }
       await new Promise(resolve => setTimeout(resolve, delay));
       delay *= 2;
     }
@@ -356,47 +415,30 @@ async function detectLanguage(lyrics) {
   const systemInstruction = "You are a highly accurate language detection bot. You must answer with EXACTLY ONE of the following two-letter language codes and nothing else. Codes: ko, en, zh, ja, fr, vi, th, am. If it is none of these, return 'other'.";
   const prompt = `What is the primary language of the following song lyrics?\n\nLyrics:\n${lyrics}`;
   
-  try {
-    const raw = await callGemini(prompt, systemInstruction);
-    const code = raw.toLowerCase().replace(/[^a-z]/g, "");
-    const knownCodes = LANGUAGES.map(l => l[2]);
-    return knownCodes.includes(code) ? code : "other";
-  } catch (e) {
-    console.error("Language detection failed:", e);
-    return "other"; // 감지 실패 시 기본적으로 모든 언어로 번역 시도
-  }
+  const raw = await callGemini(prompt, systemInstruction);
+  const code = raw.toLowerCase().replace(/[^a-z]/g, "");
+  const knownCodes = LANGUAGES.map(l => l[2]);
+  return knownCodes.includes(code) ? code : "other";
 }
 
 async function translateOne(lyrics, langNameEn) {
-  const systemInstruction = `You are a professional and poetic song lyrics translator. Translate the user's lyrics into ${langNameEn}. 
-Crucial Rules:
-1. Preserve the line breaks, stanza spacing, and verse structure of the original EXACTLY.
-2. Ensure the translation flows naturally as a song in ${langNameEn}.
-3. Output ONLY the translated text. DO NOT add any title, explanation, quotation marks, or markdown formatting (like \`\`\`).`;
-  
-  const prompt = `Translate the following lyrics:\n\n${lyrics}`;
-  
-  // Gemini의 응답에서 마크다운 코드블럭이 포함될 경우를 대비해 정규식으로 정리합니다.
-  let result = await callGemini(prompt, systemInstruction);
-  result = result.replace(/^```[a-z]*\n/gmi, '').replace(/\n```$/g, '');
-  return result;
+  const systemInstruction = "You are a professional lyric translator. Translate the lyrics accurately into the target language while maintaining the original verse structure, stanzas, and line breaks. DO NOT include any titles, markdown formatting, or extra explanations. Output ONLY the translated lyrics.";
+  const prompt = `Translate the following song lyrics into ${langNameEn}.\n\nLyrics:\n${lyrics}`;
+  return await callGemini(prompt, systemInstruction);
 }
 
 function renderResults() {
   resultsEl.innerHTML = "";
   const keys = Object.keys(translations);
-  
   if (keys.length === 0) {
     resultsEl.appendChild(emptyHint);
     topActions.style.display = "none";
     return;
   }
-  
   topActions.style.display = "flex";
 
   for (const [nameKo, nameEn, code] of LANGUAGES) {
     if (!(code in translations)) continue;
-    
     const entry = translations[code];
     const item = document.createElement("div");
     item.className = "lang-item";
@@ -404,18 +446,14 @@ function renderResults() {
     const head = document.createElement("div");
     head.className = "lang-item-head";
 
-    const labelContainer = document.createElement("div");
-    
     const label = document.createElement("span");
     label.className = "lang-name";
     label.textContent = nameKo;
-    labelContainer.appendChild(label);
-    
     if (code === detectedCode) {
       const badge = document.createElement("span");
       badge.className = "src-badge";
       badge.textContent = "✓ 원곡 언어";
-      labelContainer.appendChild(badge);
+      label.appendChild(badge);
     }
 
     const copyBtn = document.createElement("button");
@@ -424,16 +462,16 @@ function renderResults() {
     copyBtn.onclick = async () => {
       const ok = await copyText(entry.text || "");
       if (ok) {
-        copyBtn.textContent = "복사됨";
+        copyBtn.textContent = "복사 완료!";
         copyBtn.classList.add("done");
-        setTimeout(() => { copyBtn.textContent = "복사"; copyBtn.classList.remove("done"); }, 1500);
+        setTimeout(() => { copyBtn.textContent = "복사"; copyBtn.classList.remove("done"); }, 2000);
       } else {
         copyBtn.textContent = "복사 실패";
-        setTimeout(() => { copyBtn.textContent = "복사"; }, 1500);
+        setTimeout(() => { copyBtn.textContent = "복사"; }, 2000);
       }
     };
 
-    head.appendChild(labelContainer);
+    head.appendChild(label);
     head.appendChild(copyBtn);
 
     const textDiv = document.createElement("div");
@@ -456,23 +494,24 @@ function buildFullText() {
   for (const [nameKo, nameEn, code] of LANGUAGES) {
     if (!(code in translations)) continue;
     const entry = translations[code];
-    out.push(`[${nameKo}]`);
+    out.push("=========================");
+    out.push("[" + nameKo + "]");
+    out.push("=========================");
     out.push(entry.error ? "(번역 실패)" : entry.text);
     out.push("");
-    out.push("============================");
     out.push("");
   }
-  return out.join("\n");
+  return out.join("\n").trim();
 }
 
 copyAllBtn.onclick = async () => {
   const ok = await copyText(buildFullText());
   if (ok) {
-    copyAllBtn.textContent = "✓ 전체 복사 완료";
+    copyAllBtn.textContent = "✅ 클립보드에 전체 복사되었습니다";
   } else {
-    copyAllBtn.textContent = "복사 실패";
+    copyAllBtn.textContent = "❌ 복사 실패";
   }
-  setTimeout(() => { copyAllBtn.textContent = "전체 결과 복사 (한→영→중→일→프→베→태→암하라 순)"; }, 2000);
+  setTimeout(() => { copyAllBtn.textContent = "전체 결과 복사 (한→영→중→일→프→베→태→암하라 순)"; }, 2500);
 };
 
 downloadAllBtn.onclick = () => {
@@ -480,7 +519,7 @@ downloadAllBtn.onclick = () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "translated_lyrics_8lang.txt";
+  a.download = "translated-lyrics.txt";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -503,38 +542,56 @@ translateBtn.onclick = async () => {
   clearError();
   detectedMsg.style.display = "none";
 
+  const apiKey = apiKeyEl.value.trim();
+  if (!apiKey) {
+    showError("⚠️ 상단에 Gemini API 키를 먼저 입력해 주세요.<br><a href='https://aistudio.google.com/app/apikey' target='_blank' style='color:#c0392b;'>[무료 API 키 발급받기]</a>");
+    apiKeyEl.focus();
+    return;
+  }
+
   const lyrics = lyricsEl.value.trim();
   if (!lyrics) {
-    showError("번역할 가사를 먼저 입력해 주세요.");
+    showError("번역할 가사를 입력해 주세요.");
+    lyricsEl.focus();
     return;
   }
 
   isRunning = true;
   translateBtn.disabled = true;
-  translateBtn.textContent = "AI 언어 감지 중...";
+  translateBtn.textContent = "AI가 언어를 감지하는 중...";
   translations = {};
   detectedCode = null;
   renderResults();
   
   progressWrap.style.display = "block";
   progressFill.style.width = "0%";
-  progressLabel.textContent = `0 / ${LANGUAGES.length} 완료`;
+  progressLabel.textContent = "0 / " + LANGUAGES.length + " 완료";
 
   try {
     detectedCode = await detectLanguage(lyrics);
   } catch (e) {
-    detectedCode = null;
+    isRunning = false;
+    translateBtn.disabled = false;
+    translateBtn.textContent = "8개국어로 번역하기";
+    progressWrap.style.display = "none";
+
+    if (e.message === "API_KEY_INVALID") {
+      showError("⚠️ API 키가 올바르지 않거나 유효하지 않습니다. 키를 다시 확인해 주세요.");
+    } else {
+      showError("네트워크 오류가 발생했습니다: " + e.message);
+    }
+    return; // 감지 단계에서 오류가 났으므로 진행 중단
   }
 
   if (detectedCode && detectedCode !== "other") {
     const detectedEntry = LANGUAGES.find(l => l[2] === detectedCode);
-    detectedMsg.innerHTML = `💡 <strong>감지된 원곡 언어:</strong> ${detectedEntry ? detectedEntry[0] : detectedCode}`;
+    detectedMsg.innerHTML = "💡 감지된 원곡 언어: <b>" + (detectedEntry ? detectedEntry[0] : detectedCode) + "</b>";
   } else {
-    detectedMsg.innerHTML = "💡 원곡 언어를 자동 감지하지 못해 모든 언어로 번역을 진행합니다.";
+    detectedMsg.innerHTML = "💡 원곡 언어를 특정하지 못해 모든 언어로 번역을 진행합니다.";
   }
   detectedMsg.style.display = "block";
 
-  translateBtn.textContent = "8개국어로 순차 번역 중...";
+  translateBtn.textContent = "8개국어로 순차 번역 중... (최대 1분 소요)";
 
   let done = 0;
   for (const [nameKo, nameEn, code] of LANGUAGES) {
@@ -545,15 +602,15 @@ translateBtn.onclick = async () => {
         const text = await translateOne(lyrics, nameEn);
         translations[code] = { text };
       } catch (e) {
-        console.error(`Error translating to ${nameEn}:`, e);
         translations[code] = { error: true };
       }
+      // API Rate Limit 방지를 위해 요청 간 0.5초 딜레이 추가
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     
-    // UI 업데이트
     done += 1;
     progressFill.style.width = Math.round((done / LANGUAGES.length) * 100) + "%";
-    progressLabel.textContent = `${done} / ${LANGUAGES.length} 언어 완료`;
+    progressLabel.textContent = done + " / " + LANGUAGES.length + " 언어 완료";
     renderResults();
   }
 
