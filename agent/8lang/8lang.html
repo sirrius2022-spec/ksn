@@ -193,35 +193,51 @@ function clearError() {
   errorMsg.textContent = "";
 }
 
+// 자동 우회 로직이 포함된 핵심 API 호출 함수
 async function callGemini(prompt, apiKey) {
-  // Google AI Studio 표준 REST 엔드포인트
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro", "gemini-1.5-flash-8b"];
   
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{
-        role: "user",
-        parts: [{ text: prompt }]
-      }],
-      generationConfig: {
-        temperature: 0.2
+  let lastError = "";
+  for (const model of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.2 }
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errMsg = errorData.error?.message || `HTTP 에러 ${response.status}`;
+        
+        // 404 에러 발생 시 다음 모델로 즉시 재시도
+        if (response.status === 404) {
+          lastError = `API 오류: 404 - ${model} 모델을 찾을 수 없습니다.`;
+          continue; 
+        }
+        // 400(잘못된 키), 403(권한 없음) 등의 오류는 바로 출력
+        throw new Error(`API 오류: ${response.status} - ${errMsg}`);
       }
-    })
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const message = errorData.error?.message || `HTTP 에러 ${response.status}`;
-    throw new Error(`API 오류: ${response.status} - ${message}`);
+      
+      const data = await response.json();
+      if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        return data.candidates[0].content.parts[0].text.trim();
+      }
+      throw new Error("유효한 응답을 받지 못했습니다.");
+    } catch (e) {
+      if (e.message.includes("404")) {
+        lastError = e.message;
+        continue;
+      }
+      throw e; 
+    }
   }
-  
-  const data = await response.json();
-  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-    return data.candidates[0].content.parts[0].text.trim();
-  }
-  throw new Error("유효한 응답을 받지 못했습니다.");
+  throw new Error(lastError || "모든 모델 호출에 실패했습니다.");
 }
 
 async function detectLanguage(lyrics, apiKey) {
@@ -384,7 +400,6 @@ translateBtn.onclick = async () => {
       } catch (e) {
         translations[code] = { error: true, errorMsg: e.message };
       }
-      // 연속 호출 제한(Rate Limit)을 방지하기 위한 딜레이 (1초)
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     done++;
