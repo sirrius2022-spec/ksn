@@ -1,623 +1,594 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>가사 8개국어 번역기</title>
-<style>
-  :root {
-    --accent: #2b6cb0;
-    --accent-dark: #1a4971;
-    --bg: #f7f8fa;
-    --card: #ffffff;
-    --border: #e2e5ea;
-    --text: #1a1d23;
-    --text-muted: #6b7280;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    padding: 32px 16px 80px;
-  }
-  .wrap { max-width: 760px; margin: 0 auto; }
-  h1 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 4px;
-  }
-  .subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 0 0 24px;
-    line-height: 1.5;
-  }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  }
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-  textarea, input[type="password"] {
-    width: 100%;
-    font-size: 14px;
-    line-height: 1.6;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-family: inherit;
-    background: #fafbfc;
-    transition: all 0.2s;
-  }
-  input[type="password"] {
-    margin-bottom: 6px;
-  }
-  textarea {
-    min-height: 180px;
-    resize: vertical;
-  }
-  textarea:focus, input[type="password"]:focus { 
-    outline: 2px solid var(--accent); 
-    outline-offset: -1px; 
-    background: #fff;
-  }
-  .api-hint {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-  .api-hint a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .api-hint a:hover {
-    text-decoration: underline;
-  }
-  .row {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-  button {
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-  }
-  .btn-primary:hover { background: var(--accent-dark); }
-  .btn-primary:disabled {
-    background: #b8c4d0;
-    cursor: not-allowed;
-  }
-  .btn-secondary {
-    background: #fff;
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-  .btn-secondary:hover { background: #f2f4f7; }
-  .error {
-    font-size: 13px;
-    color: #c0392b;
-    margin-top: 12px;
-    display: none;
-    background: #fdf0ed;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #f5c6cb;
-  }
-  .detected {
-    font-size: 13px;
-    color: var(--accent-dark);
-    background: #eef4ff;
-    padding: 10px;
-    border-radius: 6px;
-    margin-top: 12px;
-    display: none;
-    font-weight: 500;
-  }
-  .progress-wrap {
-    display: none;
-    margin-top: 14px;
-  }
-  .progress-bar-bg {
-    width: 100%;
-    height: 8px;
-    background: #e8ebef;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    width: 0%;
-    background: var(--accent);
-    transition: width 0.3s ease;
-  }
-  .progress-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 6px;
-    text-align: right;
-  }
-  #results { margin-top: 8px; }
-  .lang-item {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-    background: var(--card);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.01);
-  }
-  .lang-item-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .lang-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--accent-dark);
-  }
-  .src-badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: #1d9e75;
-    background: #e5f6ef;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 8px;
-    vertical-align: middle;
-  }
-  .copy-btn {
-    font-size: 12px;
-    padding: 6px 12px;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--text-muted);
-  }
-  .copy-btn:hover { background: #f2f4f7; color: var(--text); }
-  .copy-btn.done { color: #1d9e75; border-color: #1d9e75; background: #f0faf5; }
-  .lang-text {
-    font-size: 14px;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    color: var(--text);
-  }
-  .lang-text.failed {
-    color: #c0392b;
-    font-size: 13px;
-  }
-  .top-actions {
-    display: none;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-  .empty-hint {
-    font-size: 13px;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 30px 0;
-    background: #fff;
-    border: 1px dashed var(--border);
-    border-radius: 8px;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김성남 - 스마트 건설안전 강의 포털</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pretendard Font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Pretendard', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #f8fafc;
+        }
+        .card-hover {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.15);
+        }
+        .glass-header {
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+
+    <script>
+        function openInExternalBrowser(url) {
+            var userAgent = navigator.userAgent.toLowerCase();
+            if (userAgent.match(/kakaotalk/i)) {
+                // 카카오톡 환경: 외부 브라우저(크롬, 사파리 등) 강제 호출
+                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
+            } else {
+                // 일반 환경: 새 창으로 열기
+                window.open(url, '_blank');
+            }
+        }
+    </script>
 </head>
-<body>
-<div class="wrap">
-  <h1>가사 8개국어 번역기 (Gemini AI)</h1>
-  <p class="subtitle">가사를 붙여넣으면 원곡 언어를 자동 감지하고, 한국어·영어·중국어·일본어·프랑스어·베트남어·태국어·암하라어로 번역합니다. 유튜브 자막/설명란에 바로 붙여넣기 좋게 구성됩니다.</p>
+<body class="text-slate-800 flex flex-col min-h-screen">
 
-  <!-- API 키 입력 영역 추가 -->
-  <div class="card">
-    <label for="apiKey">Gemini API 키 입력 (필수)</label>
-    <input type="password" id="apiKey" placeholder="AIzaSy... 로 시작하는 API 키를 입력하세요">
-    <div class="api-hint">
-      개인 홈페이지(Vercel 등)에서 실행하려면 무료 API 키가 필요합니다. 
-      <a href="https://aistudio.google.com/app/apikey" target="_blank">[여기서 발급받기]</a> (키는 브라우저에만 안전하게 저장됩니다.)
+    <!-- Header / Hero Section -->
+    <header class="glass-header text-white sticky top-0 z-50 border-b border-slate-800 shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-5 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-left flex-1">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold mb-2 border border-blue-400/30">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    스마트 건설안전 통합 강의 포털
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center md:justify-start gap-3">
+                    인천사는 김성남
+                </h1>
+                <p class="mt-1 text-slate-300 text-xs sm:text-sm font-medium flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-1">
+                    <span><i class="fa-solid font-normal text-blue-400 fa-hard-hat mr-1"></i>건설안전공학</span>
+                    <span class="text-slate-600">|</span>
+                    <span><i class="fa-solid text-blue-400 fa-robot mr-1"></i>생성형 AI 위험성 평가</span>
+                    <span class="text-slate-600">|</span>
+                    <span><i class="fa-solid text-blue-400 fa-microchip mr-1"></i>스마트 안전 기술</span>
+                </p>
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="flex items-center gap-4 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60 shadow-inner group cursor-pointer" onclick="openQrModal()">
+                <div class="relative overflow-hidden rounded-lg border-2 border-white/80 bg-white p-1">
+                    <img src="homepage_qr.jpg" alt="홈페이지 접속 QR코드" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(window.location.href)">
+                </div>
+                <div class="text-left pr-2">
+                    <span class="inline-block text-[10px] text-blue-400 font-bold uppercase tracking-wider mb-0.5">Mobile Access</span>
+                    <p class="text-xs font-bold text-slate-200">스마트폰 QR 접속</p>
+                    <p class="text-[11px] text-slate-400 mt-1">클릭하여 확대보기 <i class="fa-solid fa-magnifying-glass-plus text-slate-400 ml-0.5"></i></p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- Profile / Intro Banner -->
+        <section class="bg-gradient-to-r from-blue-900 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-10 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-blue-600/30 border border-blue-400/30 flex items-center justify-center text-3xl text-blue-300 shrink-0 shadow-inner">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="text-center md:text-left">
+                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">안녕하세요, 김성남입니다.</h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-3xl">
+                        본 포털은 <strong>스마트 건설안전 및 공학 강의</strong>를 위한 통합 교육 플랫폼입니다. 
+                        교육생 여러분의 실무 역량 강화를 위해 직접 개발한 <span class="text-blue-300 font-semibold">AI 위험성 평가 에이전트, 공학 해석 도구 및 실습 자료</span>를 제공합니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls: Category Tabs & Search Bar -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+            <!-- Filter Tabs -->
+            <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none" id="filter-tabs">
+                <button onclick="filterCategory('all')" class="tab-btn active bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm whitespace-nowrap" data-category="all">
+                    <i class="fa-solid fa-border-all mr-1.5"></i>전체보기
+                </button>
+                <button onclick="filterCategory('ai')" class="tab-btn bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap" data-category="ai">
+                    <i class="fa-solid fa-robot text-blue-600 mr-1.5"></i>건설안전 & AI
+                </button>
+                <button onclick="filterCategory('utility')" class="tab-btn bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap" data-category="utility">
+                    <i class="fa-solid fa-wrench text-emerald-600 mr-1.5"></i>실무 & 생성형 AI 도구
+                </button>
+                <button onclick="filterCategory('game')" class="tab-btn bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap" data-category="game">
+                    <i class="fa-solid fa-gamepad text-amber-500 mr-1.5"></i>강의용 게임 & 이벤트
+                </button>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative w-full md:w-72">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="도구 또는 게임 검색..." 
+                       class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+            </div>
+        </div>
+
+        <!-- GRID SECTION -->
+        <section class="mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="cardGrid">
+
+                <!-- 1. 스마트 건설안전 (PE-Safety) -->
+                <a href="https://sirrius2022-spec.github.io/pe-safety/" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="스마트 건설안전 pe safety 기술 자격증 전문 가이드">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold">
+                            🛡️
+                        </div>
+                        <span class="text-[11px] font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">스마트 안전</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">스마트 건설안전 (PE-Safety)</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">건설안전 실무 및 전문적인 안전 관리를 위한 특화 가이드 및 자료</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 2. 건설안전 법령 에이전트 -->
+                <a href="https://lawagent123.vercel.app" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="건설안전 법령 에이전트 실시간 스마트 법령 검색 법률 안내">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xl font-bold">
+                            ⚖️
+                        </div>
+                        <span class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-200">AI 법령</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">건설안전 법령 에이전트</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">건설기술인을 위한 실시간 스마트 건설안전 법령 검색 및 안내 서비스</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 3. 4M 위험성 평가 에이전트 -->
+                <a href="/agent/4m/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="4m 위험성 평가 에이전트 현장 사진 분석 인적 기계적 작업적 관리적">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-xl font-bold">
+                            🤖
+                        </div>
+                        <span class="text-[11px] font-semibold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200">위험성평가</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">4M 위험성 평가 에이전트</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">현장 사진을 기반으로 4M(인적, 기계적, 작업적, 관리적) 위험 요인을 분석하는 전문 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-sky-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 4. 흙막이 탄소성 해석 에이전트 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/sunex-ai" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="흙막이 탄소성 해석 에이전트 굴착 지반 거동 구조물 상호작용 지반공학 sunex ai">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl font-bold">
+                            🏗️
+                        </div>
+                        <span class="text-[11px] font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">지반공학 AI</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">흙막이 탄소성 해석 에이전트</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 정밀하게 분석하여 안전성을 검토하는 전문 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-700">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 5. 스마트 공학용 계산기 -->
+                <a href="/agent/cal/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="스마트 공학용 계산기 수식 계산 현장 실무 웹 계산기">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-xl font-bold">
+                            🔢
+                        </div>
+                        <span class="text-[11px] font-semibold bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full border border-teal-200">공학 계산</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">스마트 공학용 계산기</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 및 현장 실무에서 복잡한 수식을 즉시 해결할 수 있는 웹 기반 공학 계산 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 6. 홈페이지 제작 가이드 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/guide/homepage/index.html" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="홈페이지 제작 가이드 개인 웹사이트 지식 공유 에이전트 구축 매뉴얼">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-xl font-bold">
+                            🌐
+                        </div>
+                        <span class="text-[11px] font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full border border-violet-200">웹 구축 가이드</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">홈페이지 제작 가이드</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">건설 기술인을 위한 개인 지식 공유 플랫폼 및 에이전트 웹사이트 구축을 위한 단계별 매뉴얼</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-violet-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 7. QR코드 이미지 생성기 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/qr/index.html" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="utility" data-keywords="qr코드 이미지 생성기 큐알 생성">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">
+                            📱
+                        </div>
+                        <span class="text-[11px] font-semibold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200">생성 도구</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">QR코드 이미지 생성기</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">원하는 URL 및 텍스트를 고화질 QR코드 이미지로 신속하게 제작하는 유용한 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 8. 무료 메모장 -->
+                <a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/memo/index.html')" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="utility" data-keywords="메모장 무료 웹 메모 필기">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-xl font-bold">
+                            📝
+                        </div>
+                        <span class="text-[11px] font-semibold bg-cyan-50 text-cyan-700 px-2.5 py-1 rounded-full border border-cyan-200">실무 유틸</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">무료 웹 메모장</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 내용이나 현장 메모를 별도 설치 없이 웹 브라우저에서 편리하게 기록하는 메모장</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-cyan-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 9. AI 성우 (TTS 변환) -->
+                <a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/aiwav/index.html')" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="utility" data-keywords="ai 성우 tts 텍스트 음성 변환 wav 저장 리딩">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center text-xl font-bold">
+                            🎙️
+                        </div>
+                        <span class="text-[11px] font-semibold bg-pink-50 text-pink-700 px-2.5 py-1 rounded-full border border-pink-200">음성 생성</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">AI 성우 (TTS 변환)</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">텍스트를 입력하면 자연스러운 성우 목소리로 변환하여 WAV 음성 파일로 저장하는 생성 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-pink-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 10. 로또 번호 생성기 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/lotto" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="utility" data-keywords="로또 번호 생성기 행운 번호 추첨">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl font-bold">
+                            🔮
+                        </div>
+                        <span class="text-[11px] font-semibold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-200">이벤트</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">로또 번호 생성기</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">행운의 숫자를 무작위로 추출하여 최적의 로또 번호 조합을 제안하는 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 11. 마블레이싱 게임 (제미나이) -->
+                <a href="/game/mableroulet/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="마블레이싱 게임 제미나이 경연 레이싱 조별 아이스브레이킹">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center text-xl font-bold">
+                            🏎️
+                        </div>
+                        <span class="text-[11px] font-semibold bg-orange-50 text-orange-700 px-2.5 py-1 rounded-full border border-orange-200">레이싱</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">마블레이싱 (제미나이)</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 중 집중력 환기 및 조별 레이싱 경연을 위한 역동적인 구슬 레이스 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-orange-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 12. 마블레이싱 게임 (클로드) -->
+                <a href="/game/mablerace/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="마블레이싱 게임 클로드 경연 레이싱 조별 이벤트">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
+                            🏎️
+                        </div>
+                        <span class="text-[11px] font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">레이싱</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">마블레이싱 (클로드)</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 중 집중력 환기 및 조별 레이싱 경연을 위한 역동적인 구슬 레이스 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 13. 룰렛 게임 -->
+                <a href="/game/roulet/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="룰렛 게임 발표자 추첨 랜덤 제비뽑기">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center text-xl font-bold">
+                            🎯
+                        </div>
+                        <span class="text-[11px] font-semibold bg-red-50 text-red-700 px-2.5 py-1 rounded-full border border-red-200">랜덤 추첨</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">룰렛 게임</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">발표자 추첨 및 무작위 조별 이벤트를 위한 재미있는 한국어 지원 룰렛 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-red-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 14. 룰렛 게임 (Eng) -->
+                <a href="/game/roulet-eng/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="룰렛 게임 영어 eng roulette random draw">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-xl font-bold">
+                            🎯
+                        </div>
+                        <span class="text-[11px] font-semibold bg-rose-50 text-rose-700 px-2.5 py-1 rounded-full border border-rose-200">Global</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">룰렛 게임 (English)</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">발표자 추첨 및 무작위 조별 이벤트를 위한 영어 지원 랜덤 룰렛 도구</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-rose-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 15. 테트리스 게임 -->
+                <a href="/game/tetris/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="테트리스 게임 블록 미니게임 휴식">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-800 flex items-center justify-center text-xl font-bold">
+                            🧩
+                        </div>
+                        <span class="text-[11px] font-semibold bg-yellow-50 text-yellow-800 px-2.5 py-1 rounded-full border border-yellow-200">클래식</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">테트리스 게임</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 중 집중력 환기 및 조별 이벤트를 위한 쉬어가는 퍼즐 코너</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-yellow-700">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 16. 퍼즐버블 게임 -->
+                <a href="/game/puzzlebubble/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="퍼즐버블 게임 버블 슈터 슈팅 휴식">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center text-xl font-bold">
+                            🧩
+                        </div>
+                        <span class="text-[11px] font-semibold bg-lime-50 text-lime-800 px-2.5 py-1 rounded-full border border-lime-200">퍼즐</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">퍼즐버블 게임</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">같은 색상의 방울을 맞춰 터뜨리는 강의 휴식용 버블 퍼즐 게임</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-lime-700">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 17. 블록깨기 게임 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/block/" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="블록깨기 게임 아케이드 벽돌깨기 브릭">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-green-100 text-green-700 flex items-center justify-center text-xl font-bold">
+                            🎮
+                        </div>
+                        <span class="text-[11px] font-semibold bg-green-50 text-green-700 px-2.5 py-1 rounded-full border border-green-200">아케이드</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">블록깨기 게임</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">웹 브라우저에서 가볍게 즐길 수 있는 클래식 벽돌 깨기 게임</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-green-600">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 18. 스네이크 게임 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/snake" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="스네이크 게임 뱀게임 방향키 먹이">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
+                            🐍
+                        </div>
+                        <span class="text-[11px] font-semibold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200">클래식</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">스네이크 게임</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">방향키를 이용하여 먹이를 먹고 몸집을 키워가는 클래식 뱀 게임</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-700">
+                        <span>바로가기</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </div>
+                </a>
+
+            </div>
+
+            <!-- Empty Search Message -->
+            <div id="noResults" class="hidden text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
+                <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 mb-3"></i>
+                <p class="text-slate-600 font-medium">검색 결과가 없습니다.</p>
+                <p class="text-slate-400 text-xs mt-1">다른 키워드로 검색하거나 카테고리 필터를 변경해보세요.</p>
+            </div>
+        </section>
+
+        <!-- Interactive Resource Banners (보물창고 & 방명록) -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <!-- 보물창고 -->
+            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white rounded-2xl p-6 sm:p-7 shadow-lg flex flex-col justify-between border border-slate-700/50 relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+                <div>
+                    <div class="inline-flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-box-archive"></i> Class Materials
+                    </div>
+                    <h3 class="text-xl font-extrabold mb-2 text-white">보물창고 (실습 자료실)</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                        강의에 필요한 실습용 서식, 예제 데이터 및 핵심 강의 커리큘럼 자료를 다운로드하세요.
+                    </p>
+                </div>
+                <div>
+                    <a href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" target="_blank" 
+                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-amber-500/20 text-sm">
+                        <span>보물창고 바로가기</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 방명록 -->
+            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-6 sm:p-7 shadow-lg flex flex-col justify-between border border-slate-700/50 relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
+                <div>
+                    <div class="inline-flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-comments"></i> Feedback & Q&A
+                    </div>
+                    <h3 class="text-xl font-extrabold mb-2 text-white">방명록 & 질의응답</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                        강의에 대한 피드백, 교육 소감이나 스마트 안전 관련 기술적 질문을 자유롭게 남겨주세요.
+                    </p>
+                </div>
+                <div>
+                    <a href="https://padlet.com/sirrius2022/padlet-9cd0j2khbmx7m2ec" target="_blank" 
+                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-blue-500/20 text-sm">
+                        <span>방명록 바로가기</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center text-xs sm:text-sm">
+            <p class="font-medium text-slate-300 mb-2">
+                제작자 : <strong class="text-white">김성남</strong> | 본 사이트는 스마트 건설안전 강의 및 실습 목적으로 운영됩니다.
+            </p>
+            <p class="text-slate-500 flex flex-wrap items-center justify-center gap-2">
+                <span>&copy; 2026 Kim Sung-nam. All rights reserved.</span>
+                <span class="hidden sm:inline">•</span>
+                <a href="mailto:sirrius@naver.com" class="hover:text-blue-400 transition-colors inline-flex items-center gap-1">
+                    <i class="fa-regular fa-envelope"></i> sirrius@naver.com
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Modal for Zooming QR Code -->
+    <div id="qrModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeQrModal()">
+        <div class="bg-white rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl relative" onclick="event.stopPropagation()">
+            <button onclick="closeQrModal()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h4 class="text-lg font-bold text-slate-900 mb-1">스마트폰 접속 QR코드</h4>
+            <p class="text-xs text-slate-500 mb-4">카메라 앱으로 스캔하면 스마트폰으로 접속됩니다.</p>
+            <img src="homepage_qr.jpg" alt="홈페이지 접속 QR코드" class="w-48 h-48 mx-auto rounded-xl border border-slate-200 p-2 shadow-inner" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(window.location.href)">
+            <p class="text-xs text-blue-600 font-semibold mt-4">김성남 스마트 건설안전 포털</p>
+        </div>
     </div>
-  </div>
 
-  <div class="card">
-    <label for="lyrics">원곡 가사 (언어 자동 감지)</label>
-    <textarea id="lyrics" placeholder="번역할 가사를 여기에 붙여넣으세요."></textarea>
-    <div class="row">
-      <button class="btn-primary" id="translateBtn">8개국어로 번역하기</button>
-      <button class="btn-secondary" id="clearBtn">초기화</button>
-    </div>
-    <div class="error" id="errorMsg"></div>
-    <div class="detected" id="detectedMsg"></div>
-    
-    <div class="progress-wrap" id="progressWrap">
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
-      <div class="progress-label" id="progressLabel">0 / 8 완료</div>
-    </div>
-  </div>
+    <script>
+        let currentCategory = 'all';
 
-  <div class="top-actions" id="topActions">
-    <button class="btn-secondary" id="copyAllBtn">전체 결과 복사 (한→영→중→일→프→베→태→암하라 순)</button>
-    <button class="btn-secondary" id="downloadAllBtn">전체 텍스트 파일로 저장 (.txt)</button>
-  </div>
+        function filterCategory(category) {
+            currentCategory = category;
+            
+            // Update Tab Button Styles
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if(btn.dataset.category === category) {
+                    btn.classList.add('bg-slate-900', 'text-white');
+                    btn.classList.remove('bg-white', 'text-slate-600', 'hover:bg-slate-100');
+                } else {
+                    btn.classList.remove('bg-slate-900', 'text-white');
+                    btn.classList.add('bg-white', 'text-slate-600', 'hover:bg-slate-100');
+                }
+            });
 
-  <div id="results">
-    <div class="empty-hint" id="emptyHint">번역 결과가 여기에 표시됩니다.</div>
-  </div>
-</div>
-
-<script>
-const LANGUAGES = [
-  ["한국어", "Korean", "ko"],
-  ["영어", "English", "en"],
-  ["중국어", "Chinese (Simplified)", "zh"],
-  ["일본어", "Japanese", "ja"],
-  ["프랑스어", "French", "fr"],
-  ["베트남어", "Vietnamese", "vi"],
-  ["태국어", "Thai", "th"],
-  ["암하라어", "Amharic", "am"]
-];
-
-const apiKeyEl = document.getElementById("apiKey");
-const lyricsEl = document.getElementById("lyrics");
-const translateBtn = document.getElementById("translateBtn");
-const clearBtn = document.getElementById("clearBtn");
-const errorMsg = document.getElementById("errorMsg");
-const detectedMsg = document.getElementById("detectedMsg");
-const progressWrap = document.getElementById("progressWrap");
-const progressFill = document.getElementById("progressFill");
-const progressLabel = document.getElementById("progressLabel");
-const resultsEl = document.getElementById("results");
-const emptyHint = document.getElementById("emptyHint");
-const topActions = document.getElementById("topActions");
-const copyAllBtn = document.getElementById("copyAllBtn");
-const downloadAllBtn = document.getElementById("downloadAllBtn");
-
-let translations = {};
-let isRunning = false;
-let detectedCode = null;
-
-// 저장된 API 키 불러오기
-const savedKey = localStorage.getItem("gemini_api_key");
-if (savedKey) {
-  apiKeyEl.value = savedKey;
-}
-
-// API 키 입력 시 자동 저장
-apiKeyEl.addEventListener("change", () => {
-  localStorage.setItem("gemini_api_key", apiKeyEl.value.trim());
-});
-
-function showError(msg) {
-  errorMsg.innerHTML = msg;
-  errorMsg.style.display = "block";
-}
-function clearError() {
-  errorMsg.style.display = "none";
-  errorMsg.innerHTML = "";
-}
-
-async function copyText(text) {
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-    throw new Error("clipboard api unavailable");
-  } catch (e) {
-    try {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.top = "-1000px";
-      ta.style.left = "-1000px";
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      const ok = document.execCommand("copy");
-      document.body.removeChild(ta);
-      return ok;
-    } catch (e2) {
-      return false;
-    }
-  }
-}
-
-async function callGemini(prompt, systemInstruction = null, retries = 3) {
-  const apiKey = apiKeyEl.value.trim();
-  if (!apiKey) {
-    throw new Error("API_KEY_MISSING");
-  }
-
-  // 최신 안정 버전인 gemini-1.5-flash 모델을 명시적으로 사용
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-  const payload = {
-    contents: [{ parts: [{ text: prompt }] }]
-  };
-
-  if (systemInstruction) {
-    payload.systemInstruction = {
-      parts: [{ text: systemInstruction }]
-    };
-  }
-
-  let delay = 1500; // 초기 재시도 대기 시간 (1.5초)
-  
-  for (let i = 0; i < retries; i++) {
-    try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        const errorMessage = errData.error?.message || response.statusText;
-        
-        // 429 Too Many Requests 발생 시 지수 백오프 적용하여 재시도
-        if (response.status === 429 && i < retries - 1) {
-          console.warn(`Rate limit hit (429). Retrying in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2; 
-          continue;
+            applyFilters();
         }
 
-        if (response.status === 400) {
-          throw new Error("API_KEY_INVALID");
+        function handleSearch() {
+            applyFilters();
         }
-        throw new Error(`API 오류: ${response.status} - ${errorMessage}`);
-      }
 
-      const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) {
-        throw new Error("응답 결과가 비어있습니다.");
-      }
-      return text.trim();
-    } catch (err) {
-      if (i === retries - 1 || err.message === "API_KEY_MISSING" || err.message === "API_KEY_INVALID") {
-        throw err;
-      }
-      await new Promise(resolve => setTimeout(resolve, delay));
-      delay *= 2;
-    }
-  }
-}
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.tool-card');
+            let visibleCount = 0;
 
-async function detectLanguage(lyrics) {
-  const systemInstruction = "You are a highly accurate language detection bot. You must answer with EXACTLY ONE of the following two-letter language codes and nothing else. Codes: ko, en, zh, ja, fr, vi, th, am. If it is none of these, return 'other'.";
-  const prompt = `What is the primary language of the following song lyrics?\n\nLyrics:\n${lyrics}`;
-  
-  const raw = await callGemini(prompt, systemInstruction);
-  const code = raw.toLowerCase().replace(/[^a-z]/g, "");
-  const knownCodes = LANGUAGES.map(l => l[2]);
-  return knownCodes.includes(code) ? code : "other";
-}
+            cards.forEach(card => {
+                const cardCategory = card.dataset.category;
+                const cardKeywords = (card.dataset.keywords || '').toLowerCase();
+                const cardTitle = card.querySelector('h3').innerText.toLowerCase();
+                const cardText = card.querySelector('p').innerText.toLowerCase();
 
-async function translateOne(lyrics, langNameEn) {
-  const systemInstruction = "You are a professional lyric translator. Translate the lyrics accurately into the target language while maintaining the original verse structure, stanzas, and line breaks. DO NOT include any titles, markdown formatting, or extra explanations. Output ONLY the translated lyrics.";
-  const prompt = `Translate the following song lyrics into ${langNameEn}.\n\nLyrics:\n${lyrics}`;
-  return await callGemini(prompt, systemInstruction);
-}
+                const matchesCategory = (currentCategory === 'all' || cardCategory === currentCategory);
+                const matchesSearch = !searchQuery || 
+                                     cardKeywords.includes(searchQuery) || 
+                                     cardTitle.includes(searchQuery) || 
+                                     cardText.includes(searchQuery);
 
-function renderResults() {
-  resultsEl.innerHTML = "";
-  const keys = Object.keys(translations);
-  if (keys.length === 0) {
-    resultsEl.appendChild(emptyHint);
-    topActions.style.display = "none";
-    return;
-  }
-  topActions.style.display = "flex";
+                if (matchesCategory && matchesSearch) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
 
-  for (const [nameKo, nameEn, code] of LANGUAGES) {
-    if (!(code in translations)) continue;
-    const entry = translations[code];
-    const item = document.createElement("div");
-    item.className = "lang-item";
+            const noResults = document.getElementById('noResults');
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
 
-    const head = document.createElement("div");
-    head.className = "lang-item-head";
+        function openQrModal() {
+            document.getElementById('qrModal').classList.remove('hidden');
+        }
 
-    const label = document.createElement("span");
-    label.className = "lang-name";
-    label.textContent = nameKo;
-    if (code === detectedCode) {
-      const badge = document.createElement("span");
-      badge.className = "src-badge";
-      badge.textContent = "✓ 원곡 언어";
-      label.appendChild(badge);
-    }
-
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "copy-btn";
-    copyBtn.textContent = "복사";
-    copyBtn.onclick = async () => {
-      const ok = await copyText(entry.text || "");
-      if (ok) {
-        copyBtn.textContent = "복사 완료!";
-        copyBtn.classList.add("done");
-        setTimeout(() => { copyBtn.textContent = "복사"; copyBtn.classList.remove("done"); }, 2000);
-      } else {
-        copyBtn.textContent = "복사 실패";
-        setTimeout(() => { copyBtn.textContent = "복사"; }, 2000);
-      }
-    };
-
-    head.appendChild(label);
-    head.appendChild(copyBtn);
-
-    const textDiv = document.createElement("div");
-    if (entry.error) {
-      textDiv.className = "lang-text failed";
-      textDiv.textContent = "⚠ 번역 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.";
-    } else {
-      textDiv.className = "lang-text";
-      textDiv.textContent = entry.text;
-    }
-
-    item.appendChild(head);
-    item.appendChild(textDiv);
-    resultsEl.appendChild(item);
-  }
-}
-
-function buildFullText() {
-  let out = [];
-  for (const [nameKo, nameEn, code] of LANGUAGES) {
-    if (!(code in translations)) continue;
-    const entry = translations[code];
-    out.push("=========================");
-    out.push("[" + nameKo + "]");
-    out.push("=========================");
-    out.push(entry.error ? "(번역 실패)" : entry.text);
-    out.push("");
-    out.push("");
-  }
-  return out.join("\n").trim();
-}
-
-copyAllBtn.onclick = async () => {
-  const ok = await copyText(buildFullText());
-  if (ok) {
-    copyAllBtn.textContent = "✅ 클립보드에 전체 복사되었습니다";
-  } else {
-    copyAllBtn.textContent = "❌ 복사 실패";
-  }
-  setTimeout(() => { copyAllBtn.textContent = "전체 결과 복사 (한→영→중→일→프→베→태→암하라 순)"; }, 2500);
-};
-
-downloadAllBtn.onclick = () => {
-  const blob = new Blob([buildFullText()], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "translated-lyrics.txt";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-};
-
-clearBtn.onclick = () => {
-  if (isRunning) return;
-  lyricsEl.value = "";
-  translations = {};
-  detectedCode = null;
-  clearError();
-  detectedMsg.style.display = "none";
-  progressWrap.style.display = "none";
-  renderResults();
-};
-
-translateBtn.onclick = async () => {
-  if (isRunning) return;
-  clearError();
-  detectedMsg.style.display = "none";
-
-  const apiKey = apiKeyEl.value.trim();
-  if (!apiKey) {
-    showError("⚠️ 상단에 Gemini API 키를 먼저 입력해 주세요.<br><a href='https://aistudio.google.com/app/apikey' target='_blank' style='color:#c0392b;'>[무료 API 키 발급받기]</a>");
-    apiKeyEl.focus();
-    return;
-  }
-
-  const lyrics = lyricsEl.value.trim();
-  if (!lyrics) {
-    showError("번역할 가사를 입력해 주세요.");
-    lyricsEl.focus();
-    return;
-  }
-
-  isRunning = true;
-  translateBtn.disabled = true;
-  translateBtn.textContent = "AI가 언어를 감지하는 중...";
-  translations = {};
-  detectedCode = null;
-  renderResults();
-  
-  progressWrap.style.display = "block";
-  progressFill.style.width = "0%";
-  progressLabel.textContent = "0 / " + LANGUAGES.length + " 완료";
-
-  try {
-    detectedCode = await detectLanguage(lyrics);
-  } catch (e) {
-    isRunning = false;
-    translateBtn.disabled = false;
-    translateBtn.textContent = "8개국어로 번역하기";
-    progressWrap.style.display = "none";
-
-    if (e.message === "API_KEY_INVALID") {
-      showError("⚠️ API 키가 올바르지 않거나 유효하지 않습니다. 키를 다시 확인해 주세요.");
-    } else {
-      showError("네트워크 오류가 발생했습니다: " + e.message);
-    }
-    return; // 감지 단계에서 오류가 났으므로 진행 중단
-  }
-
-  if (detectedCode && detectedCode !== "other") {
-    const detectedEntry = LANGUAGES.find(l => l[2] === detectedCode);
-    detectedMsg.innerHTML = "💡 감지된 원곡 언어: <b>" + (detectedEntry ? detectedEntry[0] : detectedCode) + "</b>";
-  } else {
-    detectedMsg.innerHTML = "💡 원곡 언어를 특정하지 못해 모든 언어로 번역을 진행합니다.";
-  }
-  detectedMsg.style.display = "block";
-
-  translateBtn.textContent = "8개국어로 순차 번역 중... (최대 1분 소요)";
-
-  let done = 0;
-  for (const [nameKo, nameEn, code] of LANGUAGES) {
-    if (code === detectedCode) {
-      translations[code] = { text: lyrics };
-    } else {
-      try {
-        const text = await translateOne(lyrics, nameEn);
-        translations[code] = { text };
-      } catch (e) {
-        translations[code] = { error: true };
-      }
-      // API Rate Limit 방지를 위해 요청 간 0.5초 딜레이 추가
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-    
-    done += 1;
-    progressFill.style.width = Math.round((done / LANGUAGES.length) * 100) + "%";
-    progressLabel.textContent = done + " / " + LANGUAGES.length + " 언어 완료";
-    renderResults();
-  }
-
-  isRunning = false;
-  translateBtn.disabled = false;
-  translateBtn.textContent = "8개국어로 번역하기";
-};
-</script>
+        function closeQrModal() {
+            document.getElementById('qrModal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
