@@ -1,633 +1,207 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>김성남 - 스마트 건설안전 강의 포털</title>
-    <!-- Tailwind CSS -->
+    <title>프롬프트 실시간 공유 에이전트</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Pretendard Font -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Pretendard', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            500: '#2563eb',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                            800: '#1e3a8a',
-                            900: '#0f172a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            background-color: #f8fafc;
-        }
-        .card-hover {
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.15);
-        }
-        .glass-header {
-            background: rgba(15, 23, 42, 0.92);
-            backdrop-filter: blur(12px);
-        }
-    </style>
-
-    <script>
-        function openInExternalBrowser(url) {
-            var userAgent = navigator.userAgent.toLowerCase();
-            if (userAgent.match(/kakaotalk/i)) {
-                // 카카오톡 환경: 외부 브라우저(크롬, 사파리 등) 강제 호출
-                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
-            } else {
-                // 일반 환경: 새 창으로 열기
-                window.open(url, '_blank');
-            }
-        }
-    </script>
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body class="text-slate-800 flex flex-col min-h-screen">
+<body class="bg-gradient-to-br from-slate-50 to-indigo-100 min-h-screen py-8 px-4 flex items-center justify-center">
 
-    <!-- Header / Hero Section -->
-    <header class="glass-header text-white z-50 border-b border-slate-800 shadow-lg">
-
-        <div class="max-w-6xl mx-auto px-4 py-5 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="text-center md:text-left flex-1">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold mb-2 border border-blue-400/30">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    스마트 건설안전 통합 강의 포털
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center md:justify-start gap-3">
-                    인천사는 김성남
-                </h1>
-                <p class="mt-1 text-slate-300 text-xs sm:text-sm font-medium flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-1">
-                    <span><i class="fa-solid font-normal text-blue-400 fa-hard-hat mr-1"></i>건설안전공학</span>
-                    <span class="text-slate-600">|</span>
-                    <span><i class="fa-solid text-blue-400 fa-robot mr-1"></i>생성형 AI 위험성 평가</span>
-                    <span class="text-slate-600">|</span>
-                    <span><i class="fa-solid text-blue-400 fa-microchip mr-1"></i>스마트 안전 기술</span>
-                </p>
-            </div>
-
-            <!-- QR Code Section -->
-            <div class="flex items-center gap-4 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60 shadow-inner group cursor-pointer" onclick="openQrModal()">
-                <div class="relative overflow-hidden rounded-lg border-2 border-white/80 bg-white p-1">
-                    <img src="homepage_qr.jpg" alt="홈페이지 접속 QR코드" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(window.location.href)">
-                </div>
-                <div class="text-left pr-2">
-                    <span class="inline-block text-[10px] text-blue-400 font-bold uppercase tracking-wider mb-0.5">Mobile Access</span>
-                    <p class="text-xs font-bold text-slate-200">스마트폰 QR 접속</p>
-                    <p class="text-[11px] text-slate-400 mt-1">클릭하여 확대보기 <i class="fa-solid fa-magnifying-glass-plus text-slate-400 ml-0.5"></i></p>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
-
-        <!-- Profile / Intro Banner -->
-        <section class="bg-gradient-to-r from-blue-900 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-10 relative overflow-hidden">
-            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="relative z-10 flex flex-col md:flex-row items-center gap-6">
-                <div class="w-16 h-16 rounded-2xl bg-blue-600/30 border border-blue-400/30 flex items-center justify-center text-3xl text-blue-300 shrink-0 shadow-inner">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                </div>
-                <div class="text-center md:text-left">
-                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">안녕하세요, 김성남입니다.</h2>
-                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-3xl">
-                        본 포털은 <strong>스마트 건설안전 및 공학 강의</strong>를 위한 통합 교육 플랫폼입니다. 
-                        교육생 여러분의 실무 역량 강화를 위해 직접 개발한 <span class="text-blue-300 font-semibold">AI 위험성 평가 에이전트, 공학 해석 도구 및 실습 자료</span>를 제공합니다.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Controls: Category Tabs & Search Bar -->
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-            <!-- Filter Tabs -->
-            <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none" id="filter-tabs">
-                <button onclick="filterCategory('all')" class="tab-btn active bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm whitespace-nowrap" data-category="all">
-                    <i class="fa-solid fa-border-all mr-1.5"></i>전체보기
-                </button>
-                <button onclick="filterCategory('ai')" class="tab-btn bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap" data-category="ai">
-                    <i class="fa-solid fa-robot text-blue-600 mr-1.5"></i>건설안전 & AI
-                </button>
-                <button onclick="filterCategory('utility')" class="tab-btn bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap" data-category="utility">
-                    <i class="fa-solid fa-wrench text-emerald-600 mr-1.5"></i>실무 & 생성형 AI 도구
-                </button>
-                <button onclick="filterCategory('game')" class="tab-btn bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap" data-category="game">
-                    <i class="fa-solid fa-gamepad text-amber-500 mr-1.5"></i>강의용 게임 & 이벤트
-                </button>
-            </div>
-
-            <!-- Search Input -->
-            <div class="relative w-full md:w-72">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="도구 또는 게임 검색..." 
-                       class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
-            </div>
+    <div class="max-w-xl w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
+        
+        <!-- 상단 헤더 -->
+        <div class="text-center space-y-2">
+            <span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">Gemini Canva 교육 도구</span>
+            <h1 class="text-2xl font-bold text-gray-900">텍스트 실시간 공유</h1>
+            <p class="text-sm text-gray-500">텍스트를 입력하고 공유하면, QR코드로 바로 가져갈 수 있습니다.</p>
         </div>
 
-        <!-- GRID SECTION -->
-        <section class="mb-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="cardGrid">
-
-                <!-- 1. 스마트 건설안전 (PE-Safety) -->
-                <a href="https://sirrius2022-spec.github.io/pe-safety/" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="스마트 건설안전 pe safety 기술 자격증 전문 가이드">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold">
-                            🛡️
-                        </div>
-                        <span class="text-[11px] font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">스마트 안전</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">스마트 건설안전 (PE-Safety)</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">건설안전 실무 및 전문적인 안전 관리를 위한 특화 가이드 및 자료</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 2. 건설안전 법령 에이전트 -->
-
-                
-
-                <!-- 3. 4M 위험성 평가 에이전트 -->
-                <a href="/agent/4m/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="4m 위험성 평가 에이전트 현장 사진 분석 인적 기계적 작업적 관리적">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-xl font-bold">
-                            🤖
-                        </div>
-                        <span class="text-[11px] font-semibold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200">위험성평가</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">4M 위험성 평가 에이전트</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">현장 사진을 기반으로 4M(인적, 기계적, 작업적, 관리적) 위험 요인을 분석하는 전문 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-sky-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 4. 흙막이 탄소성 해석 에이전트 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/sunex-ai" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="흙막이 탄소성 해석 에이전트 굴착 지반 거동 구조물 상호작용 지반공학 sunex ai">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl font-bold">
-                            🏗️
-                        </div>
-                        <span class="text-[11px] font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">지반공학 AI</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">흙막이 탄소성 해석 에이전트</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 정밀하게 분석하여 안전성을 검토하는 전문 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-700">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 5. 스마트 공학용 계산기 -->
-                <a href="/agent/cal/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="스마트 공학용 계산기 수식 계산 현장 실무 웹 계산기">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-xl font-bold">
-                            🔢
-                        </div>
-                        <span class="text-[11px] font-semibold bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full border border-teal-200">공학 계산</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">스마트 공학용 계산기</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 및 현장 실무에서 복잡한 수식을 즉시 해결할 수 있는 웹 기반 공학 계산 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 6. 홈페이지 제작 가이드 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/guide/homepage/index.html" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="ai" data-keywords="홈페이지 제작 가이드 개인 웹사이트 지식 공유 에이전트 구축 매뉴얼">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-xl font-bold">
-                            🌐
-                        </div>
-                        <span class="text-[11px] font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full border border-violet-200">웹 구축 가이드</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">홈페이지 제작 가이드</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">건설 기술인을 위한 개인 지식 공유 플랫폼 및 에이전트 웹사이트 구축을 위한 단계별 매뉴얼</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-violet-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 7. QR코드 이미지 생성기 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/qr/index.html" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="utility" data-keywords="qr코드 이미지 생성기 큐알 생성">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold">
-                            📱
-                        </div>
-                        <span class="text-[11px] font-semibold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200">생성 도구</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">QR코드 이미지 생성기</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">원하는 URL 및 텍스트를 고화질 QR코드 이미지로 신속하게 제작하는 유용한 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 8. 무료 메모장 -->
-                <a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/memo/index.html')" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="utility" data-keywords="메모장 무료 웹 메모 필기">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-xl font-bold">
-                            📝
-                        </div>
-                        <span class="text-[11px] font-semibold bg-cyan-50 text-cyan-700 px-2.5 py-1 rounded-full border border-cyan-200">실무 유틸</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">무료 웹 메모장</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 내용이나 현장 메모를 별도 설치 없이 웹 브라우저에서 편리하게 기록하는 메모장</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-cyan-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 9. AI 성우 (TTS 변환) -->
-                <a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/aiwav/index.html')" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="utility" data-keywords="ai 성우 tts 텍스트 음성 변환 wav 저장 리딩">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center text-xl font-bold">
-                            🎙️
-                        </div>
-                        <span class="text-[11px] font-semibold bg-pink-50 text-pink-700 px-2.5 py-1 rounded-full border border-pink-200">음성 생성</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">AI 성우 (TTS 변환)</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">텍스트를 입력하면 자연스러운 성우 목소리로 변환하여 WAV 음성 파일로 저장하는 생성 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-pink-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 10. 로또 번호 생성기 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/lotto" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="utility" data-keywords="로또 번호 생성기 행운 번호 추첨">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl font-bold">
-                            🔮
-                        </div>
-                        <span class="text-[11px] font-semibold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-200">이벤트</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">로또 번호 생성기</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">행운의 숫자를 무작위로 추출하여 최적의 로또 번호 조합을 제안하는 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 11. 마블레이싱 게임 (제미나이) -->
-                <a href="/game/mableroulet/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="마블레이싱 게임 제미나이 경연 레이싱 조별 아이스브레이킹">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center text-xl font-bold">
-                            🏎️
-                        </div>
-                        <span class="text-[11px] font-semibold bg-orange-50 text-orange-700 px-2.5 py-1 rounded-full border border-orange-200">레이싱</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">마블레이싱 (제미나이)</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 중 집중력 환기 및 조별 레이싱 경연을 위한 역동적인 구슬 레이스 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-orange-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 12. 마블레이싱 게임 (클로드) -->
-                <a href="/game/mablerace/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="마블레이싱 게임 클로드 경연 레이싱 조별 이벤트">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
-                            🏎️
-                        </div>
-                        <span class="text-[11px] font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">레이싱</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">마블레이싱 (클로드)</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 중 집중력 환기 및 조별 레이싱 경연을 위한 역동적인 구슬 레이스 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 13. 룰렛 게임 -->
-                <a href="/game/roulet/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="룰렛 게임 발표자 추첨 랜덤 제비뽑기">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center text-xl font-bold">
-                            🎯
-                        </div>
-                        <span class="text-[11px] font-semibold bg-red-50 text-red-700 px-2.5 py-1 rounded-full border border-red-200">랜덤 추첨</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">룰렛 게임</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">발표자 추첨 및 무작위 조별 이벤트를 위한 재미있는 한국어 지원 룰렛 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-red-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 14. 룰렛 게임 (Eng) -->
-                <a href="/game/roulet-eng/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="룰렛 게임 영어 eng roulette random draw">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-xl font-bold">
-                            🎯
-                        </div>
-                        <span class="text-[11px] font-semibold bg-rose-50 text-rose-700 px-2.5 py-1 rounded-full border border-rose-200">Global</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">룰렛 게임 (English)</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">발표자 추첨 및 무작위 조별 이벤트를 위한 영어 지원 랜덤 룰렛 도구</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-rose-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 15. 테트리스 게임 -->
-                <a href="/game/tetris/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="테트리스 게임 블록 미니게임 휴식">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-800 flex items-center justify-center text-xl font-bold">
-                            🧩
-                        </div>
-                        <span class="text-[11px] font-semibold bg-yellow-50 text-yellow-800 px-2.5 py-1 rounded-full border border-yellow-200">클래식</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">테트리스 게임</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">강의 중 집중력 환기 및 조별 이벤트를 위한 쉬어가는 퍼즐 코너</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-yellow-700">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 16. 퍼즐버블 게임 -->
-                <a href="/game/puzzlebubble/index.html" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="퍼즐버블 게임 버블 슈터 슈팅 휴식">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center text-xl font-bold">
-                            🧩
-                        </div>
-                        <span class="text-[11px] font-semibold bg-lime-50 text-lime-800 px-2.5 py-1 rounded-full border border-lime-200">퍼즐</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">퍼즐버블 게임</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">같은 색상의 방울을 맞춰 터뜨리는 강의 휴식용 버블 퍼즐 게임</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-lime-700">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 17. 블록깨기 게임 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/block/" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="블록깨기 게임 아케이드 벽돌깨기 브릭">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-green-100 text-green-700 flex items-center justify-center text-xl font-bold">
-                            🎮
-                        </div>
-                        <span class="text-[11px] font-semibold bg-green-50 text-green-700 px-2.5 py-1 rounded-full border border-green-200">아케이드</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">블록깨기 게임</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">웹 브라우저에서 가볍게 즐길 수 있는 클래식 벽돌 깨기 게임</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-green-600">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 18. 스네이크 게임 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/snake" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="스네이크 게임 뱀게임 방향키 먹이">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
-                            🐍
-                        </div>
-                        <span class="text-[11px] font-semibold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200">클래식</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">스네이크 게임</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">방향키를 이용하여 먹이를 먹고 몸집을 키워가는 클래식 뱀 게임</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-700">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                                <!-- 19. 번역기(8개국어) -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/8lang/8lang.html" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="스네이크 게임 뱀게임 방향키 먹이">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
-                            🐍
-                        </div>
-                        <span class="text-[11px] font-semibold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200">클래식</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">번역기(8개국어)</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">번역기(8개국어)</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-700">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-
-                <!-- 20. 이동식크레인 안전성검토 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/car1/car1.html" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="이동식크레인 인전성검토">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
-                            
-                        </div>
-                        <span class="text-[11px] font-semibold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200">클래식</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">이동식크레인 안전성검토</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">이동식크레인 안전성검토</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-700">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-                <!-- 21. Text전달 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/text/index.html" target="_blank" class="tool-card card-hover bg-white border border-slate-200/80 rounded-2xl p-5 block shadow-sm relative overflow-hidden" data-category="game" data-keywords="텍스트 전달">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
-                            🐍
-                        </div>
-                        <span class="text-[11px] font-semibold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200">클래식</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">텍스트 전달</h3>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">텍스트 전달</p>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-700">
-                        <span>바로가기</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                </a>
-
-
-                
-            </div>
-
-            <!-- Empty Search Message -->
-            <div id="noResults" class="hidden text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
-                <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 mb-3"></i>
-                <p class="text-slate-600 font-medium">검색 결과가 없습니다.</p>
-                <p class="text-slate-400 text-xs mt-1">다른 키워드로 검색하거나 카테고리 필터를 변경해보세요.</p>
-            </div>
-        </section>
-
-        <!-- Interactive Resource Banners (보물창고 & 방명록) -->
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <!-- 보물창고 -->
-            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white rounded-2xl p-6 sm:p-7 shadow-lg flex flex-col justify-between border border-slate-700/50 relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-                <div>
-                    <div class="inline-flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-                        <i class="fa-solid fa-box-archive"></i> Class Materials
-                    </div>
-                    <h3 class="text-xl font-extrabold mb-2 text-white">보물창고 (실습 자료실)</h3>
-                    <p class="text-slate-300 text-sm leading-relaxed mb-6">
-                        강의에 필요한 실습용 서식, 예제 데이터 및 핵심 강의 커리큘럼 자료를 다운로드하세요.
-                    </p>
-                </div>
-                <div>
-                    <a href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" target="_blank" 
-                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-amber-500/20 text-sm">
-                        <span>보물창고 바로가기</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 방명록 -->
-            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-6 sm:p-7 shadow-lg flex flex-col justify-between border border-slate-700/50 relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
-                <div>
-                    <div class="inline-flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">
-                        <i class="fa-solid fa-comments"></i> Feedback & Q&A
-                    </div>
-                    <h3 class="text-xl font-extrabold mb-2 text-white">방명록 & 질의응답</h3>
-                    <p class="text-slate-300 text-sm leading-relaxed mb-6">
-                        강의에 대한 피드백, 교육 소감이나 스마트 안전 관련 기술적 질문을 자유롭게 남겨주세요.
-                    </p>
-                </div>
-                <div>
-                    <a href="https://padlet.com/sirrius2022/padlet-9cd0j2khbmx7m2ec" target="_blank" 
-                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-blue-500/20 text-sm">
-                        <span>방명록 바로가기</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center text-xs sm:text-sm">
-            <p class="font-medium text-slate-300 mb-2">
-                제작자 : <strong class="text-white">김성남</strong> | 본 사이트는 스마트 건설안전 강의 및 실습 목적으로 운영됩니다.
-            </p>
-            <p class="text-slate-500 flex flex-wrap items-center justify-center gap-2">
-                <span>&copy; 2026 Kim Sung-nam. All rights reserved.</span>
-                <span class="hidden sm:inline">•</span>
-                <a href="mailto:sirrius@naver.com" class="hover:text-blue-400 transition-colors inline-flex items-center gap-1">
-                    <i class="fa-regular fa-envelope"></i> sirrius@naver.com
-                </a>
-            </p>
+        <!-- 탭 전환 버튼 -->
+        <div class="flex border-b border-gray-200">
+            <button onclick="switchTab('admin')" id="tabAdmin" class="flex-1 py-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 transition">1단계: 강사 입력 모드</button>
+            <button onclick="switchTab('student')" id="tabStudent" class="flex-1 py-3 text-sm font-semibold text-gray-400 border-b-2 border-transparent transition">2단계: 교육생 화면 미리보기</button>
         </div>
-    </footer>
 
-    <!-- Modal for Zooming QR Code -->
-    <div id="qrModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeQrModal()">
-        <div class="bg-white rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl relative" onclick="event.stopPropagation()">
-            <button onclick="closeQrModal()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100">
-                <i class="fa-solid fa-xmark"></i>
+        <!-- [모드 1] 강사 입력 및 생성 영역 -->
+        <div id="adminView" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">교육생들에게 전달할 프롬프트 입력</label>
+                <textarea id="inputPrompt" rows="8" class="w-full p-4 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none" placeholder="여기에 교육생들에게 공유할 프롬프트를 입력하세요..."></textarea>
+            </div>
+            
+            <button onclick="generateShareLink()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span>공유 링크 및 QR코드 만들기</span>
             </button>
-            <h4 class="text-lg font-bold text-slate-900 mb-1">스마트폰 접속 QR코드</h4>
-            <p class="text-xs text-slate-500 mb-4">카메라 앱으로 스캔하면 스마트폰으로 접속됩니다.</p>
-            <img src="homepage_qr.jpg" alt="홈페이지 접속 QR코드" class="w-48 h-48 mx-auto rounded-xl border border-slate-200 p-2 shadow-inner" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(window.location.href)">
-            <p class="text-xs text-blue-600 font-semibold mt-4">김성남 스마트 건설안전 포털</p>
+
+            <!-- 결과물 출력 영역 -->
+            <div id="resultBox" class="hidden space-y-4 pt-4 border-t border-gray-100">
+                <div class="bg-indigo-50 p-4 rounded-xl space-y-2">
+                    <label class="block text-xs font-bold text-indigo-700 uppercase">생성된 공유 링크</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="shareUrl" readonly class="w-full text-xs bg-white border border-indigo-200 p-2 rounded-lg text-gray-600 focus:outline-none">
+                        <button onclick="copyShareUrl()" class="bg-indigo-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-700 whitespace-nowrap">링크 복사</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center justify-center space-y-2">
+                    <span class="text-xs font-medium text-gray-500">이 QR코드를 칠판이나 화면에 띄워주세요</span>
+                    <div id="qrcode" class="p-3 bg-white border rounded-xl shadow-sm"></div>
+                </div>
+            </div>
         </div>
+
+        <!-- [모드 2] 교육생 화면 영역 -->
+        <div id="studentView" class="hidden space-y-4">
+            <div class="text-center space-y-1">
+                <h2 class="text-lg font-bold text-gray-800">강사님이 전달한 프롬프트</h2>
+                <p class="text-xs text-gray-500">버튼을 눌러 클립보드에 복사한 후 제미나이에 붙여넣으세요.</p>
+            </div>
+
+            <div class="relative">
+                <textarea id="displayPrompt" readonly class="w-full h-48 p-4 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none resize-none"></textarea>
+            </div>
+
+            <button onclick="copyDisplayPrompt()" id="studentCopyBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-6 rounded-xl transition duration-200 shadow-md flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                <span id="studentBtnText">프롬프트 텍스트 복사하기</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 토스트 알림 모달 -->
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 text-sm font-medium">
+        클립보드에 복사되었습니다!
     </div>
 
     <script>
-        let currentCategory = 'all';
+        const defaultPromptText = `다음 조건에 맞춰 내 꿈과 취미를 담은 반응형 웹사이트 HTML 코드를 작성해 줘.\n\n[내 꿈과 취미 5가지]\n1. \n2. \n3. \n4. \n5. \n\n[디자인 조건]\n- 세련되고 깔끔한 스타일\n- 반응형 디자인 적용`;
 
-        function filterCategory(category) {
-            currentCategory = category;
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedPrompt = urlParams.get('p');
             
-            // Update Tab Button Styles
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                if(btn.dataset.category === category) {
-                    btn.classList.add('bg-slate-900', 'text-white');
-                    btn.classList.remove('bg-white', 'text-slate-600', 'hover:bg-slate-100');
-                } else {
-                    btn.classList.remove('bg-slate-900', 'text-white');
-                    btn.classList.add('bg-white', 'text-slate-600', 'hover:bg-slate-100');
+            if (encodedPrompt) {
+                try {
+                    const decoded = decodeURIComponent(escape(atob(encodedPrompt)));
+                    document.getElementById('inputPrompt').value = decoded;
+                    document.getElementById('displayPrompt').value = decoded;
+                    switchTab('student'); // 링크로 들어온 교육생은 바로 2단계 화면으로
+                    return;
+                } catch (e) {
+                    console.error(e);
                 }
-            });
+            }
+            
+            // 기본값 세팅
+            document.getElementById('inputPrompt').value = defaultPromptText;
+            document.getElementById('displayPrompt').value = defaultPromptText;
+        };
 
-            applyFilters();
-        }
+        function switchTab(mode) {
+            const adminTab = document.getElementById('tabAdmin');
+            const studentTab = document.getElementById('tabStudent');
+            const adminView = document.getElementById('adminView');
+            const studentView = document.getElementById('studentView');
 
-        function handleSearch() {
-            applyFilters();
-        }
-
-        function applyFilters() {
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-            const cards = document.querySelectorAll('.tool-card');
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const cardCategory = card.dataset.category;
-                const cardKeywords = (card.dataset.keywords || '').toLowerCase();
-                const cardTitle = card.querySelector('h3').innerText.toLowerCase();
-                const cardText = card.querySelector('p').innerText.toLowerCase();
-
-                const matchesCategory = (currentCategory === 'all' || cardCategory === currentCategory);
-                const matchesSearch = !searchQuery || 
-                                     cardKeywords.includes(searchQuery) || 
-                                     cardTitle.includes(searchQuery) || 
-                                     cardText.includes(searchQuery);
-
-                if (matchesCategory && matchesSearch) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            const noResults = document.getElementById('noResults');
-            if (visibleCount === 0) {
-                noResults.classList.remove('hidden');
+            if (mode === 'admin') {
+                adminTab.className = "flex-1 py-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 transition";
+                studentTab.className = "flex-1 py-3 text-sm font-semibold text-gray-400 border-b-2 border-transparent transition";
+                adminView.classList.remove('hidden');
+                studentView.classList.add('hidden');
             } else {
-                noResults.classList.add('hidden');
+                studentTab.className = "flex-1 py-3 text-sm font-semibold text-emerald-600 border-b-2 border-emerald-600 transition";
+                adminTab.className = "flex-1 py-3 text-sm font-semibold text-gray-400 border-b-2 border-transparent transition";
+                studentView.classList.remove('hidden');
+                adminView.classList.add('hidden');
             }
         }
 
-        function openQrModal() {
-            document.getElementById('qrModal').classList.remove('hidden');
+        function generateShareLink() {
+            const promptText = document.getElementById('inputPrompt').value.trim();
+            if (!promptText) {
+                showToastMessage("프롬프트 내용을 입력해주세요!");
+                return;
+            }
+
+            // 2단계 미리보기 화면에도 강사님이 입력한 내용이 바로 반영되도록 설정
+            document.getElementById('displayPrompt').value = promptText;
+
+            const encoded = btoa(unescape(encodeURIComponent(promptText)));
+            const currentBaseUrl = window.location.href.split('?')[0];
+            const finalShareUrl = `${currentBaseUrl}?p=${encoded}`;
+
+            document.getElementById('shareUrl').value = finalShareUrl;
+            document.getElementById('resultBox').classList.remove('hidden');
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: finalShareUrl,
+                width: 180,
+                height: 180,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.M
+            });
+
+            showToastMessage("공유 링크와 QR코드가 생성되었습니다!");
         }
 
-        function closeQrModal() {
-            document.getElementById('qrModal').classList.add('hidden');
+        function copyShareUrl() {
+            const shareUrlInput = document.getElementById('shareUrl');
+            shareUrlInput.select();
+            document.execCommand('copy');
+            showToastMessage("링크가 복사되었습니다!");
+        }
+
+        function copyDisplayPrompt() {
+            const textarea = document.getElementById('displayPrompt');
+            textarea.select();
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    showStudentCopySuccess();
+                }).catch(() => {
+                    document.execCommand('copy');
+                    showStudentCopySuccess();
+                });
+            } else {
+                document.execCommand('copy');
+                showStudentCopySuccess();
+            }
+        }
+
+        function showStudentCopySuccess() {
+            const toast = document.getElementById('toast');
+            const btnText = document.getElementById('studentBtnText');
+            
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            btnText.innerText = '복사 완료! ✔';
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                btnText.innerText = '프롬프트 텍스트 복사하기';
+            }, 2000);
+        }
+
+        function showToastMessage(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2000);
         }
     </script>
 </body>
