@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>텍스트 실시간 공유</title>
+    <title>프롬프트 실시간 공유 에이전트</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- QR Code Library -->
@@ -87,25 +88,24 @@
         const defaultPromptText = `다음 조건에 맞춰 내 꿈과 취미를 담은 반응형 웹사이트 HTML 코드를 작성해 줘.\n\n[내 꿈과 취미 5가지]\n1. \n2. \n3. \n4. \n5. \n\n[디자인 조건]\n- 세련되고 깔끔한 스타일\n- 반응형 디자인 적용`;
 
         window.onload = function() {
-            // 강사 입력창에 기본값 세팅
-            document.getElementById('inputPrompt').value = defaultPromptText;
-
             const urlParams = new URLSearchParams(window.location.search);
             const encodedPrompt = urlParams.get('p');
             
             if (encodedPrompt) {
                 try {
                     const decoded = decodeURIComponent(escape(atob(encodedPrompt)));
+                    document.getElementById('inputPrompt').value = decoded;
                     document.getElementById('displayPrompt').value = decoded;
-                    switchTab('student');
+                    switchTab('student'); // 링크로 들어온 교육생은 바로 2단계 화면으로
+                    return;
                 } catch (e) {
-                    document.getElementById('displayPrompt').value = defaultPromptText;
-                    switchTab('student');
+                    console.error(e);
                 }
-            } else {
-                // 링크가 없어도 교육생 화면 탭을 눌렀을 때 기본 텍스트가 보이도록 설정
-                document.getElementById('displayPrompt').value = defaultPromptText;
             }
+            
+            // 기본값 세팅
+            document.getElementById('inputPrompt').value = defaultPromptText;
+            document.getElementById('displayPrompt').value = defaultPromptText;
         };
 
         function switchTab(mode) {
@@ -133,6 +133,9 @@
                 showToastMessage("프롬프트 내용을 입력해주세요!");
                 return;
             }
+
+            // 2단계 미리보기 화면에도 강사님이 입력한 내용이 바로 반영되도록 설정
+            document.getElementById('displayPrompt').value = promptText;
 
             const encoded = btoa(unescape(encodeURIComponent(promptText)));
             const currentBaseUrl = window.location.href.split('?')[0];
