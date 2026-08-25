@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>텍스트 실시간 공유</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-indigo-100 min-h-screen py-8 px-4 flex items-center justify-center">
+
+    <div class="max-w-xl w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
+        
+        <!-- 상단 헤더 -->
+        <div class="text-center space-y-2">
+            <span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">Gemini Canva 교육 도구</span>
+            <h1 class="text-2xl font-bold text-gray-900">텍스트 실시간 공유</h1>
+            <p class="text-sm text-gray-500">텍스트를 입력하고 공유하면, QR코드로 바로 가져갈 수 있습니다.</p>
+        </div>
+
+        <!-- 탭 전환 버튼 -->
+        <div class="flex border-b border-gray-200">
+            <button onclick="switchTab('admin')" id="tabAdmin" class="flex-1 py-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 transition">1단계: 강사 입력 모드</button>
+            <button onclick="switchTab('student')" id="tabStudent" class="flex-1 py-3 text-sm font-semibold text-gray-400 border-b-2 border-transparent transition">2단계: 교육생 화면 미리보기</button>
+        </div>
+
+        <!-- [모드 1] 강사 입력 및 생성 영역 -->
+        <div id="adminView" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">교육생들에게 전달할 프롬프트 입력</label>
+                <textarea id="inputPrompt" rows="8" class="w-full p-4 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none" placeholder="여기에 교육생들에게 공유할 프롬프트를 입력하세요..."></textarea>
+            </div>
+            
+            <button onclick="generateShareLink()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span>공유 링크 및 QR코드 만들기</span>
+            </button>
+
+            <!-- 결과물 출력 영역 -->
+            <div id="resultBox" class="hidden space-y-4 pt-4 border-t border-gray-100">
+                <div class="bg-indigo-50 p-4 rounded-xl space-y-2">
+                    <label class="block text-xs font-bold text-indigo-700 uppercase">생성된 공유 링크</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="shareUrl" readonly class="w-full text-xs bg-white border border-indigo-200 p-2 rounded-lg text-gray-600 focus:outline-none">
+                        <button onclick="copyShareUrl()" class="bg-indigo-600 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-700 whitespace-nowrap">링크 복사</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center justify-center space-y-2">
+                    <span class="text-xs font-medium text-gray-500">이 QR코드를 칠판이나 화면에 띄워주세요</span>
+                    <div id="qrcode" class="p-3 bg-white border rounded-xl shadow-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- [모드 2] 교육생 화면 영역 -->
+        <div id="studentView" class="hidden space-y-4">
+            <div class="text-center space-y-1">
+                <h2 class="text-lg font-bold text-gray-800">강사님이 전달한 프롬프트</h2>
+                <p class="text-xs text-gray-500">버튼을 눌러 클립보드에 복사한 후 제미나이에 붙여넣으세요.</p>
+            </div>
+
+            <div class="relative">
+                <textarea id="displayPrompt" readonly class="w-full h-48 p-4 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none resize-none"></textarea>
+            </div>
+
+            <button onclick="copyDisplayPrompt()" id="studentCopyBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-6 rounded-xl transition duration-200 shadow-md flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                <span id="studentBtnText">프롬프트 텍스트 복사하기</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 토스트 알림 모달 -->
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 text-sm font-medium">
+        클립보드에 복사되었습니다!
+    </div>
+
+    <script>
+        const defaultPromptText = `다음 조건에 맞춰 내 꿈과 취미를 담은 반응형 웹사이트 HTML 코드를 작성해 줘.\n\n[내 꿈과 취미 5가지]\n1. \n2. \n3. \n4. \n5. \n\n[디자인 조건]\n- 세련되고 깔끔한 스타일\n- 반응형 디자인 적용`;
+
+        window.onload = function() {
+            // 강사 입력창에 기본값 세팅
+            document.getElementById('inputPrompt').value = defaultPromptText;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedPrompt = urlParams.get('p');
+            
+            if (encodedPrompt) {
+                try {
+                    const decoded = decodeURIComponent(escape(atob(encodedPrompt)));
+                    document.getElementById('displayPrompt').value = decoded;
+                    switchTab('student');
+                } catch (e) {
+                    document.getElementById('displayPrompt').value = defaultPromptText;
+                    switchTab('student');
+                }
+            } else {
+                // 링크가 없어도 교육생 화면 탭을 눌렀을 때 기본 텍스트가 보이도록 설정
+                document.getElementById('displayPrompt').value = defaultPromptText;
+            }
+        };
+
+        function switchTab(mode) {
+            const adminTab = document.getElementById('tabAdmin');
+            const studentTab = document.getElementById('tabStudent');
+            const adminView = document.getElementById('adminView');
+            const studentView = document.getElementById('studentView');
+
+            if (mode === 'admin') {
+                adminTab.className = "flex-1 py-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 transition";
+                studentTab.className = "flex-1 py-3 text-sm font-semibold text-gray-400 border-b-2 border-transparent transition";
+                adminView.classList.remove('hidden');
+                studentView.classList.add('hidden');
+            } else {
+                studentTab.className = "flex-1 py-3 text-sm font-semibold text-emerald-600 border-b-2 border-emerald-600 transition";
+                adminTab.className = "flex-1 py-3 text-sm font-semibold text-gray-400 border-b-2 border-transparent transition";
+                studentView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+            }
+        }
+
+        function generateShareLink() {
+            const promptText = document.getElementById('inputPrompt').value.trim();
+            if (!promptText) {
+                showToastMessage("프롬프트 내용을 입력해주세요!");
+                return;
+            }
+
+            const encoded = btoa(unescape(encodeURIComponent(promptText)));
+            const currentBaseUrl = window.location.href.split('?')[0];
+            const finalShareUrl = `${currentBaseUrl}?p=${encoded}`;
+
+            document.getElementById('shareUrl').value = finalShareUrl;
+            document.getElementById('resultBox').classList.remove('hidden');
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: finalShareUrl,
+                width: 180,
+                height: 180,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.M
+            });
+
+            showToastMessage("공유 링크와 QR코드가 생성되었습니다!");
+        }
+
+        function copyShareUrl() {
+            const shareUrlInput = document.getElementById('shareUrl');
+            shareUrlInput.select();
+            document.execCommand('copy');
+            showToastMessage("링크가 복사되었습니다!");
+        }
+
+        function copyDisplayPrompt() {
+            const textarea = document.getElementById('displayPrompt');
+            textarea.select();
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    showStudentCopySuccess();
+                }).catch(() => {
+                    document.execCommand('copy');
+                    showStudentCopySuccess();
+                });
+            } else {
+                document.execCommand('copy');
+                showStudentCopySuccess();
+            }
+        }
+
+        function showStudentCopySuccess() {
+            const toast = document.getElementById('toast');
+            const btnText = document.getElementById('studentBtnText');
+            
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            btnText.innerText = '복사 완료! ✔';
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                btnText.innerText = '프롬프트 텍스트 복사하기';
+            }, 2000);
+        }
+
+        function showToastMessage(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
