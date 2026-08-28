@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>스페이스 인베이더 - 시네마틱 에디션</title>
+    <title>스페이스 인베이더 - 스피디 전환</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -100,15 +100,16 @@
         <div id="bombOverlay"></div>
         <div id="freezeOverlay"></div>
 
-        <!-- 💡 스테이지 클리어 / 다음 판 알림 오버레이 -->
-        <div id="transitionOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 z-20 pointer-events-none transition-opacity duration-500 opacity-0 hidden">
+        <!-- 스테이지 클리어 / 다음 판 알림 오버레이 -->
+        <!-- 💡 transition 시간도 500ms -> 300ms로 단축하여 빠릿하게 변경 -->
+        <div id="transitionOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70 z-20 pointer-events-none transition-opacity duration-300 opacity-0 hidden">
             <h2 id="transitionTitle" class="text-4xl md:text-5xl text-white mb-6 text-center leading-loose text-shadow-glow"></h2>
             <div id="transitionSub" class="text-lg md:text-xl text-center leading-loose"></div>
         </div>
 
         <!-- 메인 메뉴 / 게임 오버 오버레이 -->
         <div id="uiOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 z-30 transition-opacity duration-300">
-            <h1 id="titleText" class="text-4xl md:text-5xl text-blue-400 mb-4 text-center leading-loose text-shadow-glow">SPACE<br>INVADERS<br><span class="text-2xl text-yellow-400">CINEMATIC</span></h1>
+            <h1 id="titleText" class="text-4xl md:text-5xl text-blue-400 mb-4 text-center leading-loose text-shadow-glow">SPACE<br>INVADERS<br><span class="text-2xl text-yellow-400">HYPER</span></h1>
             <p id="scoreText" class="text-xl text-white mb-6 hidden">최종 점수: <span id="finalScore" class="text-yellow-400">0</span></p>
             <button id="startBtn" class="px-8 py-4 bg-blue-600 text-white text-xl hover:bg-blue-500 transition-colors border-4 border-blue-300 rounded cursor-pointer active:scale-95 shadow-[0_0_15px_rgba(59,130,246,0.5)] mb-4 pointer-events-auto">
                 출격 대기
@@ -146,7 +147,7 @@ const finalScoreEl = document.getElementById('finalScore');
 const transitionTitle = document.getElementById('transitionTitle');
 const transitionSub = document.getElementById('transitionSub');
 
-let gameState = 'MENU'; // MENU, PLAYING, TRANSITION, GAMEOVER
+let gameState = 'MENU'; 
 let score = 0;
 let lives = 3;
 let level = 1;
@@ -280,7 +281,6 @@ function playWarningSound() {
     playTone(900, 'square', 0.15, 0.05);
     setTimeout(() => playTone(800, 'square', 0.15, 0.05), 150);
 }
-// 💡 성공/클리어 사운드 추가
 function playSuccessSound() {
     if (!audioCtx) return;
     playTone(400, 'square', 0.1, 0.05);
@@ -392,7 +392,6 @@ function draw() {
     
     stars.forEach(star => {
         ctx.fillStyle = star.color;
-        // 💡 트랜지션(클리어) 상태면 별이 하이퍼 스피드로 길어짐
         let starLengthMultiplier = (gameState === 'TRANSITION') ? 6 : ((player.powerups.freeze > 0) ? 1 : 2.5); 
         ctx.fillRect(star.x, star.y, star.size, star.size * starLengthMultiplier); 
     });
@@ -402,7 +401,6 @@ function draw() {
         return;
     }
 
-    // 아이템
     items.forEach(item => {
         ctx.fillStyle = item.color; ctx.fillRect(item.x, item.y, item.size, item.size);
         ctx.fillStyle = 'white'; ctx.font = '12px "Press Start 2P"';
@@ -411,7 +409,6 @@ function draw() {
         ctx.strokeStyle = 'white'; ctx.lineWidth = 1; ctx.strokeRect(item.x, item.y, item.size, item.size);
     });
 
-    // 드론
     if (player.powerups.helper > 0) {
         ctx.fillStyle = '#f472b6'; 
         ctx.fillRect(player.x - 24, player.y + 10, 16, 16); ctx.fillStyle = '#fff'; ctx.fillRect(player.x - 20, player.y + 14, 8, 8);
@@ -441,12 +438,10 @@ function draw() {
         ctx.strokeStyle = `hsl(${(frameCount * 15) % 360}, 100%, 60%)`; ctx.lineWidth = 4; ctx.stroke();
     }
 
-    // 엔진 불꽃
     let thrustHeight = (gameState === 'TRANSITION') ? 30 : (Math.random() * 15 + 5);
     ctx.fillStyle = '#ef4444'; ctx.fillRect(player.x + player.width/2 - 4, player.y + player.height, 8, thrustHeight);
     ctx.fillStyle = '#facc15'; ctx.fillRect(player.x + player.width/2 - 2, player.y + player.height, 4, thrustHeight/2);
 
-    // 총알
     bullets.forEach(b => {
         if (b.isWave) {
             let grad = ctx.createLinearGradient(b.x, b.y, b.x + b.width, b.y);
@@ -499,7 +494,6 @@ function draw() {
 
     ctx.restore();
 
-    // UI 하단
     ctx.fillStyle = '#fff'; ctx.font = '14px "Press Start 2P"'; ctx.textAlign = 'left'; ctx.fillText(`SCORE:${score}`, 20, 40);
     ctx.textAlign = 'center'; ctx.fillStyle = '#facc15'; ctx.fillText(`WAVE ${level}`, canvas.width/2, 40);
     ctx.textAlign = 'right';
@@ -527,11 +521,11 @@ function useBomb() {
     });
 }
 
-// 💡 스테이지 클리어 연출 이벤트
+// 💡 스테이지 클리어 연출 이벤트 (인터벌 대폭 단축 5.5초 -> 2.5초)
 function startWaveTransition() {
     gameState = 'TRANSITION';
     score += 2000;
-    alienBullets = []; // 잔여 공격 소멸
+    alienBullets = [];
     
     playSuccessSound();
     
@@ -542,7 +536,8 @@ function startWaveTransition() {
     transitionOverlay.classList.remove('hidden');
     setTimeout(() => transitionOverlay.classList.remove('opacity-0'), 50);
 
-    // 연출 시퀀스 타임라인
+    // 연출 시퀀스 타임라인 (빠른 템포)
+    // 1. 1.2초 뒤 다음 웨이브 경고 시작 (기존 3초)
     setTimeout(() => {
         level++;
         transitionTitle.innerHTML = `WAVE ${level}`;
@@ -551,15 +546,18 @@ function startWaveTransition() {
         playWarningSound();
         triggerScreenShake(10);
         
+        // 2. 1.0초 동안 경고 깜빡인 후 화면 복귀 (기존 2초)
         setTimeout(() => {
             transitionOverlay.classList.add('opacity-0');
+            
+            // 3. 0.3초간 페이드아웃 후 즉시 게임 시작 (기존 0.5초)
             setTimeout(() => {
                 transitionOverlay.classList.add('hidden');
-                resetStage(); // 다음 스테이지 세팅
+                resetStage(); 
                 gameState = 'PLAYING';
-            }, 500);
-        }, 2000);
-    }, 3000);
+            }, 300); 
+        }, 1000); 
+    }, 1200); 
 }
 
 function update() {
@@ -571,7 +569,6 @@ function update() {
     let starSpeedMult = (player.powerups.speed > 0) ? 1.5 : 1;
     starSpeedMult *= freezeMod;
     
-    // 💡 트랜지션(클리어) 상태일 때 별들이 하이퍼스피드로 이동
     if (gameState === 'TRANSITION') starSpeedMult = 6;
     
     stars.forEach(star => {
@@ -581,7 +578,6 @@ function update() {
 
     if (gameState !== 'PLAYING' && gameState !== 'TRANSITION') return;
 
-    // 파워업 타이머 감소
     if (player.powerups.spread > 0) player.powerups.spread--;
     if (player.powerups.speed > 0) player.powerups.speed--;
     if (player.powerups.freeze > 0) {
@@ -594,7 +590,6 @@ function update() {
     if (player.powerups.quad > 0) player.powerups.quad--;
     if (player.powerups.wave > 0) player.powerups.wave--;
 
-    // 우주선 이동 (트랜지션 중에도 조작 가능)
     if (pointer.active) {
         player.x += (pointer.targetX - (player.x + player.width/2)) * 0.3;
         player.y += (pointer.targetY - (player.y + player.height/2)) * 0.3;
@@ -604,7 +599,6 @@ function update() {
     pointer.targetX = Math.max(0, Math.min(canvas.width, pointer.targetX));
     pointer.targetY = Math.max(canvas.height * 0.5, Math.min(canvas.height - 20, pointer.targetY));
 
-    // 💡 발사 및 적군 업데이트는 오직 PLAYING 상태에서만 (연출 중엔 휴식)
     if (gameState === 'PLAYING') {
         if (player.fireCooldown > 0) player.fireCooldown--;
         
@@ -646,7 +640,6 @@ function update() {
             player.fireCooldown = currentFireRate;
         }
 
-        // 아이템 처리
         for (let i = items.length - 1; i >= 0; i--) {
             items[i].y += items[i].speed;
             if (items[i].y < player.y + player.height && items[i].y + items[i].size > player.y &&
@@ -674,7 +667,6 @@ function update() {
             if (items[i].y > canvas.height) items.splice(i, 1);
         }
 
-        // 적군 이동 및 공격 로직
         let edgeHit = false;
         let activeAliensCount = 0;
         
@@ -719,13 +711,11 @@ function update() {
             }
         }
 
-        // 💡 적을 모두 죽였을 때 시네마틱 트랜지션 실행
         if (activeAliensCount === 0) {
             startWaveTransition();
             return;
         }
 
-        // 내 총알 충돌 검사
         for (let i = bullets.length - 1; i >= 0; i--) {
             let b = bullets[i];
             let hit = false;
@@ -760,18 +750,18 @@ function update() {
             if (hit && !b.pierce && !b.isWave) bullets.splice(i, 1);
         }
         
-        // 적 총알 충돌 검사
         for (let i = alienBullets.length - 1; i >= 0; i--) {
             let b = alienBullets[i];
-            if (b.x < player.x + player.width - 8 && b.x + b.width > player.x + 8 && 
-                b.y < player.y + player.height - 6 && b.y + b.height > player.y + 6) {
+            let hitXMargin = 8; 
+            let hitYMargin = 6;
+            if (b.x < player.x + player.width - hitXMargin && b.x + b.width > player.x + hitXMargin && 
+                b.y < player.y + player.height - hitYMargin && b.y + b.height > player.y + hitYMargin) {
                 alienBullets.splice(i, 1);
                 if (player.powerups.invincible > 0) { createExplosion(b.x, b.y, '#ffffff', false); continue; }
                 takeDamage(); if (gameState === 'GAMEOVER') return;
             }
         }
 
-        // 적 바디 체크
         aliens.forEach(alien => {
             if (alien.active && alien.y + alien.height >= player.y + 10 && alien.x < player.x + player.width && alien.x + alien.width > player.x) {
                 if (player.powerups.invincible > 0) {
@@ -785,9 +775,8 @@ function update() {
         aliens.forEach(alien => {
             if (alien.active && alien.y + alien.height >= canvas.height - 10) { lives = 0; player.powerups.shield = false; takeDamage(); }
         });
-    } // -- End of PLAYING scope --
+    } // End of PLAYING scope
 
-    // 총알/파티클 이동은 트랜지션(연출) 중에도 계속 진행
     for (let i = bullets.length - 1; i >= 0; i--) {
         bullets[i].x += bullets[i].vx; bullets[i].y += bullets[i].vy;
         if (bullets[i].y < -50 || bullets[i].x < -50 || bullets[i].x > canvas.width + 50) bullets.splice(i, 1);
