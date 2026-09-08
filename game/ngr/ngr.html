@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>추억의 오락실 너구리 (Ponpoko)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background: radial-gradient(circle at center, #1a1c2e 0%, #080911 100%);
+      color: #f8fafc;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow-x: hidden;
+    }
+    .retro-font {
+      font-family: 'Press Start 2P', monospace;
+    }
+    /* CRT Scanline Effect */
+    .crt-screen::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 20;
+      background-size: 100% 3px, 6px 100%;
+      pointer-events: none;
+      border-radius: 12px;
+    }
+    .glow-gold {
+      text-shadow: 0 0 10px #fbbf24, 0 0 20px #d97706;
+    }
+    .glow-cyan {
+      text-shadow: 0 0 10px #38bdf8, 0 0 20px #0284c7;
+    }
+    /* Touch Controls styling */
+    .touch-btn {
+      touch-action: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .touch-btn:active {
+      transform: scale(0.92);
+      filter: brightness(1.25);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 selection:bg-amber-500">
+
+  <div class="w-full max-w-[840px] flex flex-col items-center">
+    <!-- Top Bar / Title -->
+    <header class="w-full flex items-center justify-between mb-2 sm:mb-3 px-2">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl sm:text-3xl">🦝</span>
+        <h1 class="retro-font text-base sm:text-xl font-bold tracking-wider text-amber-400 glow-gold">NEOGURI</h1>
+      </div>
+      <div class="flex items-center gap-2 text-xs sm:text-sm">
+        <button id="soundToggleBtn" class="bg-slate-800 hover:bg-slate-700 text-amber-300 px-2.5 py-1 rounded border border-amber-500/30 flex items-center gap-1 transition">
+          <span id="soundIcon">🔊</span> SOUND
+        </button>
+        <button id="helpBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded border border-slate-600 transition">
+          ❓ 조작법
+        </button>
+      </div>
+    </header>
+
+    <!-- Score & Status Dashboard -->
+    <div class="w-full bg-slate-900/90 border border-slate-700/80 rounded-t-xl px-4 py-2 flex items-center justify-between retro-font text-xs sm:text-sm shadow-md">
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div>
+          <span class="text-slate-400 text-[10px] block mb-0.5">SCORE</span>
+          <span id="scoreDisplay" class="text-white text-sm sm:text-base glow-cyan">00000</span>
+        </div>
+        <div>
+          <span class="text-slate-400 text-[10px] block mb-0.5">HIGH</span>
+          <span id="highScoreDisplay" class="text-amber-400 text-sm sm:text-base">05000</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div>
+          <span class="text-slate-400 text-[10px] block mb-0.5">STAGE</span>
+          <span id="stageDisplay" class="text-emerald-400 text-sm sm:text-base">01</span>
+        </div>
+        <div>
+          <span class="text-slate-400 text-[10px] block mb-0.5">LIVES</span>
+          <div id="livesContainer" class="flex gap-1 text-sm sm:text-base">
+            <span>🦝</span><span>🦝</span><span>🦝</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="relative w-full aspect-[4/3] bg-black rounded-b-xl border-x border-b border-slate-700 overflow-hidden shadow-2xl crt-screen flex items-center justify-center">
+      <canvas id="gameCanvas" width="800" height="600" class="w-full h-full block image-rendering-pixelated"></canvas>
+
+      <!-- Overlay Screens (Start, Game Over, Stage Clear, Pause) -->
+      <div id="overlayScreen" class="absolute inset-0 z-30 bg-black/85 flex flex-col items-center justify-center p-6 text-center backdrop-blur-sm">
+        <!-- Start Game Card -->
+        <div id="startMenu" class="flex flex-col items-center max-w-md">
+          <div class="text-5xl sm:text-6xl mb-3 animate-bounce">🦝</div>
+          <h2 class="retro-font text-xl sm:text-3xl text-amber-400 mb-2 glow-gold">PONPOKO</h2>
+          <p class="text-slate-300 text-xs sm:text-sm mb-6">오리지널 추억의 고전 아케이드 너구리</p>
+          
+          <div class="bg-slate-800/90 border border-slate-700 rounded-lg p-4 mb-6 text-left text-xs sm:text-sm text-slate-300 w-full space-y-2">
+            <p>🎯 <strong class="text-amber-300">목표:</strong> 모든 먹이(당근, 과일 등)를 먹어 스테이지 클리어!</p>
+            <p>⚠️ <strong class="text-rose-400">위험:</strong> 기어다니는 뱀과 뾰족한 압정(가시)을 피하세요.</p>
+            <p>🪜 <strong class="text-emerald-300">사다리:</strong> 사다리 위/아래에서 방향키로 이동 가능.</p>
+            <p>🦘 <strong class="text-cyan-300">점프:</strong> 점프 중에는 공중에서 궤적이 유지됩니다.</p>
+          </div>
+
+          <button id="startGameBtn" class="retro-font text-sm sm:text-base bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-8 py-3.5 rounded-lg shadow-lg hover:shadow-amber-500/50 transition-all transform hover:-translate-y-0.5">
+            START GAME
+          </button>
+        </div>
+
+        <!-- Stage Clear Card -->
+        <div id="stageClearMenu" class="hidden flex flex-col items-center">
+          <div class="text-5xl mb-3">🎉</div>
+          <h2 class="retro-font text-2xl sm:text-3xl text-emerald-400 mb-2 glow-cyan">STAGE CLEAR!</h2>
+          <p id="stageClearBonusText" class="retro-font text-xs sm:text-sm text-amber-300 mb-6">BONUS +1000</p>
+          <button id="nextStageBtn" class="retro-font text-sm sm:text-base bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 rounded-lg shadow-lg transition">
+            NEXT STAGE
+          </button>
+        </div>
+
+        <!-- Game Over Card -->
+        <div id="gameOverMenu" class="hidden flex flex-col items-center">
+          <div class="text-5xl mb-3">💀</div>
+          <h2 class="retro-font text-2xl sm:text-3xl text-rose-500 mb-2 glow-gold">GAME OVER</h2>
+          <p id="finalScoreText" class="retro-font text-xs sm:text-sm text-slate-300 mb-6">FINAL SCORE: 0</p>
+          <button id="restartGameBtn" class="retro-font text-sm sm:text-base bg-rose-600 hover:bg-rose-500 text-white font-bold px-8 py-3.5 rounded-lg shadow-lg transition">
+            PLAY AGAIN
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full mt-3 flex items-center justify-between px-2 sm:px-6">
+      <!-- Left: D-Pad -->
+      <div class="grid grid-cols-3 gap-1.5 w-36 h-36 sm:w-40 sm:h-40 p-1 bg-slate-900/60 rounded-2xl border border-slate-800 backdrop-blur-sm">
+        <div></div>
+        <button id="btnUp" class="touch-btn bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow active:bg-amber-600">▲</button>
+        <div></div>
+        <button id="btnLeft" class="touch-btn bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow active:bg-amber-600">◀</button>
+        <div class="bg-slate-950/80 rounded-lg flex items-center justify-center text-[10px] text-slate-600 font-mono">PAD</div>
+        <button id="btnRight" class="touch-btn bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow active:bg-amber-600">▶</button>
+        <div></div>
+        <button id="btnDown" class="touch-btn bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow active:bg-amber-600">▼</button>
+        <div></div>
+      </div>
+
+      <!-- Controls Hint for PC -->
+      <div class="hidden md:flex flex-col items-center text-center text-slate-400 text-xs gap-1 bg-slate-900/40 p-3 rounded-xl border border-slate-800">
+        <span class="text-amber-400 font-bold">키보드 조작법</span>
+        <span>이동: [◀ / ▶] 방향키</span>
+        <span>사다리: [▲ / ▼] 방향키</span>
+        <span>점프: [스페이스바] 또는 [Shift]</span>
+      </div>
+
+      <!-- Right: Action Buttons (Jump) -->
+      <div class="flex items-center gap-3">
+        <button id="btnJump" class="touch-btn w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-rose-600 to-amber-500 text-white font-bold text-base sm:text-lg shadow-lg border-2 border-rose-400/50 flex flex-col items-center justify-center active:scale-95">
+          <span class="retro-font text-xs sm:text-sm">JUMP</span>
+          <span class="text-[10px] text-rose-200 mt-0.5">점프</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 max-w-md w-full p-6 rounded-xl shadow-2xl relative">
+      <h3 class="retro-font text-lg text-amber-400 mb-4 flex items-center gap-2">
+        <span>🎮</span> 게임 가이드
+      </h3>
+      <div class="text-slate-300 text-sm space-y-3 mb-6">
+        <p>1. <strong>조작법</strong>: 좌우 방향키로 걷고, 사다리 위치에서 위/아래 방향키로 층간을 오르내릴 수 있습니다.</p>
+        <p>2. <strong>포물선 점프</strong>: 이동 중 점프하면 포물선을 그리며 장애물을 뛰어넘습니다. (점프 중에는 방향을 꺾을 수 없는 고전 방식의 관성이 적용됩니다!)</p>
+        <p>3. <strong>장애물</strong>: 바닥에 박힌 <strong>압정</strong>과 천천히 순찰하는 <strong>뱀</strong>에 부딪히면 생명을 잃습니다.</p>
+        <p>4. <strong>클리어</strong>: 맵에 있는 맛있는 음식 아이템들을 모두 획득하면 다음 라운드로 진출합니다!</p>
+      </div>
+      <button id="closeHelpBtn" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-lg border border-slate-600">
+        닫기
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* Chiptune Sound Engine via Web Audio API */
+    class RetroAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playJump() {
+        if (!this.enabled) return;
+        this.init();
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'square';
+          const now = this.ctx.currentTime;
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(600, now + 0.16);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.16);
+        } catch(e) {}
+      }
+
+      playCollect() {
+        if (!this.enabled) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.05);
+            gain.gain.setValueAtTime(0.15, now + i * 0.05);
+            gain.gain.linearRampToValueAtTime(0.001, now + i * 0.05 + 0.09);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + i * 0.05);
+            osc.stop(now + i * 0.05 + 0.1);
+          });
+        } catch(e) {}
+      }
+
+      playDie() {
+        if (!this.enabled) return;
+        this.init();
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          const now = this.ctx.currentTime;
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.linearRampToValueAtTime(60, now + 0.5);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        } catch(e) {}
+      }
+
+      playLadder() {
+        if (!this.enabled) return;
+        this.init();
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          const now = this.ctx.currentTime;
+          osc.frequency.setValueAtTime(220 + Math.random() * 40, now);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.linearRampToValueAtTime(0.001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } catch(e) {}
+      }
+
+      playStageClear() {
+        if (!this.enabled) return;
+        this.init();
+        try {
+          const notes = [261.6, 329.6, 392.0, 523.2, 659.2, 783.9, 1046.5];
+          const now = this.ctx.currentTime;
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'square';
+            const t = now + idx * 0.09;
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.linearRampToValueAtTime(0.01, t + 0.12);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.14);
+          });
+        } catch(e) {}
+      }
+    }
+
+    const sound = new RetroAudioEngine();
+
+    // Virtual Canvas: 800 x 600
+    // Floor positions Y: 520 (ground), 420, 320, 220, 120
+    const LEVELS = [
+      {
+        stageNum: 1,
+        floors: [
+          { y: 520, x1: 40, x2: 760 },
+          { y: 420, x1: 40, x2: 760 },
+          { y: 320, x1: 40, x2: 760 },
+          { y: 220, x1: 40, x2: 760 },
+          { y: 120, x1: 40, x2: 760 }
+        ],
+        ladders: [
+          { x: 120, y1: 420, y2: 520 },
+          { x: 680, y1: 320, y2: 420 },
+          { x: 220, y1: 220, y2: 320 },
+          { x: 580, y1: 120, y2: 220 }
+        ],
+        traps: [
+          { x: 380, floorY: 520 },
+          { x: 420, floorY: 420 },
+          { x: 480, floorY: 320 },
+          { x: 350, floorY: 220 }
+        ],
+        snakes: [
+          { x: 500, floorY: 420, minX: 300, maxX: 640, speed: 1.2, dir: -1 },
+          { x: 300, floorY: 220, minX: 160, maxX: 520, speed: 1.5, dir: 1 }
+        ],
+        items: [
+          { x: 200, floorY: 520, type: 'carrot', points: 100 },
+          { x: 600, floorY: 520, type: 'carrot', points: 100 },
+          { x: 280, floorY: 420, type: 'apple', points: 150 },
+          { x: 620, floorY: 420, type: 'apple', points: 150 },
+          { x: 140, floorY: 320, type: 'strawberry', points: 200 },
+          { x: 540, floorY: 320, type: 'strawberry', points: 200 },
+          { x: 300, floorY: 220, type: 'grape', points: 250 },
+          { x: 650, floorY: 220, type: 'grape', points: 250 },
+          { x: 180, floorY: 120, type: 'watermelon', points: 300 },
+          { x: 400, floorY: 120, type: 'watermelon', points: 300 }
+        ],
+        startPos: { x: 70, y: 520 }
+      },
+      {
+        stageNum: 2,
+        floors: [
+          { y: 520, x1: 40, x2: 760 },
+          { y: 420, x1: 40, x2: 760 },
+          { y: 320, x1: 40, x2: 760 },
+          { y: 220, x1: 40, x2: 760 },
+          { y: 120, x1: 40, x2: 760 }
+        ],
+        ladders: [
+          { x: 650, y1: 420, y2: 520 },
+          { x: 150, y1: 320, y2: 420 },
+          { x: 600, y1: 220, y2: 320 },
+          { x: 300, y1: 120, y2: 220 }
+        ],
+        traps: [
+          { x: 250, floorY: 520 },
+          { x: 450, floorY: 520 },
+          { x: 350, floorY: 420 },
+          { x: 500, floorY: 420 },
+          { x: 320, floorY: 320 },
+          { x: 420, floorY: 220 },
+          { x: 540, floorY: 120 }
+        ],
+        snakes: [
+          { x: 200, floorY: 520, minX: 100, maxX: 400, speed: 1.6, dir: 1 },
+          { x: 450, floorY: 320, minX: 250, maxX: 650, speed: 1.8, dir: -1 },
+          { x: 450, floorY: 120, minX: 200, maxX: 680, speed: 2.0, dir: 1 }
+        ],
+        items: [
+          { x: 120, floorY: 520, type: 'apple', points: 150 },
+          { x: 360, floorY: 520, type: 'carrot', points: 100 },
+          { x: 540, floorY: 520, type: 'grape', points: 250 },
+          { x: 260, floorY: 420, type: 'strawberry', points: 200 },
+          { x: 600, floorY: 420, type: 'apple', points: 150 },
+          { x: 220, floorY: 320, type: 'watermelon', points: 300 },
+          { x: 560, floorY: 320, type: 'carrot', points: 100 },
+          { x: 160, floorY: 220, type: 'grape', points: 250 },
+          { x: 500, floorY: 220, type: 'strawberry', points: 200 },
+          { x: 150, floorY: 120, type: 'watermelon', points: 300 },
+          { x: 620, floorY: 120, type: 'watermelon', points: 300 }
+        ],
+        startPos: { x: 80, y: 520 }
+      },
+      {
+        stageNum: 3,
+        floors: [
+          { y: 520, x1: 40, x2: 760 },
+          { y: 420, x1: 40, x2: 760 },
+          { y: 320, x1: 40, x2: 760 },
+          { y: 220, x1: 40, x2: 760 },
+          { y: 120, x1: 40, x2: 760 }
+        ],
+        ladders: [
+          { x: 200, y1: 420, y2: 520 },
+          { x: 500, y1: 420, y2: 520 },
+          { x: 350, y1: 320, y2: 420 },
+          { x: 650, y1: 320, y2: 420 },
+          { x: 180, y1: 220, y2: 320 },
+          { x: 520, y1: 120, y2: 220 }
+        ],
+        traps: [
+          { x: 320, floorY: 520 },
+          { x: 620, floorY: 520 },
+          { x: 220, floorY: 420 },
+          { x: 450, floorY: 320 },
+          { x: 320, floorY: 220 },
+          { x: 460, floorY: 220 },
+          { x: 260, floorY: 120 },
+          { x: 380, floorY: 120 }
+        ],
+        snakes: [
+          { x: 400, floorY: 520, minX: 240, maxX: 600, speed: 2.0, dir: 1 },
+          { x: 260, floorY: 420, minX: 100, maxX: 400, speed: 2.2, dir: -1 },
+          { x: 500, floorY: 320, minX: 200, maxX: 620, speed: 2.2, dir: 1 },
+          { x: 350, floorY: 120, minX: 120, maxX: 500, speed: 2.4, dir: -1 }
+        ],
+        items: [
+          { x: 100, floorY: 520, type: 'watermelon', points: 300 },
+          { x: 380, floorY: 520, type: 'carrot', points: 100 },
+          { x: 680, floorY: 520, type: 'apple', points: 150 },
+          { x: 120, floorY: 420, type: 'strawberry', points: 200 },
+          { x: 420, floorY: 420, type: 'grape', points: 250 },
+          { x: 240, floorY: 320, type: 'watermelon', points: 300 },
+          { x: 560, floorY: 320, type: 'apple', points: 150 },
+          { x: 240, floorY: 220, type: 'strawberry', points: 200 },
+          { x: 600, floorY: 220, type: 'grape', points: 250 },
+          { x: 120, floorY: 120, type: 'watermelon', points: 300 },
+          { x: 660, floorY: 120, type: 'watermelon', points: 300 }
+        ],
+        startPos: { x: 70, y: 520 }
+      }
+    ];
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const highScoreDisplay = document.getElementById('highScoreDisplay');
+    const stageDisplay = document.getElementById('stageDisplay');
+    const livesContainer = document.getElementById('livesContainer');
+    const overlayScreen = document.getElementById('overlayScreen');
+    const startMenu = document.getElementById('startMenu');
+    const stageClearMenu = document.getElementById('stageClearMenu');
+    const gameOverMenu = document.getElementById('gameOverMenu');
+    const stageClearBonusText = document.getElementById('stageClearBonusText');
+    const finalScoreText = document.getElementById('finalScoreText');
+
+    let gameState = 'START'; // START, PLAYING, DYING, STAGECLEAR, GAMEOVER
+    let currentStageIndex = 0;
+    let score = 0;
+    let highScore = 5000;
+    let lives = 3;
+    let animFrameId = null;
+    let lastTime = 0;
+
+    // Keys State
+    const keys = {
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+      jump: false
+    };
+
+    // Raccoon Player Object
+    const raccoon = {
+      x: 80,
+      y: 520,
+      width: 32,
+      height: 38,
+      vx: 0,
+      vy: 0,
+      speed: 3.2,
+      climbSpeed: 2.4,
+      jumpForce: -6.2, // 원작 아케이드에 맞춘 안정적인 점프력 (장애물만 딱 넘는 높이)
+      gravity: 0.42,   // 자연스러운 포물선 낙하 중력
+      jumpOriginFloorY: 520, // 점프를 시작한 층 기억 (윗층 착지 방지)
+      facing: 1, // 1: right, -1: left
+      isGrounded: true,
+      isClimbing: false,
+      isJumping: false,
+      jumpVx: 0, // fixed horizontal speed during arc jump (arcade style)
+      walkFrame: 0,
+      walkTimer: 0,
+      deathTimer: 0,
+      
+      reset(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = 0;
+        this.vy = 0;
+        this.facing = 1;
+        this.isGrounded = true;
+        this.isClimbing = false;
+        this.isJumping = false;
+        this.jumpVx = 0;
+        this.jumpOriginFloorY = y;
+        this.walkFrame = 0;
+        this.walkTimer = 0;
+      }
+    };
+
+    // Current Active Level Elements
+    let currentFloors = [];
+    let currentLadders = [];
+    let currentTraps = [];
+    let currentSnakes = [];
+    let currentItems = [];
+
+    function loadStage(index) {
+      const template = LEVELS[index % LEVELS.length];
+      currentFloors = JSON.parse(JSON.stringify(template.floors));
+      currentLadders = JSON.parse(JSON.stringify(template.ladders));
+      currentTraps = JSON.parse(JSON.stringify(template.traps));
+      currentSnakes = JSON.parse(JSON.stringify(template.snakes));
+      currentItems = JSON.parse(JSON.stringify(template.items));
+
+      raccoon.reset(template.startPos.x, template.startPos.y);
+
+      stageDisplay.textContent = String(index + 1).padStart(2, '0');
+      updateLivesUI();
+    }
+
+    function updateScore(pts) {
+      score += pts;
+      scoreDisplay.textContent = String(score).padStart(5, '0');
+      if (score > highScore) {
+        highScore = score;
+        highScoreDisplay.textContent = String(highScore).padStart(5, '0');
+      }
+    }
+
+    function updateLivesUI() {
+      let str = '';
+      for (let i = 0; i < lives; i++) {
+        str += '🦝';
+      }
+      livesContainer.innerHTML = str || '💀';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+        e.preventDefault();
+      }
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = true;
+      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = true;
+      if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+        keys.jump = true;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
+      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = false;
+      if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+        keys.jump = false;
+      }
+    });
+
+    // Touch Virtual Controls
+    function setupTouchButton(id, keyName) {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      const startHandler = (e) => {
+        e.preventDefault();
+        keys[keyName] = true;
+      };
+      const endHandler = (e) => {
+        e.preventDefault();
+        keys[keyName] = false;
+      };
+      btn.addEventListener('touchstart', startHandler, { passive: false });
+      btn.addEventListener('touchend', endHandler, { passive: false });
+      btn.addEventListener('touchcancel', endHandler, { passive: false });
+      btn.addEventListener('mousedown', startHandler);
+      btn.addEventListener('mouseup', endHandler);
+      btn.addEventListener('mouseleave', endHandler);
+    }
+
+    setupTouchButton('btnUp', 'up');
+    setupTouchButton('btnDown', 'down');
+    setupTouchButton('btnLeft', 'left');
+    setupTouchButton('btnRight', 'right');
+    setupTouchButton('btnJump', 'jump');
+
+    function checkLadderOverlap(px, py) {
+      for (const ladder of currentLadders) {
+        // Horizontal proximity to ladder center
+        if (Math.abs(px - ladder.x) < 18) {
+          // Vertical range check (ladder spans from y1 to y2)
+          if (py >= ladder.y1 - 4 && py <= ladder.y2 + 4) {
+            return ladder;
+          }
+        }
+      }
+      return null;
+    }
+
+    function updatePlayerPhysics() {
+      const ladder = checkLadderOverlap(raccoon.x, raccoon.y);
+
+      // --- 1. LADDER CLIMBING LOGIC ---
+      if (ladder && !raccoon.isJumping) {
+        // Can engage climbing with Up or Down
+        if (keys.up) {
+          raccoon.isClimbing = true;
+          raccoon.x = ladder.x; // Align with ladder center
+          raccoon.y -= raccoon.climbSpeed;
+          sound.playLadder();
+          // Climb past top onto floor
+          if (raccoon.y <= ladder.y1) {
+            raccoon.y = ladder.y1;
+            raccoon.isClimbing = false;
+            raccoon.isGrounded = true;
+          }
+        } else if (keys.down) {
+          raccoon.isClimbing = true;
+          raccoon.x = ladder.x;
+          raccoon.y += raccoon.climbSpeed;
+          sound.playLadder();
+          // Climb down to base floor
+          if (raccoon.y >= ladder.y2) {
+            raccoon.y = ladder.y2;
+            raccoon.isClimbing = false;
+            raccoon.isGrounded = true;
+          }
+        } else if (raccoon.isClimbing) {
+          // Stationary on ladder
+        }
+      } else {
+        raccoon.isClimbing = false;
+      }
+
+      // If climbing, player ignores standard gravity and horizontal movement
+      if (raccoon.isClimbing) {
+        return;
+      }
+
+      // --- 2. JUMPING LOGIC ---
+      if (raccoon.isGrounded && keys.jump && !raccoon.isJumping) {
+        raccoon.isJumping = true;
+        raccoon.isGrounded = false;
+        raccoon.vy = raccoon.jumpForce;
+        raccoon.jumpOriginFloorY = raccoon.y; // 점프 시작 층 기록
+        
+        // Classic arcade inertia: direction determined at launch
+        if (keys.left) {
+          raccoon.jumpVx = -raccoon.speed;
+          raccoon.facing = -1;
+        } else if (keys.right) {
+          raccoon.jumpVx = raccoon.speed;
+          raccoon.facing = 1;
+        } else {
+          raccoon.jumpVx = 0;
+        }
+        sound.playJump();
+      }
+
+      // --- 3. HORIZONTAL MOVEMENT & GRAVITY ---
+      if (raccoon.isJumping) {
+        raccoon.x += raccoon.jumpVx;
+        raccoon.y += raccoon.vy;
+        raccoon.vy += raccoon.gravity;
+
+        // 천장 충돌 감지 (점프 중 윗층 바닥에 머리가 닿으면 상승 중단)
+        for (const floor of currentFloors) {
+          if (floor.y < raccoon.jumpOriginFloorY && raccoon.x >= floor.x1 - 10 && raccoon.x <= floor.x2 + 10) {
+            if (raccoon.y - raccoon.height <= floor.y + 14 && raccoon.vy < 0) {
+              raccoon.vy = 0.5; // 머리 부딪힘 후 즉시 하강
+            }
+          }
+        }
+      } else {
+        // Ground walking
+        if (keys.left) {
+          raccoon.x -= raccoon.speed;
+          raccoon.facing = -1;
+          raccoon.walkTimer++;
+          if (raccoon.walkTimer % 8 === 0) raccoon.walkFrame = (raccoon.walkFrame + 1) % 4;
+        } else if (keys.right) {
+          raccoon.x += raccoon.speed;
+          raccoon.facing = 1;
+          raccoon.walkTimer++;
+          if (raccoon.walkTimer % 8 === 0) raccoon.walkFrame = (raccoon.walkFrame + 1) % 4;
+        } else {
+          raccoon.walkFrame = 0;
+        }
+
+        // Apply normal gravity when not grounded
+        if (!raccoon.isGrounded) {
+          raccoon.y += raccoon.vy;
+          raccoon.vy += raccoon.gravity;
+        }
+      }
+
+      // Keep inside screen bounds
+      if (raccoon.x < 55) raccoon.x = 55;
+      if (raccoon.x > 745) raccoon.x = 745;
+
+      // --- 4. FLOOR LANDING DETECTION ---
+      raccoon.isGrounded = false;
+      for (const floor of currentFloors) {
+        // 점프 중에는 점프를 시작했던 층보다 더 높은 층으로 착지할 수 없도록 제한 (원작 고증: 층간 이동은 오직 사다리로만 가능)
+        if (raccoon.isJumping && floor.y < raccoon.jumpOriginFloorY - 15) {
+          continue;
+        }
+
+        if (raccoon.x >= floor.x1 - 15 && raccoon.x <= floor.x2 + 15) {
+          // If falling down and feet cross the floor line
+          const feetPrev = raccoon.y - raccoon.vy;
+          if (raccoon.vy >= 0 && feetPrev <= floor.y + 4 && raccoon.y >= floor.y - 6) {
+            raccoon.y = floor.y;
+            raccoon.vy = 0;
+            raccoon.isGrounded = true;
+            raccoon.isJumping = false;
+            raccoon.jumpVx = 0;
+            break;
+          }
+        }
+      }
+
+      // Fall below screen bounds check
+      if (raccoon.y > 580) {
+        handlePlayerDeath();
+      }
+    }
+
+    function updateSnakes() {
+      for (const snake of currentSnakes) {
+        snake.x += snake.speed * snake.dir;
+        if (snake.x >= snake.maxX) {
+          snake.x = snake.maxX;
+          snake.dir = -1;
+        } else if (snake.x <= snake.minX) {
+          snake.x = snake.minX;
+          snake.dir = 1;
+        }
+      }
+    }
+
+    function checkHazardAndItemCollisions() {
+      if (gameState !== 'PLAYING') return;
+
+      const pBox = {
+        left: raccoon.x - 12,
+        right: raccoon.x + 12,
+        top: raccoon.y - raccoon.height + 4,
+        bottom: raccoon.y
+      };
+
+      // 1. Check Traps (Spikes / Thorns)
+      for (const trap of currentTraps) {
+        // Trap hit box
+        const tBox = {
+          left: trap.x - 10,
+          right: trap.x + 10,
+          top: trap.floorY - 14,
+          bottom: trap.floorY
+        };
+        if (intersect(pBox, tBox)) {
+          handlePlayerDeath();
+          return;
+        }
+      }
+
+      // 2. Check Snakes
+      for (const snake of currentSnakes) {
+        const sBox = {
+          left: snake.x - 14,
+          right: snake.x + 14,
+          top: snake.floorY - 16,
+          bottom: snake.floorY
+        };
+        if (intersect(pBox, sBox)) {
+          handlePlayerDeath();
+          return;
+        }
+      }
+
+      // 3. Check Collectibles
+      for (let i = currentItems.length - 1; i >= 0; i--) {
+        const item = currentItems[i];
+        const iBox = {
+          left: item.x - 12,
+          right: item.x + 12,
+          top: item.floorY - 26,
+          bottom: item.floorY - 2
+        };
+        if (intersect(pBox, iBox)) {
+          updateScore(item.points);
+          sound.playCollect();
+          currentItems.splice(i, 1);
+
+          // All items collected -> Stage Clear!
+          if (currentItems.length === 0) {
+            triggerStageClear();
+            return;
+          }
+        }
+      }
+    }
+
+    function intersect(a, b) {
+      return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    }
+
+    function handlePlayerDeath() {
+      if (gameState !== 'PLAYING') return;
+      gameState = 'DYING';
+      sound.playDie();
+      lives--;
+      updateLivesUI();
+
+      setTimeout(() => {
+        if (lives > 0) {
+          const template = LEVELS[currentStageIndex % LEVELS.length];
+          raccoon.reset(template.startPos.x, template.startPos.y);
+          gameState = 'PLAYING';
+        } else {
+          gameState = 'GAMEOVER';
+          finalScoreText.textContent = `FINAL SCORE: ${score}`;
+          overlayScreen.classList.remove('hidden');
+          startMenu.classList.add('hidden');
+          stageClearMenu.classList.add('hidden');
+          gameOverMenu.classList.remove('hidden');
+        }
+      }, 900);
+    }
+
+    function triggerStageClear() {
+      gameState = 'STAGECLEAR';
+      sound.playStageClear();
+      updateScore(1000);
+      stageClearBonusText.textContent = `STAGE BONUS +1000`;
+      
+      setTimeout(() => {
+        overlayScreen.classList.remove('hidden');
+        startMenu.classList.add('hidden');
+        gameOverMenu.classList.add('hidden');
+        stageClearMenu.classList.remove('hidden');
+      }, 700);
+    }
+
+    // Draw Raccoon Character
+    function drawRaccoon() {
+      ctx.save();
+      ctx.translate(raccoon.x, raccoon.y);
+
+      if (raccoon.facing === -1) {
+        ctx.scale(-1, 1);
+      }
+
+      if (gameState === 'DYING') {
+        // Spinning / Falling effect when hit
+        ctx.rotate((Date.now() % 500) / 40);
+      }
+
+      // --- Body (Tan / Brown) ---
+      ctx.fillStyle = '#b45309'; // Fur main
+      ctx.beginPath();
+      ctx.ellipse(0, -20, 14, 17, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Belly patch (Cream/Peach)
+      ctx.fillStyle = '#fed7aa';
+      ctx.beginPath();
+      ctx.ellipse(2, -18, 8, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mask (Dark Brown)
+      ctx.fillStyle = '#451a03';
+      ctx.beginPath();
+      ctx.ellipse(5, -27, 8, 5, 0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eye
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(6, -28, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(7, -28, 1.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Snout / Nose
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(12, -24, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(13, -25, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pointy Ears
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      ctx.moveTo(-4, -33);
+      ctx.lineTo(-1, -40);
+      ctx.lineTo(4, -34);
+      ctx.fill();
+      ctx.fillStyle = '#fca5a5';
+      ctx.beginPath();
+      ctx.moveTo(-2, -34);
+      ctx.lineTo(0, -38);
+      ctx.lineTo(2, -34);
+      ctx.fill();
+
+      // Striped Tail
+      ctx.save();
+      const tailWiggle = Math.sin(Date.now() * 0.015) * 4;
+      ctx.translate(-14, -14);
+      ctx.rotate(0.3 + tailWiggle * 0.03);
+      ctx.fillStyle = '#92400e';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 8, 5, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      // Tail stripe
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(-3, -4, 4, 8);
+      ctx.restore();
+
+      // Paws / Feet with walk animation
+      ctx.fillStyle = '#451a03';
+      if (raccoon.isClimbing) {
+        // Climbing pose
+        const climbCycle = (Date.now() / 120) % 2 > 1;
+        ctx.fillRect(-8, climbCycle ? -32 : -20, 5, 5);
+        ctx.fillRect(4, climbCycle ? -20 : -32, 5, 5);
+        ctx.fillRect(-9, -6, 6, 6);
+        ctx.fillRect(4, -6, 6, 6);
+      } else if (!raccoon.isGrounded) {
+        // Jumping pose
+        ctx.fillRect(-6, -8, 6, 6);
+        ctx.fillRect(2, -8, 6, 6);
+      } else {
+        // Walking pose
+        const step = raccoon.walkFrame % 2 === 0 ? 3 : -3;
+        ctx.fillRect(-8 + step, -5, 6, 6);
+        ctx.fillRect(3 - step, -5, 6, 6);
+      }
+
+      ctx.restore();
+    }
+
+    // Draw Platforms (Stone Brick arcade style)
+    function drawPlatforms() {
+      for (const floor of currentFloors) {
+        const h = 14;
+        // Wood/Stone beam
+        ctx.fillStyle = '#854d0e'; // Border/Shadow
+        ctx.fillRect(floor.x1, floor.y, floor.x2 - floor.x1, h);
+
+        ctx.fillStyle = '#ca8a04'; // Main top surface
+        ctx.fillRect(floor.x1, floor.y, floor.x2 - floor.x1, 5);
+
+        // Pixel brick ridges
+        ctx.fillStyle = '#713f12';
+        for (let x = floor.x1; x < floor.x2; x += 28) {
+          ctx.fillRect(x, floor.y + 5, 2, h - 5);
+        }
+      }
+    }
+
+    // Draw Ladders
+    function drawLadders() {
+      for (const ladder of currentLadders) {
+        const w = 24;
+        const left = ladder.x - w / 2;
+        const right = ladder.x + w / 2;
+
+        // Ladder vertical rails
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(left, ladder.y1, 4, ladder.y2 - ladder.y1 + 4);
+        ctx.fillRect(right - 4, ladder.y1, 4, ladder.y2 - ladder.y1 + 4);
+
+        // Rungs
+        ctx.fillStyle = '#bae6fd';
+        for (let y = ladder.y1 + 8; y <= ladder.y2; y += 14) {
+          ctx.fillRect(left + 2, y, w - 4, 3);
+        }
+      }
+    }
+
+    // Draw Traps (Sharp Caltrops/Spikes)
+    function drawTraps() {
+      for (const trap of currentTraps) {
+        ctx.save();
+        ctx.translate(trap.x, trap.floorY);
+        
+        // Spike 1
+        ctx.fillStyle = '#cbd5e1';
+        ctx.beginPath();
+        ctx.moveTo(-10, 0);
+        ctx.lineTo(-5, -16);
+        ctx.lineTo(0, 0);
+        ctx.fill();
+
+        // Spike 2
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(5, -16);
+        ctx.lineTo(10, 0);
+        ctx.fill();
+
+        // Red danger warning highlight
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(-6, -3, 12, 3);
+        ctx.restore();
+      }
+    }
+
+    // Draw Snakes
+    function drawSnakes() {
+      const t = Date.now() * 0.01;
+      for (const snake of currentSnakes) {
+        ctx.save();
+        ctx.translate(snake.x, snake.floorY);
+        if (snake.dir === -1) {
+          ctx.scale(-1, 1);
+        }
+
+        // Snake Body segments with slither wave
+        ctx.fillStyle = '#16a34a';
+        for (let i = 0; i < 4; i++) {
+          const segX = -12 + i * 7;
+          const segY = -6 + Math.sin(t + i * 1.2) * 3;
+          ctx.beginPath();
+          ctx.arc(segX, segY, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Spots
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath();
+          ctx.arc(segX, segY - 1, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#16a34a';
+        }
+
+        // Snake Head
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.arc(12, -8, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(13, -10, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        ctx.arc(14, -10, 1, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Flickering tongue
+        if (Math.sin(t * 1.5) > 0.3) {
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(17, -7);
+          ctx.lineTo(23, -7);
+          ctx.lineTo(25, -9);
+          ctx.moveTo(23, -7);
+          ctx.lineTo(25, -5);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    // Draw Food Collectibles
+    function drawItems() {
+      const bob = Math.sin(Date.now() * 0.006) * 3;
+      for (const item of currentItems) {
+        ctx.save();
+        ctx.translate(item.x, item.floorY - 12 + bob);
+
+        if (item.type === 'carrot') {
+          // Carrot
+          ctx.fillStyle = '#ea580c';
+          ctx.beginPath();
+          ctx.moveTo(-5, -12);
+          ctx.lineTo(5, -12);
+          ctx.lineTo(0, 4);
+          ctx.closePath();
+          ctx.fill();
+          // Leaves
+          ctx.fillStyle = '#22c55e';
+          ctx.fillRect(-2, -17, 4, 5);
+          ctx.fillRect(-6, -16, 3, 3);
+          ctx.fillRect(3, -16, 3, 3);
+        } else if (item.type === 'apple') {
+          // Apple
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath();
+          ctx.arc(0, -4, 8, 0, Math.PI * 2);
+          ctx.fill();
+          // Stem & Leaf
+          ctx.fillStyle = '#854d0e';
+          ctx.fillRect(-1, -14, 2, 4);
+          ctx.fillStyle = '#4ade80';
+          ctx.beginPath();
+          ctx.ellipse(3, -12, 3, 2, 0.4, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (item.type === 'strawberry') {
+          // Strawberry
+          ctx.fillStyle = '#f43f5e';
+          ctx.beginPath();
+          ctx.moveTo(-6, -10);
+          ctx.lineTo(6, -10);
+          ctx.lineTo(0, 4);
+          ctx.closePath();
+          ctx.fill();
+          // Green top
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(-5, -13, 10, 3);
+        } else if (item.type === 'grape') {
+          // Grape bunch
+          ctx.fillStyle = '#9333ea';
+          [-3, 3].forEach(x => {
+            ctx.beginPath(); ctx.arc(x, -8, 4, 0, Math.PI * 2); ctx.fill();
+          });
+          [-4, 0, 4].forEach(x => {
+            ctx.beginPath(); ctx.arc(x, -3, 3.5, 0, Math.PI * 2); ctx.fill();
+          });
+          ctx.beginPath(); ctx.arc(0, 2, 3, 0, Math.PI * 2); ctx.fill();
+          // Stem
+          ctx.fillStyle = '#65a30d';
+          ctx.fillRect(-1, -14, 2, 4);
+        } else {
+          // Watermelon slice
+          ctx.fillStyle = '#16a34a';
+          ctx.beginPath();
+          ctx.arc(0, -2, 9, 0, Math.PI);
+          ctx.fill();
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(0, -2, 7, 0, Math.PI);
+          ctx.fill();
+          // Seeds
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(-3, 1, 1.5, 1.5);
+          ctx.fillRect(2, 1, 1.5, 1.5);
+        }
+
+        ctx.restore();
+      }
+    }
+
+    function gameLoop(timestamp) {
+      if (!lastTime) lastTime = timestamp;
+      const dt = timestamp - lastTime;
+      lastTime = timestamp;
+
+      // Clear Canvas Background (Dark Navy Retro Arcade)
+      ctx.fillStyle = '#090a15';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Starry / subtle grid backdrop
+      ctx.fillStyle = '#1e1b4b';
+      for (let x = 40; x < canvas.width; x += 40) {
+        ctx.fillRect(x, 0, 1, canvas.height);
+      }
+      for (let y = 40; y < canvas.height; y += 40) {
+        ctx.fillRect(0, y, canvas.width, 1);
+      }
+
+      // Update State
+      if (gameState === 'PLAYING') {
+        updatePlayerPhysics();
+        updateSnakes();
+        checkHazardAndItemCollisions();
+      }
+
+      // Render World Elements
+      drawLadders();
+      drawPlatforms();
+      drawTraps();
+      drawSnakes();
+      drawItems();
+      drawRaccoon();
+
+      animFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    // UI Buttons Events
+    document.getElementById('startGameBtn').addEventListener('click', () => {
+      sound.init();
+      overlayScreen.classList.add('hidden');
+      score = 0;
+      lives = 3;
+      currentStageIndex = 0;
+      updateScore(0);
+      loadStage(currentStageIndex);
+      gameState = 'PLAYING';
+    });
+
+    document.getElementById('nextStageBtn').addEventListener('click', () => {
+      overlayScreen.classList.add('hidden');
+      currentStageIndex++;
+      loadStage(currentStageIndex);
+      gameState = 'PLAYING';
+    });
+
+    document.getElementById('restartGameBtn').addEventListener('click', () => {
+      overlayScreen.classList.add('hidden');
+      score = 0;
+      lives = 3;
+      currentStageIndex = 0;
+      updateScore(0);
+      loadStage(currentStageIndex);
+      gameState = 'PLAYING';
+    });
+
+    // Sound toggle
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    soundToggleBtn.addEventListener('click', () => {
+      sound.enabled = !sound.enabled;
+      if (sound.enabled) {
+        sound.init();
+        soundIcon.textContent = '🔊';
+        soundToggleBtn.classList.add('text-amber-300');
+        soundToggleBtn.classList.remove('text-slate-500');
+      } else {
+        soundIcon.textContent = '🔇';
+        soundToggleBtn.classList.remove('text-amber-300');
+        soundToggleBtn.classList.add('text-slate-500');
+      }
+    });
+
+    // Help Modal
+    const helpBtn = document.getElementById('helpBtn');
+    const closeHelpBtn = document.getElementById('closeHelpBtn');
+    const helpModal = document.getElementById('helpModal');
+
+    helpBtn.addEventListener('click', () => helpModal.classList.remove('hidden'));
+    closeHelpBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) helpModal.classList.add('hidden');
+    });
+
+    // Start rendering loop on window load
+    window.onload = function () {
+      loadStage(0);
+      animFrameId = requestAnimationFrame(gameLoop);
+    };
+  </script>
+</body>
+</html>
