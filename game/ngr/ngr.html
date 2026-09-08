@@ -1,205 +1,208 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>추억의 오락실 너구리 (Ponpoko)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>오리지널 오락실 너구리 (Ponpoko)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pretendard:wght@500;700;900&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      font-family: 'Pretendard', sans-serif;
-      background: radial-gradient(circle at center, #1a1c2e 0%, #080911 100%);
-      color: #f8fafc;
-      touch-action: manipulation;
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
       user-select: none;
       -webkit-user-select: none;
-      overflow-x: hidden;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #030712;
+      font-family: 'Pretendard', sans-serif;
+      touch-action: manipulation;
     }
     .retro-font {
       font-family: 'Press Start 2P', monospace;
     }
-    /* CRT Scanline Effect */
+    /* CRT 브라운관 스캔라인 & 비네팅 효과 */
     .crt-screen::before {
-      content: " ";
-      display: block;
+      content: "";
       position: absolute;
-      top: 0; left: 0; bottom: 0; right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-      z-index: 20;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.28) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
       background-size: 100% 3px, 6px 100%;
       pointer-events: none;
-      border-radius: 12px;
+      z-index: 10;
+      border-radius: 8px;
+    }
+    .crt-glow {
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(245, 158, 11, 0.2);
     }
     .glow-gold {
-      text-shadow: 0 0 10px #fbbf24, 0 0 20px #d97706;
+      text-shadow: 0 0 8px #f59e0b, 0 0 16px #b45309;
     }
     .glow-cyan {
-      text-shadow: 0 0 10px #38bdf8, 0 0 20px #0284c7;
+      text-shadow: 0 0 8px #38bdf8;
     }
-    /* Touch Controls styling */
+    /* 모바일 가상 패드 터치 애니메이션 */
     .touch-btn {
       touch-action: none;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.06s ease, filter 0.06s ease;
     }
     .touch-btn:active {
       transform: scale(0.92);
-      filter: brightness(1.25);
+      filter: brightness(1.3);
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 selection:bg-amber-500">
+<body class="flex flex-col items-center justify-between p-1 sm:p-3 max-w-lg mx-auto h-full">
 
-  <div class="w-full max-w-[840px] flex flex-col items-center">
-    <!-- Top Bar / Title -->
-    <header class="w-full flex items-center justify-between mb-2 sm:mb-3 px-2">
-      <div class="flex items-center gap-2">
-        <span class="text-2xl sm:text-3xl">🦝</span>
-        <h1 class="retro-font text-base sm:text-xl font-bold tracking-wider text-amber-400 glow-gold">NEOGURI</h1>
+  <header class="w-full shrink-0 flex flex-col gap-1 px-1">
+    <!-- 상단 브랜드 & 사운드 제어 -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-1.5">
+        <span class="text-xl">🦝</span>
+        <h1 class="retro-font text-xs sm:text-sm font-bold tracking-wider text-amber-400 glow-gold">PONPOKO</h1>
       </div>
-      <div class="flex items-center gap-2 text-xs sm:text-sm">
-        <button id="soundToggleBtn" class="bg-slate-800 hover:bg-slate-700 text-amber-300 px-2.5 py-1 rounded border border-amber-500/30 flex items-center gap-1 transition">
-          <span id="soundIcon">🔊</span> SOUND
-        </button>
-        <button id="helpBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded border border-slate-600 transition">
-          ❓ 조작법
-        </button>
-      </div>
-    </header>
+      <button id="soundToggleBtn" class="bg-slate-900 border border-amber-500/40 text-amber-300 px-2.5 py-1 rounded text-[10px] sm:text-xs flex items-center gap-1 active:scale-95 transition">
+        <span id="soundIcon">🔊</span> BGM: ON
+      </button>
+    </div>
 
-    <!-- Score & Status Dashboard -->
-    <div class="w-full bg-slate-900/90 border border-slate-700/80 rounded-t-xl px-4 py-2 flex items-center justify-between retro-font text-xs sm:text-sm shadow-md">
-      <div class="flex items-center gap-4 sm:gap-6">
+    <!-- 스코어 / 라운드 / 잔기 대시보드 -->
+    <div class="w-full bg-slate-950/90 border border-slate-800 rounded-lg px-2.5 py-1.5 flex items-center justify-between retro-font text-[10px] sm:text-xs">
+      <div class="flex items-center gap-3 sm:gap-4">
         <div>
-          <span class="text-slate-400 text-[10px] block mb-0.5">SCORE</span>
-          <span id="scoreDisplay" class="text-white text-sm sm:text-base glow-cyan">00000</span>
+          <span class="text-slate-500 text-[8px] block">1UP</span>
+          <span id="scoreDisplay" class="text-white glow-cyan">00000</span>
         </div>
         <div>
-          <span class="text-slate-400 text-[10px] block mb-0.5">HIGH</span>
-          <span id="highScoreDisplay" class="text-amber-400 text-sm sm:text-base">05000</span>
+          <span class="text-slate-500 text-[8px] block">HIGH</span>
+          <span id="highScoreDisplay" class="text-amber-400">05000</span>
         </div>
       </div>
-      <div class="flex items-center gap-4 sm:gap-6">
+      <div class="flex items-center gap-3 sm:gap-4">
         <div>
-          <span class="text-slate-400 text-[10px] block mb-0.5">STAGE</span>
-          <span id="stageDisplay" class="text-emerald-400 text-sm sm:text-base">01</span>
+          <span class="text-slate-500 text-[8px] block">ROUND</span>
+          <span id="stageDisplay" class="text-emerald-400">01</span>
         </div>
         <div>
-          <span class="text-slate-400 text-[10px] block mb-0.5">LIVES</span>
-          <div id="livesContainer" class="flex gap-1 text-sm sm:text-base">
+          <span class="text-slate-500 text-[8px] block">REST</span>
+          <div id="livesContainer" class="flex gap-0.5 text-xs">
             <span>🦝</span><span>🦝</span><span>🦝</span>
           </div>
         </div>
       </div>
     </div>
+  </header>
 
-    <div class="relative w-full aspect-[4/3] bg-black rounded-b-xl border-x border-b border-slate-700 overflow-hidden shadow-2xl crt-screen flex items-center justify-center">
+  <main class="relative w-full flex-1 my-1 min-h-0 flex items-center justify-center">
+    <div class="relative w-full h-full max-h-[58vh] aspect-[4/3] bg-black rounded-lg border-2 border-slate-800 overflow-hidden crt-screen crt-glow flex items-center justify-center">
       <canvas id="gameCanvas" width="800" height="600" class="w-full h-full block image-rendering-pixelated"></canvas>
 
-      <!-- Overlay Screens (Start, Game Over, Stage Clear, Pause) -->
-      <div id="overlayScreen" class="absolute inset-0 z-30 bg-black/85 flex flex-col items-center justify-center p-6 text-center backdrop-blur-sm">
-        <!-- Start Game Card -->
-        <div id="startMenu" class="flex flex-col items-center max-w-md">
-          <div class="text-5xl sm:text-6xl mb-3 animate-bounce">🦝</div>
-          <h2 class="retro-font text-xl sm:text-3xl text-amber-400 mb-2 glow-gold">PONPOKO</h2>
-          <p class="text-slate-300 text-xs sm:text-sm mb-6">오리지널 추억의 고전 아케이드 너구리</p>
-          
-          <div class="bg-slate-800/90 border border-slate-700 rounded-lg p-4 mb-6 text-left text-xs sm:text-sm text-slate-300 w-full space-y-2">
-            <p>🎯 <strong class="text-amber-300">목표:</strong> 모든 먹이(당근, 과일 등)를 먹어 스테이지 클리어!</p>
-            <p>⚠️ <strong class="text-rose-400">위험:</strong> 기어다니는 뱀과 뾰족한 압정(가시)을 피하세요.</p>
-            <p>🪜 <strong class="text-emerald-300">사다리:</strong> 사다리 위/아래에서 방향키로 이동 가능.</p>
-            <p>🦘 <strong class="text-cyan-300">점프:</strong> 점프 중에는 공중에서 궤적이 유지됩니다.</p>
+      <!-- 설명서 없이 터치 한 번으로 즉시 시작하는 컴팩트 오버레이 -->
+      <div id="overlayScreen" class="absolute inset-0 z-20 bg-black/75 flex flex-col items-center justify-center p-4 text-center backdrop-blur-[2px]">
+        <!-- 시작 화면 -->
+        <div id="startMenu" class="flex flex-col items-center cursor-pointer select-none">
+          <div class="text-4xl sm:text-5xl mb-2 animate-bounce">🦝</div>
+          <h2 class="retro-font text-lg sm:text-2xl text-amber-400 mb-2 glow-gold">PONPOKO</h2>
+          <div class="inline-block px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 retro-font text-xs sm:text-sm font-black rounded-lg shadow-lg border-2 border-amber-300 animate-pulse">
+            TAP TO PLAY!
           </div>
-
-          <button id="startGameBtn" class="retro-font text-sm sm:text-base bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-8 py-3.5 rounded-lg shadow-lg hover:shadow-amber-500/50 transition-all transform hover:-translate-y-0.5">
-            START GAME
-          </button>
+          <p class="text-slate-400 text-[10px] mt-3">화면을 탭하거나 버튼을 눌러 시작</p>
         </div>
 
-        <!-- Stage Clear Card -->
+        <!-- 스테이지 클리어 -->
         <div id="stageClearMenu" class="hidden flex flex-col items-center">
-          <div class="text-5xl mb-3">🎉</div>
-          <h2 class="retro-font text-2xl sm:text-3xl text-emerald-400 mb-2 glow-cyan">STAGE CLEAR!</h2>
-          <p id="stageClearBonusText" class="retro-font text-xs sm:text-sm text-amber-300 mb-6">BONUS +1000</p>
-          <button id="nextStageBtn" class="retro-font text-sm sm:text-base bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 rounded-lg shadow-lg transition">
-            NEXT STAGE
+          <div class="text-4xl mb-2">🎉</div>
+          <h2 class="retro-font text-base sm:text-xl text-emerald-400 mb-1 glow-cyan">STAGE CLEAR!</h2>
+          <p id="stageClearBonusText" class="retro-font text-[10px] sm:text-xs text-amber-300 mb-3">BONUS +1000</p>
+          <button id="nextStageBtn" class="retro-font text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded shadow">
+            NEXT ROUND ▶
           </button>
         </div>
 
-        <!-- Game Over Card -->
+        <!-- 게임 오버 -->
         <div id="gameOverMenu" class="hidden flex flex-col items-center">
-          <div class="text-5xl mb-3">💀</div>
-          <h2 class="retro-font text-2xl sm:text-3xl text-rose-500 mb-2 glow-gold">GAME OVER</h2>
-          <p id="finalScoreText" class="retro-font text-xs sm:text-sm text-slate-300 mb-6">FINAL SCORE: 0</p>
-          <button id="restartGameBtn" class="retro-font text-sm sm:text-base bg-rose-600 hover:bg-rose-500 text-white font-bold px-8 py-3.5 rounded-lg shadow-lg transition">
-            PLAY AGAIN
+          <div class="text-4xl mb-2">💀</div>
+          <h2 class="retro-font text-base sm:text-xl text-rose-500 mb-1">GAME OVER</h2>
+          <p id="finalScoreText" class="retro-font text-[10px] text-slate-300 mb-3">FINAL: 0</p>
+          <button id="restartGameBtn" class="retro-font text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold px-5 py-2 rounded shadow">
+            RETRY 🔄
           </button>
         </div>
       </div>
     </div>
+  </main>
 
-    <div class="w-full mt-3 flex items-center justify-between px-2 sm:px-6">
-      <!-- Left: D-Pad -->
-      <div class="grid grid-cols-3 gap-1.5 w-36 h-36 sm:w-40 sm:h-40 p-1 bg-slate-900/60 rounded-2xl border border-slate-800 backdrop-blur-sm">
-        <div></div>
-        <button id="btnUp" class="touch-btn bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow active:bg-amber-600">▲</button>
-        <div></div>
-        <button id="btnLeft" class="touch-btn bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow active:bg-amber-600">◀</button>
-        <div class="bg-slate-950/80 rounded-lg flex items-center justify-center text-[10px] text-slate-600 font-mono">PAD</div>
-        <button id="btnRight" class="touch-btn bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow active:bg-amber-600">▶</button>
-        <div></div>
-        <button id="btnDown" class="touch-btn bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow active:bg-amber-600">▼</button>
-        <div></div>
-      </div>
-
-      <!-- Controls Hint for PC -->
-      <div class="hidden md:flex flex-col items-center text-center text-slate-400 text-xs gap-1 bg-slate-900/40 p-3 rounded-xl border border-slate-800">
-        <span class="text-amber-400 font-bold">키보드 조작법</span>
-        <span>이동: [◀ / ▶] 방향키</span>
-        <span>사다리: [▲ / ▼] 방향키</span>
-        <span>점프: [스페이스바] 또는 [Shift]</span>
-      </div>
-
-      <!-- Right: Action Buttons (Jump) -->
-      <div class="flex items-center gap-3">
-        <button id="btnJump" class="touch-btn w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-rose-600 to-amber-500 text-white font-bold text-base sm:text-lg shadow-lg border-2 border-rose-400/50 flex flex-col items-center justify-center active:scale-95">
-          <span class="retro-font text-xs sm:text-sm">JUMP</span>
-          <span class="text-[10px] text-rose-200 mt-0.5">점프</span>
-        </button>
-      </div>
+  <footer class="w-full shrink-0 flex items-center justify-between px-2 pb-1">
+    <!-- 십자키 (D-Pad) -->
+    <div class="grid grid-cols-3 gap-1 w-32 h-32 sm:w-36 sm:h-36 p-1 bg-slate-950/80 rounded-2xl border border-slate-800/80 shadow-lg backdrop-blur-sm">
+      <div></div>
+      <button id="btnUp" class="touch-btn bg-slate-800 border border-slate-700 active:bg-amber-600 text-amber-300 rounded-xl flex items-center justify-center text-lg font-bold shadow">▲</button>
+      <div></div>
+      <button id="btnLeft" class="touch-btn bg-slate-800 border border-slate-700 active:bg-amber-600 text-amber-300 rounded-xl flex items-center justify-center text-lg font-bold shadow">◀</button>
+      <div class="rounded-lg flex items-center justify-center text-[9px] text-slate-600 font-bold font-mono">PAD</div>
+      <button id="btnRight" class="touch-btn bg-slate-800 border border-slate-700 active:bg-amber-600 text-amber-300 rounded-xl flex items-center justify-center text-lg font-bold shadow">▶</button>
+      <div></div>
+      <button id="btnDown" class="touch-btn bg-slate-800 border border-slate-700 active:bg-amber-600 text-amber-300 rounded-xl flex items-center justify-center text-lg font-bold shadow">▼</button>
+      <div></div>
     </div>
-  </div>
 
-  <!-- Help Modal -->
-  <div id="helpModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-slate-900 border border-slate-700 max-w-md w-full p-6 rounded-xl shadow-2xl relative">
-      <h3 class="retro-font text-lg text-amber-400 mb-4 flex items-center gap-2">
-        <span>🎮</span> 게임 가이드
-      </h3>
-      <div class="text-slate-300 text-sm space-y-3 mb-6">
-        <p>1. <strong>조작법</strong>: 좌우 방향키로 걷고, 사다리 위치에서 위/아래 방향키로 층간을 오르내릴 수 있습니다.</p>
-        <p>2. <strong>포물선 점프</strong>: 이동 중 점프하면 포물선을 그리며 장애물을 뛰어넘습니다. (점프 중에는 방향을 꺾을 수 없는 고전 방식의 관성이 적용됩니다!)</p>
-        <p>3. <strong>장애물</strong>: 바닥에 박힌 <strong>압정</strong>과 천천히 순찰하는 <strong>뱀</strong>에 부딪히면 생명을 잃습니다.</p>
-        <p>4. <strong>클리어</strong>: 맵에 있는 맛있는 음식 아이템들을 모두 획득하면 다음 라운드로 진출합니다!</p>
-      </div>
-      <button id="closeHelpBtn" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-lg border border-slate-600">
-        닫기
+    <!-- 점프 버튼 (큼직하고 누르기 편한 액션 버튼) -->
+    <div class="flex items-center justify-center">
+      <button id="btnJump" class="touch-btn w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-rose-600 via-rose-500 to-amber-500 text-white font-black shadow-xl border-4 border-rose-400/40 flex flex-col items-center justify-center active:scale-95">
+        <span class="retro-font text-xs sm:text-sm">JUMP</span>
+        <span class="text-[9px] text-rose-200 mt-0.5">점프</span>
       </button>
     </div>
-  </div>
+  </footer>
 
   <script>
-    /* Chiptune Sound Engine via Web Audio API */
-    class RetroAudioEngine {
+    /* 
+      Web Audio 기반 추억의 아케이드 Ponpoko 사운드 시스템:
+      - 오리지널 경쾌한 너구리 배경음악(BGM) 루프 멜로디
+      - 점프, 아이템 수집, 사다리, 피격, 라운드 클리어 효과음
+    */
+    class PonpokoAudioEngine {
       constructor() {
         this.ctx = null;
         this.enabled = true;
+        this.bgmTimer = null;
+        this.isBgmPlaying = false;
+        this.bgmStep = 0;
+
+        // 원작 오락실 너구리 메인 테마 멜로디 (주파수 & 길이)
+        // 경쾌한 포크 댄스풍의 멜로디 시퀀스
+        this.melody = [
+          { f: 523.25, d: 0.15 }, { f: 659.25, d: 0.15 }, { f: 783.99, d: 0.15 }, { f: 1046.5, d: 0.2 },
+          { f: 880.00, d: 0.15 }, { f: 783.99, d: 0.15 }, { f: 659.25, d: 0.25 }, { f: 0, d: 0.05 },
+          { f: 587.33, d: 0.15 }, { f: 659.25, d: 0.15 }, { f: 698.46, d: 0.15 }, { f: 880.00, d: 0.2 },
+          { f: 783.99, d: 0.15 }, { f: 659.25, d: 0.15 }, { f: 523.25, d: 0.25 }, { f: 0, d: 0.05 },
+
+          { f: 523.25, d: 0.15 }, { f: 659.25, d: 0.15 }, { f: 783.99, d: 0.15 }, { f: 1046.5, d: 0.2 },
+          { f: 1174.6, d: 0.15 }, { f: 1046.5, d: 0.15 }, { f: 880.00, d: 0.25 }, { f: 0, d: 0.05 },
+          { f: 783.99, d: 0.15 }, { f: 880.00, d: 0.15 }, { f: 987.77, d: 0.15 }, { f: 1046.5, d: 0.25 },
+          { f: 783.99, d: 0.15 }, { f: 659.25, d: 0.15 }, { f: 523.25, d: 0.3 },  { f: 0, d: 0.1 }
+        ];
+
+        // 베이스 라인 (뚱땅거리는 8비트 아르페지오 베이스)
+        this.bass = [
+          261.6, 392.0, 261.6, 392.0, 220.0, 329.6, 261.6, 392.0,
+          293.6, 440.0, 293.6, 440.0, 261.6, 392.0, 261.6, 392.0,
+          261.6, 392.0, 261.6, 392.0, 220.0, 440.0, 220.0, 440.0,
+          392.0, 493.8, 523.2, 392.0, 261.6, 329.6, 261.6, 0
+        ];
       }
-      
+
       init() {
         if (!this.ctx) {
           const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -210,22 +213,84 @@
         }
       }
 
+      startBGM() {
+        if (!this.enabled || this.isBgmPlaying) return;
+        this.init();
+        this.isBgmPlaying = true;
+        this.bgmStep = 0;
+        this.scheduleBGMNote();
+      }
+
+      stopBGM() {
+        this.isBgmPlaying = false;
+        if (this.bgmTimer) {
+          clearTimeout(this.bgmTimer);
+          this.bgmTimer = null;
+        }
+      }
+
+      scheduleBGMNote() {
+        if (!this.isBgmPlaying || !this.enabled) return;
+
+        const note = this.melody[this.bgmStep % this.melody.length];
+        const bassFreq = this.bass[this.bgmStep % this.bass.length];
+        const now = this.ctx.currentTime;
+
+        // 1. 리드 멜로디 (펄스 사각파)
+        if (note.f > 0) {
+          try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(note.f, now);
+            gain.gain.setValueAtTime(0.045, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + note.d * 0.85);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + note.d);
+          } catch(e) {}
+        }
+
+        // 2. 통통 튀는 베이스 (삼각파)
+        if (bassFreq > 0) {
+          try {
+            const bOsc = this.ctx.createOscillator();
+            const bGain = this.ctx.createGain();
+            bOsc.type = 'triangle';
+            bOsc.frequency.setValueAtTime(bassFreq * 0.5, now);
+            bGain.gain.setValueAtTime(0.06, now);
+            bGain.gain.linearRampToValueAtTime(0.01, now + note.d * 0.7);
+            bOsc.connect(bGain);
+            bGain.connect(this.ctx.destination);
+            bOsc.start(now);
+            bOsc.stop(now + note.d);
+          } catch(e) {}
+        }
+
+        this.bgmStep++;
+        const nextTime = Math.max(100, note.d * 1000);
+        this.bgmTimer = setTimeout(() => {
+          this.scheduleBGMNote();
+        }, nextTime);
+      }
+
       playJump() {
         if (!this.enabled) return;
         this.init();
         try {
+          const now = this.ctx.currentTime;
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'square';
-          const now = this.ctx.currentTime;
-          osc.frequency.setValueAtTime(150, now);
-          osc.frequency.exponentialRampToValueAtTime(600, now + 0.16);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(560, now + 0.14);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.14);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.16);
+          osc.stop(now + 0.14);
         } catch(e) {}
       }
 
@@ -234,37 +299,18 @@
         this.init();
         try {
           const now = this.ctx.currentTime;
-          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+          [659.25, 880.00, 1318.5].forEach((freq, i) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, now + i * 0.05);
-            gain.gain.setValueAtTime(0.15, now + i * 0.05);
-            gain.gain.linearRampToValueAtTime(0.001, now + i * 0.05 + 0.09);
+            osc.frequency.setValueAtTime(freq, now + i * 0.04);
+            gain.gain.setValueAtTime(0.12, now + i * 0.04);
+            gain.gain.linearRampToValueAtTime(0.001, now + i * 0.04 + 0.08);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
-            osc.start(now + i * 0.05);
-            osc.stop(now + i * 0.05 + 0.1);
+            osc.start(now + i * 0.04);
+            osc.stop(now + i * 0.04 + 0.08);
           });
-        } catch(e) {}
-      }
-
-      playDie() {
-        if (!this.enabled) return;
-        this.init();
-        try {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sawtooth';
-          const now = this.ctx.currentTime;
-          osc.frequency.setValueAtTime(400, now);
-          osc.frequency.linearRampToValueAtTime(60, now + 0.5);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.5);
         } catch(e) {}
       }
 
@@ -272,34 +318,55 @@
         if (!this.enabled) return;
         this.init();
         try {
+          const now = this.ctx.currentTime;
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'triangle';
-          const now = this.ctx.currentTime;
-          osc.frequency.setValueAtTime(220 + Math.random() * 40, now);
-          gain.gain.setValueAtTime(0.05, now);
-          gain.gain.linearRampToValueAtTime(0.001, now + 0.04);
+          osc.frequency.setValueAtTime(240 + (Math.random() * 30), now);
+          gain.gain.setValueAtTime(0.03, now);
+          gain.gain.linearRampToValueAtTime(0.001, now + 0.035);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.04);
+          osc.stop(now + 0.035);
+        } catch(e) {}
+      }
+
+      playDie() {
+        if (!this.enabled) return;
+        this.stopBGM();
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(450, now);
+          osc.frequency.linearRampToValueAtTime(70, now + 0.45);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.45);
         } catch(e) {}
       }
 
       playStageClear() {
         if (!this.enabled) return;
+        this.stopBGM();
         this.init();
         try {
-          const notes = [261.6, 329.6, 392.0, 523.2, 659.2, 783.9, 1046.5];
+          const notes = [392.0, 523.2, 659.2, 783.9, 1046.5, 1318.5];
           const now = this.ctx.currentTime;
           notes.forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = 'square';
-            const t = now + idx * 0.09;
+            const t = now + idx * 0.08;
             osc.frequency.setValueAtTime(freq, t);
-            gain.gain.setValueAtTime(0.12, t);
-            gain.gain.linearRampToValueAtTime(0.01, t + 0.12);
+            gain.gain.setValueAtTime(0.1, t);
+            gain.gain.linearRampToValueAtTime(0.005, t + 0.12);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
             osc.start(t);
@@ -309,11 +376,13 @@
       }
     }
 
-    const sound = new RetroAudioEngine();
+    const sound = new PonpokoAudioEngine();
+  </script>
 
-    // Virtual Canvas: 800 x 600
-    // Floor positions Y: 520 (ground), 420, 320, 220, 120
-    const LEVELS = [
+  <script>
+    // 가상 해상도: 800 x 600
+    // 5개 층 바닥 Y: 520(1층/바닥), 420(2층), 320(3층), 220(4층), 120(5층/꼭대기)
+    const STAGES = [
       {
         stageNum: 1,
         floors: [
@@ -324,34 +393,34 @@
           { y: 120, x1: 40, x2: 760 }
         ],
         ladders: [
-          { x: 120, y1: 420, y2: 520 },
-          { x: 680, y1: 320, y2: 420 },
-          { x: 220, y1: 220, y2: 320 },
-          { x: 580, y1: 120, y2: 220 }
+          { x: 130, y1: 420, y2: 520 },
+          { x: 670, y1: 320, y2: 420 },
+          { x: 200, y1: 220, y2: 320 },
+          { x: 590, y1: 120, y2: 220 }
         ],
         traps: [
-          { x: 380, floorY: 520 },
-          { x: 420, floorY: 420 },
-          { x: 480, floorY: 320 },
-          { x: 350, floorY: 220 }
+          { x: 400, floorY: 520 },
+          { x: 430, floorY: 420 },
+          { x: 470, floorY: 320 },
+          { x: 380, floorY: 220 }
         ],
         snakes: [
-          { x: 500, floorY: 420, minX: 300, maxX: 640, speed: 1.2, dir: -1 },
-          { x: 300, floorY: 220, minX: 160, maxX: 520, speed: 1.5, dir: 1 }
+          { x: 520, floorY: 420, minX: 280, maxX: 630, speed: 1.3, dir: -1 },
+          { x: 320, floorY: 220, minX: 180, maxX: 540, speed: 1.5, dir: 1 }
         ],
         items: [
-          { x: 200, floorY: 520, type: 'carrot', points: 100 },
-          { x: 600, floorY: 520, type: 'carrot', points: 100 },
-          { x: 280, floorY: 420, type: 'apple', points: 150 },
-          { x: 620, floorY: 420, type: 'apple', points: 150 },
+          { x: 220, floorY: 520, type: 'carrot', points: 100 },
+          { x: 620, floorY: 520, type: 'carrot', points: 100 },
+          { x: 260, floorY: 420, type: 'apple', points: 150 },
+          { x: 600, floorY: 420, type: 'apple', points: 150 },
           { x: 140, floorY: 320, type: 'strawberry', points: 200 },
           { x: 540, floorY: 320, type: 'strawberry', points: 200 },
-          { x: 300, floorY: 220, type: 'grape', points: 250 },
-          { x: 650, floorY: 220, type: 'grape', points: 250 },
-          { x: 180, floorY: 120, type: 'watermelon', points: 300 },
+          { x: 290, floorY: 220, type: 'grape', points: 250 },
+          { x: 660, floorY: 220, type: 'grape', points: 250 },
+          { x: 200, floorY: 120, type: 'watermelon', points: 300 },
           { x: 400, floorY: 120, type: 'watermelon', points: 300 }
         ],
-        startPos: { x: 70, y: 520 }
+        startPos: { x: 75, y: 520 }
       },
       {
         stageNum: 2,
@@ -364,38 +433,37 @@
         ],
         ladders: [
           { x: 650, y1: 420, y2: 520 },
-          { x: 150, y1: 320, y2: 420 },
-          { x: 600, y1: 220, y2: 320 },
+          { x: 160, y1: 320, y2: 420 },
+          { x: 620, y1: 220, y2: 320 },
           { x: 300, y1: 120, y2: 220 }
         ],
         traps: [
-          { x: 250, floorY: 520 },
-          { x: 450, floorY: 520 },
-          { x: 350, floorY: 420 },
-          { x: 500, floorY: 420 },
-          { x: 320, floorY: 320 },
-          { x: 420, floorY: 220 },
-          { x: 540, floorY: 120 }
+          { x: 260, floorY: 520 },
+          { x: 460, floorY: 520 },
+          { x: 360, floorY: 420 },
+          { x: 510, floorY: 420 },
+          { x: 340, floorY: 320 },
+          { x: 440, floorY: 220 }
         ],
         snakes: [
-          { x: 200, floorY: 520, minX: 100, maxX: 400, speed: 1.6, dir: 1 },
-          { x: 450, floorY: 320, minX: 250, maxX: 650, speed: 1.8, dir: -1 },
-          { x: 450, floorY: 120, minX: 200, maxX: 680, speed: 2.0, dir: 1 }
+          { x: 210, floorY: 520, minX: 110, maxX: 420, speed: 1.6, dir: 1 },
+          { x: 450, floorY: 320, minX: 240, maxX: 640, speed: 1.8, dir: -1 },
+          { x: 460, floorY: 120, minX: 210, maxX: 680, speed: 2.0, dir: 1 }
         ],
         items: [
           { x: 120, floorY: 520, type: 'apple', points: 150 },
           { x: 360, floorY: 520, type: 'carrot', points: 100 },
-          { x: 540, floorY: 520, type: 'grape', points: 250 },
+          { x: 550, floorY: 520, type: 'grape', points: 250 },
           { x: 260, floorY: 420, type: 'strawberry', points: 200 },
           { x: 600, floorY: 420, type: 'apple', points: 150 },
-          { x: 220, floorY: 320, type: 'watermelon', points: 300 },
-          { x: 560, floorY: 320, type: 'carrot', points: 100 },
-          { x: 160, floorY: 220, type: 'grape', points: 250 },
-          { x: 500, floorY: 220, type: 'strawberry', points: 200 },
-          { x: 150, floorY: 120, type: 'watermelon', points: 300 },
-          { x: 620, floorY: 120, type: 'watermelon', points: 300 }
+          { x: 230, floorY: 320, type: 'watermelon', points: 300 },
+          { x: 570, floorY: 320, type: 'carrot', points: 100 },
+          { x: 170, floorY: 220, type: 'grape', points: 250 },
+          { x: 510, floorY: 220, type: 'strawberry', points: 200 },
+          { x: 160, floorY: 120, type: 'watermelon', points: 300 },
+          { x: 630, floorY: 120, type: 'watermelon', points: 300 }
         ],
-        startPos: { x: 80, y: 520 }
+        startPos: { x: 75, y: 520 }
       },
       {
         stageNum: 3,
@@ -407,46 +475,47 @@
           { y: 120, x1: 40, x2: 760 }
         ],
         ladders: [
-          { x: 200, y1: 420, y2: 520 },
-          { x: 500, y1: 420, y2: 520 },
-          { x: 350, y1: 320, y2: 420 },
-          { x: 650, y1: 320, y2: 420 },
-          { x: 180, y1: 220, y2: 320 },
-          { x: 520, y1: 120, y2: 220 }
+          { x: 210, y1: 420, y2: 520 },
+          { x: 520, y1: 420, y2: 520 },
+          { x: 360, y1: 320, y2: 420 },
+          { x: 660, y1: 320, y2: 420 },
+          { x: 190, y1: 220, y2: 320 },
+          { x: 530, y1: 120, y2: 220 }
         ],
         traps: [
-          { x: 320, floorY: 520 },
-          { x: 620, floorY: 520 },
-          { x: 220, floorY: 420 },
-          { x: 450, floorY: 320 },
-          { x: 320, floorY: 220 },
-          { x: 460, floorY: 220 },
-          { x: 260, floorY: 120 },
-          { x: 380, floorY: 120 }
+          { x: 330, floorY: 520 },
+          { x: 640, floorY: 520 },
+          { x: 230, floorY: 420 },
+          { x: 460, floorY: 320 },
+          { x: 330, floorY: 220 },
+          { x: 470, floorY: 220 },
+          { x: 360, floorY: 120 }
         ],
         snakes: [
-          { x: 400, floorY: 520, minX: 240, maxX: 600, speed: 2.0, dir: 1 },
-          { x: 260, floorY: 420, minX: 100, maxX: 400, speed: 2.2, dir: -1 },
-          { x: 500, floorY: 320, minX: 200, maxX: 620, speed: 2.2, dir: 1 },
-          { x: 350, floorY: 120, minX: 120, maxX: 500, speed: 2.4, dir: -1 }
+          { x: 410, floorY: 520, minX: 250, maxX: 610, speed: 2.0, dir: 1 },
+          { x: 270, floorY: 420, minX: 100, maxX: 410, speed: 2.2, dir: -1 },
+          { x: 510, floorY: 320, minX: 210, maxX: 630, speed: 2.2, dir: 1 },
+          { x: 360, floorY: 120, minX: 130, maxX: 510, speed: 2.5, dir: -1 }
         ],
         items: [
-          { x: 100, floorY: 520, type: 'watermelon', points: 300 },
-          { x: 380, floorY: 520, type: 'carrot', points: 100 },
-          { x: 680, floorY: 520, type: 'apple', points: 150 },
-          { x: 120, floorY: 420, type: 'strawberry', points: 200 },
-          { x: 420, floorY: 420, type: 'grape', points: 250 },
-          { x: 240, floorY: 320, type: 'watermelon', points: 300 },
-          { x: 560, floorY: 320, type: 'apple', points: 150 },
-          { x: 240, floorY: 220, type: 'strawberry', points: 200 },
-          { x: 600, floorY: 220, type: 'grape', points: 250 },
-          { x: 120, floorY: 120, type: 'watermelon', points: 300 },
-          { x: 660, floorY: 120, type: 'watermelon', points: 300 }
+          { x: 110, floorY: 520, type: 'watermelon', points: 300 },
+          { x: 390, floorY: 520, type: 'carrot', points: 100 },
+          { x: 690, floorY: 520, type: 'apple', points: 150 },
+          { x: 130, floorY: 420, type: 'strawberry', points: 200 },
+          { x: 430, floorY: 420, type: 'grape', points: 250 },
+          { x: 250, floorY: 320, type: 'watermelon', points: 300 },
+          { x: 570, floorY: 320, type: 'apple', points: 150 },
+          { x: 250, floorY: 220, type: 'strawberry', points: 200 },
+          { x: 610, floorY: 220, type: 'grape', points: 250 },
+          { x: 130, floorY: 120, type: 'watermelon', points: 300 },
+          { x: 670, floorY: 120, type: 'watermelon', points: 300 }
         ],
-        startPos: { x: 70, y: 520 }
+        startPos: { x: 75, y: 520 }
       }
     ];
+  </script>
 
+  <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -466,10 +535,8 @@
     let score = 0;
     let highScore = 5000;
     let lives = 3;
-    let animFrameId = null;
-    let lastTime = 0;
 
-    // Keys State
+    // 조작 키 입력 상태
     const keys = {
       left: false,
       right: false,
@@ -478,28 +545,27 @@
       jump: false
     };
 
-    // Raccoon Player Object
+    // 너구리 플레이어 객체
     const raccoon = {
-      x: 80,
+      x: 75,
       y: 520,
       width: 32,
-      height: 38,
+      height: 36,
       vx: 0,
       vy: 0,
-      speed: 3.2,
-      climbSpeed: 2.4,
-      jumpForce: -6.2, // 원작 아케이드에 맞춘 안정적인 점프력 (장애물만 딱 넘는 높이)
-      gravity: 0.42,   // 자연스러운 포물선 낙하 중력
-      jumpOriginFloorY: 520, // 점프를 시작한 층 기억 (윗층 착지 방지)
-      facing: 1, // 1: right, -1: left
+      speed: 3.3,
+      climbSpeed: 2.5,
+      jumpForce: -6.3,       // 원작 맞춤 점프력 (장애물만 적절히 뛰어넘는 쾌적한 궤적)
+      gravity: 0.44,         // 중력
+      jumpOriginFloorY: 520, // 점프 시 윗층 뚫고 올라가는 것 방지용 기준 층
+      facing: 1,             // 1: 우측, -1: 좌측
       isGrounded: true,
       isClimbing: false,
       isJumping: false,
-      jumpVx: 0, // fixed horizontal speed during arc jump (arcade style)
+      jumpVx: 0,             // 점프 중 관성 속도 고정 (원작 방식)
       walkFrame: 0,
       walkTimer: 0,
-      deathTimer: 0,
-      
+
       reset(x, y) {
         this.x = x;
         this.y = y;
@@ -516,7 +582,6 @@
       }
     };
 
-    // Current Active Level Elements
     let currentFloors = [];
     let currentLadders = [];
     let currentTraps = [];
@@ -524,7 +589,7 @@
     let currentItems = [];
 
     function loadStage(index) {
-      const template = LEVELS[index % LEVELS.length];
+      const template = STAGES[index % STAGES.length];
       currentFloors = JSON.parse(JSON.stringify(template.floors));
       currentLadders = JSON.parse(JSON.stringify(template.ladders));
       currentTraps = JSON.parse(JSON.stringify(template.traps));
@@ -532,7 +597,6 @@
       currentItems = JSON.parse(JSON.stringify(template.items));
 
       raccoon.reset(template.startPos.x, template.startPos.y);
-
       stageDisplay.textContent = String(index + 1).padStart(2, '0');
       updateLivesUI();
     }
@@ -548,12 +612,11 @@
 
     function updateLivesUI() {
       let str = '';
-      for (let i = 0; i < lives; i++) {
-        str += '🦝';
-      }
+      for (let i = 0; i < lives; i++) str += '🦝';
       livesContainer.innerHTML = str || '💀';
     }
 
+    // 키보드 이벤트
     window.addEventListener('keydown', (e) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
         e.preventDefault();
@@ -564,6 +627,7 @@
       if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = true;
       if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
         keys.jump = true;
+        if (gameState === 'START') startGame();
       }
     });
 
@@ -572,42 +636,39 @@
       if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
       if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
       if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = false;
-      if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-        keys.jump = false;
-      }
+      if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.jump = false;
     });
 
-    // Touch Virtual Controls
-    function setupTouchButton(id, keyName) {
+    // 모바일 터치 및 마우스 바인딩 (동시 멀티터치 완벽 지원)
+    function bindTouchControl(id, keyName) {
       const btn = document.getElementById(id);
       if (!btn) return;
-      const startHandler = (e) => {
+      const onStart = (e) => {
         e.preventDefault();
         keys[keyName] = true;
+        if (gameState === 'START') startGame();
       };
-      const endHandler = (e) => {
+      const onEnd = (e) => {
         e.preventDefault();
         keys[keyName] = false;
       };
-      btn.addEventListener('touchstart', startHandler, { passive: false });
-      btn.addEventListener('touchend', endHandler, { passive: false });
-      btn.addEventListener('touchcancel', endHandler, { passive: false });
-      btn.addEventListener('mousedown', startHandler);
-      btn.addEventListener('mouseup', endHandler);
-      btn.addEventListener('mouseleave', endHandler);
+      btn.addEventListener('touchstart', onStart, { passive: false });
+      btn.addEventListener('touchend', onEnd, { passive: false });
+      btn.addEventListener('touchcancel', onEnd, { passive: false });
+      btn.addEventListener('mousedown', onStart);
+      btn.addEventListener('mouseup', onEnd);
+      btn.addEventListener('mouseleave', onEnd);
     }
 
-    setupTouchButton('btnUp', 'up');
-    setupTouchButton('btnDown', 'down');
-    setupTouchButton('btnLeft', 'left');
-    setupTouchButton('btnRight', 'right');
-    setupTouchButton('btnJump', 'jump');
+    bindTouchControl('btnUp', 'up');
+    bindTouchControl('btnDown', 'down');
+    bindTouchControl('btnLeft', 'left');
+    bindTouchControl('btnRight', 'right');
+    bindTouchControl('btnJump', 'jump');
 
-    function checkLadderOverlap(px, py) {
+    function checkLadder(px, py) {
       for (const ladder of currentLadders) {
-        // Horizontal proximity to ladder center
-        if (Math.abs(px - ladder.x) < 18) {
-          // Vertical range check (ladder spans from y1 to y2)
+        if (Math.abs(px - ladder.x) < 20) {
           if (py >= ladder.y1 - 4 && py <= ladder.y2 + 4) {
             return ladder;
           }
@@ -617,17 +678,15 @@
     }
 
     function updatePlayerPhysics() {
-      const ladder = checkLadderOverlap(raccoon.x, raccoon.y);
+      const ladder = checkLadder(raccoon.x, raccoon.y);
 
-      // --- 1. LADDER CLIMBING LOGIC ---
+      // 1. 사다리 오르내리기
       if (ladder && !raccoon.isJumping) {
-        // Can engage climbing with Up or Down
         if (keys.up) {
           raccoon.isClimbing = true;
-          raccoon.x = ladder.x; // Align with ladder center
+          raccoon.x = ladder.x;
           raccoon.y -= raccoon.climbSpeed;
           sound.playLadder();
-          // Climb past top onto floor
           if (raccoon.y <= ladder.y1) {
             raccoon.y = ladder.y1;
             raccoon.isClimbing = false;
@@ -638,32 +697,25 @@
           raccoon.x = ladder.x;
           raccoon.y += raccoon.climbSpeed;
           sound.playLadder();
-          // Climb down to base floor
           if (raccoon.y >= ladder.y2) {
             raccoon.y = ladder.y2;
             raccoon.isClimbing = false;
             raccoon.isGrounded = true;
           }
-        } else if (raccoon.isClimbing) {
-          // Stationary on ladder
         }
       } else {
         raccoon.isClimbing = false;
       }
 
-      // If climbing, player ignores standard gravity and horizontal movement
-      if (raccoon.isClimbing) {
-        return;
-      }
+      if (raccoon.isClimbing) return;
 
-      // --- 2. JUMPING LOGIC ---
+      // 2. 아케이드 점프 트리거
       if (raccoon.isGrounded && keys.jump && !raccoon.isJumping) {
         raccoon.isJumping = true;
         raccoon.isGrounded = false;
         raccoon.vy = raccoon.jumpForce;
-        raccoon.jumpOriginFloorY = raccoon.y; // 점프 시작 층 기록
-        
-        // Classic arcade inertia: direction determined at launch
+        raccoon.jumpOriginFloorY = raccoon.y;
+
         if (keys.left) {
           raccoon.jumpVx = -raccoon.speed;
           raccoon.facing = -1;
@@ -676,57 +728,53 @@
         sound.playJump();
       }
 
-      // --- 3. HORIZONTAL MOVEMENT & GRAVITY ---
+      // 3. 점프 이동 & 중력 & 윗층 천장 충돌 가드
       if (raccoon.isJumping) {
         raccoon.x += raccoon.jumpVx;
         raccoon.y += raccoon.vy;
         raccoon.vy += raccoon.gravity;
 
-        // 천장 충돌 감지 (점프 중 윗층 바닥에 머리가 닿으면 상승 중단)
+        // 윗층 바닥 아래 천장 부딪힘 방지
         for (const floor of currentFloors) {
           if (floor.y < raccoon.jumpOriginFloorY && raccoon.x >= floor.x1 - 10 && raccoon.x <= floor.x2 + 10) {
-            if (raccoon.y - raccoon.height <= floor.y + 14 && raccoon.vy < 0) {
-              raccoon.vy = 0.5; // 머리 부딪힘 후 즉시 하강
+            if (raccoon.y - raccoon.height <= floor.y + 12 && raccoon.vy < 0) {
+              raccoon.vy = 0.5;
             }
           }
         }
       } else {
-        // Ground walking
+        // 평지 보행
         if (keys.left) {
           raccoon.x -= raccoon.speed;
           raccoon.facing = -1;
           raccoon.walkTimer++;
-          if (raccoon.walkTimer % 8 === 0) raccoon.walkFrame = (raccoon.walkFrame + 1) % 4;
+          if (raccoon.walkTimer % 7 === 0) raccoon.walkFrame = (raccoon.walkFrame + 1) % 4;
         } else if (keys.right) {
           raccoon.x += raccoon.speed;
           raccoon.facing = 1;
           raccoon.walkTimer++;
-          if (raccoon.walkTimer % 8 === 0) raccoon.walkFrame = (raccoon.walkFrame + 1) % 4;
+          if (raccoon.walkTimer % 7 === 0) raccoon.walkFrame = (raccoon.walkFrame + 1) % 4;
         } else {
           raccoon.walkFrame = 0;
         }
 
-        // Apply normal gravity when not grounded
         if (!raccoon.isGrounded) {
           raccoon.y += raccoon.vy;
           raccoon.vy += raccoon.gravity;
         }
       }
 
-      // Keep inside screen bounds
+      // 화면 경계 제한
       if (raccoon.x < 55) raccoon.x = 55;
       if (raccoon.x > 745) raccoon.x = 745;
 
-      // --- 4. FLOOR LANDING DETECTION ---
+      // 4. 바닥 착지 감지 (점프로 윗층 뚫고 올라가는 버그 완벽 차단)
       raccoon.isGrounded = false;
       for (const floor of currentFloors) {
-        // 점프 중에는 점프를 시작했던 층보다 더 높은 층으로 착지할 수 없도록 제한 (원작 고증: 층간 이동은 오직 사다리로만 가능)
-        if (raccoon.isJumping && floor.y < raccoon.jumpOriginFloorY - 15) {
-          continue;
+        if (raccoon.isJumping && floor.y < raccoon.jumpOriginFloorY - 10) {
+          continue; // 점프로는 절대 윗 층 바닥에 착지할 수 없음
         }
-
         if (raccoon.x >= floor.x1 - 15 && raccoon.x <= floor.x2 + 15) {
-          // If falling down and feet cross the floor line
           const feetPrev = raccoon.y - raccoon.vy;
           if (raccoon.vy >= 0 && feetPrev <= floor.y + 4 && raccoon.y >= floor.y - 6) {
             raccoon.y = floor.y;
@@ -739,7 +787,6 @@
         }
       }
 
-      // Fall below screen bounds check
       if (raccoon.y > 580) {
         handlePlayerDeath();
       }
@@ -768,13 +815,12 @@
         bottom: raccoon.y
       };
 
-      // 1. Check Traps (Spikes / Thorns)
+      // 1. 압정/가시 충돌
       for (const trap of currentTraps) {
-        // Trap hit box
         const tBox = {
-          left: trap.x - 10,
-          right: trap.x + 10,
-          top: trap.floorY - 14,
+          left: trap.x - 11,
+          right: trap.x + 11,
+          top: trap.floorY - 15,
           bottom: trap.floorY
         };
         if (intersect(pBox, tBox)) {
@@ -783,12 +829,12 @@
         }
       }
 
-      // 2. Check Snakes
+      // 2. 뱀 충돌
       for (const snake of currentSnakes) {
         const sBox = {
-          left: snake.x - 14,
-          right: snake.x + 14,
-          top: snake.floorY - 16,
+          left: snake.x - 15,
+          right: snake.x + 15,
+          top: snake.floorY - 18,
           bottom: snake.floorY
         };
         if (intersect(pBox, sBox)) {
@@ -797,21 +843,20 @@
         }
       }
 
-      // 3. Check Collectibles
+      // 3. 먹이 획득
       for (let i = currentItems.length - 1; i >= 0; i--) {
         const item = currentItems[i];
         const iBox = {
-          left: item.x - 12,
-          right: item.x + 12,
-          top: item.floorY - 26,
-          bottom: item.floorY - 2
+          left: item.x - 14,
+          right: item.x + 14,
+          top: item.floorY - 28,
+          bottom: item.floorY
         };
         if (intersect(pBox, iBox)) {
           updateScore(item.points);
           sound.playCollect();
           currentItems.splice(i, 1);
 
-          // All items collected -> Stage Clear!
           if (currentItems.length === 0) {
             triggerStageClear();
             return;
@@ -833,9 +878,10 @@
 
       setTimeout(() => {
         if (lives > 0) {
-          const template = LEVELS[currentStageIndex % LEVELS.length];
+          const template = STAGES[currentStageIndex % STAGES.length];
           raccoon.reset(template.startPos.x, template.startPos.y);
           gameState = 'PLAYING';
+          sound.startBGM();
         } else {
           gameState = 'GAMEOVER';
           finalScoreText.textContent = `FINAL SCORE: ${score}`;
@@ -844,7 +890,7 @@
           stageClearMenu.classList.add('hidden');
           gameOverMenu.classList.remove('hidden');
         }
-      }, 900);
+      }, 950);
     }
 
     function triggerStageClear() {
@@ -852,16 +898,18 @@
       sound.playStageClear();
       updateScore(1000);
       stageClearBonusText.textContent = `STAGE BONUS +1000`;
-      
+
       setTimeout(() => {
         overlayScreen.classList.remove('hidden');
         startMenu.classList.add('hidden');
         gameOverMenu.classList.add('hidden');
         stageClearMenu.classList.remove('hidden');
-      }, 700);
+      }, 750);
     }
+  </script>
 
-    // Draw Raccoon Character
+  <script>
+    // 1. 고퀄리티 너구리 캐릭터 렌더링
     function drawRaccoon() {
       ctx.save();
       ctx.translate(raccoon.x, raccoon.y);
@@ -871,169 +919,207 @@
       }
 
       if (gameState === 'DYING') {
-        // Spinning / Falling effect when hit
-        ctx.rotate((Date.now() % 500) / 40);
+        ctx.rotate((Date.now() % 600) / 50);
       }
 
-      // --- Body (Tan / Brown) ---
-      ctx.fillStyle = '#b45309'; // Fur main
+      // 그림자
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.beginPath();
-      ctx.ellipse(0, -20, 14, 17, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, -1, 14, 4, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Belly patch (Cream/Peach)
+      // 너구리 줄무늬 꼬리 (살랑거림 애니메이션)
+      ctx.save();
+      const tailWiggle = Math.sin(Date.now() * 0.018) * 3;
+      ctx.translate(-13, -15);
+      ctx.rotate(0.25 + tailWiggle * 0.04);
+      // 베이스 꼬리
+      ctx.fillStyle = '#b45309';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 9, 6, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      // 꼬리 검은 줄무늬
+      ctx.fillStyle = '#3e1d08';
+      ctx.fillRect(-4, -5, 3, 10);
+      ctx.fillRect(1, -5, 3, 9);
+      ctx.restore();
+
+      // 너구리 몸통
+      ctx.fillStyle = '#9a3412';
+      ctx.beginPath();
+      ctx.ellipse(0, -19, 14, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 배 (밝은 살구색 복부)
       ctx.fillStyle = '#fed7aa';
       ctx.beginPath();
-      ctx.ellipse(2, -18, 8, 12, 0, 0, Math.PI * 2);
+      ctx.ellipse(3, -17, 8, 12, 0.1, 0, Math.PI * 2);
       ctx.fill();
 
-      // Mask (Dark Brown)
-      ctx.fillStyle = '#451a03';
+      // 머리 / 볼
+      ctx.fillStyle = '#9a3412';
       ctx.beginPath();
-      ctx.ellipse(5, -27, 8, 5, 0.1, 0, Math.PI * 2);
+      ctx.arc(5, -28, 11, 0, Math.PI * 2);
       ctx.fill();
 
-      // Eye
+      // 귀 (바깥 & 분홍색 안쪽)
+      ctx.fillStyle = '#7c2d12';
+      ctx.beginPath();
+      ctx.moveTo(-3, -36);
+      ctx.lineTo(1, -43);
+      ctx.lineTo(6, -37);
+      ctx.fill();
+      ctx.fillStyle = '#fda4af';
+      ctx.beginPath();
+      ctx.moveTo(-1, -37);
+      ctx.lineTo(1, -41);
+      ctx.lineTo(4, -38);
+      ctx.fill();
+
+      // 도둑 마스크 (너구리 특유의 검은 눈가 안경무늬)
+      ctx.fillStyle = '#261005';
+      ctx.beginPath();
+      ctx.ellipse(7, -29, 7, 5, 0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 똘망똘망한 눈동자
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(6, -28, 2.5, 0, Math.PI * 2);
+      ctx.arc(8, -30, 2.8, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#0f172a';
       ctx.beginPath();
-      ctx.arc(7, -28, 1.3, 0, Math.PI * 2);
+      ctx.arc(9.2, -30, 1.5, 0, Math.PI * 2);
       ctx.fill();
+      // 하이라이트 반사광
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(9, -31.5, 1, 1);
 
-      // Snout / Nose
-      ctx.fillStyle = '#fbbf24';
+      // 주둥이 & 코
+      ctx.fillStyle = '#ffedd5';
       ctx.beginPath();
-      ctx.arc(12, -24, 2, 0, Math.PI * 2);
+      ctx.arc(14, -26, 3.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#000000';
       ctx.beginPath();
-      ctx.arc(13, -25, 1.2, 0, Math.PI * 2);
+      ctx.arc(16, -27, 1.8, 0, Math.PI * 2);
       ctx.fill();
 
-      // Pointy Ears
-      ctx.fillStyle = '#78350f';
-      ctx.beginPath();
-      ctx.moveTo(-4, -33);
-      ctx.lineTo(-1, -40);
-      ctx.lineTo(4, -34);
-      ctx.fill();
-      ctx.fillStyle = '#fca5a5';
-      ctx.beginPath();
-      ctx.moveTo(-2, -34);
-      ctx.lineTo(0, -38);
-      ctx.lineTo(2, -34);
-      ctx.fill();
-
-      // Striped Tail
-      ctx.save();
-      const tailWiggle = Math.sin(Date.now() * 0.015) * 4;
-      ctx.translate(-14, -14);
-      ctx.rotate(0.3 + tailWiggle * 0.03);
-      ctx.fillStyle = '#92400e';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 8, 5, -0.4, 0, Math.PI * 2);
-      ctx.fill();
-      // Tail stripe
-      ctx.fillStyle = '#451a03';
-      ctx.fillRect(-3, -4, 4, 8);
-      ctx.restore();
-
-      // Paws / Feet with walk animation
-      ctx.fillStyle = '#451a03';
+      // 손과 발 (사다리 타기 / 뜀박질 애니메이션)
+      ctx.fillStyle = '#431407';
       if (raccoon.isClimbing) {
-        // Climbing pose
-        const climbCycle = (Date.now() / 120) % 2 > 1;
-        ctx.fillRect(-8, climbCycle ? -32 : -20, 5, 5);
-        ctx.fillRect(4, climbCycle ? -20 : -32, 5, 5);
-        ctx.fillRect(-9, -6, 6, 6);
+        const climbAlt = (Date.now() / 110) % 2 > 1;
+        ctx.fillRect(-7, climbAlt ? -33 : -21, 6, 6);
+        ctx.fillRect(5, climbAlt ? -21 : -33, 6, 6);
+        ctx.fillRect(-8, -6, 6, 6);
         ctx.fillRect(4, -6, 6, 6);
       } else if (!raccoon.isGrounded) {
-        // Jumping pose
-        ctx.fillRect(-6, -8, 6, 6);
-        ctx.fillRect(2, -8, 6, 6);
+        // 점프 포즈
+        ctx.fillRect(-7, -9, 7, 7);
+        ctx.fillRect(3, -9, 7, 7);
+        ctx.fillRect(8, -22, 5, 5); // 앞발 들기
       } else {
-        // Walking pose
+        // 걷기 포즈
         const step = raccoon.walkFrame % 2 === 0 ? 3 : -3;
-        ctx.fillRect(-8 + step, -5, 6, 6);
-        ctx.fillRect(3 - step, -5, 6, 6);
+        ctx.fillRect(-8 + step, -6, 6, 6);
+        ctx.fillRect(3 - step, -6, 6, 6);
+        ctx.fillRect(8, -19, 5, 5);
       }
 
       ctx.restore();
     }
 
-    // Draw Platforms (Stone Brick arcade style)
+    // 2. 바닥 플랫폼 (원작 브라운관 벽돌 질감 & 하이라이트)
     function drawPlatforms() {
       for (const floor of currentFloors) {
-        const h = 14;
-        // Wood/Stone beam
-        ctx.fillStyle = '#854d0e'; // Border/Shadow
+        const h = 15;
+        // 하단 그림자
+        ctx.fillStyle = '#451a03';
         ctx.fillRect(floor.x1, floor.y, floor.x2 - floor.x1, h);
 
-        ctx.fillStyle = '#ca8a04'; // Main top surface
-        ctx.fillRect(floor.x1, floor.y, floor.x2 - floor.x1, 5);
+        // 상단 잔디/벽돌면
+        const grad = ctx.createLinearGradient(0, floor.y, 0, floor.y + 6);
+        grad.addColorStop(0, '#f59e0b');
+        grad.addColorStop(1, '#b45309');
+        ctx.fillStyle = grad;
+        ctx.fillRect(floor.x1, floor.y, floor.x2 - floor.x1, 6);
 
-        // Pixel brick ridges
-        ctx.fillStyle = '#713f12';
-        for (let x = floor.x1; x < floor.x2; x += 28) {
-          ctx.fillRect(x, floor.y + 5, 2, h - 5);
+        // 오락실 도트 벽돌 눈금
+        ctx.fillStyle = '#78350f';
+        for (let x = floor.x1; x < floor.x2; x += 24) {
+          ctx.fillRect(x, floor.y + 6, 2, h - 6);
         }
       }
     }
 
-    // Draw Ladders
+    // 3. 사다리 렌더링 (입체적인 금속/목재 레일)
     function drawLadders() {
       for (const ladder of currentLadders) {
-        const w = 24;
+        const w = 26;
         const left = ladder.x - w / 2;
         const right = ladder.x + w / 2;
 
-        // Ladder vertical rails
-        ctx.fillStyle = '#38bdf8';
+        // 기둥 외곽선
+        ctx.fillStyle = '#0284c7';
         ctx.fillRect(left, ladder.y1, 4, ladder.y2 - ladder.y1 + 4);
         ctx.fillRect(right - 4, ladder.y1, 4, ladder.y2 - ladder.y1 + 4);
 
-        // Rungs
-        ctx.fillStyle = '#bae6fd';
+        // 기둥 하이라이트
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(left + 1, ladder.y1, 2, ladder.y2 - ladder.y1 + 4);
+        ctx.fillRect(right - 3, ladder.y1, 2, ladder.y2 - ladder.y1 + 4);
+
+        // 발판 가로대
         for (let y = ladder.y1 + 8; y <= ladder.y2; y += 14) {
-          ctx.fillRect(left + 2, y, w - 4, 3);
+          ctx.fillStyle = '#075985';
+          ctx.fillRect(left + 2, y + 1, w - 4, 4);
+          ctx.fillStyle = '#bae6fd';
+          ctx.fillRect(left + 2, y, w - 4, 2);
         }
       }
     }
 
-    // Draw Traps (Sharp Caltrops/Spikes)
+    // 4. 압정 / 가시 함정 (날카로운 광택 철제 스파이크)
     function drawTraps() {
       for (const trap of currentTraps) {
         ctx.save();
         ctx.translate(trap.x, trap.floorY);
-        
-        // Spike 1
-        ctx.fillStyle = '#cbd5e1';
+
+        // 그림자
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
         ctx.beginPath();
-        ctx.moveTo(-10, 0);
-        ctx.lineTo(-5, -16);
-        ctx.lineTo(0, 0);
+        ctx.ellipse(0, 0, 12, 3, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Spike 2
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(5, -16);
-        ctx.lineTo(10, 0);
-        ctx.fill();
+        // 뾰족한 철제 압정 2개 나란히
+        [-6, 6].forEach((ox) => {
+          ctx.fillStyle = '#94a3b8';
+          ctx.beginPath();
+          ctx.moveTo(ox - 5, 0);
+          ctx.lineTo(ox, -16);
+          ctx.lineTo(ox + 5, 0);
+          ctx.fill();
 
-        // Red danger warning highlight
+          // 금속 반사 하이라이트
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath();
+          ctx.moveTo(ox, -16);
+          ctx.lineTo(ox + 2, 0);
+          ctx.lineTo(ox, 0);
+          ctx.fill();
+        });
+
+        // 빨간 경고 베이스
         ctx.fillStyle = '#ef4444';
-        ctx.fillRect(-6, -3, 12, 3);
+        ctx.fillRect(-10, -3, 20, 3);
+
         ctx.restore();
       }
     }
 
-    // Draw Snakes
+    // 5. 뱀 몬스터 (원작 구렁이 모션: 꿈틀대는 몸체 & 혓바닥 애니메이션)
     function drawSnakes() {
-      const t = Date.now() * 0.01;
+      const t = Date.now() * 0.012;
       for (const snake of currentSnakes) {
         ctx.save();
         ctx.translate(snake.x, snake.floorY);
@@ -1041,49 +1127,55 @@
           ctx.scale(-1, 1);
         }
 
-        // Snake Body segments with slither wave
-        ctx.fillStyle = '#16a34a';
-        for (let i = 0; i < 4; i++) {
-          const segX = -12 + i * 7;
-          const segY = -6 + Math.sin(t + i * 1.2) * 3;
+        // 그림자
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 16, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 꿈틀거리는 몸통 세그먼트 (그라데이션 및 비늘 무늬)
+        for (let i = 0; i < 5; i++) {
+          const segX = -14 + i * 6.5;
+          const segY = -7 + Math.sin(t + i * 1.3) * 3.5;
+
+          ctx.fillStyle = '#15803d';
           ctx.beginPath();
-          ctx.arc(segX, segY, 5, 0, Math.PI * 2);
+          ctx.arc(segX, segY, 6, 0, Math.PI * 2);
           ctx.fill();
 
-          // Spots
+          // 노란색 알록달록 비늘 반점
           ctx.fillStyle = '#facc15';
           ctx.beginPath();
-          ctx.arc(segX, segY - 1, 2, 0, Math.PI * 2);
+          ctx.arc(segX, segY - 1.5, 2.5, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = '#16a34a';
         }
 
-        // Snake Head
-        ctx.fillStyle = '#15803d';
+        // 뱀 머리
+        ctx.fillStyle = '#166534';
         ctx.beginPath();
-        ctx.arc(12, -8, 6, 0, Math.PI * 2);
+        ctx.ellipse(14, -8, 8, 6.5, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Eye
+        // 번뜩이는 눈
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(13, -10, 2, 0, Math.PI * 2);
+        ctx.arc(15, -10, 2.8, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#000000';
+        ctx.fillStyle = '#dc2626';
         ctx.beginPath();
-        ctx.arc(14, -10, 1, 0, Math.PI * 2);
+        ctx.arc(16.5, -10, 1.4, 0, Math.PI * 2);
         ctx.fill();
 
-        // Flickering tongue
-        if (Math.sin(t * 1.5) > 0.3) {
+        // 날름거리는 붉은 혓바닥
+        if (Math.sin(t * 1.8) > 0.2) {
           ctx.strokeStyle = '#ef4444';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.moveTo(17, -7);
-          ctx.lineTo(23, -7);
-          ctx.lineTo(25, -9);
-          ctx.moveTo(23, -7);
-          ctx.lineTo(25, -5);
+          ctx.moveTo(21, -8);
+          ctx.lineTo(28, -8);
+          ctx.lineTo(31, -11);
+          ctx.moveTo(28, -8);
+          ctx.lineTo(31, -5);
           ctx.stroke();
         }
 
@@ -1091,111 +1183,128 @@
       }
     }
 
-    // Draw Food Collectibles
+    // 6. 먹이 아이템 (당근, 사과, 딸기, 포도, 수박의 통통 튀는 애니메이션)
     function drawItems() {
-      const bob = Math.sin(Date.now() * 0.006) * 3;
+      const bob = Math.sin(Date.now() * 0.007) * 3.5;
       for (const item of currentItems) {
         ctx.save();
-        ctx.translate(item.x, item.floorY - 12 + bob);
+        ctx.translate(item.x, item.floorY - 14 + bob);
+
+        // 아이템 발광 후광 효과
+        ctx.shadowColor = 'rgba(251, 191, 36, 0.4)';
+        ctx.shadowBlur = 8;
 
         if (item.type === 'carrot') {
-          // Carrot
+          // 당근
           ctx.fillStyle = '#ea580c';
           ctx.beginPath();
-          ctx.moveTo(-5, -12);
-          ctx.lineTo(5, -12);
-          ctx.lineTo(0, 4);
+          ctx.moveTo(-6, -11);
+          ctx.lineTo(6, -11);
+          ctx.lineTo(0, 6);
           ctx.closePath();
           ctx.fill();
-          // Leaves
+          // 당근 주름선
+          ctx.strokeStyle = '#c2410c';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(-3, -7); ctx.lineTo(1, -7);
+          ctx.moveTo(-1, -2); ctx.lineTo(3, -2);
+          ctx.stroke();
+          // 싱싱한 당근 잎
           ctx.fillStyle = '#22c55e';
-          ctx.fillRect(-2, -17, 4, 5);
-          ctx.fillRect(-6, -16, 3, 3);
-          ctx.fillRect(3, -16, 3, 3);
+          ctx.fillRect(-2, -18, 4, 7);
+          ctx.fillRect(-6, -16, 3, 5);
+          ctx.fillRect(3, -16, 3, 5);
         } else if (item.type === 'apple') {
-          // Apple
+          // 탐스러운 빨간 사과
           ctx.fillStyle = '#dc2626';
           ctx.beginPath();
-          ctx.arc(0, -4, 8, 0, Math.PI * 2);
+          ctx.arc(-3, -4, 7, 0, Math.PI * 2);
+          ctx.arc(3, -4, 7, 0, Math.PI * 2);
           ctx.fill();
-          // Stem & Leaf
-          ctx.fillStyle = '#854d0e';
-          ctx.fillRect(-1, -14, 2, 4);
+          // 하이라이트 광택
+          ctx.fillStyle = '#fca5a5';
+          ctx.beginPath();
+          ctx.arc(-3, -7, 2, 0, Math.PI * 2);
+          ctx.fill();
+          // 꼭지 & 잎
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(-1, -15, 2, 5);
           ctx.fillStyle = '#4ade80';
           ctx.beginPath();
-          ctx.ellipse(3, -12, 3, 2, 0.4, 0, Math.PI * 2);
+          ctx.ellipse(4, -13, 4, 2.5, 0.4, 0, Math.PI * 2);
           ctx.fill();
         } else if (item.type === 'strawberry') {
-          // Strawberry
+          // 달콤한 딸기
           ctx.fillStyle = '#f43f5e';
           ctx.beginPath();
-          ctx.moveTo(-6, -10);
-          ctx.lineTo(6, -10);
-          ctx.lineTo(0, 4);
-          ctx.closePath();
+          ctx.moveTo(-7, -9);
+          ctx.quadraticCurveTo(8, -9, 0, 7);
+          ctx.quadraticCurveTo(-8, -9, -7, -9);
           ctx.fill();
-          // Green top
+          // 딸기 씨앗
+          ctx.fillStyle = '#fef08a';
+          [[-3, -5], [2, -6], [-1, -1], [3, 0]].forEach(([px, py]) => {
+            ctx.fillRect(px, py, 1.5, 1.5);
+          });
+          // 꼭지
           ctx.fillStyle = '#10b981';
-          ctx.fillRect(-5, -13, 10, 3);
+          ctx.fillRect(-5, -12, 10, 3);
         } else if (item.type === 'grape') {
-          // Grape bunch
+          // 알알이 맺힌 포도송이
           ctx.fillStyle = '#9333ea';
-          [-3, 3].forEach(x => {
-            ctx.beginPath(); ctx.arc(x, -8, 4, 0, Math.PI * 2); ctx.fill();
-          });
-          [-4, 0, 4].forEach(x => {
-            ctx.beginPath(); ctx.arc(x, -3, 3.5, 0, Math.PI * 2); ctx.fill();
-          });
-          ctx.beginPath(); ctx.arc(0, 2, 3, 0, Math.PI * 2); ctx.fill();
-          // Stem
+          [-4, 4].forEach(x => { ctx.beginPath(); ctx.arc(x, -9, 4.5, 0, Math.PI * 2); ctx.fill(); });
+          [-5, 0, 5].forEach(x => { ctx.beginPath(); ctx.arc(x, -3, 4, 0, Math.PI * 2); ctx.fill(); });
+          ctx.beginPath(); ctx.arc(0, 3, 3.5, 0, Math.PI * 2); ctx.fill();
+          // 줄기
           ctx.fillStyle = '#65a30d';
-          ctx.fillRect(-1, -14, 2, 4);
+          ctx.fillRect(-1, -15, 2, 5);
         } else {
-          // Watermelon slice
-          ctx.fillStyle = '#16a34a';
+          // 수박 조각
+          ctx.fillStyle = '#15803d'; // 수박 껍질
           ctx.beginPath();
-          ctx.arc(0, -2, 9, 0, Math.PI);
+          ctx.arc(0, -3, 11, 0, Math.PI);
           ctx.fill();
-          ctx.fillStyle = '#ef4444';
+          ctx.fillStyle = '#ef4444'; // 빨간 과육
           ctx.beginPath();
-          ctx.arc(0, -2, 7, 0, Math.PI);
+          ctx.arc(0, -3, 8.5, 0, Math.PI);
           ctx.fill();
-          // Seeds
+          // 수박씨
           ctx.fillStyle = '#000000';
-          ctx.fillRect(-3, 1, 1.5, 1.5);
-          ctx.fillRect(2, 1, 1.5, 1.5);
+          ctx.fillRect(-4, 0, 1.8, 1.8);
+          ctx.fillRect(3, 0, 1.8, 1.8);
+          ctx.fillRect(0, 3, 1.8, 1.8);
         }
 
         ctx.restore();
       }
     }
+  </script>
 
-    function gameLoop(timestamp) {
-      if (!lastTime) lastTime = timestamp;
-      const dt = timestamp - lastTime;
-      lastTime = timestamp;
-
-      // Clear Canvas Background (Dark Navy Retro Arcade)
-      ctx.fillStyle = '#090a15';
+  <script>
+    function renderLoop() {
+      // 캔버스 배경 (고전 아케이드 심야 네이비)
+      ctx.fillStyle = '#050714';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Starry / subtle grid backdrop
-      ctx.fillStyle = '#1e1b4b';
+      // 은은한 그리드 라인 배경
+      ctx.strokeStyle = 'rgba(30, 41, 59, 0.35)';
+      ctx.lineWidth = 1;
       for (let x = 40; x < canvas.width; x += 40) {
-        ctx.fillRect(x, 0, 1, canvas.height);
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
       }
       for (let y = 40; y < canvas.height; y += 40) {
-        ctx.fillRect(0, y, canvas.width, 1);
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
       }
 
-      // Update State
+      // 게임 플레이 업데이트
       if (gameState === 'PLAYING') {
         updatePlayerPhysics();
         updateSnakes();
         checkHazardAndItemCollisions();
       }
 
-      // Render World Elements
+      // 화면 요소 렌더링
       drawLadders();
       drawPlatforms();
       drawTraps();
@@ -1203,11 +1312,10 @@
       drawItems();
       drawRaccoon();
 
-      animFrameId = requestAnimationFrame(gameLoop);
+      requestAnimationFrame(renderLoop);
     }
 
-    // UI Buttons Events
-    document.getElementById('startGameBtn').addEventListener('click', () => {
+    function startGame() {
       sound.init();
       overlayScreen.classList.add('hidden');
       score = 0;
@@ -1216,6 +1324,14 @@
       updateScore(0);
       loadStage(currentStageIndex);
       gameState = 'PLAYING';
+      sound.startBGM();
+    }
+
+    // 터치 및 버튼 바인딩
+    document.getElementById('startMenu').addEventListener('click', startGame);
+    document.getElementById('startMenu').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startGame();
     });
 
     document.getElementById('nextStageBtn').addEventListener('click', () => {
@@ -1223,6 +1339,7 @@
       currentStageIndex++;
       loadStage(currentStageIndex);
       gameState = 'PLAYING';
+      sound.startBGM();
     });
 
     document.getElementById('restartGameBtn').addEventListener('click', () => {
@@ -1233,40 +1350,32 @@
       updateScore(0);
       loadStage(currentStageIndex);
       gameState = 'PLAYING';
+      sound.startBGM();
     });
 
-    // Sound toggle
+    // BGM 및 사운드 온/오프 토글
     const soundToggleBtn = document.getElementById('soundToggleBtn');
     const soundIcon = document.getElementById('soundIcon');
     soundToggleBtn.addEventListener('click', () => {
       sound.enabled = !sound.enabled;
       if (sound.enabled) {
         sound.init();
+        if (gameState === 'PLAYING') sound.startBGM();
         soundIcon.textContent = '🔊';
+        soundToggleBtn.innerHTML = '<span id="soundIcon">🔊</span> BGM: ON';
         soundToggleBtn.classList.add('text-amber-300');
-        soundToggleBtn.classList.remove('text-slate-500');
       } else {
+        sound.stopBGM();
         soundIcon.textContent = '🔇';
+        soundToggleBtn.innerHTML = '<span id="soundIcon">🔇</span> BGM: OFF';
         soundToggleBtn.classList.remove('text-amber-300');
-        soundToggleBtn.classList.add('text-slate-500');
       }
     });
 
-    // Help Modal
-    const helpBtn = document.getElementById('helpBtn');
-    const closeHelpBtn = document.getElementById('closeHelpBtn');
-    const helpModal = document.getElementById('helpModal');
-
-    helpBtn.addEventListener('click', () => helpModal.classList.remove('hidden'));
-    closeHelpBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
-    helpModal.addEventListener('click', (e) => {
-      if (e.target === helpModal) helpModal.classList.add('hidden');
-    });
-
-    // Start rendering loop on window load
+    // 페이지 로드 시 초기화 및 애니메이션 루프 시작
     window.onload = function () {
       loadStage(0);
-      animFrameId = requestAnimationFrame(gameLoop);
+      requestAnimationFrame(renderLoop);
     };
   </script>
 </body>
