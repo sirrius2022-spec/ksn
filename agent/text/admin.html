@@ -157,6 +157,9 @@
       <input type="text" id="ghRepo" placeholder="예: risk-assessment-prompt">
       <label>Personal Access Token (repo 쓰기 권한)</label>
       <input type="password" id="ghToken" placeholder="ghp_로 시작하는 토큰">
+      <label>저장소 내 파일 경로 (content.json 위치)</label>
+      <input type="text" id="ghPath" placeholder="예: agent/text/content.json">
+      <div class="hint">저장소 루트가 아니라 폴더 안에 넣었다면 그 경로를 정확히 적어야 합니다. (예: 이 페이지 주소가 .../agent/text/admin.html 이라면 agent/text/content.json)</div>
       <button class="btn btn-ghost" onclick="saveConfig()">설정 저장</button>
       <details>
         <summary>토큰은 어디서 만드나요?</summary>
@@ -178,8 +181,7 @@
 </main>
 
 <script>
-const ADMIN_PASSWORD = "1234";
-const FILE_PATH = "content.json";
+const ADMIN_PASSWORD = "여기에_원하는_비밀번호_입력";
 
 function checkPassword(){
   const val = document.getElementById('pwInput').value;
@@ -197,12 +199,14 @@ function loadConfig(){
   document.getElementById('ghOwner').value = localStorage.getItem('gh_owner') || '';
   document.getElementById('ghRepo').value = localStorage.getItem('gh_repo') || '';
   document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
+  document.getElementById('ghPath').value = localStorage.getItem('gh_path') || 'content.json';
 }
 
 function saveConfig(){
   localStorage.setItem('gh_owner', document.getElementById('ghOwner').value.trim());
   localStorage.setItem('gh_repo', document.getElementById('ghRepo').value.trim());
   localStorage.setItem('gh_token', document.getElementById('ghToken').value.trim());
+  localStorage.setItem('gh_path', document.getElementById('ghPath').value.trim() || 'content.json');
   alert('설정이 저장되었습니다.');
 }
 
@@ -224,17 +228,18 @@ function getConfig(){
   return {
     owner: document.getElementById('ghOwner').value.trim(),
     repo: document.getElementById('ghRepo').value.trim(),
-    token: document.getElementById('ghToken').value.trim()
+    token: document.getElementById('ghToken').value.trim(),
+    path: document.getElementById('ghPath').value.trim() || 'content.json'
   };
 }
 
 async function loadCurrent(){
-  const { owner, repo, token } = getConfig();
+  const { owner, repo, token, path } = getConfig();
   const statusEl = document.getElementById('deployStatus');
   statusEl.className = 'status';
   statusEl.textContent = '불러오는 중...';
   try{
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${FILE_PATH}`, {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
       headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' }
     });
     if(!res.ok) throw new Error(`GitHub API 오류 (${res.status})`);
@@ -251,7 +256,7 @@ async function loadCurrent(){
 }
 
 async function deploy(){
-  const { owner, repo, token } = getConfig();
+  const { owner, repo, token, path } = getConfig();
   const promptText = document.getElementById('promptEdit').value;
   const btn = document.getElementById('deployBtn');
   const statusEl = document.getElementById('deployStatus');
@@ -273,7 +278,7 @@ async function deploy(){
 
   try{
     // 1) 현재 파일의 sha 확인
-    const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${FILE_PATH}`, {
+    const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
       headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' }
     });
     if(!getRes.ok) throw new Error(`파일 조회 실패 (${getRes.status})`);
@@ -285,7 +290,7 @@ async function deploy(){
       updatedAt: new Date().toISOString()
     }, null, 2);
 
-    const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${FILE_PATH}`, {
+    const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
       method: 'PUT',
       headers: {
         'Authorization': `token ${token}`,
