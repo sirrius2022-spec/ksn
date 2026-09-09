@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프롬프트 관리자</title>
+<style>
+  :root{
+    --safety-yellow:#FFC72C;
+    --sky-blue:#2E86DE;
+    --ink:#1B2733;
+    --paper:#FBF8F1;
+    --card:#FFFFFF;
+    --line:#E4DFD3;
+    --danger:#D64545;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .topbar{
+    background:var(--ink);
+    color:#fff;
+    padding:14px 20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .topbar .chip{
+    background:var(--safety-yellow);
+    color:var(--ink);
+    font-weight:800;
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:999px;
+  }
+  .topbar .title{ font-size:14px; font-weight:600; opacity:0.9; }
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:24px 18px 60px;
+  }
+  h1{ font-size:20px; margin:6px 0 16px; font-weight:800; }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px 18px;
+    margin-bottom:16px;
+  }
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    color:#5B6B7A;
+    margin-bottom:6px;
+  }
+  input[type=text], input[type=password], textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--ink);
+    margin-bottom:14px;
+  }
+  textarea{
+    min-height:160px;
+    line-height:1.6;
+    resize:vertical;
+    white-space:pre-wrap;
+  }
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .btn{
+    width:100%;
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    color:#fff;
+  }
+  .btn-primary{ background:var(--sky-blue); }
+  .btn-ghost{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink);
+    margin-top:8px;
+  }
+  .btn:disabled{ background:#C7CDD3; cursor:default; }
+  .btn.success{ background:#2E9E5B; }
+  .status{
+    font-size:13px;
+    margin-top:10px;
+    line-height:1.6;
+    white-space:pre-wrap;
+  }
+  .status.error{ color:var(--danger); }
+  .status.ok{ color:#2E9E5B; }
+  .hint{
+    font-size:12px;
+    color:#8C97A3;
+    line-height:1.6;
+    margin-top:-6px;
+    margin-bottom:14px;
+  }
+  .gate{
+    max-width:340px;
+    margin:80px auto;
+    text-align:center;
+  }
+  .gate input{ text-align:center; }
+  details{
+    font-size:13px;
+    color:#5B6B7A;
+    margin-top:6px;
+  }
+  summary{ cursor:pointer; font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="chip">관리자</span>
+  <span class="title">프롬프트 관리자 모드</span>
+</div>
+
+<main>
+
+  <!-- 비밀번호 게이트 -->
+  <div class="gate card" id="gate">
+    <h1>관리자 비밀번호</h1>
+    <input type="password" id="pwInput" placeholder="비밀번호 입력">
+    <button class="btn btn-primary" onclick="checkPassword()">입장</button>
+    <div class="status error" id="pwStatus"></div>
+  </div>
+
+  <!-- 관리자 화면 (비밀번호 확인 후 표시) -->
+  <div id="adminArea" style="display:none;">
+
+    <div class="card">
+      <h1 style="margin-top:0;">GitHub 연결 설정</h1>
+      <div class="hint">최초 1회만 입력하면 이 브라우저에 저장됩니다. (다른 기기에서는 다시 입력)</div>
+      <label>GitHub 사용자명 (owner)</label>
+      <input type="text" id="ghOwner" placeholder="예: myaccount">
+      <label>저장소 이름 (repo)</label>
+      <input type="text" id="ghRepo" placeholder="예: risk-assessment-prompt">
+      <label>Personal Access Token (repo 쓰기 권한)</label>
+      <input type="password" id="ghToken" placeholder="ghp_로 시작하는 토큰">
+      <button class="btn btn-ghost" onclick="saveConfig()">설정 저장</button>
+      <details>
+        <summary>토큰은 어디서 만드나요?</summary>
+        GitHub → 우측 상단 프로필 → Settings → Developer settings → Fine-grained tokens → Generate new token.<br>
+        Repository access는 이 저장소 하나만 선택하고, Permissions에서 "Contents: Read and write"만 켜주세요.
+      </details>
+    </div>
+
+    <div class="card">
+      <h1 style="margin-top:0;">프롬프트 내용</h1>
+      <label>학생 화면에 표시될 문구</label>
+      <textarea id="promptEdit" placeholder="여기에 프롬프트를 입력하세요"></textarea>
+      <button class="btn btn-ghost" onclick="loadCurrent()">현재 배포된 내용 불러오기</button>
+      <button class="btn btn-primary" id="deployBtn" onclick="deploy()" style="margin-top:10px;">배포하기</button>
+      <div class="status" id="deployStatus"></div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const ADMIN_PASSWORD = "여기에_원하는_비밀번호_입력";
+const FILE_PATH = "content.json";
+
+function checkPassword(){
+  const val = document.getElementById('pwInput').value;
+  const statusEl = document.getElementById('pwStatus');
+  if(val === ADMIN_PASSWORD){
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('adminArea').style.display = 'block';
+    loadConfig();
+  }else{
+    statusEl.textContent = '비밀번호가 올바르지 않습니다.';
+  }
+}
+
+function loadConfig(){
+  document.getElementById('ghOwner').value = localStorage.getItem('gh_owner') || '';
+  document.getElementById('ghRepo').value = localStorage.getItem('gh_repo') || '';
+  document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
+}
+
+function saveConfig(){
+  localStorage.setItem('gh_owner', document.getElementById('ghOwner').value.trim());
+  localStorage.setItem('gh_repo', document.getElementById('ghRepo').value.trim());
+  localStorage.setItem('gh_token', document.getElementById('ghToken').value.trim());
+  alert('설정이 저장되었습니다.');
+}
+
+function utf8ToBase64(str){
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
+function base64ToUtf8(base64){
+  const binary = atob(base64.replace(/\n/g, ''));
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function getConfig(){
+  return {
+    owner: document.getElementById('ghOwner').value.trim(),
+    repo: document.getElementById('ghRepo').value.trim(),
+    token: document.getElementById('ghToken').value.trim()
+  };
+}
+
+async function loadCurrent(){
+  const { owner, repo, token } = getConfig();
+  const statusEl = document.getElementById('deployStatus');
+  statusEl.className = 'status';
+  statusEl.textContent = '불러오는 중...';
+  try{
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${FILE_PATH}`, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if(!res.ok) throw new Error(`GitHub API 오류 (${res.status})`);
+    const data = await res.json();
+    const content = base64ToUtf8(data.content);
+    const parsed = JSON.parse(content);
+    document.getElementById('promptEdit').value = parsed.prompt || '';
+    statusEl.className = 'status ok';
+    statusEl.textContent = '현재 배포된 내용을 불러왔습니다.';
+  }catch(e){
+    statusEl.className = 'status error';
+    statusEl.textContent = '불러오기 실패: ' + e.message + '\n(owner/repo/토큰을 확인해주세요)';
+  }
+}
+
+async function deploy(){
+  const { owner, repo, token } = getConfig();
+  const promptText = document.getElementById('promptEdit').value;
+  const btn = document.getElementById('deployBtn');
+  const statusEl = document.getElementById('deployStatus');
+
+  if(!owner || !repo || !token){
+    statusEl.className = 'status error';
+    statusEl.textContent = '먼저 GitHub 연결 설정을 저장해주세요.';
+    return;
+  }
+  if(!promptText.trim()){
+    statusEl.className = 'status error';
+    statusEl.textContent = '프롬프트 내용을 입력해주세요.';
+    return;
+  }
+
+  btn.disabled = true;
+  statusEl.className = 'status';
+  statusEl.textContent = '배포 준비 중...';
+
+  try{
+    // 1) 현재 파일의 sha 확인
+    const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${FILE_PATH}`, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if(!getRes.ok) throw new Error(`파일 조회 실패 (${getRes.status})`);
+    const getData = await getRes.json();
+
+    // 2) 새 내용 커밋
+    const newContent = JSON.stringify({
+      prompt: promptText,
+      updatedAt: new Date().toISOString()
+    }, null, 2);
+
+    const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${FILE_PATH}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `프롬프트 업데이트 ${new Date().toLocaleString('ko-KR')}`,
+        content: utf8ToBase64(newContent),
+        sha: getData.sha
+      })
+    });
+
+    if(!putRes.ok){
+      const errBody = await putRes.json().catch(()=>({}));
+      throw new Error(`배포 실패 (${putRes.status}): ${errBody.message || ''}`);
+    }
+
+    btn.classList.add('success');
+    statusEl.className = 'status ok';
+    statusEl.textContent = '배포 완료! Vercel이 자동으로 재빌드합니다 (보통 30~60초 소요). 학생 화면은 잠시 후 새로고침하면 반영됩니다.';
+    setTimeout(()=> btn.classList.remove('success'), 2000);
+  }catch(e){
+    statusEl.className = 'status error';
+    statusEl.textContent = e.message;
+  }finally{
+    btn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>
