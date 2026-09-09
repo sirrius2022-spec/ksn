@@ -1,251 +1,156 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>위험성평가 프롬프트 실습</title>
-    <!-- Tailwind CSS 로드 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* 기본 폰트 설정 및 커스텀 스타일 */
-        body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-            background-color: #f3f4f6; /* bg-gray-100 */
-        }
-        
-        /* 알림 메시지 애니메이션 */
-        .toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 16px;
-            position: fixed;
-            z-index: 50;
-            left: 50%;
-            bottom: 30px;
-            font-size: 17px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            opacity: 0;
-            transition: opacity 0.3s, bottom 0.3s, visibility 0.3s;
-        }
-
-        .toast.show {
-            visibility: visible;
-            opacity: 1;
-            bottom: 50px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Generator</title>
+<!-- 최신 node-qrcode 브라우저용 라이브러리로 교체 -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  * {box-sizing:border-box; margin:0; padding:0;}
+  body {
+    min-height:100vh; background:#0a0a0a; display:flex; align-items:center; justify-content:center;
+    font-family:'Courier New',monospace; padding:24px;
+    background-image: linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),
+                      linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);
+    background-size:40px 40px;
+  }
+  .card {
+    width:100%; max-width:420px; background:#111; border:1px solid #2a2a2a;
+    border-radius:4px; padding:36px 28px; box-shadow:0 0 60px rgba(0,255,180,0.05);
+  }
+  .badge {display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .dot {width:8px; height:8px; border-radius:50%; background:#00ffb4; box-shadow:0 0 8px #00ffb4;}
+  .badge-text {color:#00ffb4; font-size:11px; letter-spacing:.15em; text-transform:uppercase;}
+  h1 {color:#f0f0f0; font-size:22px; font-weight:700; margin-bottom:4px;}
+  .sub {color:#555; font-size:12px; margin-bottom:28px;}
+  label {display:block; color:#666; font-size:11px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:7px;}
+  input {
+    width:100%; background:#0d0d0d; border:1px solid #2a2a2a;
+    color:#e0e0e0; font-size:14px; padding:12px 14px; border-radius:3px;
+    outline:none; font-family:inherit; transition:border-color .2s; margin-bottom:6px;
+  }
+  input:focus {border-color:#00ffb4;}
+  .err {color:#ff5f5f; font-size:12px; min-height:18px; margin-bottom:10px;}
+  .sizes {display:flex; gap:8px; margin-bottom:22px;}
+  .sz {
+    flex:1; padding:8px 0; background:#0d0d0d; color:#666; border:1px solid #2a2a2a;
+    border-radius:3px; font-size:12px; cursor:pointer; font-family:inherit;
+    letter-spacing:.05em; transition:all .15s;
+  }
+  .sz.on {background:#00ffb4; color:#000; border-color:#00ffb4; font-weight:700;}
+  #genbtn {
+    width:100%; padding:14px 0; background:#00ffb4; color:#000; border:none;
+    border-radius:3px; font-size:13px; font-weight:700; letter-spacing:.1em;
+    text-transform:uppercase; cursor:pointer; font-family:inherit; transition:opacity .15s;
+  }
+  #genbtn:hover {opacity:.85;}
+  .out {margin-top:28px; border-top:1px solid #1e1e1e; padding-top:28px; text-align:center; display:none;}
+  .qrwrap {display:inline-block; background:#fff; padding:14px; border-radius:3px; box-shadow:0 0 40px rgba(0,255,180,0.1);}
+  /* 새 라이브러리는 canvas에 직접 그림 */
+  #qrc {display:block; margin: 0 auto;} 
+  .urltext {color:#444; font-size:11px; margin-top:12px; word-break:break-all;}
+  #dlbtn {
+    margin-top:14px; padding:11px 28px; background:transparent; color:#00ffb4;
+    border:1px solid #00ffb4; border-radius:3px; font-size:12px; font-weight:600;
+    letter-spacing:.1em; text-transform:uppercase; cursor:pointer; font-family:inherit; transition:all .15s;
+  }
+  #dlbtn:hover {background:#00ffb4; color:#000;}
+  .foot {margin-top:24px; border-top:1px solid #1a1a1a; padding-top:12px; display:flex; justify-content:space-between;}
+  .foot span {color:#2a2a2a; font-size:10px; letter-spacing:.07em;}
+</style>
 </head>
-<body class="flex flex-col min-h-screen">
-    <header class="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-10 flex justify-between items-center">
-        <div class="w-12"></div> <!-- 중앙 정렬을 위한 여백 -->
-        <h1 class="text-xl font-bold text-center">AI 실습 도우미</h1>
-        <a href="?admin=true" class="text-xs bg-blue-800 hover:bg-blue-900 text-white px-2 py-1 rounded shadow transition" title="프롬프트 수정 모드">관리자</a>
-    </header>
+<body>
+<div class="card">
+  <div class="badge"><div class="dot"></div><span class="badge-text">Advanced QR Generator</span></div>
+  <h1>URL → QR Code</h1>
+  <p class="sub">긴 주소(프롬프트) 완벽 지원</p>
+  
+  <label>Target URL</label>
+  <input type="text" id="urlinput" placeholder="https://example.com">
+  <div class="err" id="errmsg"></div>
+  
+  <label>Size: <span id="szlabel">300</span>px</label>
+  <div class="sizes">
+    <button class="sz" onclick="setSize(200)">200px</button>
+    <button class="sz on" onclick="setSize(300)">300px</button>
+    <button class="sz" onclick="setSize(500)">500px</button>
+  </div>
+  
+  <button id="genbtn" onclick="generate()">⬡ Generate QR Code</button>
+  
+  <div class="out" id="out">
+    <div class="qrwrap"><canvas id="qrc"></canvas></div>
+    <p class="urltext" id="urltxt"></p>
+    <button id="dlbtn" onclick="dlQR()">↓ Download PNG</button>
+  </div>
+  
+  <div class="foot">
+    <span>CLIENT-SIDE · NO SERVER</span>
+    <span>FREE TO USE</span>
+  </div>
+</div>
 
-    <main class="flex-grow p-4 md:p-6 flex flex-col items-center max-w-2xl mx-auto w-full">
-        
-        <div id="studentMode" class="w-full">
-            <div class="bg-white rounded-xl shadow-lg w-full p-6 mb-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2 border-gray-200">
-                    실습용 프롬프트
-                </h2>
-                
-                <p class="text-sm text-gray-600 mb-4">
-                    아래 버튼을 눌러 프롬프트를 복사한 후, ChatGPT나 다른 AI 서비스에 붙여넣기 하세요.
-                </p>
+<script>
+let sz = 300;
 
-                <!-- 복사할 프롬프트 내용 (JavaScript로 렌더링됨) -->
-                <div id="displayPrompt" class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-5 text-gray-700 text-sm md:text-base leading-relaxed break-keep whitespace-pre-wrap"></div>
+function setSize(n){
+  sz = n;
+  document.getElementById('szlabel').textContent = n;
+  document.querySelectorAll('.sz').forEach(b => b.classList.remove('on'));
+  event.target.classList.add('on');
+}
 
-                <button 
-                    onclick="copyPrompt()" 
-                    class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg shadow transition duration-150 ease-in-out flex justify-center items-center gap-2 touch-manipulation"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                    프롬프트 복사하기
-                </button>
-            </div>
+function norm(u){ return /^https?:\/\//i.test(u) ? u : 'https://'+u; }
+function valid(u){ try{new URL(u); return true;} catch{return false;} }
 
-            <div class="bg-yellow-50 border border-yellow-200 rounded-xl shadow w-full p-5">
-                <h3 class="text-md font-bold text-yellow-800 mb-2 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                    </svg>
-                    실습 안내
-                </h3>
-                <ul class="list-disc list-inside text-sm text-yellow-700 space-y-1 ml-1">
-                    <li>복사된 텍스트를 AI 대화창에 붙여넣기 하세요.</li>
-                    <li>분석할 사진을 AI 대화창에 함께 첨부해야 합니다.</li>
-                </ul>
-            </div>
-        </div>
+function generate(){
+  const raw = document.getElementById('urlinput').value.trim();
+  const err = document.getElementById('errmsg');
+  err.textContent = '';
+  
+  if(!raw){ err.textContent = '⚠ URL을 입력하세요.'; return; }
+  const url = norm(raw);
+  if(!valid(url)){ err.textContent = '⚠ 유효하지 않은 URL입니다.'; return; }
 
-        <div id="adminMode" class="w-full hidden">
-            <div class="bg-white rounded-xl shadow-lg w-full p-6 mb-6 border-2 border-indigo-400">
-                <div class="flex justify-between items-center mb-4 border-b pb-2 border-gray-200">
-                    <h2 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-                        </svg>
-                        관리자 설정 (프롬프트 편집)
-                    </h2>
-                    <a href="?" class="text-sm text-gray-500 hover:text-gray-700 underline">학생 모드로 돌아가기</a>
-                </div>
-                
-                <p class="text-sm text-gray-600 mb-3">
-                    강의에 맞게 프롬프트를 수정한 후 링크를 생성하세요.<br>
-                    생성된 주소로 QR코드를 만들어 학생들에게 배포하면 됩니다.
-                </p>
+  const canvas = document.getElementById('qrc');
+  
+  // node-qrcode 라이브러리 사용
+  QRCode.toCanvas(canvas, url, {
+    width: sz,
+    margin: 1, // 테두리 여백
+    errorCorrectionLevel: 'L', // 긴 URL 저장을 위해 오류 복원 레벨을 Low로 설정
+    color: {
+      dark: '#000000',
+      light: '#ffffff'
+    }
+  }, function (error) {
+    if (error) {
+      err.textContent = '⚠ QR 코드 생성 실패 (길이 초과 등)';
+      console.error(error);
+      return;
+    }
+    // 성공 시
+    document.getElementById('urltxt').textContent = url;
+    document.getElementById('out').style.display = 'block';
+  });
+}
 
-                <textarea id="adminTextarea" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm mb-4 resize-y"></textarea>
+function dlQR(){
+  const canvas = document.getElementById('qrc');
+  if(canvas){
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'qrcode.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
 
-                <button 
-                    onclick="generateLink()" 
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow transition mb-4"
-                >
-                    새로운 공유 링크 만들기
-                </button>
-
-                <!-- 결과 링크 표시 영역 -->
-                <div id="linkResult" class="hidden bg-gray-50 p-4 rounded-lg border border-indigo-200">
-                    <p class="text-sm font-semibold text-indigo-800 mb-2">✅ 공유 주소가 생성되었습니다!</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="generatedLink" class="flex-grow p-2 text-xs border border-gray-300 rounded bg-white" readonly>
-                        <button onclick="copyGeneratedLink()" class="bg-gray-800 text-white px-3 py-2 rounded text-xs whitespace-nowrap hover:bg-gray-700">주소 복사</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <footer class="bg-gray-800 text-gray-300 text-center p-4 text-xs mt-auto">
-        &copy; Copyright 김성남 All rights reserved.
-    </footer>
-
-    <!-- 복사 성공 알림창 (Toast) -->
-    <div id="toast" class="toast">알림</div>
-
-    <!-- 숨겨진 텍스트 영역 (복사용 실제 텍스트 저장) -->
-    <textarea id="hiddenPrompt" class="hidden" aria-hidden="true"></textarea>
-
-    <script>
-        // 기본 프롬프트 설정
-        const defaultPrompt = `1. 당신은 30여년 흙막이 경험을 가진 토질및기초기술사, 토목시공기술사, 건설안전기술사로서 나의 파트너 입니다.\n\n2. 사진을 분석해서 첨부한 자료를 근거로 “번호, 문제점, 안전대책, 설계기준 근거, 시방서 근거, 법적근거(조항 및 키워드 포함), 코사가이드 및 표준안전작업지침 등 ” 순서대로 보기좋게 표로 상세하게 작성해서 엑셀로 저장해 주세요.`;
-
-        let currentPrompt = defaultPrompt;
-
-        // URL 파라미터 확인 (?admin=true 또는 ?p=프롬프트내용)
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedPrompt = urlParams.get('p');
-        const isAdmin = urlParams.get('admin') === 'true';
-
-        // URL에 커스텀 프롬프트 데이터가 있으면 덮어쓰기
-        if (encodedPrompt) {
-            try {
-                currentPrompt = decodeURIComponent(encodedPrompt);
-            } catch (e) {
-                console.error("URL 파라미터 해석 실패:", e);
-            }
-        }
-
-        // 페이지 로딩 완료 시 UI 업데이트
-        window.onload = function() {
-            // 화면에 텍스트 반영
-            document.getElementById('displayPrompt').textContent = currentPrompt;
-            document.getElementById('hiddenPrompt').value = currentPrompt;
-
-            // 관리자 모드 접속 시 화면 전환
-            if (isAdmin) {
-                document.getElementById('studentMode').classList.add('hidden');
-                document.getElementById('adminMode').classList.remove('hidden');
-                document.getElementById('adminTextarea').value = currentPrompt;
-            }
-        };
-
-        function copyPrompt() {
-            var copyText = document.getElementById("hiddenPrompt");
-            var textToCopy = copyText.value;
-
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(textToCopy).then(function() {
-                    showToast("프롬프트가 복사되었습니다!");
-                }, function(err) {
-                    fallbackCopyTextToClipboard(textToCopy);
-                });
-            } else {
-                fallbackCopyTextToClipboard(textToCopy);
-            }
-        }
-
-        function fallbackCopyTextToClipboard(text) {
-            var textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-
-            try {
-                var successful = document.execCommand('copy');
-                if(successful){
-                    showToast("프롬프트가 복사되었습니다!");
-                } else {
-                    alert('복사에 실패했습니다. 텍스트를 직접 드래그해주세요.');
-                }
-            } catch (err) {
-                alert('복사에 실패했습니다. 텍스트를 직접 드래그해주세요.');
-            }
-            document.body.removeChild(textArea);
-        }
-
-        function generateLink() {
-            const newText = document.getElementById('adminTextarea').value;
-            if (!newText.trim()) {
-                alert("프롬프트 내용을 입력해주세요.");
-                return;
-            }
-            
-            // 베이스 주소 뒤에 파라미터를 붙여 새로운 링크 생성
-            const baseUrl = window.location.origin + window.location.pathname;
-            const newUrl = baseUrl + '?p=' + encodeURIComponent(newText);
-            
-            document.getElementById('generatedLink').value = newUrl;
-            document.getElementById('linkResult').classList.remove('hidden');
-        }
-
-        function copyGeneratedLink() {
-            const linkInput = document.getElementById('generatedLink');
-            
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(linkInput.value).then(function() {
-                    showToast("공유 주소가 복사되었습니다!");
-                });
-            } else {
-                linkInput.select();
-                document.execCommand('copy');
-                showToast("공유 주소가 복사되었습니다!");
-            }
-        }
-
-        // 토스트 알림창 공통 함수
-        function showToast(message) {
-            var toast = document.getElementById("toast");
-            toast.textContent = message;
-            toast.className = "toast show";
-            setTimeout(function(){ 
-                toast.className = toast.className.replace("show", ""); 
-            }, 3000);
-        }
-    </script>
+document.getElementById('urlinput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') generate();
+});
+</script>
 </body>
 </html>
