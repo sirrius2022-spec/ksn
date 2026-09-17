@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>정릉동 도시형생활주택 3D BIM & 설계도면 뷰어</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,184 +15,295 @@
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
-    * { font-family: 'Pretendard', sans-serif; }
-    canvas { outline: none; }
-    /* Custom scrollbars */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    * { 
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+    html, body {
+      overscroll-behavior-y: none;
+      touch-action: manipulation;
+    }
+    #canvas-container canvas {
+      outline: none;
+      touch-action: none;
+    }
+    /* Smooth custom scrollbars */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
-    ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.7); }
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.82);
-      backdrop-filter: blur(12px);
+    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.4); border-radius: 4px; }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
-    .badge {
-      font-size: 11px;
-      letter-spacing: 0.05em;
+    .sheet-transition {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
     }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 overflow-hidden h-screen w-screen flex flex-col select-none">
 
-  <header class="h-14 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between px-5 z-20 shrink-0">
-    <div class="flex items-center space-x-3">
-      <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-500/30">
-        <i class="fa-solid fa-cubes"></i>
+  <!-- Top Navigation Bar -->
+  <header class="h-12 md:h-14 bg-slate-900/95 border-b border-slate-800/80 flex items-center justify-between px-3 md:px-5 z-30 shrink-0">
+    <div class="flex items-center space-x-2 md:space-x-3 overflow-hidden">
+      <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-600/30 shrink-0">
+        <i class="fa-solid fa-cubes text-xs md:text-sm"></i>
       </div>
-      <div>
-        <h1 class="text-sm font-semibold tracking-wide flex items-center gap-2">
-          서울 성북구 정릉동 도시형생활주택
-          <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs border border-emerald-500/30 font-medium">A동 실시도면 모델링</span>
-        </h1>
-        <p class="text-xs text-slate-400">지하 2층 / 지상 4층 + 옥탑층 (연면적: 1,006.18㎡ / 최고높이: 11.90m)</p>
+      <div class="truncate">
+        <div class="flex items-center gap-1.5">
+          <h1 class="text-xs md:text-sm font-semibold tracking-tight truncate text-white">정릉동 도시형생활주택</h1>
+          <span class="hidden sm:inline-block px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] border border-emerald-500/30">A동 실시도면</span>
+        </div>
+        <p class="text-[10px] md:text-xs text-slate-400 truncate hidden xs:block">지하 2층/지상 4층 (연면적 1,006㎡ / 높이 11.9m)</p>
       </div>
     </div>
 
-    <!-- Quick Tool Buttons -->
-    <div class="flex items-center space-x-2">
-      <button id="btn-wireframe" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
-        <i class="fa-solid fa-border-all"></i>
-        <span>와이어프레임</span>
+    <!-- Quick Tools (Compact for Mobile) -->
+    <div class="flex items-center space-x-1.5 shrink-0">
+      <button id="btn-wireframe" class="p-2 md:px-2.5 md:py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-1.5 border border-slate-700" title="와이어프레임 토글">
+        <i class="fa-solid fa-border-all text-xs"></i>
+        <span class="hidden md:inline">와이어프레임</span>
       </button>
-      <button id="btn-labels" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
-        <i class="fa-solid fa-tags"></i>
-        <span>호실 라벨</span>
+      <button id="btn-labels" class="p-2 md:px-2.5 md:py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition flex items-center gap-1.5 border border-indigo-500" title="호실 라벨 토글">
+        <i class="fa-solid fa-tags text-xs"></i>
+        <span class="hidden md:inline">라벨</span>
       </button>
-      <button id="btn-axes" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
-        <i class="fa-solid fa-lines-leaning"></i>
-        <span>도면 그리드</span>
+      <button id="btn-axes" class="p-2 md:px-2.5 md:py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition flex items-center gap-1.5 border border-indigo-500" title="도면 그리드 토글">
+        <i class="fa-solid fa-lines-leaning text-xs"></i>
+        <span class="hidden md:inline">그리드</span>
       </button>
-      <button id="btn-info-toggle" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm shadow-indigo-600/40">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>도면 개요</span>
+      <button id="btn-info-toggle" class="p-2 md:px-3 md:py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-indigo-500/40 transition flex items-center gap-1.5" title="도면 개요 보기">
+        <i class="fa-solid fa-circle-info text-xs"></i>
+        <span class="hidden md:inline">도면 개요</span>
       </button>
     </div>
   </header>
 
+  <!-- Main Viewport Area -->
   <div class="flex-1 relative overflow-hidden flex">
     <!-- 3D Canvas Container -->
     <div id="canvas-container" class="w-full h-full relative cursor-grab active:cursor-grabbing"></div>
 
-    <!-- Left Control Floating Dock (View & Mode Switchers) -->
-    <div class="absolute top-4 left-4 flex flex-col space-y-3 z-10 w-64 max-h-[calc(100vh-80px)] overflow-y-auto pr-1">
+    <!-- Active Hover Floor Info Tooltip -->
+    <div id="hover-tooltip" class="absolute pointer-events-none opacity-0 transition-opacity duration-150 bg-slate-900/95 text-white text-[11px] px-2.5 py-1.5 rounded-md border border-indigo-500/50 shadow-xl z-20 font-medium whitespace-nowrap">
+      층 정보
+    </div>
+
+    <!-- Backdrop Dimmer for Mobile Modal Sheets -->
+    <div id="sheet-backdrop" class="fixed inset-0 bg-black/60 z-30 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+
+    <!-- ==================== DESKTOP FLOATING PANELS ==================== -->
+    <div class="hidden md:flex absolute top-4 left-4 flex-col space-y-3 z-10 w-64 max-h-[calc(100vh-85px)] overflow-y-auto pr-1">
       
-      <!-- Camera Projection Viewports Card -->
-      <div class="glass-panel p-3.5 rounded-xl shadow-xl space-y-2.5">
+      <!-- Projection View Card -->
+      <div class="glass-card p-3.5 rounded-xl shadow-xl space-y-2">
         <div class="flex items-center justify-between text-xs font-semibold text-slate-300 pb-1 border-b border-slate-700/60">
           <span class="flex items-center gap-1.5"><i class="fa-solid fa-video text-indigo-400"></i> 투영 뷰 모드</span>
-          <span id="current-view-badge" class="badge text-indigo-300 bg-indigo-500/20 px-1.5 py-0.5 rounded">3D 조감도</span>
+          <span id="desktop-view-badge" class="text-[10px] text-indigo-300 bg-indigo-500/20 px-1.5 py-0.5 rounded">3D 조감도</span>
         </div>
         <div class="grid grid-cols-2 gap-1.5 text-xs">
           <button data-view="iso" class="view-btn active-btn px-2.5 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-500 transition text-left flex items-center gap-1.5">
-            <i class="fa-solid fa-cube text-xs"></i> 3D 조감도
+            <i class="fa-solid fa-cube text-[10px]"></i> 3D 조감도
           </button>
-          <button data-view="top" class="view-btn px-2.5 py-2 rounded-lg bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition text-left flex items-center gap-1.5">
-            <i class="fa-regular fa-map text-xs"></i> 평면도(Top)
+          <button data-view="top" class="view-btn px-2.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-left flex items-center gap-1.5">
+            <i class="fa-regular fa-map text-[10px]"></i> 평면도(Top)
           </button>
-          <button data-view="front" class="view-btn px-2.5 py-2 rounded-lg bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition text-left flex items-center gap-1.5">
-            <i class="fa-solid fa-building text-xs"></i> 정면도(남측)
+          <button data-view="front" class="view-btn px-2.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-left flex items-center gap-1.5">
+            <i class="fa-solid fa-building text-[10px]"></i> 정면도(남측)
           </button>
-          <button data-view="right" class="view-btn px-2.5 py-2 rounded-lg bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition text-left flex items-center gap-1.5">
-            <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i> 우측면도(동측)
+          <button data-view="right" class="view-btn px-2.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-left flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-right-to-bracket text-[10px]"></i> 우측(동측)
           </button>
-          <button data-view="back" class="view-btn px-2.5 py-2 rounded-lg bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition text-left flex items-center gap-1.5">
-            <i class="fa-solid fa-compass text-xs"></i> 배면도(북측)
+          <button data-view="back" class="view-btn px-2.5 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-left flex items-center gap-1.5">
+            <i class="fa-solid fa-compass text-[10px]"></i> 배면도(북측)
           </button>
           <button data-view="section" class="view-btn px-2.5 py-2 rounded-lg bg-amber-600/30 text-amber-300 hover:bg-amber-600/40 border border-amber-500/40 transition text-left flex items-center gap-1.5">
-            <i class="fa-solid fa-scissors text-xs"></i> 횡단면도(Cut)
+            <i class="fa-solid fa-scissors text-[10px]"></i> 횡단면도
           </button>
         </div>
       </div>
 
-      <div class="glass-panel p-3.5 rounded-xl shadow-xl space-y-3">
+      <!-- Floor Explosion & Isolation Card -->
+      <div class="glass-card p-3.5 rounded-xl shadow-xl space-y-3">
         <div class="flex items-center justify-between text-xs font-semibold text-slate-300 pb-1 border-b border-slate-700/60">
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-emerald-400"></i> 층 분리 & 전개(Explosion)</span>
-          <button id="btn-reset-floor" class="text-[11px] text-slate-400 hover:text-slate-200 underline">전체 리셋</button>
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-emerald-400"></i> 층 분해 및 포커스</span>
+          <button id="btn-reset-floor-desktop" class="text-[11px] text-slate-400 hover:text-slate-200 underline">초기화</button>
         </div>
 
-        <!-- Exploded Slider -->
         <div class="space-y-1.5">
           <div class="flex justify-between text-xs text-slate-400">
             <span>층 분해 간격 (Explode)</span>
-            <span id="explode-val" class="font-mono text-emerald-400">0%</span>
+            <span class="explode-val-text font-mono text-emerald-400">0%</span>
           </div>
-          <input id="slider-explode" type="range" min="0" max="100" value="0" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+          <input type="range" min="0" max="100" value="0" class="slider-explode w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
         </div>
 
-        <!-- Individual Floor Selector -->
         <div class="space-y-1">
-          <div class="text-[11px] text-slate-400 mb-1">개별 층 포커스 보기:</div>
-          <div class="grid grid-cols-1 gap-1 text-xs" id="floor-buttons-list">
+          <div class="text-[11px] text-slate-400 mb-1">층별 단독 보기:</div>
+          <div class="grid grid-cols-1 gap-1 text-xs floor-btn-group">
             <button data-floor="all" class="floor-btn active-floor px-2.5 py-1.5 rounded-md bg-emerald-600 text-white font-medium text-left flex justify-between items-center transition">
               <span>전체 층 한눈에 보기</span>
-              <span class="badge text-[10px] bg-black/30 px-1.5 py-0.5 rounded">All</span>
+              <span class="text-[10px] bg-black/30 px-1.5 py-0.5 rounded">All</span>
             </button>
-            <button data-floor="roof" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 text-left flex justify-between items-center transition">
+            <button data-floor="roof" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700 text-left flex justify-between items-center transition">
               <span>옥탑 / 지붕층 (FL.+13.5m)</span>
-              <span class="text-[10px] text-slate-400">계단탑/실외기</span>
+              <span class="text-[10px] text-slate-400">계단탑</span>
             </button>
-            <button data-floor="4f" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 text-left flex justify-between items-center transition">
+            <button data-floor="4f" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700 text-left flex justify-between items-center transition">
               <span>지상 4층 (FL.+8.25m)</span>
-              <span class="text-[10px] text-slate-400">101호/102호(셰어5인)</span>
+              <span class="text-[10px] text-slate-400">쉐어/테라스</span>
             </button>
-            <button data-floor="3f" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 text-left flex justify-between items-center transition">
+            <button data-floor="3f" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700 text-left flex justify-between items-center transition">
               <span>지상 3층 (FL.+5.50m)</span>
-              <span class="text-[10px] text-slate-400">소형주택 5세대</span>
+              <span class="text-[10px] text-slate-400">5세대</span>
             </button>
-            <button data-floor="2f" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 text-left flex justify-between items-center transition">
+            <button data-floor="2f" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700 text-left flex justify-between items-center transition">
               <span>지상 2층 (FL.+2.75m)</span>
-              <span class="text-[10px] text-slate-400">소형주택 5세대</span>
+              <span class="text-[10px] text-slate-400">5세대</span>
             </button>
-            <button data-floor="1f" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 text-left flex justify-between items-center transition">
-              <span>지상 1층 (GL.+5.5m/EL.0)</span>
-              <span class="text-[10px] text-slate-400">소형주택 5세대/조경</span>
+            <button data-floor="1f" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700 text-left flex justify-between items-center transition">
+              <span>지상 1층 (GL.0/FL.+5.5m)</span>
+              <span class="text-[10px] text-slate-400">5세대/조경</span>
             </button>
-            <button data-floor="b1" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 text-left flex justify-between items-center transition">
+            <button data-floor="b1" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700 text-left flex justify-between items-center transition">
               <span>지하 1층 (EL.-2.95m)</span>
-              <span class="text-[10px] text-slate-400">근생·휴게음식/주민공동</span>
+              <span class="text-[10px] text-slate-400">근생/공동시설</span>
             </button>
-            <button data-floor="b2" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 text-left flex justify-between items-center transition">
+            <button data-floor="b2" class="floor-btn px-2.5 py-1.5 rounded-md bg-slate-800/80 text-slate-300 hover:bg-slate-700 text-left flex justify-between items-center transition">
               <span>지하 2층 (EL.-5.50m)</span>
-              <span class="text-[10px] text-slate-400">주차장 (8대 계획)</span>
+              <span class="text-[10px] text-slate-400">주차장 (8대)</span>
             </button>
           </div>
         </div>
 
-        <!-- Cutting Plane Slider for Section -->
-        <div id="section-slider-container" class="space-y-1.5 pt-2 border-t border-slate-700/50 hidden">
+        <div id="desktop-section-slider-container" class="space-y-1.5 pt-2 border-t border-slate-700/50 hidden">
           <div class="flex justify-between text-xs text-amber-300">
             <span>횡단면 절단 위치 (X축)</span>
-            <span id="section-val" class="font-mono">0m</span>
+            <span class="section-val-text font-mono">0m</span>
           </div>
-          <input id="slider-section" type="range" min="-7" max="7" step="0.1" value="0" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+          <input type="range" min="-7" max="7" step="0.1" value="0" class="slider-section w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
         </div>
-
       </div>
-
-      <!-- Navigation & Guide Prompt -->
-      <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 space-y-1">
-        <p><i class="fa-solid fa-computer-mouse text-slate-300 mr-1"></i> <strong>마우스 조작:</strong> 좌클릭 드래그 회전, 우클릭 드래그 이동, 휠 줌</p>
-        <p><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> 각 층을 클릭하거나 왼쪽 메뉴에서 층별 상세 분리 및 관찰이 가능합니다.</p>
-      </div>
-
     </div>
 
-    <div id="info-drawer" class="absolute top-4 right-4 w-80 glass-panel p-4 rounded-xl shadow-2xl space-y-3.5 z-10 transition-transform duration-300 translate-x-0 max-h-[calc(100vh-80px)] overflow-y-auto">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-700">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-scroll text-indigo-400"></i>
-          <h2 class="text-sm font-semibold text-white">도면 설계 개요 (A동)</h2>
+    <!-- ==================== MOBILE BOTTOM SHEETS ==================== -->
+
+    <!-- Mobile Sheet 1: View Modes -->
+    <div id="sheet-views" class="md:hidden fixed bottom-14 left-0 right-0 glass-card rounded-t-2xl p-4 z-40 translate-y-full opacity-0 pointer-events-none sheet-transition max-h-[75vh] overflow-y-auto">
+      <div class="w-12 h-1 bg-slate-600 rounded-full mx-auto mb-3"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700 mb-3">
+        <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-video text-indigo-400"></i> 투영 뷰 모드 선택
+        </h3>
+        <button class="sheet-close-btn p-1 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <button data-view="iso" class="view-btn active-btn p-3 rounded-xl bg-indigo-600 text-white font-medium flex items-center gap-2">
+          <i class="fa-solid fa-cube text-sm"></i> 3D 조감도
+        </button>
+        <button data-view="top" class="view-btn p-3 rounded-xl bg-slate-800 text-slate-200 font-medium flex items-center gap-2">
+          <i class="fa-regular fa-map text-sm"></i> 평면도 (Top)
+        </button>
+        <button data-view="front" class="view-btn p-3 rounded-xl bg-slate-800 text-slate-200 font-medium flex items-center gap-2">
+          <i class="fa-solid fa-building text-sm"></i> 정면도 (남측)
+        </button>
+        <button data-view="right" class="view-btn p-3 rounded-xl bg-slate-800 text-slate-200 font-medium flex items-center gap-2">
+          <i class="fa-solid fa-arrow-right-to-bracket text-sm"></i> 우측면도 (동측)
+        </button>
+        <button data-view="back" class="view-btn p-3 rounded-xl bg-slate-800 text-slate-200 font-medium flex items-center gap-2">
+          <i class="fa-solid fa-compass text-sm"></i> 배면도 (북측)
+        </button>
+        <button data-view="section" class="view-btn p-3 rounded-xl bg-amber-600/30 text-amber-300 border border-amber-500/40 font-medium flex items-center gap-2">
+          <i class="fa-solid fa-scissors text-sm"></i> 횡단면도 (X Cut)
+        </button>
+      </div>
+      <div id="mobile-section-slider-container" class="space-y-1.5 pt-3 mt-3 border-t border-slate-700/60 hidden">
+        <div class="flex justify-between text-xs text-amber-300">
+          <span>횡단면 절단 위치 (X축)</span>
+          <span class="section-val-text font-mono">0.0m</span>
         </div>
-        <button id="btn-close-drawer" class="text-slate-400 hover:text-white p-1">
+        <input type="range" min="-7" max="7" step="0.1" value="0" class="slider-section w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+      </div>
+    </div>
+
+    <!-- Mobile Sheet 2: Floor Explosion & Isolation -->
+    <div id="sheet-floors" class="md:hidden fixed bottom-14 left-0 right-0 glass-card rounded-t-2xl p-4 z-40 translate-y-full opacity-0 pointer-events-none sheet-transition max-h-[75vh] overflow-y-auto">
+      <div class="w-12 h-1 bg-slate-600 rounded-full mx-auto mb-3"></div>
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700 mb-3">
+        <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-emerald-400"></i> 층 분해 & 개별 층 보기
+        </h3>
+        <button class="sheet-close-btn p-1 text-slate-400 hover:text-white">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="text-xs space-y-2 text-slate-300">
+      <!-- Exploded Slider -->
+      <div class="p-3 bg-slate-900/60 rounded-xl space-y-2 mb-3 border border-slate-800">
+        <div class="flex justify-between text-xs text-slate-300 font-medium">
+          <span>층 분해 간격 (Explode)</span>
+          <span class="explode-val-text font-mono text-emerald-400">0%</span>
+        </div>
+        <input type="range" min="0" max="100" value="0" class="slider-explode w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+      </div>
+
+      <!-- Floor List -->
+      <div class="space-y-1.5 floor-btn-group">
+        <button data-floor="all" class="floor-btn active-floor w-full p-2.5 rounded-lg bg-emerald-600 text-white font-medium text-xs flex justify-between items-center transition">
+          <span>전체 층 한눈에 보기</span>
+          <span class="text-[10px] bg-black/30 px-2 py-0.5 rounded">All</span>
+        </button>
+        <button data-floor="roof" class="floor-btn w-full p-2.5 rounded-lg bg-slate-800/90 text-slate-200 text-xs flex justify-between items-center transition">
+          <span>옥탑 / 지붕층 (FL.+13.5m)</span>
+          <span class="text-[10px] text-slate-400">계단탑/공용옥상</span>
+        </button>
+        <button data-floor="4f" class="floor-btn w-full p-2.5 rounded-lg bg-slate-800/90 text-slate-200 text-xs flex justify-between items-center transition">
+          <span>지상 4층 (FL.+8.25m)</span>
+          <span class="text-[10px] text-slate-400">쉐어하우스 5실/테라스</span>
+        </button>
+        <button data-floor="3f" class="floor-btn w-full p-2.5 rounded-lg bg-slate-800/90 text-slate-200 text-xs flex justify-between items-center transition">
+          <span>지상 3층 (FL.+5.50m)</span>
+          <span class="text-[10px] text-slate-400">소형주택 5세대</span>
+        </button>
+        <button data-floor="2f" class="floor-btn w-full p-2.5 rounded-lg bg-slate-800/90 text-slate-200 text-xs flex justify-between items-center transition">
+          <span>지상 2층 (FL.+2.75m)</span>
+          <span class="text-[10px] text-slate-400">소형주택 5세대</span>
+        </button>
+        <button data-floor="1f" class="floor-btn w-full p-2.5 rounded-lg bg-slate-800/90 text-slate-200 text-xs flex justify-between items-center transition">
+          <span>지상 1층 (GL.0/FL.+5.5m)</span>
+          <span class="text-[10px] text-slate-400">소형주택 5세대/조경</span>
+        </button>
+        <button data-floor="b1" class="floor-btn w-full p-2.5 rounded-lg bg-slate-800/90 text-slate-200 text-xs flex justify-between items-center transition">
+          <span>지하 1층 (EL.-2.95m)</span>
+          <span class="text-[10px] text-slate-400">근생/휴게음식·주민공동</span>
+        </button>
+        <button data-floor="b2" class="floor-btn w-full p-2.5 rounded-lg bg-slate-800/90 text-slate-200 text-xs flex justify-between items-center transition">
+          <span>지하 2층 (EL.-5.50m)</span>
+          <span class="text-[10px] text-slate-400">주차장 (8대 계획)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Drawer (Info Sheet) for Desktop & Mobile -->
+    <div id="info-drawer" class="fixed md:absolute top-12 md:top-4 right-0 bottom-14 md:bottom-auto w-full sm:w-80 md:w-80 glass-card p-4 rounded-none md:rounded-xl shadow-2xl space-y-3 z-40 translate-x-full sheet-transition max-h-none md:max-h-[calc(100vh-85px)] overflow-y-auto">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-scroll text-indigo-400"></i>
+          <h2 class="text-xs md:text-sm font-semibold text-white">도면 설계 개요 (A동)</h2>
+        </div>
+        <button id="btn-close-drawer" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="text-[11px] md:text-xs space-y-1.5 text-slate-300">
         <div class="flex justify-between py-1 border-b border-slate-800">
           <span class="text-slate-400">대지 위치</span>
-          <span class="font-medium text-slate-200">서울시 성북구 정릉동</span>
+          <span class="font-medium text-slate-200 text-right">서울시 성북구 정릉동</span>
         </div>
         <div class="flex justify-between py-1 border-b border-slate-800">
           <span class="text-slate-400">대지 면적</span>
@@ -204,7 +315,7 @@
         </div>
         <div class="flex justify-between py-1 border-b border-slate-800">
           <span class="text-slate-400">주 용도</span>
-          <span class="font-medium text-slate-200">도시형생활주택(소형주택)</span>
+          <span class="font-medium text-slate-200">도시형생활주택 (17세대)</span>
         </div>
         <div class="flex justify-between py-1 border-b border-slate-800">
           <span class="text-slate-400">구조 / 규모</span>
@@ -215,12 +326,12 @@
           <span class="font-medium text-indigo-300 font-mono">11.90 m (옥탑 13.5m)</span>
         </div>
         <div class="flex justify-between py-1 border-b border-slate-800">
-          <span class="text-slate-400">건축면적 / 건폐율</span>
-          <span class="font-medium text-slate-200 font-mono">168.35㎡ / 48.38% (법정 60%)</span>
+          <span class="text-slate-400">건축면적/건폐율</span>
+          <span class="font-medium text-slate-200 font-mono">168.35㎡ / 48.38%</span>
         </div>
         <div class="flex justify-between py-1 border-b border-slate-800">
-          <span class="text-slate-400">연면적 / 용적률</span>
-          <span class="font-medium text-slate-200 font-mono">1,006.18㎡ / 179.90% (완화180%)</span>
+          <span class="text-slate-400">연면적/용적률</span>
+          <span class="font-medium text-slate-200 font-mono">1,006.18㎡ / 179.90%</span>
         </div>
         <div class="flex justify-between py-1 border-b border-slate-800">
           <span class="text-slate-400">계획 주차대수</span>
@@ -233,89 +344,93 @@
       </div>
 
       <!-- Floor Area Summary Table -->
-      <div class="pt-2">
-        <h3 class="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
-          <i class="fa-solid fa-chart-pie text-emerald-400"></i> 층별 면적 및 용도 구성
+      <div class="pt-1">
+        <h3 class="text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+          <i class="fa-solid fa-chart-pie text-emerald-400"></i> 층별 면적 및 용도
         </h3>
-        <div class="space-y-1.5 text-[11px]">
-          <div class="p-2 rounded bg-slate-800/80 flex justify-between items-center border border-slate-700/50">
+        <div class="space-y-1 text-[10px] md:text-[11px]">
+          <div class="p-1.5 rounded bg-slate-800/80 flex justify-between items-center border border-slate-700/50">
             <div>
               <span class="font-semibold text-slate-200">지상 4층</span>
-              <p class="text-slate-400">소형주택 (101호 27.7㎡ + 102호 쉐어 90.4㎡)</p>
+              <p class="text-slate-400">소형주택 101/102호(쉐어)+테라스</p>
             </div>
             <span class="font-mono text-emerald-400">145.13 ㎡</span>
           </div>
-          <div class="p-2 rounded bg-slate-800/80 flex justify-between items-center border border-slate-700/50">
+          <div class="p-1.5 rounded bg-slate-800/80 flex justify-between items-center border border-slate-700/50">
             <div>
-              <span class="font-semibold text-slate-200">지상 1~3층 (각 층)</span>
+              <span class="font-semibold text-slate-200">지상 1~3층 (각)</span>
               <p class="text-slate-400">소형주택 5세대씩 (001~005호)</p>
             </div>
             <span class="font-mono text-emerald-400">160.31 ㎡</span>
           </div>
-          <div class="p-2 rounded bg-slate-800/80 flex justify-between items-center border border-slate-700/50">
+          <div class="p-1.5 rounded bg-slate-800/80 flex justify-between items-center border border-slate-700/50">
             <div>
               <span class="font-semibold text-slate-200">지하 1층</span>
-              <p class="text-slate-400">주민공동(97.5㎡) + 1종근생(49.6㎡)</p>
+              <p class="text-slate-400">주민공동(97.5㎡) + 휴게음식점(49.6㎡)</p>
             </div>
             <span class="font-mono text-indigo-400">173.73 ㎡</span>
           </div>
-          <div class="p-2 rounded bg-slate-800/80 flex justify-between items-center border border-slate-700/50">
+          <div class="p-1.5 rounded bg-slate-800/80 flex justify-between items-center border border-slate-700/50">
             <div>
               <span class="font-semibold text-slate-200">지하 2층</span>
-              <p class="text-slate-400">주차장 (165.3㎡) + 계단실(41.1㎡)</p>
+              <p class="text-slate-400">주차장 8대(165.3㎡) + 계단실</p>
             </div>
             <span class="font-mono text-indigo-400">206.41 ㎡</span>
           </div>
         </div>
       </div>
-
-      <!-- Real Dimensions Legend from Drawings -->
-      <div class="p-2.5 rounded-lg bg-indigo-950/40 border border-indigo-500/20 text-[11px] text-slate-300 space-y-1">
-        <div class="font-semibold text-indigo-300 mb-1 flex items-center gap-1">
-          <i class="fa-solid fa-ruler-combined"></i> 도면 그리드 축척 (Grid Y & X)
-        </div>
-        <p>• <strong>X축 (가로 12.90m) :</strong> X6 ~ X12 (3.85 + 1.40 + 1.75 + 4.30 + 1.60m)</p>
-        <p>• <strong>Y축 (세로 13.05m) :</strong> YA1 ~ YA7 (3.85 + 0.60 + 2.00 + 2.60 + 2.90 + 1.70m)</p>
-        <p>• <strong>층고 :</strong> B2:2.55m / B1:2.95m / 1~3F:2.75m / 4F:2.80m / 옥탑:2.45m</p>
-      </div>
-    </div>
-
-    <!-- Active Hover Floor Info Tooltip -->
-    <div id="hover-tooltip" class="absolute pointer-events-none opacity-0 transition-opacity bg-slate-900/90 text-white text-xs px-3 py-1.5 rounded-md border border-indigo-500/50 shadow-lg z-30 font-medium">
-      층 정보
     </div>
   </div>
 
+  <!-- ==================== MOBILE BOTTOM TAB BAR ==================== -->
+  <nav class="md:hidden h-14 bg-slate-900/95 border-t border-slate-800/90 flex items-center justify-around px-2 z-40 shrink-0">
+    <button id="tab-views" class="mobile-tab-btn flex flex-col items-center justify-center w-16 py-1 text-slate-400 active:text-indigo-400 transition">
+      <i class="fa-solid fa-video text-base mb-0.5"></i>
+      <span class="text-[10px] font-medium">도면 뷰</span>
+    </button>
+    <button id="tab-floors" class="mobile-tab-btn flex flex-col items-center justify-center w-16 py-1 text-slate-400 active:text-emerald-400 transition">
+      <i class="fa-solid fa-layer-group text-base mb-0.5"></i>
+      <span class="text-[10px] font-medium">층 분해</span>
+    </button>
+    <button id="tab-info" class="mobile-tab-btn flex flex-col items-center justify-center w-16 py-1 text-slate-400 active:text-indigo-400 transition">
+      <i class="fa-solid fa-circle-info text-base mb-0.5"></i>
+      <span class="text-[10px] font-medium">도면 개요</span>
+    </button>
+    <button id="tab-reset" class="flex flex-col items-center justify-center w-16 py-1 text-slate-400 active:text-amber-400 transition">
+      <i class="fa-solid fa-rotate-left text-base mb-0.5"></i>
+      <span class="text-[10px] font-medium">전체 리셋</span>
+    </button>
+  </nav>
+
   <script>
-    // Global App Configuration & State
+    // Building Dimensions from Cad Drawings
     const CONFIG = {
-      buildingWidth: 12.90, // 도면 X축 폭 12.9m
-      buildingDepth: 13.05, // 도면 Y축 깊이 13.05m
+      buildingWidth: 12.90, // 도면 X축 가로 12.9m
+      buildingDepth: 13.05, // 도면 Y축 세로 13.05m
       levels: [
-        { id: 'b2', name: '지하 2층', elevation: -5.50, height: 2.55, color: 0x475569, use: '주차장 (8대/정화조)' },
+        { id: 'b2', name: '지하 2층', elevation: -5.50, height: 2.55, color: 0x475569, use: '주차장 (8대 계획/정화조)' },
         { id: 'b1', name: '지하 1층', elevation: -2.95, height: 2.95, color: 0x52525b, use: '근린생활시설 & 주민공동시설' },
-        { id: '1f', name: '지상 1층', elevation: 0.00, height: 2.75, color: 0xf1f5f9, use: '소형주택 5세대 & 조경' },
+        { id: '1f', name: '지상 1층', elevation: 0.00, height: 2.75, color: 0xf1f5f9, use: '소형주택 5세대 & 옥외조경' },
         { id: '2f', name: '지상 2층', elevation: 2.75, height: 2.75, color: 0xe2e8f0, use: '소형주택 5세대 (001~005호)' },
         { id: '3f', name: '지상 3층', elevation: 5.50, height: 2.75, color: 0xe2e8f0, use: '소형주택 5세대 (001~005호)' },
-        { id: '4f', name: '지상 4층', elevation: 8.25, height: 2.80, color: 0xede9fe, use: '도시형주택 (101호/102호 쉐어5인/테라스)' },
-        { id: 'roof', name: '옥탑/지붕층', elevation: 11.05, height: 2.45, color: 0x94a3b8, use: '계단탑/EV 기계실/공용옥상' }
+        { id: '4f', name: '지상 4층', elevation: 8.25, height: 2.80, color: 0xede9fe, use: '도시형주택 101/102호(쉐어)+테라스' },
+        { id: 'roof', name: '옥탑/지붕', elevation: 11.05, height: 2.45, color: 0x94a3b8, use: '계단탑/EV 기계실/공용옥상' }
       ]
     };
 
     let scene, camera, renderer, controls;
-    let container = document.getElementById('canvas-container');
-    let buildingGroup = new THREE.Group();
-    let floorGroups = {}; // ID -> THREE.Group
-    let labelSprites = [];
-    let gridHelperGroup = new THREE.Group();
+    const container = document.getElementById('canvas-container');
+    const buildingGroup = new THREE.Group();
+    let floorGroups = {};
+    const labelSprites = [];
+    const gridHelperGroup = new THREE.Group();
     let clippingPlane;
     let isWireframe = false;
     let showLabels = true;
     let showGrids = true;
-    let explodeDistance = 0;
-    let selectedFloor = 'all';
+    let currentView = 'iso';
 
-    // Materials Dictionary for realistic architectural look
+    // Materials
     const materials = {
       concrete: new THREE.MeshStandardMaterial({ color: 0x8a929a, roughness: 0.85, metalness: 0.1 }),
       stuccoWall: new THREE.MeshStandardMaterial({ color: 0xededed, roughness: 0.7, metalness: 0.05 }),
@@ -332,20 +447,23 @@
       balconyRail: new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 }),
       coreStairs: new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 }),
       parkingSlab: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 }),
-      terraceFloor: new THREE.MeshStandardMaterial({ color: 0xa16207, roughness: 0.6 }),
-      accentWood: new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.7 })
+      terraceFloor: new THREE.MeshStandardMaterial({ color: 0xa16207, roughness: 0.6 })
     };
+
+    function isMobile() {
+      return window.innerWidth < 768;
+    }
 
     function initThree() {
       // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0a0f1d);
-      scene.fog = new THREE.FogExp2(0x0a0f1d, 0.015);
+      scene.fog = new THREE.FogExp2(0x0a0f1d, 0.012);
 
       // Camera
       const aspect = container.clientWidth / container.clientHeight;
-      camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-      camera.position.set(24, 18, 26);
+      camera = new THREE.PerspectiveCamera(isMobile() ? 52 : 45, aspect, 0.1, 1000);
+      setCameraForMobileOrDesktop();
 
       // Renderer
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -356,108 +474,98 @@
       renderer.localClippingEnabled = true;
       container.appendChild(renderer.domElement);
 
-      // OrbitControls
+      // OrbitControls with touch support
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
-      controls.maxPolarAngle = Math.PI / 2 + 0.05; // allow slightly below horizon
-      controls.minDistance = 3;
-      controls.maxDistance = 120;
+      controls.maxPolarAngle = Math.PI / 2 + 0.05;
+      controls.minDistance = 2;
+      controls.maxDistance = 140;
       controls.target.set(0, 4, 0);
 
       // Lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
       scene.add(ambientLight);
 
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.5);
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.55);
       hemiLight.position.set(0, 50, 0);
       scene.add(hemiLight);
 
-      const dirLight1 = new THREE.DirectionalLight(0xfffaed, 1.2);
-      dirLight1.position.set(30, 45, 25);
-      dirLight1.castShadow = true;
-      dirLight1.shadow.mapSize.width = 2048;
-      dirLight1.shadow.mapSize.height = 2048;
-      dirLight1.shadow.camera.near = 10;
-      dirLight1.shadow.camera.far = 100;
+      const dirLight = new THREE.DirectionalLight(0xfffaed, 1.2);
+      dirLight.position.set(30, 45, 25);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = isMobile() ? 1024 : 2048;
+      dirLight.shadow.mapSize.height = isMobile() ? 1024 : 2048;
       const d = 25;
-      dirLight1.shadow.camera.left = -d;
-      dirLight1.shadow.camera.right = d;
-      dirLight1.shadow.camera.top = d;
-      dirLight1.shadow.camera.bottom = -d;
-      scene.add(dirLight1);
+      dirLight.shadow.camera.left = -d;
+      dirLight.shadow.camera.right = d;
+      dirLight.shadow.camera.top = d;
+      dirLight.shadow.camera.bottom = -d;
+      scene.add(dirLight);
 
-      const dirLight2 = new THREE.DirectionalLight(0x93c5fd, 0.4);
-      dirLight2.position.set(-25, 20, -25);
-      scene.add(dirLight2);
+      const fillLight = new THREE.DirectionalLight(0x93c5fd, 0.4);
+      fillLight.position.set(-25, 20, -25);
+      scene.add(fillLight);
 
-      // Clipping plane for cross-section
-      clippingPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 1000); // initially outside
+      // Clipping plane
+      clippingPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 1000);
       renderer.clippingPlanes = [clippingPlane];
 
-      // Build Environment & Architectural Models
       createGroundAndSurroundings();
       createCadGridSystem();
       buildArchitecturalBuilding();
 
-      // Window resize listener
       window.addEventListener('resize', onWindowResize);
-
-      // Raycaster for floor selection
       setupRaycasting();
-
-      // Animation loop
       animate();
     }
 
+    function setCameraForMobileOrDesktop() {
+      if (isMobile()) {
+        camera.position.set(29, 22, 31);
+      } else {
+        camera.position.set(24, 18, 26);
+      }
+    }
+
     function createGroundAndSurroundings() {
-      // Ground terrain
-      const groundGeo = new THREE.PlaneGeometry(80, 80);
-      const groundMat = new THREE.MeshStandardMaterial({
-        color: 0x131d2e,
-        roughness: 0.95
-      });
-      const ground = new THREE.Mesh(groundGeo, groundMat);
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(80, 80),
+        new THREE.MeshStandardMaterial({ color: 0x131d2e, roughness: 0.95 })
+      );
       ground.rotation.x = -Math.PI / 2;
-      ground.position.y = -5.50; // 지하 2층 기초 높이
+      ground.position.y = -5.50;
       ground.receiveShadow = true;
       scene.add(ground);
 
-      // GL (지반면: 1층 바닥 기준 GL 0 또는 현황 레벨 표현)
-      const siteBoundaryGeo = new THREE.BufferGeometry();
+      // Boundary line
       const hw = CONFIG.buildingWidth / 2 + 2.5;
       const hd = CONFIG.buildingDepth / 2 + 2.5;
-      const borderPoints = [
-        new THREE.Vector3(-hw, 0, -hd),
-        new THREE.Vector3(hw, 0, -hd),
-        new THREE.Vector3(hw + 1.2, 0, hd - 1.5),
-        new THREE.Vector3(-hw, 0, hd),
-        new THREE.Vector3(-hw, 0, -hd)
+      const boundaryPoints = [
+        new THREE.Vector3(-hw, 0.05, -hd),
+        new THREE.Vector3(hw, 0.05, -hd),
+        new THREE.Vector3(hw + 1.2, 0.05, hd - 1.5),
+        new THREE.Vector3(-hw, 0.05, hd),
+        new THREE.Vector3(-hw, 0.05, -hd)
       ];
-      siteBoundaryGeo.setFromPoints(borderPoints);
-      const boundaryLine = new THREE.Line(siteBoundaryGeo, new THREE.LineDashedMaterial({
-        color: 0xef4444,
-        dashSize: 0.6,
-        gapSize: 0.3
+      const boundaryGeo = new THREE.BufferGeometry().setFromPoints(boundaryPoints);
+      const boundaryLine = new THREE.Line(boundaryGeo, new THREE.LineDashedMaterial({
+        color: 0xef4444, dashSize: 0.6, gapSize: 0.3
       }));
       boundaryLine.computeLineDistances();
-      boundaryLine.position.y = 0.05;
       scene.add(boundaryLine);
     }
 
     function createCadGridSystem() {
       gridHelperGroup.clear();
 
-      // Horizontal floor grid on ground
       const grid = new THREE.GridHelper(40, 40, 0x334155, 0x1e293b);
       grid.position.y = -5.50;
       gridHelperGroup.add(grid);
 
-      // Dimension CAD Axis: X6 ~ X12 (12.9m) & YA1 ~ YA7 (13.05m)
       const w = CONFIG.buildingWidth;
       const d = CONFIG.buildingDepth;
 
-      // Dimension boundary lines
       const boxPoints = [
         new THREE.Vector3(-w/2, 0.02, -d/2),
         new THREE.Vector3(w/2, 0.02, -d/2),
@@ -466,14 +574,11 @@
         new THREE.Vector3(-w/2, 0.02, -d/2)
       ];
       const boxGeo = new THREE.BufferGeometry().setFromPoints(boxPoints);
-      const boxMat = new THREE.LineBasicMaterial({ color: 0x0ea5e9, linewidth: 2 });
-      const cadOutline = new THREE.Line(boxGeo, boxMat);
+      const cadOutline = new THREE.Line(boxGeo, new THREE.LineBasicMaterial({ color: 0x0ea5e9, linewidth: 2 }));
       gridHelperGroup.add(cadOutline);
 
-      // Create axis markers (X6, X7, X8, X9, X10, X11, X12)
-      const xOffsets = [0, 3.85, 3.85+1.40, 3.85+1.40+1.75, 3.85+1.40+1.75+4.30, 12.90];
-      const xLabels = ['X6', 'X7', 'X8', 'X9', 'X10', 'X12'];
-      xOffsets.forEach((ox, i) => {
+      const xOffsets = [0, 3.85, 5.25, 7.00, 11.30, 12.90];
+      xOffsets.forEach(ox => {
         const xPos = -w/2 + ox;
         const lineGeo = new THREE.BufferGeometry().setFromPoints([
           new THREE.Vector3(xPos, 0, -d/2 - 1.5),
@@ -494,7 +599,7 @@
       const bw = CONFIG.buildingWidth;
       const bd = CONFIG.buildingDepth;
 
-      CONFIG.levels.forEach((lvl) => {
+      CONFIG.levels.forEach(lvl => {
         const fGroup = new THREE.Group();
         fGroup.name = lvl.name;
         fGroup.userData = {
@@ -505,63 +610,40 @@
           use: lvl.use
         };
 
-        // 1. Concrete Slab (Floor Base)
         const slabThickness = 0.28;
-        let slabGeo;
-        
-        // 4층 및 옥탑은 도면상 동측 테라스 및 후퇴구조 반영
-        if (lvl.id === '4f') {
-          // 4층은 우측 테라스가 있어서 슬래브는 유지하되 상부 메스는 축소
-          slabGeo = new THREE.BoxGeometry(bw, slabThickness, bd);
-        } else if (lvl.id === 'roof') {
-          // 옥탑층 슬래브: 계단실 탑 및 옥상 난간
-          slabGeo = new THREE.BoxGeometry(bw, slabThickness, bd);
-        } else {
-          slabGeo = new THREE.BoxGeometry(bw, slabThickness, bd);
-        }
-
         const slabMat = (lvl.id === 'b2' || lvl.id === 'b1') ? materials.parkingSlab : materials.concrete;
-        const slab = new THREE.Mesh(slabGeo, slabMat);
+        const slab = new THREE.Mesh(new THREE.BoxGeometry(bw, slabThickness, bd), slabMat);
         slab.position.y = slabThickness / 2;
         slab.receiveShadow = true;
         slab.castShadow = true;
         fGroup.add(slab);
 
-        // 2. Interior Walls & Core (계단실/엘리베이터 코어)
-        // 도면상 X7-X9, YA4-YA6 부근 계단실/승강기 위치 (중앙 서측 치우침)
+        // Core Elevator & Stairs
         const coreH = lvl.height - slabThickness;
-        const coreGeo = new THREE.BoxGeometry(2.3, coreH, 3.8);
-        const coreMesh = new THREE.Mesh(coreGeo, materials.coreStairs);
+        const coreMesh = new THREE.Mesh(new THREE.BoxGeometry(2.3, coreH, 3.8), materials.coreStairs);
         coreMesh.position.set(-0.6, slabThickness + coreH/2, 0.5);
         coreMesh.castShadow = true;
         coreMesh.receiveShadow = true;
         fGroup.add(coreMesh);
 
-        // 3. Floor-Specific Structure Detail
         if (lvl.id === 'b2') {
-          // 지하 2층 주차장 (기둥 및 주차 구획, 정화조)
           buildParkingLevel(fGroup, bw, bd, coreH, slabThickness);
         } else if (lvl.id === 'b1') {
-          // 지하 1층 근생/휴게음식점 & 주민공동시설
           buildUndergroundLevel(fGroup, bw, bd, coreH, slabThickness);
         } else if (lvl.id === '1f' || lvl.id === '2f' || lvl.id === '3f') {
-          // 지상 1, 2, 3층: 소형주택 5세대 유닛 배치 (001~005호)
-          buildResidentialLevel(fGroup, bw, bd, coreH, slabThickness, lvl.id);
+          buildResidentialLevel(fGroup, bw, bd, coreH, slabThickness);
         } else if (lvl.id === '4f') {
-          // 지상 4층: 101호 + 102호(셰어하우스 5실) 및 동측 넓은 야외 테라스
           buildFourthFloorWithTerrace(fGroup, bw, bd, coreH, slabThickness);
         } else if (lvl.id === 'roof') {
-          // 옥탑 / 지붕층: 계단탑, 파라펫 난간, 실외기 존
           buildRoofLevel(fGroup, bw, bd, coreH, slabThickness);
         }
 
-        // Add 3D Text/Icon Floating Label over each floor
-        const labelSprite = createFloorLabelSprite(`${lvl.name}`, lvl.use);
+        // 3D Floor Label
+        const labelSprite = createFloorLabelSprite(lvl.name, lvl.use);
         labelSprite.position.set(-bw/2 - 2.2, lvl.height * 0.5, 0);
         fGroup.add(labelSprite);
         labelSprites.push(labelSprite);
 
-        // Position floor at real CAD elevation
         fGroup.position.y = lvl.elevation;
         buildingGroup.add(fGroup);
         floorGroups[lvl.id] = fGroup;
@@ -571,30 +653,16 @@
     }
 
     function buildParkingLevel(group, bw, bd, wallH, slabT) {
-      // 외벽 (오픈형 램프 출입부 감안한 지하 옹벽)
-      const wallMat = materials.undergroundWall;
-      const wallThickness = 0.3;
-
-      // 주차장 기둥 (6개 기둥 배열)
       const colGeo = new THREE.BoxGeometry(0.5, wallH, 0.5);
-      const colMat = materials.concrete;
-      [
-        [-4.2, -3.5], [-4.2, 3.5],
-        [3.8, -3.5], [3.8, 3.5]
-      ].forEach(([x, z]) => {
-        const col = new THREE.Mesh(colGeo, colMat);
+      [[-4.2, -3.5], [-4.2, 3.5], [3.8, -3.5], [3.8, 3.5]].forEach(([x, z]) => {
+        const col = new THREE.Mesh(colGeo, materials.concrete);
         col.position.set(x, slabT + wallH/2, z);
         group.add(col);
       });
 
-      // 주차 구획 라인 텍스처 박스
       const bayGeo = new THREE.BoxGeometry(2.3, 0.02, 4.8);
       const bayMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true });
-      [
-        [-3.6, -3.2], [-3.6, 2.8],
-        [2.2, -3.2], [4.6, -3.2],
-        [2.2, 2.8], [4.6, 2.8]
-      ].forEach(([bx, bz]) => {
+      [[-3.6, -3.2], [-3.6, 2.8], [2.2, -3.2], [4.6, -3.2], [2.2, 2.8], [4.6, 2.8]].forEach(([bx, bz]) => {
         const bay = new THREE.Mesh(bayGeo, bayMat);
         bay.position.set(bx, slabT + 0.02, bz);
         group.add(bay);
@@ -602,78 +670,44 @@
     }
 
     function buildUndergroundLevel(group, bw, bd, wallH, slabT) {
-      // 휴게음식점(서측) & 주민공동시설(동측 대공간)
-      const partGeo = new THREE.BoxGeometry(0.2, wallH, bd * 0.85);
-      const partWall = new THREE.Mesh(partGeo, materials.concrete);
+      const partWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, wallH, bd * 0.85), materials.concrete);
       partWall.position.set(0.6, slabT + wallH/2, 0);
       group.add(partWall);
 
-      // 근생 채광창/환기 썬큰창
-      const glassH = wallH * 0.7;
-      const glassMesh = new THREE.Mesh(new THREE.BoxGeometry(bw * 0.8, glassH, 0.08), materials.glass);
+      const glassMesh = new THREE.Mesh(new THREE.BoxGeometry(bw * 0.8, wallH * 0.7, 0.08), materials.glass);
       glassMesh.position.set(0, slabT + wallH/2, bd/2);
       group.add(glassMesh);
     }
 
-    function buildResidentialLevel(group, bw, bd, wallH, slabT, levelId) {
-      // 5개 세대 분할 벽체 생성 (001, 002, 003, 004, 005호)
-      // 중앙 코도를 기준으로 5개 실 분할
+    function buildResidentialLevel(group, bw, bd, wallH, slabT) {
       const wallMat = materials.stuccoWall;
 
-      // 외벽 (발코니 창호 포함)
-      // 전면(남측) 창호 및 발코니 돌출
-      const frontBalcony = new THREE.Mesh(
-        new THREE.BoxGeometry(bw * 0.85, 0.15, 0.9),
-        materials.concrete
-      );
+      const frontBalcony = new THREE.Mesh(new THREE.BoxGeometry(bw * 0.85, 0.15, 0.9), materials.concrete);
       frontBalcony.position.set(0, slabT, bd/2 + 0.45);
       group.add(frontBalcony);
 
-      // 발코니 난간
-      const railMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(bw * 0.85, 1.1, 0.05),
-        materials.balconyRail
-      );
+      const railMesh = new THREE.Mesh(new THREE.BoxGeometry(bw * 0.85, 1.1, 0.05), materials.balconyRail);
       railMesh.position.set(0, slabT + 0.55, bd/2 + 0.88);
       group.add(railMesh);
 
-      // 세대 간 외벽 및 유리창 창호 모듈
-      const glassWall = new THREE.Mesh(
-        new THREE.BoxGeometry(bw * 0.92, wallH * 0.75, 0.1),
-        materials.glass
-      );
+      const glassWall = new THREE.Mesh(new THREE.BoxGeometry(bw * 0.92, wallH * 0.75, 0.1), materials.glass);
       glassWall.position.set(0, slabT + wallH/2 + 0.1, bd/2);
       group.add(glassWall);
 
-      // 측면 및 배면 창호
-      const sideGlass = new THREE.Mesh(
-        new THREE.BoxGeometry(0.1, wallH * 0.65, bd * 0.6),
-        materials.glass
-      );
+      const sideGlass = new THREE.Mesh(new THREE.BoxGeometry(0.1, wallH * 0.65, bd * 0.6), materials.glass);
       sideGlass.position.set(-bw/2, slabT + wallH/2, 0);
       group.add(sideGlass);
 
-      // 내부 세대 구분벽
-      const roomDivider1 = new THREE.Mesh(new THREE.BoxGeometry(bw/2 - 1, wallH, 0.15), wallMat);
-      roomDivider1.position.set(-bw/4, slabT + wallH/2, -bd/4);
-      group.add(roomDivider1);
+      const r1 = new THREE.Mesh(new THREE.BoxGeometry(bw/2 - 1, wallH, 0.15), wallMat);
+      r1.position.set(-bw/4, slabT + wallH/2, -bd/4);
+      group.add(r1);
 
-      const roomDivider2 = new THREE.Mesh(new THREE.BoxGeometry(bw/2 - 1, wallH, 0.15), wallMat);
-      roomDivider2.position.set(bw/4, slabT + wallH/2, -bd/4);
-      group.add(roomDivider2);
+      const r2 = new THREE.Mesh(new THREE.BoxGeometry(bw/2 - 1, wallH, 0.15), wallMat);
+      r2.position.set(bw/4, slabT + wallH/2, -bd/4);
+      group.add(r2);
 
-      const roomDivider3 = new THREE.Mesh(new THREE.BoxGeometry(bw/2 - 1, wallH, 0.15), wallMat);
-      roomDivider3.position.set(bw/4, slabT + wallH/2, bd/4);
-      group.add(roomDivider3);
-
-      // 외벽 기둥 & 모서리 매스
       const cornerGeo = new THREE.BoxGeometry(0.5, wallH, 0.5);
-      [
-        [-bw/2 + 0.25, -bd/2 + 0.25],
-        [bw/2 - 0.25, -bd/2 + 0.25],
-        [-bw/2 + 0.25, bd/2 - 0.25],
-        [bw/2 - 0.25, bd/2 - 0.25]
-      ].forEach(([cx, cz]) => {
+      [[-bw/2 + 0.25, -bd/2 + 0.25], [bw/2 - 0.25, -bd/2 + 0.25], [-bw/2 + 0.25, bd/2 - 0.25], [bw/2 - 0.25, bd/2 - 0.25]].forEach(([cx, cz]) => {
         const corner = new THREE.Mesh(cornerGeo, wallMat);
         corner.position.set(cx, slabT + wallH/2, cz);
         group.add(corner);
@@ -681,77 +715,50 @@
     }
 
     function buildFourthFloorWithTerrace(group, bw, bd, wallH, slabT) {
-      // 4층: 동측(X10~X12)이 넓은 옥외 테라스 구조로 매스가 줄어듦 (약 3.5m 테라스)
-      const setbackW = bw * 0.72; // 테라스를 제외한 주거 공간 폭
+      const setbackW = bw * 0.72;
       const terraceW = bw - setbackW;
 
-      // 주거 매스 (서측으로 편향)
-      const mainUnit = new THREE.Mesh(
-        new THREE.BoxGeometry(setbackW, wallH, bd * 0.95),
-        materials.stuccoWall
-      );
+      const mainUnit = new THREE.Mesh(new THREE.BoxGeometry(setbackW, wallH, bd * 0.95), materials.stuccoWall);
       mainUnit.position.set(-terraceW/2, slabT + wallH/2, 0);
       group.add(mainUnit);
 
-      // 주거부 전면/테라스 측면 창호
-      const terraceDoorGlass = new THREE.Mesh(
-        new THREE.BoxGeometry(0.1, wallH * 0.8, bd * 0.7),
-        materials.glass
-      );
+      const terraceDoorGlass = new THREE.Mesh(new THREE.BoxGeometry(0.1, wallH * 0.8, bd * 0.7), materials.glass);
       terraceDoorGlass.position.set(-terraceW/2 + setbackW/2, slabT + wallH/2, 0);
       group.add(terraceDoorGlass);
 
-      // 야외 테라스 바닥 데크 (목재/타일 느낌)
-      const deckMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(terraceW - 0.1, 0.05, bd * 0.95),
-        materials.terraceFloor
-      );
+      const deckMesh = new THREE.Mesh(new THREE.BoxGeometry(terraceW - 0.1, 0.05, bd * 0.95), materials.terraceFloor);
       deckMesh.position.set(bw/2 - terraceW/2, slabT + 0.04, 0);
       group.add(deckMesh);
 
-      // 테라스 안전 난간
-      const terraceRail = new THREE.Mesh(
-        new THREE.BoxGeometry(terraceW, 1.15, 0.05),
-        materials.balconyRail
-      );
+      const terraceRail = new THREE.Mesh(new THREE.BoxGeometry(terraceW, 1.15, 0.05), materials.balconyRail);
       terraceRail.position.set(bw/2 - terraceW/2, slabT + 0.6, bd/2 - 0.05);
       group.add(terraceRail);
     }
 
     function buildRoofLevel(group, bw, bd, wallH, slabT) {
-      // 옥탑 계단탑 및 EV 권상기실 (도면 X7~X9 구간 돌출)
-      const stairTowerGeo = new THREE.BoxGeometry(3.2, 2.45, 4.2);
-      const stairTower = new THREE.Mesh(stairTowerGeo, materials.stuccoWall);
+      const stairTower = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.45, 4.2), materials.stuccoWall);
       stairTower.position.set(-0.6, slabT + 2.45/2, 0.5);
       stairTower.castShadow = true;
       group.add(stairTower);
 
-      // 옥상 파라펫 (난간벽: 높이 1.2m)
-      const parapetThickness = 0.2;
-      const parapetH = 1.2;
+      const pThick = 0.2;
+      const pH = 1.2;
 
-      // 남/북 난간
-      const p1 = new THREE.Mesh(new THREE.BoxGeometry(bw, parapetH, parapetThickness), materials.stuccoWall);
-      p1.position.set(0, slabT + parapetH/2, bd/2 - parapetThickness/2);
+      const p1 = new THREE.Mesh(new THREE.BoxGeometry(bw, pH, pThick), materials.stuccoWall);
+      p1.position.set(0, slabT + pH/2, bd/2 - pThick/2);
       group.add(p1);
 
-      const p2 = new THREE.Mesh(new THREE.BoxGeometry(bw, parapetH, parapetThickness), materials.stuccoWall);
-      p2.position.set(0, slabT + parapetH/2, -bd/2 + parapetThickness/2);
+      const p2 = new THREE.Mesh(new THREE.BoxGeometry(bw, pH, pThick), materials.stuccoWall);
+      p2.position.set(0, slabT + pH/2, -bd/2 + pThick/2);
       group.add(p2);
 
-      // 서/동 난간
-      const p3 = new THREE.Mesh(new THREE.BoxGeometry(parapetThickness, parapetH, bd), materials.stuccoWall);
-      p3.position.set(-bw/2 + parapetThickness/2, slabT + parapetH/2, 0);
+      const p3 = new THREE.Mesh(new THREE.BoxGeometry(pThick, pH, bd), materials.stuccoWall);
+      p3.position.set(-bw/2 + pThick/2, slabT + pH/2, 0);
       group.add(p3);
 
-      const p4 = new THREE.Mesh(new THREE.BoxGeometry(parapetThickness, parapetH, bd), materials.stuccoWall);
-      p4.position.set(bw/2 - parapetThickness/2, slabT + parapetH/2, 0);
+      const p4 = new THREE.Mesh(new THREE.BoxGeometry(pThick, pH, bd), materials.stuccoWall);
+      p4.position.set(bw/2 - pThick/2, slabT + pH/2, 0);
       group.add(p4);
-
-      // 실외기 설치 구역 패드
-      const hvacPad = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.4, 2.0), materials.parkingSlab);
-      hvacPad.position.set(-3.5, slabT + 0.2, -3.2);
-      group.add(hvacPad);
     }
 
     function createFloorLabelSprite(title, subtitle) {
@@ -760,89 +767,83 @@
       canvas.height = 110;
       const ctx = canvas.getContext('2d');
 
-      // Card Background
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
       ctx.roundRect(5, 5, 370, 100, 14);
       ctx.fill();
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#6366f1';
       ctx.stroke();
 
-      // Floor Name
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 34px Pretendard, sans-serif';
       ctx.fillText(title, 25, 48);
 
-      // Subtitle (Use)
       ctx.fillStyle = '#94a3b8';
       ctx.font = '20px Pretendard, sans-serif';
-      ctx.fillText(subtitle.length > 22 ? subtitle.substring(0, 22) + '...' : subtitle, 25, 84);
+      ctx.fillText(subtitle.length > 20 ? subtitle.substring(0, 20) + '...' : subtitle, 25, 84);
 
       const texture = new THREE.CanvasTexture(canvas);
       texture.minFilter = THREE.LinearFilter;
-      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
-      const sprite = new THREE.Sprite(spriteMat);
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true }));
       sprite.scale.set(4.5, 1.3, 1);
       return sprite;
     }
 
     function setCameraView(viewMode) {
-      const badge = document.getElementById('current-view-badge');
-      const sectionContainer = document.getElementById('section-slider-container');
+      currentView = viewMode;
+      const desktopBadge = document.getElementById('desktop-view-badge');
+      const deskSec = document.getElementById('desktop-section-slider-container');
+      const mobSec = document.getElementById('mobile-section-slider-container');
       
-      // Default: disable cutting plane unless section view
       clippingPlane.constant = 1000;
-      sectionContainer.classList.add('hidden');
+      deskSec.classList.add('hidden');
+      mobSec.classList.add('hidden');
 
-      // Animate Camera Position & Target smoothly
       const targetPos = new THREE.Vector3(0, 4, 0);
-      let camPos = new THREE.Vector3();
+      const camPos = new THREE.Vector3();
+      const dist = isMobile() ? 40 : 34;
 
       switch(viewMode) {
         case 'iso':
-          camPos.set(24, 18, 26);
-          badge.textContent = '3D 조감도';
+          setCameraForMobileOrDesktop();
+          camPos.copy(camera.position);
+          if (desktopBadge) desktopBadge.textContent = '3D 조감도';
           break;
         case 'top':
-          // 평면도 (Orthographic top-down style)
-          camPos.set(0, 42, 0.001);
+          camPos.set(0, isMobile() ? 48 : 42, 0.001);
           targetPos.set(0, 0, 0);
-          badge.textContent = '평면도 (Top)';
+          if (desktopBadge) desktopBadge.textContent = '평면도 (Top)';
           break;
         case 'front':
-          // 정면도 (남측 입면)
-          camPos.set(0, 5, 34);
+          camPos.set(0, 5, dist);
           targetPos.set(0, 5, 0);
-          badge.textContent = '정면도 (남측 입면)';
+          if (desktopBadge) desktopBadge.textContent = '정면도 (남측)';
           break;
         case 'right':
-          // 우측면도 (동측 테라스 방향 입면)
-          camPos.set(34, 5, 0);
+          camPos.set(dist, 5, 0);
           targetPos.set(0, 5, 0);
-          badge.textContent = '우측면도 (동측)';
+          if (desktopBadge) desktopBadge.textContent = '우측면도 (동측)';
           break;
         case 'back':
-          // 배면도 (북측)
-          camPos.set(0, 5, -34);
+          camPos.set(0, 5, -dist);
           targetPos.set(0, 5, 0);
-          badge.textContent = '배면도 (북측)';
+          if (desktopBadge) desktopBadge.textContent = '배면도 (북측)';
           break;
         case 'section':
-          // 횡단면도 (X축 단면 절단)
-          camPos.set(-28, 5, 0);
+          camPos.set(-dist, 5, 0);
           targetPos.set(0, 5, 0);
           clippingPlane.normal.set(1, 0, 0);
           clippingPlane.constant = 0;
-          sectionContainer.classList.remove('hidden');
-          badge.textContent = '횡단면도 (X Cut)';
+          deskSec.classList.remove('hidden');
+          mobSec.classList.remove('hidden');
+          if (desktopBadge) desktopBadge.textContent = '횡단면도 (Cut)';
           break;
       }
 
-      // Smooth Camera Lerp
       smoothMoveCamera(camPos, targetPos);
     }
 
-    function smoothMoveCamera(newPos, newTarget, duration = 800) {
+    function smoothMoveCamera(newPos, newTarget, duration = 650) {
       const startPos = camera.position.clone();
       const startTarget = controls.target.clone();
       const startTime = performance.now();
@@ -850,67 +851,47 @@
       function updateCam(now) {
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const ease = 0.5 - Math.cos(progress * Math.PI) / 2; // in-out cosine
+        const ease = 0.5 - Math.cos(progress * Math.PI) / 2;
 
         camera.position.lerpVectors(startPos, newPos, ease);
         controls.target.lerpVectors(startTarget, newTarget, ease);
         controls.update();
 
-        if (progress < 1) {
-          requestAnimationFrame(updateCam);
-        }
+        if (progress < 1) requestAnimationFrame(updateCam);
       }
       requestAnimationFrame(updateCam);
     }
 
-    function updateExplosion(distanceFactor) {
-      explodeDistance = distanceFactor;
-      document.getElementById('explode-val').textContent = `${Math.round(distanceFactor * 100)}%`;
+    function updateExplosion(factor) {
+      document.querySelectorAll('.explode-val-text').forEach(span => {
+        span.textContent = `${Math.round(factor * 100)}%`;
+      });
+      document.querySelectorAll('.slider-explode').forEach(slider => {
+        slider.value = factor * 100;
+      });
 
-      // Apply cumulative explosion offset to each floor
       CONFIG.levels.forEach((lvl, idx) => {
         const fGroup = floorGroups[lvl.id];
         if (!fGroup) return;
-
-        // Base elevation + additional exploded offset
-        const baseElevation = lvl.elevation;
-        // B2 is anchor (idx 0), each higher floor spreads upwards
-        const spreadAmount = idx * distanceFactor * 5.0; // max 5m per floor
-        fGroup.position.y = baseElevation + spreadAmount;
+        const spreadAmount = idx * factor * 5.0;
+        fGroup.position.y = lvl.elevation + spreadAmount;
       });
     }
 
     function isolateFloor(floorId) {
-      selectedFloor = floorId;
-
-      CONFIG.levels.forEach((lvl) => {
+      CONFIG.levels.forEach(lvl => {
         const fGroup = floorGroups[lvl.id];
         if (!fGroup) return;
 
         if (floorId === 'all') {
           fGroup.visible = true;
-          // Restore opacity
-          fGroup.traverse(child => {
-            if (child.isMesh && child.material !== materials.glass) {
-              child.material.transparent = false;
-              child.material.opacity = 1.0;
-            }
-          });
         } else if (floorId === lvl.id) {
           fGroup.visible = true;
-          fGroup.traverse(child => {
-            if (child.isMesh && child.material !== materials.glass) {
-              child.material.transparent = false;
-              child.material.opacity = 1.0;
-            }
-          });
-          // Focus camera slightly towards this isolated floor
           smoothMoveCamera(
-            new THREE.Vector3(18, lvl.elevation + 6, 18),
+            new THREE.Vector3(isMobile() ? 22 : 18, lvl.elevation + 6, isMobile() ? 22 : 18),
             new THREE.Vector3(0, lvl.elevation + lvl.height/2, 0)
           );
         } else {
-          // Hide or ghost out other floors
           fGroup.visible = false;
         }
       });
@@ -921,34 +902,39 @@
       const mouse = new THREE.Vector2();
       const tooltip = document.getElementById('hover-tooltip');
 
-      window.addEventListener('mousemove', (e) => {
+      function onPointer(e) {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         const rect = renderer.domElement.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(buildingGroup.children, true);
 
         if (intersects.length > 0) {
-          // Find root floor group
           let hitFloor = intersects[0].object;
           while (hitFloor.parent && hitFloor.parent !== buildingGroup) {
             hitFloor = hitFloor.parent;
           }
           if (hitFloor.userData && hitFloor.userData.name) {
             tooltip.style.opacity = '1';
-            tooltip.style.left = `${e.clientX + 14}px`;
-            tooltip.style.top = `${e.clientY + 14}px`;
-            tooltip.innerHTML = `<strong>${hitFloor.userData.name}</strong><br><span class="text-slate-300">${hitFloor.userData.use}</span>`;
+            tooltip.style.left = `${Math.min(clientX + 10, window.innerWidth - 180)}px`;
+            tooltip.style.top = `${Math.max(clientY - 50, 60)}px`;
+            tooltip.innerHTML = `<strong>${hitFloor.userData.name}</strong><br><span class="text-slate-300 text-[10px]">${hitFloor.userData.use}</span>`;
             return;
           }
         }
         tooltip.style.opacity = '0';
-      });
+      }
+
+      window.addEventListener('mousemove', onPointer);
+      window.addEventListener('touchstart', onPointer, { passive: true });
     }
 
     function onWindowResize() {
       camera.aspect = container.clientWidth / container.clientHeight;
+      camera.fov = isMobile() ? 52 : 45;
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
     }
@@ -962,79 +948,152 @@
     window.addEventListener('DOMContentLoaded', () => {
       initThree();
 
-      // Projection View buttons
+      // Mobile Bottom Sheet Handlers
+      const backdrop = document.getElementById('sheet-backdrop');
+      const sheetViews = document.getElementById('sheet-views');
+      const sheetFloors = document.getElementById('sheet-floors');
+      const infoDrawer = document.getElementById('info-drawer');
+
+      function closeAllSheets() {
+        [sheetViews, sheetFloors].forEach(sheet => {
+          sheet.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+        });
+        infoDrawer.classList.add('translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+          btn.classList.remove('text-indigo-400', 'text-emerald-400');
+          btn.classList.add('text-slate-400');
+        });
+      }
+
+      function openSheet(sheet, tabBtn, activeColorClass) {
+        const isOpen = !sheet.classList.contains('translate-y-full');
+        closeAllSheets();
+        if (!isOpen) {
+          sheet.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+          backdrop.classList.remove('opacity-0', 'pointer-events-none');
+          if (tabBtn) {
+            tabBtn.classList.remove('text-slate-400');
+            tabBtn.classList.add(activeColorClass);
+          }
+        }
+      }
+
+      backdrop.addEventListener('click', closeAllSheets);
+      document.querySelectorAll('.sheet-close-btn').forEach(b => b.addEventListener('click', closeAllSheets));
+
+      document.getElementById('tab-views').addEventListener('click', function() {
+        openSheet(sheetViews, this, 'text-indigo-400');
+      });
+
+      document.getElementById('tab-floors').addEventListener('click', function() {
+        openSheet(sheetFloors, this, 'text-emerald-400');
+      });
+
+      document.getElementById('tab-info').addEventListener('click', function() {
+        const isOpen = !infoDrawer.classList.contains('translate-x-full');
+        closeAllSheets();
+        if (!isOpen) {
+          infoDrawer.classList.remove('translate-x-full');
+          backdrop.classList.remove('opacity-0', 'pointer-events-none');
+          this.classList.remove('text-slate-400');
+          this.classList.add('text-indigo-400');
+        }
+      });
+
+      // View Buttons Sync
       document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+          const viewMode = btn.dataset.view;
           document.querySelectorAll('.view-btn').forEach(b => {
             b.classList.remove('active-btn', 'bg-indigo-600', 'text-white');
-            b.classList.add('bg-slate-800/90', 'text-slate-300');
+            if (b.dataset.view !== 'section') {
+              b.classList.add('bg-slate-800', 'text-slate-300');
+            }
           });
-          btn.classList.add('active-btn', 'bg-indigo-600', 'text-white');
-          btn.classList.remove('bg-slate-800/90', 'text-slate-300');
+          document.querySelectorAll(`.view-btn[data-view="${viewMode}"]`).forEach(b => {
+            b.classList.add('active-btn', 'bg-indigo-600', 'text-white');
+            b.classList.remove('bg-slate-800', 'text-slate-300');
+          });
 
-          setCameraView(btn.dataset.view);
+          setCameraView(viewMode);
+          if (isMobile() && viewMode !== 'section') {
+            closeAllSheets();
+          }
         });
       });
 
-      // Explode Slider
-      const explodeSlider = document.getElementById('slider-explode');
-      explodeSlider.addEventListener('input', (e) => {
-        const factor = parseFloat(e.target.value) / 100;
-        updateExplosion(factor);
+      // Explode Sliders Sync
+      document.querySelectorAll('.slider-explode').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+          updateExplosion(parseFloat(e.target.value) / 100);
+        });
       });
 
-      // Section Slider
-      const sectionSlider = document.getElementById('slider-section');
-      const sectionValSpan = document.getElementById('section-val');
-      sectionSlider.addEventListener('input', (e) => {
-        const val = parseFloat(e.target.value);
-        clippingPlane.constant = val;
-        sectionValSpan.textContent = `${val > 0 ? '+' : ''}${val.toFixed(1)}m`;
+      // Section Cut Sliders Sync
+      document.querySelectorAll('.slider-section').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          clippingPlane.constant = val;
+          document.querySelectorAll('.section-val-text').forEach(span => {
+            span.textContent = `${val > 0 ? '+' : ''}${val.toFixed(1)}m`;
+          });
+          document.querySelectorAll('.slider-section').forEach(s => s.value = val);
+        });
       });
 
-      // Individual Floor buttons
+      // Floor Select Buttons Sync
       document.querySelectorAll('.floor-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+          const floorId = btn.dataset.floor;
           document.querySelectorAll('.floor-btn').forEach(b => {
             b.classList.remove('active-floor', 'bg-emerald-600', 'text-white');
             b.classList.add('bg-slate-800/80', 'text-slate-300');
           });
-          btn.classList.add('active-floor', 'bg-emerald-600', 'text-white');
-          btn.classList.remove('bg-slate-800/80', 'text-slate-300');
+          document.querySelectorAll(`.floor-btn[data-floor="${floorId}"]`).forEach(b => {
+            b.classList.add('active-floor', 'bg-emerald-600', 'text-white');
+            b.classList.remove('bg-slate-800/80', 'text-slate-300');
+          });
 
-          isolateFloor(btn.dataset.floor);
+          isolateFloor(floorId);
+          if (isMobile()) {
+            closeAllSheets();
+          }
         });
       });
 
-      // Reset Button
-      document.getElementById('btn-reset-floor').addEventListener('click', () => {
-        explodeSlider.value = 0;
+      // Reset Functions
+      function resetAll() {
         updateExplosion(0);
         isolateFloor('all');
+        setCameraView('iso');
         document.querySelectorAll('.floor-btn').forEach(b => {
           b.classList.remove('active-floor', 'bg-emerald-600', 'text-white');
           b.classList.add('bg-slate-800/80', 'text-slate-300');
         });
-        const allBtn = document.querySelector('.floor-btn[data-floor="all"]');
-        if (allBtn) {
-          allBtn.classList.add('active-floor', 'bg-emerald-600', 'text-white');
-        }
-      });
+        document.querySelectorAll('.floor-btn[data-floor="all"]').forEach(b => {
+          b.classList.add('active-floor', 'bg-emerald-600', 'text-white');
+        });
+        closeAllSheets();
+      }
+
+      document.getElementById('tab-reset')?.addEventListener('click', resetAll);
+      document.getElementById('btn-reset-floor-desktop')?.addEventListener('click', resetAll);
 
       // Header Toolbar Toggles
       document.getElementById('btn-wireframe').addEventListener('click', function() {
         isWireframe = !isWireframe;
         this.classList.toggle('bg-indigo-600', isWireframe);
         this.classList.toggle('text-white', isWireframe);
-        Object.values(materials).forEach(mat => {
-          mat.wireframe = isWireframe;
-        });
+        this.classList.toggle('bg-slate-800', !isWireframe);
+        Object.values(materials).forEach(mat => mat.wireframe = isWireframe);
       });
 
       document.getElementById('btn-labels').addEventListener('click', function() {
         showLabels = !showLabels;
         this.classList.toggle('bg-indigo-600', showLabels);
         this.classList.toggle('text-white', showLabels);
+        this.classList.toggle('bg-slate-800', !showLabels);
         labelSprites.forEach(s => s.visible = showLabels);
       });
 
@@ -1042,21 +1101,24 @@
         showGrids = !showGrids;
         this.classList.toggle('bg-indigo-600', showGrids);
         this.classList.toggle('text-white', showGrids);
+        this.classList.toggle('bg-slate-800', !showGrids);
         gridHelperGroup.visible = showGrids;
       });
 
-      // Info Drawer Toggle
-      const drawer = document.getElementById('info-drawer');
-      const infoToggleBtn = document.getElementById('btn-info-toggle');
-      const drawerCloseBtn = document.getElementById('btn-close-drawer');
-
-      infoToggleBtn.addEventListener('click', () => {
-        drawer.classList.toggle('translate-x-0');
-        drawer.classList.toggle('translate-x-96');
+      // Info Drawer Button
+      document.getElementById('btn-info-toggle').addEventListener('click', () => {
+        const isClosed = infoDrawer.classList.contains('translate-x-full');
+        if (isClosed) {
+          infoDrawer.classList.remove('translate-x-full');
+          if (isMobile()) backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        } else {
+          infoDrawer.classList.add('translate-x-full');
+          backdrop.classList.add('opacity-0', 'pointer-events-none');
+        }
       });
-      drawerCloseBtn.addEventListener('click', () => {
-        drawer.classList.add('translate-x-96');
-        drawer.classList.remove('translate-x-0');
+      document.getElementById('btn-close-drawer').addEventListener('click', () => {
+        infoDrawer.classList.add('translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
       });
     });
   </script>
