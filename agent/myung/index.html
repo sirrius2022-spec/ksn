@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>오늘의 명언 에이전트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
+<style>
+:root{--bg:#f3f1ec;--card:#fffefb;--ink:#1d1f24;--sub:#666a72;--line:#e3e0d8;--acc:#2f4f8f;--acc2:#b8863b;--soft:#ecebe5;--shadow:0 1px 2px rgba(20,30,50,.05),0 8px 26px rgba(20,30,50,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#14161a;--card:#1d2026;--ink:#e9e7e2;--sub:#a3a6ad;--line:#30343c;--acc:#7f9fe0;--acc2:#d6a75c;--soft:#262a31;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans KR",system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
+header{display:flex;align-items:flex-end;gap:14px;margin-bottom:22px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+.seal{width:46px;height:46px;border-radius:10px;background:var(--acc);color:#fff;display:grid;place-items:center;font:700 26px "Noto Serif KR",serif;flex:none}
+h1{font:700 26px/1.2 "Noto Serif KR",serif;margin:0}
+header p{margin:2px 0 0;color:var(--sub);font-size:13.5px}
+.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+@media (max-width:840px){.grid{grid-template-columns:1fr}}
+.grid>div,.row>div,.tabs button{min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.card+.card{margin-top:18px}
+.step{font:700 12px "Noto Sans KR";letter-spacing:.08em;color:var(--acc2);margin-bottom:6px}
+h2{font:700 17px "Noto Serif KR",serif;margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--sub);margin:12px 0 5px;font-weight:500}
+textarea,input[type=text],input[type=password],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit}
+select{text-overflow:ellipsis}
+textarea{min-height:180px;resize:vertical}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--acc);outline-offset:-1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 11px;border-radius:99px;font:500 13px "Noto Sans KR";cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.quote{position:relative;margin-top:14px;padding:22px 20px 18px;border-radius:12px;background:linear-gradient(135deg,#1f2a44,#3b3157);color:#f5ecd9}
+.quote .mark{position:absolute;top:-6px;left:14px;font:700 64px/1 "Noto Serif KR",serif;color:#d6a75c;opacity:.8}
+.quote .q{font:600 19px/1.65 "Noto Serif KR",serif;margin:8px 0 10px;word-break:keep-all}
+.quote .a{font-size:13.5px;color:#d9c79f;text-align:right}
+.qedit{display:grid;grid-template-columns:1fr 150px;gap:8px;margin-top:10px}
+@media (max-width:480px){.qedit{grid-template-columns:1fr}}
+.qedit input{font-size:13px;padding:8px 10px}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:11px 16px;font:700 14px "Noto Sans KR";cursor:pointer;background:var(--soft);color:var(--ink)}
+.btn.pri{background:var(--acc);color:#fff;flex:1}
+.persona{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:480px){.persona{grid-template-columns:1fr}}
+.pc{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:var(--bg);cursor:pointer;text-align:left;color:var(--ink);font:inherit;position:relative}
+.pc b{display:block;font-size:14px}
+.pc small{color:var(--sub);font-size:12px}
+.pc.on{border-color:var(--acc);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.pc .play{position:absolute;right:8px;top:8px;border:0;background:transparent;color:var(--acc);font-size:15px;cursor:pointer;padding:4px}
+.tabs{display:flex;gap:6px;background:var(--soft);padding:4px;border-radius:11px;margin-bottom:10px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--sub);padding:8px 6px;border-radius:8px;font:500 13px "Noto Sans KR";cursor:pointer;line-height:1.3}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow);font-weight:700}
+.tabs small{display:block;font-weight:400;font-size:11px;opacity:.8}
+.note{font-size:12.5px;color:var(--sub);background:var(--soft);border-radius:9px;padding:9px 11px;margin-top:10px}
+.note b{color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rng{display:flex;align-items:center;gap:10px}
+.rng input{flex:1;min-width:0;accent-color:var(--acc)}
+.rng output{min-width:44px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px}
+.chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px;color:var(--ink);cursor:pointer}
+.chk input{accent-color:var(--acc);width:17px;height:17px}
+.pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pv button{border:1px dashed var(--line);background:transparent;color:var(--sub);padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer}
+.go{width:100%;margin-top:16px;padding:14px;border:0;border-radius:11px;background:var(--acc);color:#fff;font:700 16px "Noto Sans KR";cursor:pointer}
+.go:disabled{opacity:.55;cursor:wait}
+.stop{display:none;width:100%;margin-top:8px;padding:10px;border:1px solid var(--acc);border-radius:11px;background:transparent;color:var(--acc);font:700 14px "Noto Sans KR";cursor:pointer}
+.bar{height:6px;background:var(--soft);border-radius:9px;overflow:hidden;margin-top:14px;display:none}
+.bar i{display:block;height:100%;width:0;background:var(--acc2);transition:width .25s}
+#msg{font-size:13.5px;margin-top:8px;min-height:20px}
+#msg.err{color:#c0392b}
+#result{display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+audio{width:100%}
+.dl{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:10px 16px;border-radius:9px;background:var(--acc2);color:#fff;text-decoration:none;font-weight:700}
+.fmt{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap}
+.fmt label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
+.hide{display:none!important}
+.swatch{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+.swatch.on{border-color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="seal">言</div><div><h1>오늘의 명언 에이전트</h1><p>명언 선택 → 원고 자동 작성 → 성우 낭독 + BGM → 음성(MP3·WAV)·영상(MP4)·카드(PNG) 저장</p></div></header>
+
+<div class="grid">
+<div>
+ <div class="card">
+  <div class="step">STEP 1</div><h2>오늘의 명언</h2>
+  <label>분위기 프리셋 <span style="font-weight:400">(목소리·형태·BGM 자동 설정)</span></label>
+  <div class="chips" id="moods"></div>
+  <label>주제</label>
+  <div class="chips" id="themes"></div>
+  <div class="quote"><div class="mark">“</div><div class="q" id="qView"></div><div class="a" id="aView"></div></div>
+  <div class="qedit"><input type="text" id="qText" placeholder="명언 (직접 수정 가능)"><input type="text" id="qAuth" placeholder="인물"></div>
+  <div class="btns"><button class="btn pri" id="refresh">🔄 새 명언</button><button class="btn" id="rewrite">✍ 원고만 다시 쓰기</button></div>
+
+  <label>원고 형태</label>
+  <select id="form"></select>
+  <label>원고 <span style="font-weight:400">(자동 작성 · 자유롭게 수정 가능)</span> <span id="cnt" style="float:right"></span></label>
+  <textarea id="text"></textarea>
+ </div>
+
+ <div class="card">
+  <div class="step">STEP 2</div><h2>성우 목소리</h2>
+  <div class="tabs" id="tabs">
+   <button data-e="google" class="on">성우 음성<small>Google 신경망</small></button>
+   <button data-e="live">브라우저 음성<small>무료 · PC 녹음</small></button>
+   <button data-e="mic">내 목소리<small>직접 녹음</small></button>
+  </div>
+  <div id="eng-google">
+   <div class="persona" id="personas"></div>
+   <label>Google Cloud API 키</label>
+   <input type="password" id="gkey" placeholder="AIza...">
+   <label class="chk" style="margin-top:8px"><input type="checkbox" id="gsave">이 브라우저에 키 저장</label>
+  </div>
+  <div id="eng-live" class="hide">
+   <label>목소리 (PC에 설치된 한국어 음성)</label><select id="lvoice"></select>
+   <div class="note"><b>녹음 방식:</b> 시작 → 공유 창에서 <b>「전체 화면」 + 「시스템 오디오 공유」</b> 체크. Windows Chrome·Edge 전용.</div>
+  </div>
+  <div id="eng-mic" class="hide">
+   <button type="button" class="chip" id="mic" style="width:100%;padding:11px">● 녹음 시작 — 원고를 읽어 주세요</button>
+   <audio id="micPlay" controls class="hide" style="margin-top:8px"></audio>
+   <div class="note">녹음한 목소리에 BGM과 효과를 입혀 저장합니다.</div>
+  </div>
+  <div class="row">
+   <div><label>속도 보정</label><div class="rng"><input type="range" id="rate" min="-30" max="30" step="5" value="0"><output id="rateO"></output></div></div>
+   <div><label>문장 간격</label><div class="rng"><input type="range" id="gap" min="0.3" max="3" step="0.1" value="0.8"><output id="gapO"></output></div></div>
+  </div>
+ </div>
+</div>
+
+<div>
+ <div class="card">
+  <div class="step">STEP 3</div><h2>배경음악 · 효과</h2>
+  <label>BGM</label>
+  <select id="bgm">
+   <option value="none">없음</option><option value="piano">잔잔한 피아노</option><option value="dream">몽환 패드</option>
+   <option value="birds">아침 새소리</option><option value="waves">파도</option><option value="rain">빗소리</option><option value="stream">계곡 물소리</option>
+  </select>
+  <div class="row">
+   <div><label>도입</label><select id="intro"><option value="none">없음</option><option value="chime">맑은 차임</option><option value="bowl">싱잉볼</option><option value="music">오르골</option></select></div>
+   <div><label>마무리</label><select id="outro"><option value="none">없음</option><option value="chime">맑은 차임</option><option value="bowl">싱잉볼</option><option value="music">오르골</option></select></div>
+  </div>
+  <div class="row">
+   <div><label>BGM 크기</label><div class="rng"><input type="range" id="bgmG" min="0" max="1" step="0.05" value="0.45"><output id="bgmGO"></output></div></div>
+   <div><label>공간감</label><div class="rng"><input type="range" id="rev" min="0" max="1" step="0.05" value="0.2"><output id="revO"></output></div></div>
+  </div>
+  <div class="pv"><span style="font-size:12px;color:var(--sub);align-self:center">미리듣기</span>
+   <button data-p="piano">피아노</button><button data-p="dream">패드</button><button data-p="birds">새소리</button><button data-p="waves">파도</button><button data-p="chime">차임</button><button data-p="music">오르골</button><button data-p="stop">■</button>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="step">STEP 4</div><h2>변환 · 저장</h2>
+  <div class="fmt"><label><input type="radio" name="fmt" value="mp3" checked>MP3</label><label><input type="radio" name="fmt" value="wav">WAV</label><label><input type="radio" name="fmt" value="mp4">MP4 영상</label></div>
+  <div id="vopt" class="hide">
+   <label>화면 비율</label>
+   <div class="chips" id="ratio"><button type="button" class="chip on" data-r="1080x1080">정사각 1:1</button><button type="button" class="chip" data-r="1080x1920">세로 9:16</button><button type="button" class="chip" data-r="1280x720">가로 16:9</button></div>
+   <label class="chk"><input type="checkbox" id="vsub" checked>하단에 낭독 자막 표시</label>
+  </div>
+  <label>카드 배경</label>
+  <div class="chips" id="palette" style="align-items:center"></div>
+  <label>배경 이미지 (선택)</label><input type="file" id="vbg" accept="image/*">
+  <div class="btns" style="margin-top:16px"><button class="btn" id="preview" style="flex:1;padding:14px;font-size:15px">▶ 미리듣기</button><button class="go" id="go" style="margin:0;flex:2">🎙 변환 및 저장</button></div>
+  <button class="stop" id="stop">■ 녹음 중단</button>
+  <div class="btns"><button class="btn" id="png" style="flex:1">🖼 명언 카드 이미지(PNG)</button></div>
+  <div class="bar" id="bar"><i></i></div>
+  <div id="msg"></div>
+  <div id="result"><div id="pvLabel" class="note hide" style="margin:0 0 8px">🎧 미리듣기 — 마음에 들면 [변환 및 저장]을 누르세요. 음성을 다시 합성하지 않습니다.</div><audio id="player" controls></audio><video id="vplayer" controls playsinline class="hide" style="width:100%;border-radius:10px;background:#000"></video><img id="iplayer" class="hide" style="width:100%;border-radius:10px"><a class="dl" id="dl">⬇ 다운로드</a></div>
+ </div>
+</div>
+</div>
+</div>
+
+<script>
+/* 오늘의 명언 DB — 주제별. q: 명언(번역·의역), a: 인물, s: 출전, e: 해설 한 문장 */
+const QUOTES = {
+"인생":[
+ {q:"남이 나를 알아주지 않음을 걱정하지 말고, 내가 남을 알지 못함을 걱정하라.",a:"공자",s:"논어",e:"인정받기를 바라기보다 먼저 이해하려는 마음이 사람을 깊게 만듭니다."},
+ {q:"성찰하지 않는 삶은 살 가치가 없다.",a:"소크라테스",s:"",e:"하루를 돌아보는 짧은 시간이 내일의 방향을 바로잡아 줍니다."},
+ {q:"우리에게 주어진 시간이 짧은 것이 아니라, 우리가 많은 시간을 허비하는 것이다.",a:"세네카",s:"인생의 짧음에 관하여",e:"시간이 없다고 느껴질수록 정말 중요한 일에 시간을 쓰고 있는지 살펴야 합니다."},
+ {q:"삶의 행복은 생각의 질에 달려 있다.",a:"마르쿠스 아우렐리우스",s:"명상록",e:"같은 하루도 어떤 생각으로 바라보느냐에 따라 전혀 다른 하루가 됩니다."},
+ {q:"천 리 길도 한 걸음부터 시작된다.",a:"노자",s:"도덕경",e:"거창한 계획보다 오늘 내딛는 한 걸음이 목적지에 더 가까이 데려다줍니다."},
+ {q:"누구도 같은 강물에 두 번 발을 담글 수 없다.",a:"헤라클레이토스",s:"",e:"모든 것은 변하기에, 지금 이 순간은 다시 오지 않는 귀한 시간입니다."},
+ {q:"인생은 뒤돌아볼 때 이해되지만, 앞을 향해 살아가야 한다.",a:"키르케고르",s:"",e:"지금 이해되지 않는 일도 시간이 지나면 의미를 드러내니, 오늘은 그저 성실히 걸어가면 됩니다."},
+ {q:"왜 살아야 하는지 아는 사람은 어떤 상황도 견뎌낼 수 있다.",a:"니체",s:"우상의 황혼",e:"분명한 이유 하나가 수많은 어려움을 견디게 하는 힘이 됩니다."},
+ {q:"우물 안 개구리에게는 바다를 이야기할 수 없다.",a:"장자",s:"추수편",e:"익숙한 울타리를 넘어설 때 비로소 더 넓은 세상이 보입니다."},
+ {q:"모두가 세상을 바꾸려 하지만, 자기 자신을 바꾸려는 사람은 드물다.",a:"톨스토이",s:"",e:"세상을 바꾸는 가장 확실한 출발점은 나 자신의 작은 변화입니다."}],
+"성공·도전":[
+ {q:"반걸음이 쌓이지 않으면 천 리에 이를 수 없다.",a:"순자",s:"권학편",e:"눈에 띄지 않는 작은 노력들이 쌓여 결국 큰 성취를 이룹니다."},
+ {q:"하늘이 큰 임무를 맡기려 할 때는 먼저 그 마음과 뜻을 괴롭게 한다.",a:"맹자",s:"고자편",e:"지금의 시련은 더 큰 일을 감당할 그릇을 만드는 과정일 수 있습니다."},
+ {q:"나는 실패한 것이 아니다. 잘 되지 않는 방법 만 가지를 찾아냈을 뿐이다.",a:"토머스 에디슨",s:"",e:"실패를 배움으로 바꾸는 사람에게 실패는 끝이 아니라 과정입니다."},
+ {q:"할 수 있다고 믿든 할 수 없다고 믿든, 당신의 생각이 옳다.",a:"헨리 포드",s:"",e:"믿음은 행동을 결정하고, 행동은 결과를 만듭니다."},
+ {q:"나는 수없이 실패했다. 그것이 내가 성공한 이유다.",a:"마이클 조던",s:"",e:"넘어진 횟수만큼 다시 일어선 사람이 결국 정상에 섭니다."},
+ {q:"다시 시도하라. 다시 실패하라. 더 나은 실패를 하라.",a:"사뮈엘 베케트",s:"",e:"완벽한 성공보다 어제보다 나은 시도가 우리를 앞으로 나아가게 합니다."},
+ {q:"아는 것만으로는 부족하다. 적용해야 한다. 바라는 것만으로는 부족하다. 행동해야 한다.",a:"괴테",s:"",e:"오늘 배운 것 하나를 실제로 해보는 것, 그것이 진짜 배움입니다."},
+ {q:"기회는 준비된 사람에게 찾아온다.",a:"루이 파스퇴르",s:"",e:"운처럼 보이는 순간도 사실은 오랜 준비가 만들어 낸 결과입니다."},
+ {q:"죽고자 하면 살고, 살고자 하면 죽는다.",a:"이순신",s:"",e:"모든 것을 걸고 임하는 각오가 불가능해 보이는 상황을 이겨내게 합니다."},
+ {q:"자신을 이기는 사람이 진정으로 강한 사람이다.",a:"노자",s:"도덕경",e:"가장 어려운 상대는 바깥이 아니라 어제의 나 자신입니다."}],
+"용기·위로":[
+ {q:"나를 죽이지 못하는 것은 나를 더 강하게 만든다.",a:"니체",s:"우상의 황혼",e:"지금 견디고 있는 어려움이 언젠가 당신을 지탱하는 힘이 될 것입니다."},
+ {q:"세상은 고통으로 가득하지만, 그것을 이겨내는 일로도 가득하다.",a:"헬렌 켈러",s:"",e:"고통이 있는 곳에는 언제나 그것을 이겨내는 사람들의 이야기도 함께 있습니다."},
+ {q:"앞을 가로막는 장애물이 곧 길이 된다.",a:"마르쿠스 아우렐리우스",s:"명상록",e:"막힌 길처럼 보이는 문제 속에 새로운 길의 실마리가 숨어 있습니다."},
+ {q:"당신의 동의 없이는 누구도 당신을 열등하게 만들 수 없다.",a:"엘리너 루스벨트",s:"",e:"나의 가치는 남의 말이 아니라 내가 나를 어떻게 바라보느냐로 정해집니다."},
+ {q:"모든 것을 빼앗겨도, 주어진 상황에서 태도를 선택할 자유만은 빼앗을 수 없다.",a:"빅터 프랭클",s:"죽음의 수용소에서",e:"상황은 고를 수 없어도, 그 상황을 대하는 마음은 언제나 내가 고를 수 있습니다."},
+ {q:"이 또한 지나가리라.",a:"페르시아 격언",s:"",e:"기쁜 날도 힘든 날도 머물지 않고 지나가니, 오늘을 담담히 건너가면 됩니다."},
+ {q:"슬픔이 깊이 파고들수록, 그 자리에 더 많은 기쁨을 담을 수 있다.",a:"칼릴 지브란",s:"예언자",e:"아픔을 겪은 마음일수록 더 깊은 기쁨과 공감을 품을 수 있습니다."},
+ {q:"우리는 많은 패배를 겪을 수 있지만, 결코 패배해서는 안 된다.",a:"마야 안젤루",s:"",e:"넘어지는 것은 일이지만, 포기하는 것은 선택입니다."},
+ {q:"날이 추워진 뒤에야 소나무와 잣나무가 늦게 시듦을 안다.",a:"공자",s:"논어",e:"어려운 시기를 지날 때 비로소 사람의 진짜 모습과 단단함이 드러납니다."},
+ {q:"한겨울 속에서 나는 마침내 내 안에 꺾이지 않는 여름이 있음을 알았다.",a:"알베르 카뮈",s:"",e:"가장 추운 시간에도 당신 안에는 꺼지지 않는 따뜻함이 남아 있습니다."}],
+"배움·지혜":[
+ {q:"배우기만 하고 생각하지 않으면 얻는 것이 없고, 생각만 하고 배우지 않으면 위태롭다.",a:"공자",s:"논어",e:"배움과 생각이 함께 갈 때 지식은 비로소 지혜가 됩니다."},
+ {q:"아는 것을 안다 하고, 모르는 것을 모른다 하는 것, 이것이 진정으로 아는 것이다.",a:"공자",s:"논어",e:"모른다고 말할 수 있는 용기가 배움의 첫걸음입니다."},
+ {q:"나는 내가 모른다는 것을 안다.",a:"소크라테스",s:"",e:"겸손한 마음이 있어야 새로운 것을 받아들일 자리가 생깁니다."},
+ {q:"하루라도 책을 읽지 않으면 입 안에 가시가 돋는다.",a:"안중근",s:"",e:"꾸준한 읽기는 마음을 가꾸는 가장 오래된 습관입니다."},
+ {q:"중요한 것은 질문을 멈추지 않는 것이다.",a:"알베르트 아인슈타인",s:"",e:"호기심을 잃지 않는 한 우리는 언제까지나 성장할 수 있습니다."},
+ {q:"지식에 대한 투자가 가장 높은 이자를 낳는다.",a:"벤저민 프랭클린",s:"",e:"오늘 배운 한 가지는 평생에 걸쳐 이자를 돌려줍니다."},
+ {q:"아는 것이 힘이다.",a:"프랜시스 베이컨",s:"",e:"제대로 아는 만큼 더 나은 선택을 할 수 있습니다."},
+ {q:"남을 아는 것은 지혜요, 자신을 아는 것은 밝음이다.",a:"노자",s:"도덕경",e:"세상을 읽는 눈만큼 나 자신을 비추어 보는 눈도 중요합니다."},
+ {q:"사람이 태어나 배우지 않으면 사람다운 사람이 될 수 없다.",a:"율곡 이이",s:"격몽요결",e:"배움은 지식을 넘어 사람됨을 가꾸는 일입니다."},
+ {q:"내가 더 멀리 보았다면, 그것은 거인들의 어깨 위에 서 있었기 때문이다.",a:"아이작 뉴턴",s:"",e:"앞선 이들의 지혜에 감사하며 배울 때 우리는 더 멀리 볼 수 있습니다."}],
+"관계·사랑":[
+ {q:"내가 원하지 않는 일을 남에게 시키지 말라.",a:"공자",s:"논어",e:"관계의 기본은 상대의 자리에 서서 한 번 더 생각해 보는 것입니다."},
+ {q:"사랑은 서로 마주보는 것이 아니라 함께 같은 방향을 바라보는 것이다.",a:"생텍쥐페리",s:"인간의 대지",e:"함께 꿈꾸는 방향이 같을 때 관계는 더욱 단단해집니다."},
+ {q:"친구란 두 몸에 깃든 하나의 영혼이다.",a:"아리스토텔레스",s:"",e:"마음을 나눌 수 있는 친구 한 사람은 인생의 큰 보물입니다."},
+ {q:"덕은 외롭지 않으니 반드시 이웃이 있다.",a:"공자",s:"논어",e:"바르게 사는 사람 곁에는 결국 좋은 사람들이 모여듭니다."},
+ {q:"어둠은 어둠을 몰아낼 수 없고 오직 빛만이 할 수 있다. 미움은 미움을 몰아낼 수 없고 오직 사랑만이 할 수 있다.",a:"마틴 루서 킹",s:"",e:"갈등 앞에서 한 번 더 너그러워지는 것이 가장 강한 대응입니다."},
+ {q:"인생 최고의 행복은 우리가 사랑받고 있다는 확신이다.",a:"빅토르 위고",s:"레 미제라블",e:"오늘 곁에 있는 사람에게 그 확신을 건네 보는 건 어떨까요."},
+ {q:"사람을 있는 그대로 대하면 그대로 머물지만, 될 수 있는 모습으로 대하면 그렇게 된다.",a:"괴테",s:"",e:"믿어 주는 한마디가 사람을 성장하게 합니다."},
+ {q:"혼자서는 할 수 있는 일이 적지만, 함께라면 많은 일을 할 수 있다.",a:"헬렌 켈러",s:"",e:"함께하는 힘은 언제나 혼자의 힘보다 큽니다."},
+ {q:"군자의 사귐은 물처럼 담백하다.",a:"장자",s:"산목편",e:"억지로 꾸미지 않은 담백한 관계가 오래도록 변하지 않습니다."},
+ {q:"주는 양보다, 주는 일에 얼마나 많은 사랑을 담느냐가 중요하다.",a:"마더 테레사",s:"",e:"작은 친절이라도 진심을 담으면 큰 울림이 됩니다."}],
+"행복·감사":[
+ {q:"행복은 우리 자신에게 달려 있다.",a:"아리스토텔레스",s:"",e:"행복은 멀리서 찾아오는 것이 아니라 내 안에서 길러지는 것입니다."},
+ {q:"행복에 이르는 길은 하나뿐이다. 우리 의지 밖의 일을 걱정하지 않는 것이다.",a:"에픽테토스",s:"",e:"바꿀 수 있는 일에 집중하고, 바꿀 수 없는 일은 내려놓아 보세요."},
+ {q:"만족할 줄 아는 사람이 진정 부유한 사람이다.",a:"노자",s:"도덕경",e:"더 가지려는 마음을 잠시 멈추면 이미 가진 것들이 보이기 시작합니다."},
+ {q:"감사는 가장 큰 미덕일 뿐 아니라 모든 미덕의 어머니다.",a:"키케로",s:"",e:"감사하는 마음 하나가 다른 좋은 마음들을 함께 불러옵니다."},
+ {q:"사람은 마음먹은 만큼 행복하다.",a:"에이브러햄 링컨",s:"",e:"오늘 하루, 행복하기로 마음먹는 것부터 시작해 보세요."},
+ {q:"건강은 가장 큰 이익이요, 만족은 가장 큰 재산이다.",a:"법구경",s:"",e:"건강하게 오늘을 맞이한 것만으로도 감사할 이유는 충분합니다."},
+ {q:"화를 내는 1분마다 60초의 행복을 잃는다.",a:"랄프 왈도 에머슨",s:"",e:"화가 날 때 잠시 숨을 고르면 소중한 시간을 지킬 수 있습니다."},
+ {q:"진정한 행복은 미래에 매달리지 않고 현재를 누리는 것이다.",a:"세네카",s:"",e:"내일의 걱정보다 오늘의 소소한 기쁨에 마음을 두어 보세요."},
+ {q:"행복한 삶을 위해 필요한 것은 아주 적다.",a:"마르쿠스 아우렐리우스",s:"명상록",e:"단순하게 살수록 작은 것에서 큰 기쁨을 발견하게 됩니다."},
+ {q:"아직 남아 있는 아름다운 것들을 생각하면 행복해질 수 있다.",a:"안네 프랑크",s:"안네의 일기",e:"가장 어두운 순간에도 아름다운 것을 바라보는 눈은 우리를 지켜 줍니다."}],
+"마음·명상":[
+ {q:"모든 것은 마음이 앞서고, 마음이 주인이며, 마음으로 지어진다.",a:"법구경",s:"",e:"오늘 하루의 모습은 결국 내 마음이 그려 낸 그림입니다."},
+ {q:"미움은 미움으로 그치지 않는다. 미움은 오직 사랑으로만 그친다.",a:"법구경",s:"",e:"미움을 내려놓는 순간 가장 먼저 자유로워지는 것은 바로 나 자신입니다."},
+ {q:"전쟁에서 백만 명을 이기는 것보다 자기 자신을 이기는 것이 가장 큰 승리다.",a:"법구경",s:"",e:"나를 다스리는 힘이야말로 가장 값진 힘입니다."},
+ {q:"모든 것은 오직 마음이 지어낼 뿐이다. 일체유심조.",a:"원효대사",s:"",e:"같은 물도 마음에 따라 감로수가 되기도, 썩은 물이 되기도 합니다."},
+ {q:"소리에 놀라지 않는 사자처럼, 그물에 걸리지 않는 바람처럼, 무소의 뿔처럼 혼자서 가라.",a:"숫타니파타",s:"",e:"흔들림 없는 마음으로 자신의 길을 묵묵히 걸어가면 됩니다."},
+ {q:"가장 훌륭한 선은 물과 같다.",a:"노자",s:"도덕경",e:"물처럼 낮은 곳으로 흐르며 다투지 않는 마음이 가장 큰 힘을 지닙니다."},
+ {q:"본래 한 물건도 없거늘, 어디에 티끌이 일어나겠는가.",a:"혜능",s:"육조단경",e:"붙잡고 있는 집착을 내려놓으면 마음은 본래의 맑음을 되찾습니다."},
+ {q:"눈 덮인 들판을 걸을 때 함부로 어지러이 걷지 마라. 오늘 내 발자국이 뒷사람의 이정표가 되리니.",a:"서산대사",s:"",e:"오늘 나의 작은 행동이 누군가에게는 길잡이가 됩니다."},
+ {q:"인간의 모든 불행은 방 안에 조용히 혼자 앉아 있지 못하는 데서 비롯된다.",a:"파스칼",s:"팡세",e:"하루에 잠깐이라도 고요히 머무는 시간이 마음을 단단하게 합니다."},
+ {q:"숨을 들이쉬며 몸을 고요히 하고, 숨을 내쉬며 미소 짓는다.",a:"틱낫한",s:"",e:"지금 이 호흡 하나에 머무는 것만으로도 마음은 평온해집니다."}],
+"리더십":[
+ {q:"다스림이란 바르게 하는 것이다. 그대가 바르게 이끌면 누가 감히 바르지 않겠는가.",a:"공자",s:"논어",e:"리더의 말보다 리더의 모습이 조직을 움직입니다."},
+ {q:"가장 훌륭한 지도자는 사람들이 그 존재만 겨우 알 뿐인 지도자다.",a:"노자",s:"도덕경",e:"구성원이 스스로 해냈다고 느끼게 하는 것이 최고의 리더십입니다."},
+ {q:"효율은 일을 올바르게 하는 것이고, 효과는 올바른 일을 하는 것이다.",a:"피터 드러커",s:"",e:"빨리 하는 것보다 먼저 옳은 일을 고르는 것이 중요합니다."},
+ {q:"위대한 일을 하는 유일한 방법은 자신이 하는 일을 사랑하는 것이다.",a:"스티브 잡스",s:"",e:"좋아하는 마음은 오래 버티게 하고, 오래 버틴 일은 결국 빛을 냅니다."},
+ {q:"적을 알고 나를 알면 백 번 싸워도 위태롭지 않다.",a:"손자",s:"손자병법",e:"상황을 정확히 아는 것이 모든 전략의 출발점입니다."},
+ {q:"신에게는 아직 열두 척의 배가 남아 있습니다.",a:"이순신",s:"",e:"남은 것에 집중하는 사람이 위기를 기회로 바꿉니다."},
+ {q:"리더십과 배움은 서로에게 없어서는 안 된다.",a:"존 F. 케네디",s:"",e:"배우기를 멈추지 않는 리더가 조직을 성장시킵니다."},
+ {q:"하늘의 때는 땅의 이로움만 못하고, 땅의 이로움은 사람의 화합만 못하다.",a:"맹자",s:"공손추편",e:"어떤 조건보다 강한 것은 한마음으로 뭉친 사람들의 힘입니다."},
+ {q:"이봐, 해봤어?",a:"정주영",s:"",e:"해보기도 전에 안 된다고 단정하지 말고, 일단 부딪혀 보는 용기가 필요합니다."},
+ {q:"군자는 화합하되 똑같아지지 않는다.",a:"공자",s:"논어",e:"서로 다른 생각을 존중할 때 진짜 화합이 이루어집니다."}],
+"안전·현장":[
+ {q:"작은 구멍 하나가 큰 배를 가라앉힌다.",a:"벤저민 프랭클린",s:"",e:"현장의 작은 불안전 요소 하나가 큰 사고로 이어질 수 있습니다."},
+ {q:"예방 1온스는 치료 1파운드의 가치가 있다.",a:"벤저민 프랭클린",s:"",e:"사고가 난 뒤의 수습보다 사고 전의 점검이 훨씬 값집니다."},
+ {q:"미리 대비하면 근심이 없다. 유비무환.",a:"서경",s:"",e:"작업 전 위험성평가와 점검이 오늘의 무사고를 만듭니다."},
+ {q:"편안할 때 위태로움을 생각하라. 거안사위.",a:"춘추좌씨전",s:"",e:"익숙한 작업일수록 방심하지 말고 한 번 더 확인해야 합니다."},
+ {q:"천 길 둑도 개미구멍 하나로 무너진다.",a:"한비자",s:"",e:"보호구 하나, 안전난간 하나를 소홀히 하지 않는 것이 큰 둑을 지키는 일입니다."},
+ {q:"한 번의 큰 사고 뒤에는 스물아홉 번의 작은 사고와 삼백 번의 아차 사고가 있다.",a:"하인리히 법칙",s:"",e:"아차 사고를 그냥 넘기지 않고 공유하는 것이 큰 사고를 막는 길입니다."},
+ {q:"돌다리도 두들겨 보고 건너라.",a:"우리 속담",s:"",e:"확실해 보여도 한 번 더 확인하는 습관이 생명을 지킵니다."},
+ {q:"소 잃고 외양간 고치지 말고, 외양간은 미리 고쳐라.",a:"우리 속담",s:"",e:"사고 후의 대책보다 사고 전의 개선이 진짜 안전관리입니다."},
+ {q:"안전은 우연히 지켜지지 않는다. 습관이 지킨다.",a:"현장 안전 격언",s:"",e:"매일 반복하는 기본 수칙이 결국 나와 동료를 지켜 줍니다."}]
+};
+
+</script>
+<script>
+"use strict";
+const SR=24000;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const store={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch{}}};
+const pick=a=>a[Math.random()*a.length|0];
+
+/* ════════ 1. 원고 자동 작성 ════════ */
+const josa=(w,a,b)=>{const c=w.charCodeAt(w.length-1);if(c<0xAC00||c>0xD7A3)return w+b;return w+((c-0xAC00)%28?a:b)};
+function today(){const d=new Date(),W='일월화수목금토'[d.getDay()];return {d,txt:`${d.getMonth()+1}월 ${d.getDate()}일 ${W}요일`,dot:`${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')} (${W})`,h:d.getHours(),m:d.getMonth()+1}}
+function season(m){return m>=3&&m<=5?'봄':m<=8?'여름':m<=11?'가을':'겨울'}
+const timeGreet=h=>h<11?pick(['좋은 아침입니다.','상쾌한 아침이에요.','새로운 아침이 밝았습니다.']):h<17?pick(['좋은 오후입니다.','안녕하세요, 오후 시간 잘 보내고 계신가요?']):pick(['좋은 저녁입니다.','오늘 하루도 수고 많으셨습니다.']);
+const CLOSE={
+ "인생":["오늘 하루도 당신만의 속도로 걸어가세요.","오늘이 당신 인생의 좋은 한 페이지가 되길 바랍니다."],
+ "성공·도전":["오늘 내딛는 한 걸음을 응원합니다.","작은 도전 하나가 큰 변화를 만듭니다. 오늘도 힘내세요."],
+ "용기·위로":["당신은 생각보다 훨씬 강한 사람입니다.","힘든 하루였다면, 오늘은 스스로를 꼭 안아 주세요."],
+ "배움·지혜":["오늘도 하나를 배우는 즐거움이 함께하길 바랍니다.","배움을 멈추지 않는 당신을 응원합니다."],
+ "관계·사랑":["오늘, 소중한 사람에게 따뜻한 한마디를 건네 보세요.","당신 곁의 사람들과 따뜻한 하루 보내세요."],
+ "행복·감사":["오늘 감사한 일 세 가지를 떠올려 보는 건 어떨까요.","작은 행복이 가득한 하루 되세요."],
+ "마음·명상":["오늘 하루, 마음의 평안이 함께하길 바랍니다.","잠시 숨을 고르고, 지금 이 순간에 머물러 보세요."],
+ "리더십":["오늘도 좋은 본보기가 되어 주세요.","함께 성장하는 하루 되시길 바랍니다."],
+ "안전·현장":["오늘도 기본과 원칙을 지켜, 모두 무사히 귀가합시다.","작업 전 한 번 더 확인하는 것, 잊지 마세요."]};
+const FORMS={
+ short:{name:"① 명언 낭독 (짧게)",gap:.9,make:(Q)=>`오늘의 명언입니다.\n${Q.q}\n${Q.a}의 말입니다.`},
+ explain:{name:"② 명언 + 해설",gap:.8,make:(Q,T)=>`${timeGreet(T.h)}\n오늘의 명언은 ${Q.a}의 말입니다.\n${Q.q}\n${Q.e}\n${pick(CLOSE[Q.t]||CLOSE["인생"])}`},
+ radio:{name:"③ 라디오 오프닝",gap:.7,make:(Q,T)=>`${T.txt}, ${timeGreet(T.h)}\n${pick([`${season(T.m)}의 한가운데에서, 마음에 새길 한 문장을 전해 드립니다.`,'오늘 하루를 여는 짧은 이야기, 함께 들어 보실까요?','바쁜 일상 속 잠시 쉬어 가는 시간, 오늘의 명언입니다.'])}\n${Q.a}${Q.s?`, 『${Q.s}』`:''}에 이런 말이 있습니다.\n${Q.q}\n${Q.e}\n${pick(['오늘 이 문장을 한 번쯤 떠올려 보세요.','여러분의 하루에는 이 말이 어떻게 다가오나요?','짧은 문장이지만, 오래 곱씹어 볼 만한 이야기입니다.'])}\n${pick(CLOSE[Q.t]||CLOSE["인생"])}`},
+ meditate:{name:"④ 명상 낭독 (느리게)",gap:1.6,make:(Q)=>`잠시 눈을 감고, 천천히 숨을 들이쉬어 보세요.\n그리고, 천천히 내쉽니다.\n오늘 마음에 담을 문장입니다.\n${Q.q}\n${Q.a}.\n다시 한번, 마음속으로 새겨 봅니다.\n${Q.q}\n${Q.e}\n편안한 호흡과 함께, 이 말을 오늘 하루 품고 지내 보세요.`},
+ night:{name:"⑤ 잠들기 전 한마디",gap:1.1,make:(Q)=>`오늘 하루도 정말 수고 많으셨습니다.\n잠들기 전, 마음에 새길 한 문장을 전해 드립니다.\n${Q.q}\n${Q.a}의 말입니다.\n${Q.e}\n${pick(['오늘의 걱정은 여기 내려놓고, 편안한 밤 되세요.','포근한 꿈 꾸시고, 내일 또 만나요.','좋은 꿈 꾸세요. 오늘도 고생하셨습니다.'])}`},
+ motivation:{name:"⑥ 동기부여 응원",gap:.5,make:(Q,T)=>`${pick(['자, 오늘도 시작해 봅시다!','좋습니다, 오늘도 힘차게 출발해 볼까요?','오늘, 어제보다 한 걸음 더 나아가 봅시다!'])}\n${josa(Q.a,'은','는')} 이렇게 말했습니다.\n${Q.q}\n${Q.e}\n${pick(['당신은 할 수 있습니다. 오늘도 파이팅!','멈추지 마세요. 지금 이 순간에도 당신은 성장하고 있습니다.','오늘의 작은 실천이 내일의 큰 변화를 만듭니다. 출발!'])}`},
+ safety:{name:"⑦ 안전 조회 멘트",gap:.7,make:(Q,T)=>`안녕하십니까. ${T.txt}, 오늘의 안전 한마디입니다.\n${Q.q}\n${Q.a}의 말입니다.\n${Q.e}\n${pick(['작업 전 보호구 착용과 위험요인 확인, 다시 한번 점검합시다.','서두르지 말고, 기본 수칙부터 지켜 주십시오.','아차 사고는 숨기지 말고 즉시 공유해 주십시오.'])}\n오늘도 모두 무사히 귀가합시다. 안전!`}
+};
+const THEMES=["전체",...Object.keys(QUOTES)];
+let theme="전체",cur=null;const recent=[];
+function allQ(){const r=[];for(const t in QUOTES)QUOTES[t].forEach(q=>r.push({...q,t}));return r}
+function nextQuote(byDate=false){
+ const pool=theme==="전체"?allQ():QUOTES[theme].map(q=>({...q,t:theme}));
+ let q;
+ if(byDate){const T=today().d,k=T.getFullYear()*372+T.getMonth()*31+T.getDate();q=pool[(k*2654435761>>>0)%pool.length]}
+ else{const fresh=pool.filter(x=>!recent.includes(x.q));q=pick(fresh.length?fresh:pool)}
+ recent.push(q.q);if(recent.length>20)recent.shift();
+ return q;
+}
+function showQuote(){
+ $('#qView').textContent=cur.q;$('#aView').textContent='— '+cur.a+(cur.s?` 『${cur.s}』`:'');
+ $('#qText').value=cur.q;$('#qAuth').value=cur.a;
+}
+function writeScript(){
+ const Q={...cur,q:$('#qText').value.trim()||cur.q,a:$('#qAuth').value.trim()||cur.a};
+ if(Q.q!==cur.q){Q.e=Q.e&&Q.q===cur.q?Q.e:cur.e}
+ $('#text').value=FORMS[$('#form').value].make(Q,today());
+ $('#gap').value=FORMS[$('#form').value].gap;syncOut();cnt();
+}
+
+/* ════════ 2. 성우 페르소나 ════════ */
+const PERSONAS=[
+ {id:'dj',name:'📻 따뜻한 라디오 DJ',d:'여성 · 다정한 아침 라디오',v:'ko-KR-Chirp3-HD-Aoede',fb:'ko-KR-Neural2-A',rate:0,pitch:0},
+ {id:'narr',name:'🎙 중후한 내레이터',d:'남성 · 깊고 묵직한 다큐 톤',v:'ko-KR-Chirp3-HD-Charon',fb:'ko-KR-Neural2-C',rate:-8,pitch:-3},
+ {id:'med',name:'🧘 차분한 명상 가이드',d:'여성 · 느리고 고요한',v:'ko-KR-Chirp3-HD-Kore',fb:'ko-KR-Wavenet-B',rate:-15,pitch:-2},
+ {id:'pump',name:'🔥 힘찬 동기부여 코치',d:'남성 · 에너지 넘치는',v:'ko-KR-Chirp3-HD-Fenrir',fb:'ko-KR-Wavenet-D',rate:6,pitch:1},
+ {id:'elder',name:'🍵 지혜로운 어르신',d:'남성 · 느릿하고 낮은',v:'ko-KR-Wavenet-C',fb:'ko-KR-Standard-C',rate:-18,pitch:-6},
+ {id:'fresh',name:'🌸 맑은 청춘',d:'여성 · 밝고 경쾌한',v:'ko-KR-Chirp3-HD-Leda',fb:'ko-KR-Neural2-B',rate:4,pitch:2},
+ {id:'dawn',name:'🌙 새벽 감성',d:'남성 · 나지막한 밤 라디오',v:'ko-KR-Chirp3-HD-Orus',fb:'ko-KR-Wavenet-D',rate:-10,pitch:-2}];
+let persona=PERSONAS[0];const voiceOK={};
+
+/* ════════ 3. 분위기 프리셋 ════════ */
+const MOODS={
+ '☀️ 아침 활력':{p:'dj',form:'radio',bgm:'birds',intro:'chime',outro:'chime',pal:'dawn',theme:'성공·도전'},
+ '🔥 동기부여':{p:'pump',form:'motivation',bgm:'piano',intro:'chime',outro:'none',pal:'sunset',theme:'성공·도전'},
+ '🧘 명상':{p:'med',form:'meditate',bgm:'waves',intro:'bowl',outro:'bowl',pal:'forest',theme:'마음·명상'},
+ '🌙 잠들기 전':{p:'dawn',form:'night',bgm:'dream',intro:'music',outro:'music',pal:'night',theme:'용기·위로'},
+ '📜 고전의 지혜':{p:'elder',form:'explain',bgm:'piano',intro:'bowl',outro:'none',pal:'ink',theme:'배움·지혜'},
+ '🦺 안전 조회':{p:'narr',form:'safety',bgm:'none',intro:'chime',outro:'chime',pal:'paper',theme:'안전·현장'}};
+
+/* ════════ 4. BGM · 효과 합성 ════════ */
+const gauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)*1.2;
+function norm(y,peak=1){let p=1e-9;for(let i=0;i<y.length;i++){const a=Math.abs(y[i]);if(a>p)p=a}const k=peak/p;for(let i=0;i<y.length;i++)y[i]*=k;return y}
+function lp(x,a){const y=new Float32Array(x.length);let s=0;for(let i=0;i<x.length;i++){s+=a*(x[i]-s);y[i]=s}return y}
+function noise(n){const w=new Float32Array(n);for(let i=0;i<n;i++)w[i]=gauss();return w}
+const mtof=m=>440*2**((m-69)/12);
+function tone(y,st,dur,f,amp,att,dec,harm=[[1,1]],sustain=true){ // 한 음 가산
+ const s=st*SR|0,n=Math.min(y.length-s,dur*SR|0);
+ for(let i=0;i<n;i++){const t=i/SR;let env=Math.min(1,t/att);env*=sustain?Math.min(1,(dur-t)/dec):Math.exp(-t/dec);
+  let v=0;for(const[h,a]of harm)v+=a*Math.sin(2*Math.PI*f*h*t);y[s+i]+=v*amp*env}
+}
+const PROG={piano:[[48,[60,64,67,71]],[45,[57,60,64,67]],[41,[57,60,65,69]],[43,[55,59,62,67]]],
+            dream:[[45,[57,60,64,71]],[41,[57,60,65,72]],[48,[55,60,64,67]],[43,[55,59,62,69]]]};
+const BGM={
+ piano(sec){const y=new Float32Array(SR*sec|0),P=PROG.piano,L=4;
+  for(let c=0;c*L<sec;c++){const[b,ch]=P[c%4],t0=c*L;
+   tone(y,t0,L+1.2,mtof(b),.35,.05,2.2,[[1,1],[2,.25]],false);
+   ch.forEach(m=>tone(y,t0,L+.8,mtof(m),.08,1.2,1.2,[[1,1],[2,.15]]));
+   for(let k=0;k<8;k++)if(Math.random()<.7){const m=ch[(k+c)%4]+12;tone(y,t0+k*.5,2.2,mtof(m),.16,.004,.7,[[1,1],[2,.3],[3,.1]],false)}}
+  return norm(y,.5)},
+ dream(sec){const y=new Float32Array(SR*sec|0),P=PROG.dream,L=6;
+  for(let c=0;c*L<sec;c++){const[b,ch]=P[c%4],t0=c*L;
+   tone(y,t0,L+2,mtof(b),.25,2,2);ch.forEach(m=>{tone(y,t0,L+2,mtof(m),.07,2.5,2.5);tone(y,t0,L+2,mtof(m)*1.004,.06,2.5,2.5)});
+   for(let k=0;k<3;k++)if(Math.random()<.6)tone(y,t0+k*2+Math.random(),3,mtof(pick(ch)+24),.05,.01,1.4,[[1,1]],false)}
+  return norm(y,.45)},
+ birds(sec){const n=SR*sec|0,y=new Float32Array(n),w=lp(noise(n),.008);for(let i=0;i<n;i++)y[i]=w[i]*3;
+  let t=.5;while(t<sec-1){const cnt=2+Math.random()*4|0,f0=2600+Math.random()*1800,up=Math.random()<.5;
+   for(let k=0;k<cnt;k++){const st=t+k*(.09+Math.random()*.05),d=.05+Math.random()*.07,s=st*SR|0,m=d*SR|0;
+    let ph=0;for(let i=0;i<m&&s+i<n;i++){const r=i/m,f=f0*(up?1+.35*r:1.35-.35*r);ph+=2*Math.PI*f/SR;y[s+i]+=Math.sin(ph)*Math.sin(Math.PI*r)*.25}}
+   t+=.8+Math.random()*2.8}
+  return norm(y,.4)},
+ waves(sec){const n=SR*sec|0,w=lp(noise(n),.06),y=new Float32Array(n);for(let i=0;i<n;i++){const t=i/SR;y[i]=w[i]*(.2+.8*Math.sin(Math.PI*t/7.5)**4)}return norm(y,.5)},
+ rain(sec){const n=SR*sec|0,w=noise(n),a=lp(w,.15),y=new Float32Array(n);let d=0;for(let i=0;i<n;i++){if(Math.random()>.9993)d+=Math.random()*1.5;d*=.967;y[i]=w[i]-a[i]+d*gauss()}return norm(y,.45)},
+ stream(sec){const n=SR*sec|0,w=noise(n),a=lp(w,.25),b=lp(w,.02),m=lp(noise(n),.0003),y=new Float32Array(n);for(let i=0;i<n;i++)y[i]=(a[i]-b[i])*(.6+.4*m[i]*8);return norm(y,.45)}
+};
+const FX={
+ chime(){const y=new Float32Array(SR*3.2|0);[76,79,84].forEach((m,i)=>tone(y,i*.22,3-i*.22,mtof(m),.4,.003,1.1,[[1,1],[2.76,.3],[5.4,.12]],false));return norm(y,.6)},
+ bowl(){const n=SR*6|0,y=new Float32Array(n);[[1,1,4.5],[2.76,.5,3],[5.4,.28,2]].forEach(([r,a,tau])=>{tone(y,0,6,220*r,a,.01,tau,[[1,1]],false);tone(y,0,6,220*r+1.3,a*.6,.01,tau,[[1,1]],false)});return norm(y,.6)},
+ music(){const y=new Float32Array(SR*4|0);[72,76,79,84,79,76,77,74].forEach((m,i)=>tone(y,i*.32,1.6,mtof(m+12),.3,.002,.5,[[1,1],[3,.25],[5.1,.1]],false));return norm(y,.5)},
+ ir(a){const n=SR*(.4+2*a)|0,x=new Float32Array(n),tau=.12+.5*a;for(let i=0;i<n;i++)x[i]=gauss()*Math.exp(-i/SR/tau);const y=lp(x,.3);y[0]=0;let e=0;for(const v of y)e+=v*v;e=Math.sqrt(e)+1e-9;for(let i=0;i<n;i++)y[i]/=e;return y}
+};
+const INTRO_LEN={chime:1.6,bowl:2.2,music:2.8};
+
+function mixEvents(ev,minSec){let n=SR*minSec|0;for(const e of ev)n=Math.max(n,(e.at*SR|0)+e.clip.length);const out=new Float32Array(n);
+ for(const e of ev){const s=e.at*SR|0;for(let i=0;i<e.clip.length;i++)out[s+i]+=e.clip[i]*e.gain}return out}
+function opts(){const v=id=>$('#'+id).value;return{gap:+v('gap'),intro:v('intro'),outro:v('outro'),bgm:v('bgm'),bgmG:+v('bgmG'),rev:+v('rev'),rate:+v('rate'),fmt:$('input[name=fmt]:checked').value}}
+
+let CAPS=[];
+async function build(segs,o,texts=null){
+ const V=[],F=[];let c=.4;CAPS=[];
+ if(o.intro!=='none'){F.push({clip:FX[o.intro](),at:.2,gain:.8});c=.2+INTRO_LEN[o.intro]}
+ segs.forEach((seg,i)=>{V.push({clip:seg,at:c,gain:1});if(texts)CAPS.push({t:texts[i],a:c,b:c+seg.length/SR});c+=seg.length/SR;if(i<segs.length-1)c+=o.gap});
+ c+=.9;
+ if(o.outro!=='none'){const cl=FX[o.outro]();F.push({clip:cl,at:c,gain:.8});c+=cl.length/SR}else c+=1.2;
+ const total=c+.3,voice=mixEvents(V,total),fx=mixEvents(F,total),n=Math.max(voice.length,fx.length);
+ const bus=new Float32Array(n);for(let i=0;i<n;i++)bus[i]=(voice[i]||0)+(fx[i]||0);
+ return render(bus,o,true);
+}
+async function render(bus,o,withBgm){
+ const tail=o.rev>0?(SR*(.4+2*o.rev)|0):0,N=bus.length+tail,oc=new OfflineAudioContext(1,N,SR);
+ const src=oc.createBufferSource();src.buffer=oc.createBuffer(1,bus.length,SR);src.buffer.copyToChannel(bus,0);src.connect(oc.destination);
+ if(o.rev>0){const cv=oc.createConvolver();cv.normalize=false;const ir=FX.ir(o.rev),ib=oc.createBuffer(1,ir.length,SR);ib.copyToChannel(ir,0);cv.buffer=ib;const wg=oc.createGain();wg.gain.value=.5*o.rev;src.connect(cv).connect(wg).connect(oc.destination)}
+ if(withBgm&&o.bgm!=='none'&&o.bgmG>0){const bg=BGM[o.bgm](N/SR),f=Math.min(bg.length/4|0,SR*2.5);for(let i=0;i<f;i++){bg[i]*=i/f;bg[bg.length-1-i]*=i/f}
+  const ab=oc.createBuffer(1,bg.length,SR);ab.copyToChannel(bg,0);const as=oc.createBufferSource();as.buffer=ab;const ag=oc.createGain();ag.gain.value=o.bgmG*.45;as.connect(ag).connect(oc.destination);as.start()}
+ src.start();const out=await oc.startRendering();return norm(out.getChannelData(0).slice(),.89);
+}
+
+/* ════════ 5. 음성 엔진 ════════ */
+const splitSent=t=>t.trim().split(/(?<=[.!?。…])\s+|\n+/).map(s=>s.trim()).filter(Boolean);
+async function decode(buf){const oc=new OfflineAudioContext(1,SR,SR);return (await oc.decodeAudioData(buf)).getChannelData(0).slice()}
+async function gCall(text,key,voice,rate,pitch){
+ const ac={audioEncoding:'LINEAR16',sampleRateHertz:SR};if(rate)ac.speakingRate=Math.max(.25,1+rate/100);if(pitch&&!/Chirp/.test(voice))ac.pitch=pitch;
+ const r=await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({input:{text},voice:{languageCode:'ko-KR',name:voice},audioConfig:ac})});
+ const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error?.message||('HTTP '+r.status));e.status=r.status;throw e}
+ const bin=atob(j.audioContent),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return decode(u.buffer);
+}
+async function personaTTS(text,key,P,extraRate){ // 고품질 음성 실패 시 대체 음성 자동 전환
+ const rate=P.rate+extraRate,tries=voiceOK[P.id]?[voiceOK[P.id]]:[[P.v,rate],[P.v,0],[P.fb,rate]];
+ let last;for(const[v,r]of tries){try{const a=await gCall(text,key,v,r,P.pitch);voiceOK[P.id]=[v,r];return a}catch(e){last=e;if(e.status===403||e.status===401||/referer|API key|billing/i.test(e.message))throw e}}
+ throw last;
+}
+
+// 브라우저 음성 (PC 실시간 녹음)
+const canLive=!!navigator.mediaDevices?.getDisplayMedia;let liveAbort=false;
+function loadVoices(){const sel=$('#lvoice');if(!sel)return;const vs=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang));
+ sel.innerHTML=vs.length?vs.map(v=>`<option value="${v.name}">${v.name}${/natural|online/i.test(v.name)?' ★':''}</option>`).join(''):'<option value="">한국어 음성 없음</option>';
+ const best=vs.find(v=>/natural/i.test(v.name));if(best)sel.value=best.name}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function speak(text,o){return new Promise(res=>{const u=new SpeechSynthesisUtterance(text),v=speechSynthesis.getVoices().find(v=>v.name===$('#lvoice').value);
+ if(v)u.voice=v;u.lang='ko-KR';u.rate=Math.max(.3,1+o.rate/100);const g=setTimeout(res,Math.max(8000,text.length*400));u.onend=u.onerror=()=>{clearTimeout(g);res()};speechSynthesis.speak(u)})}
+async function liveRecord(sents,o){
+ let stream;try{stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:{suppressLocalAudioPlayback:false},systemAudio:'include'})}catch{throw new Error('화면 공유가 취소되었습니다.')}
+ const at=stream.getAudioTracks();if(!at.length){stream.getTracks().forEach(t=>t.stop());throw new Error('「시스템 오디오 공유」를 체크하세요.')}
+ const chunks=[],rec=new MediaRecorder(new MediaStream(at));rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const stopped=new Promise(r=>rec.onstop=r);
+ rec.start(250);await sleep(500);
+ try{for(let i=0;i<sents.length&&!liveAbort;i++){setProg((i+.5)/sents.length,`낭독·녹음 중 ${i+1}/${sents.length}`);await speak(sents[i],o);await sleep(o.gap*1000)}}
+ finally{speechSynthesis.cancel();rec.stop();await stopped;stream.getTracks().forEach(t=>t.stop())}
+ return trimSilence(await decode(await new Blob(chunks).arrayBuffer()));
+}
+function trimSilence(x){let a=0,b=x.length-1;const th=.003;while(a<b&&Math.abs(x[a])<th)a++;while(b>a&&Math.abs(x[b])<th)b--;return x.slice(Math.max(0,a-SR*.1|0),Math.min(x.length,b+SR*.2|0))}
+
+/* ════════ 6. 인코딩 ════════ */
+function toI16(f){const o=new Int16Array(f.length);for(let i=0;i<f.length;i++){const v=Math.max(-1,Math.min(1,f[i]));o[i]=v<0?v*32768:v*32767}return o}
+function toWav(f){const d=toI16(f),b=new ArrayBuffer(44+d.length*2),v=new DataView(b);let p=0;const w=s=>{for(const c of s)v.setUint8(p++,c.charCodeAt(0))},u32=x=>{v.setUint32(p,x,true);p+=4},u16=x=>{v.setUint16(p,x,true);p+=2};
+ w('RIFF');u32(36+d.length*2);w('WAVE');w('fmt ');u32(16);u16(1);u16(1);u32(SR);u32(SR*2);u16(2);u16(16);w('data');u32(d.length*2);new Int16Array(b,44).set(d);return new Blob([b],{type:'audio/wav'})}
+function toMp3(f){const enc=new lamejs.Mp3Encoder(1,SR,192),d=toI16(f),out=[];for(let i=0;i<d.length;i+=1152){const m=enc.encodeBuffer(d.subarray(i,i+1152));if(m.length)out.push(new Uint8Array(m))}const e=enc.flush();if(e.length)out.push(new Uint8Array(e));return new Blob(out,{type:'audio/mpeg'})}
+
+/* ════════ 7. 명언 카드 그리기 (영상·이미지 공용) ════════ */
+const PAL={
+ dawn:{n:'새벽',g:['#16223f','#43356a'],fg:'#f6eedd',ac:'#e3b766',sub:'#c9bfe0'},
+ sunset:{n:'노을',g:['#3a1a2f','#c0613b'],fg:'#fff4e6',ac:'#ffd08a',sub:'#f3c7b0'},
+ forest:{n:'숲',g:['#0d241d','#2f5b47'],fg:'#eef4ea',ac:'#cde3a4',sub:'#a9c9b5'},
+ night:{n:'밤',g:['#07090f','#1c2338'],fg:'#e8ecf6',ac:'#9fb6ef',sub:'#8c97b3'},
+ ink:{n:'먹',g:['#141210','#2d2722'],fg:'#f1e9da',ac:'#d6a75c',sub:'#b9ab95'},
+ paper:{n:'한지',g:['#f6f1e6','#e6dcc6'],fg:'#26211b',ac:'#a8402a',sub:'#6d6252'}};
+let pal='dawn';
+function wrapLines(g,text,maxW){const out=[];for(const para of text.split('\n')){let line='';for(const w of para.split(' ')){const t=line?line+' '+w:w;if(g.measureText(t).width>maxW&&line){out.push(line);line=w}else line=t}
+ while(g.measureText(line).width>maxW){let k=line.length;while(k>1&&g.measureText(line.slice(0,k)).width>maxW)k--;out.push(line.slice(0,k));line=line.slice(k)}if(line)out.push(line)}return out}
+async function cardPainter(W,H){
+ let bg=null;const bf=$('#vbg').files[0];if(bf){try{bg=await createImageBitmap(bf)}catch{}}
+ try{await document.fonts.load('700 40px "Noto Serif KR"');await document.fonts.load('700 40px "Noto Sans KR"')}catch{}
+ const cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d'),P=PAL[pal],S=Math.min(W,H)/1080;
+ const q=$('#qText').value.trim()||cur.q,a=$('#qAuth').value.trim()||cur.a,src=(a===cur.a&&cur.s)?` 『${cur.s}』`:'',dt=today().dot;
+ return {cv,g,draw(t,dur,sub,env){
+  if(bg){const r=Math.max(W/bg.width,H/bg.height),bw=bg.width*r,bh=bg.height*r;g.drawImage(bg,(W-bw)/2,(H-bh)/2,bw,bh);g.fillStyle='rgba(10,10,14,.58)';g.fillRect(0,0,W,H)}
+  else{const gr=g.createLinearGradient(0,0,W*.4,H);gr.addColorStop(0,P.g[0]);gr.addColorStop(1,P.g[1]);g.fillStyle=gr;g.fillRect(0,0,W,H)}
+  const fg=bg?'#fff':P.fg,ac=P.ac,sb=bg?'#ddd':P.sub,M=W*.1;
+  g.textBaseline='middle';g.textAlign='left';
+  g.fillStyle=ac;g.font=`700 ${30*S}px "Noto Sans KR",sans-serif`;g.fillText('오늘의 명언',M,H*.09);
+  g.fillStyle=sb;g.font=`500 ${26*S}px "Noto Sans KR",sans-serif`;g.textAlign='right';g.fillText(dt,W-M,H*.09);
+  g.fillStyle=ac;g.fillRect(M,H*.09+30*S,W-2*M,2*S);
+  // 명언 본문 — 길이에 맞춰 글자 크기 자동 조절
+  let fs=(q.length>70?52:q.length>40?62:74)*S*(H<W?.9:1),L,lh;
+  const maxH=H*(sub?.48:.56);
+  for(;;){g.font=`700 ${fs}px "Noto Serif KR",serif`;L=wrapLines(g,q,W-2*M);lh=fs*1.5;if(L.length*lh<=maxH||fs<28*S)break;fs*=.92}
+  const cy=H*(sub?.43:.47),y0=cy-(L.length-1)*lh/2;
+  g.textAlign='center';g.fillStyle=ac;g.globalAlpha=.55;g.font=`700 ${150*S}px "Noto Serif KR",serif`;g.fillText('“',W/2,y0-lh*.95);g.globalAlpha=1;
+  g.font=`700 ${fs}px "Noto Serif KR",serif`;g.fillStyle=fg;L.forEach((l,i)=>g.fillText(l,W/2,y0+i*lh));
+  g.fillStyle=sb;g.font=`500 ${34*S}px "Noto Serif KR",serif`;g.fillText(`— ${a}${src}`,W/2,y0+(L.length-1)*lh+lh*1.1);
+  if(sub){const sf=30*S;g.font=`500 ${sf}px "Noto Sans KR",sans-serif`;const SL=wrapLines(g,sub,W*.82).slice(0,3),sy=H*.8;
+   g.fillStyle='rgba(0,0,0,.35)';const bh=SL.length*sf*1.5+sf;g.fillRect(W*.06,sy-bh/2,W*.88,bh);g.fillStyle='#fff';SL.forEach((l,i)=>g.fillText(l,W/2,sy-(SL.length-1)*sf*.75+i*sf*1.5))}
+  if(dur){const bars=28,bw=W*.5/bars,by=H*.925;g.fillStyle=ac;g.globalAlpha=.8;
+   for(let b=0;b<bars;b++){const e=env?env(b):0,h=(3+e*40*(1-Math.abs(b-bars/2)/bars))*S;g.fillRect(W*.25+b*bw+bw*.25,by-h,bw*.5,h*2)}g.globalAlpha=1;
+   g.fillStyle='rgba(127,127,127,.25)';g.fillRect(M,H*.965,W-2*M,4*S);g.fillStyle=ac;g.fillRect(M,H*.965,(W-2*M)*t/dur,4*S)}
+ }};
+}
+async function resample(x,rate){const oc=new OfflineAudioContext(1,Math.ceil(x.length*rate/SR),rate);const b=oc.createBuffer(1,x.length,SR);b.copyToChannel(x,0);const s=oc.createBufferSource();s.buffer=b;s.connect(oc.destination);s.start();return (await oc.startRendering()).getChannelData(0)}
+async function pickCfg(Enc,list){for(const c of list){try{if((await Enc.isConfigSupported(c)).supported)return c}catch{}}return null}
+async function toMp4(audio){
+ if(!window.VideoEncoder||!window.AudioEncoder)throw new Error('이 브라우저는 영상 인코딩을 지원하지 않습니다. 최신 Chrome·Edge·삼성 인터넷을 사용하세요.');
+ if(!window.Mp4Muxer)throw new Error('MP4 모듈을 불러오지 못했습니다. 새로고침하세요.');
+ const[W,H]=$('#ratio .on').dataset.r.split('x').map(Number),FPS=15,AR=48000;
+ const vc=await pickCfg(VideoEncoder,['avc1.640028','avc1.4d0028','avc1.42002a','vp09.00.40.08'].map(codec=>({codec,width:W,height:H,bitrate:2_000_000,framerate:FPS})));
+ const ac=await pickCfg(AudioEncoder,['mp4a.40.2','opus'].map(codec=>({codec,sampleRate:AR,numberOfChannels:1,bitrate:128000})));
+ if(!vc||!ac)throw new Error('이 기기에서 지원하는 영상/음성 코덱이 없습니다.');
+ const muxer=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),fastStart:'in-memory',video:{codec:vc.codec.startsWith('avc')?'avc':'vp9',width:W,height:H},audio:{codec:ac.codec==='opus'?'opus':'aac',numberOfChannels:1,sampleRate:AR}});
+ let err=null;const ve=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>err=e});ve.configure(vc);
+ const ae=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>err=e});ae.configure(ac);
+ const a48=await resample(audio,AR);for(let i=0;i<a48.length;i+=4800){const d=a48.slice(i,i+4800);ae.encode(new AudioData({format:'f32-planar',sampleRate:AR,numberOfFrames:d.length,numberOfChannels:1,timestamp:Math.round(i/AR*1e6),data:d}))}
+ const C=await cardPainter(W,H),dur=audio.length/SR,N=Math.ceil(dur*FPS),showSub=$('#vsub').checked;
+ const envA=new Float32Array(N);for(let k=0;k<N;k++){const a=k/FPS*SR|0,b=Math.min(audio.length,a+(SR/FPS|0));let m=0;for(let j=a;j<b;j+=8)m=Math.max(m,Math.abs(audio[j]));envA[k]=m}
+ for(let k=0;k<N;k++){if(err)throw err;const t=k/FPS;let sub='';if(showSub&&CAPS.length){const c=CAPS.find(c=>t>=c.a-.15&&t<=c.b+.4);sub=c?c.t:''}
+  C.draw(t,dur,sub,b=>envA[Math.max(0,Math.min(N-1,k-(Math.abs(b-14)|0)))]);
+  const f=new VideoFrame(C.cv,{timestamp:Math.round(t*1e6),duration:Math.round(1e6/FPS)});ve.encode(f,{keyFrame:k%(FPS*2)===0});f.close();
+  if(ve.encodeQueueSize>8)await new Promise(r=>{const w=()=>ve.encodeQueueSize>2?setTimeout(w,5):r();w()});
+  if(k%15===0){setProg(k/N,`영상 인코딩 ${Math.round(k/N*100)}%`);await sleep(0)}}
+ await ve.flush();await ae.flush();if(err)throw err;muxer.finalize();ve.close();ae.close();
+ return new Blob([muxer.target.buffer],{type:'video/mp4'});
+}
+
+/* ════════ 8. UI ════════ */
+function setProg(p,t){$('#bar').style.display='block';$('#bar i').style.width=Math.round(p*100)+'%';msg(t)}
+function msg(t,err){$('#msg').textContent=t||'';$('#msg').className=err?'err':''}
+const FMT={rate:v=>(v>0?'+':'')+v+'%',gap:v=>(+v).toFixed(1)+'초',bgmG:v=>Math.round(v*100)+'%',rev:v=>v==0?'끔':Math.round(v*100)+'%'};
+function syncOut(){for(const k in FMT)$('#'+k+'O').textContent=FMT[k]($('#'+k).value)}
+for(const k in FMT)$('#'+k).addEventListener('input',syncOut);
+const cnt=()=>$('#cnt').textContent=$('#text').value.length.toLocaleString()+'자';$('#text').addEventListener('input',cnt);
+
+// 주제·형태
+$('#themes').innerHTML=THEMES.map(t=>`<button class="chip${t===theme?' on':''}">${t}</button>`).join('');
+$$('#themes .chip').forEach(b=>b.onclick=()=>{theme=b.textContent;$$('#themes .chip').forEach(x=>x.classList.toggle('on',x===b));cur=nextQuote();showQuote();writeScript()});
+$('#form').innerHTML=Object.entries(FORMS).map(([k,f])=>`<option value="${k}">${f.name}</option>`).join('');$('#form').value='explain';
+$('#form').onchange=writeScript;
+$('#refresh').onclick=()=>{cur=nextQuote();showQuote();writeScript()};
+$('#rewrite').onclick=writeScript;
+$('#qText').oninput=()=>{$('#qView').textContent=$('#qText').value};
+$('#qAuth').oninput=()=>{$('#aView').textContent='— '+$('#qAuth').value};
+
+// 페르소나
+function renderPersonas(){$('#personas').innerHTML=PERSONAS.map(p=>`<div class="pc${p===persona?' on':''}" data-id="${p.id}" role="button" tabindex="0"><b>${p.name}</b><small>${p.d}</small><button class="play" data-id="${p.id}" title="목소리 듣기">▶</button></div>`).join('');
+ $$('#personas .pc').forEach(el=>el.onclick=e=>{if(e.target.classList.contains('play'))return;persona=PERSONAS.find(p=>p.id===el.dataset.id);renderPersonas()});
+ $$('#personas .play').forEach(b=>b.onclick=async e=>{e.stopPropagation();const P=PERSONAS.find(p=>p.id===b.dataset.id),key=$('#gkey').value.trim();if(!key){msg('⚠ 목소리 듣기에는 API 키가 필요합니다.',true);return}
+  b.textContent='…';try{const a=await personaTTS('안녕하세요. 오늘의 명언을 전해 드립니다.',key,P,0);playClip(a)}catch(er){msg('⚠ '+er.message,true)}b.textContent='▶'})}
+renderPersonas();
+
+// 분위기
+$('#moods').innerHTML=Object.keys(MOODS).map(k=>`<button class="chip">${k}</button>`).join('');
+$$('#moods .chip').forEach(b=>b.onclick=()=>{$$('#moods .chip').forEach(x=>x.classList.toggle('on',x===b));const m=MOODS[b.textContent];
+ persona=PERSONAS.find(p=>p.id===m.p);renderPersonas();$('#form').value=m.form;$('#bgm').value=m.bgm;$('#intro').value=m.intro;$('#outro').value=m.outro;setPal(m.pal);
+ theme=m.theme;$$('#themes .chip').forEach(x=>x.classList.toggle('on',x.textContent===theme));cur=nextQuote();showQuote();writeScript()});
+
+// 카드 팔레트
+$('#palette').innerHTML=Object.entries(PAL).map(([k,p])=>`<span class="swatch" data-k="${k}" title="${p.n}" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})"></span>`).join('');
+function setPal(k){pal=k;$$('#palette .swatch').forEach(s=>s.classList.toggle('on',s.dataset.k===k));const P=PAL[k],qb=$('.quote');qb.style.background=`linear-gradient(135deg,${P.g[0]},${P.g[1]})`;qb.style.color=P.fg;$('.quote .mark').style.color=P.ac;$('#aView').style.color=P.sub}
+$$('#palette .swatch').forEach(s=>s.onclick=()=>setPal(s.dataset.k));
+
+// 엔진 탭
+let engine='google',url=null;
+if(!canLive){$('#tabs [data-e=live] small').textContent='PC 전용';$('#eng-live').innerHTML='<div class="note"><b>스마트폰 미지원</b> — 성우 음성 또는 내 목소리 녹음을 이용하세요.</div>'}
+$$('#tabs button').forEach(b=>b.onclick=()=>{engine=b.dataset.e;$$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));['google','live','mic'].forEach(e=>$('#eng-'+e).classList.toggle('hide',e!==engine));$('#go').disabled=$('#preview').disabled=engine==='live'&&!canLive});
+const k0=store.get('gtts_key');if(k0){$('#gkey').value=k0;$('#gsave').checked=true}
+$('#gsave').onchange=()=>store.set('gtts_key',$('#gsave').checked?$('#gkey').value:null);
+$('#gkey').oninput=()=>$('#gsave').checked&&store.set('gtts_key',$('#gkey').value);
+$$('input[name=fmt]').forEach(r=>r.onchange=()=>$('#vopt').classList.toggle('hide',$('input[name=fmt]:checked').value!=='mp4'));
+$$('#ratio .chip').forEach(b=>b.onclick=()=>$$('#ratio .chip').forEach(x=>x.classList.toggle('on',x===b)));
+
+// 마이크
+let micBlob=null,micRec=null;
+$('#mic').onclick=async()=>{if(micRec&&micRec.state==='recording'){micRec.stop();return}
+ try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}}),ch=[];micRec=new MediaRecorder(st);micRec.ondataavailable=e=>e.data.size&&ch.push(e.data);
+  micRec.onstop=()=>{st.getTracks().forEach(t=>t.stop());micBlob=new Blob(ch,{type:micRec.mimeType});$('#micPlay').src=URL.createObjectURL(micBlob);$('#micPlay').classList.remove('hide');$('#mic').textContent='● 다시 녹음';$('#mic').classList.remove('on');msg('녹음 완료 → [변환 및 저장]')};
+  micRec.start();$('#mic').textContent='■ 녹음 중지';$('#mic').classList.add('on');msg('녹음 중… 원고를 읽어 주세요')}catch{msg('⚠ 마이크 권한이 필요합니다.',true)}};
+
+// 미리듣기
+let pvCtx,pvSrc;
+function playClip(c){pvCtx=pvCtx||new AudioContext({sampleRate:SR});try{pvSrc&&pvSrc.stop()}catch{}const b=pvCtx.createBuffer(1,c.length,SR);b.copyToChannel(c,0);pvSrc=pvCtx.createBufferSource();pvSrc.buffer=b;pvSrc.connect(pvCtx.destination);pvSrc.start()}
+$$('.pv button').forEach(b=>b.onclick=()=>{const p=b.dataset.p;if(p==='stop'){try{pvSrc&&pvSrc.stop()}catch{}return}playClip(BGM[p]?BGM[p](12):FX[p]())});
+$('#stop').onclick=()=>{liveAbort=true;speechSynthesis.cancel();msg('중단 중…')};
+
+function stamp(ext){const d=new Date(),z=n=>String(n).padStart(2,'0');return `명언_${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}.${ext}`}
+function showResult(blob,ext){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);const name=stamp(ext);
+ $('#player').classList.toggle('hide',!['mp3','wav'].includes(ext));$('#vplayer').classList.toggle('hide',ext!=='mp4');$('#iplayer').classList.toggle('hide',ext!=='png');
+ ({mp4:$('#vplayer'),png:$('#iplayer')}[ext]||$('#player')).src=url;$('#dl').href=url;$('#dl').download=name;$('#dl').textContent=`⬇ ${name}`;$('#result').style.display='block'}
+
+
+// 음성 합성 캐시: 같은 원고·성우·속도면 재합성하지 않음 (API 사용량 절약)
+const segCache=new Map();
+async function makeAudio(o){
+ const s=splitSent($('#text').value);if(!s.length&&engine!=='mic')throw new Error('원고가 비어 있습니다.');
+ if(engine==='google'){const key=$('#gkey').value.trim();if(!key)throw new Error('API 키를 입력하세요.');
+  const segs=[];for(let i=0;i<s.length;i++){const ck=persona.id+'|'+o.rate+'|'+s[i];
+   if(!segCache.has(ck)){setProg(i/s.length,`${persona.name} 낭독 합성 ${i+1}/${s.length}`);segCache.set(ck,await personaTTS(s[i],key,persona,o.rate))}segs.push(segCache.get(ck))}
+  setProg(.95,'BGM 믹싱 중…');return build(segs,o,s)}
+ if(engine==='mic'){if(!micBlob)throw new Error('먼저 녹음하세요.');setProg(.5,'BGM 믹싱 중…');return build([trimSilence(await decode(await micBlob.arrayBuffer()))],o)}
+ const lk='live|'+$('#text').value;if(!segCache.has(lk)){$('#stop').style.display='block';segCache.set(lk,await liveRecord(s,o))}
+ setProg(.95,'BGM 믹싱 중…');return build([segCache.get(lk)],o);
+}
+let lastAudio=null,lastSig='';
+const sig=o=>JSON.stringify([engine,persona.id,$('#text').value,o.gap,o.intro,o.outro,o.bgm,o.bgmG,o.rev,o.rate,engine==='mic'?micBlob?.size:0]);
+async function run(isPreview){
+ const o=opts(),btns=[$('#go'),$('#preview')];btns.forEach(b=>b.disabled=true);$('#result').style.display='none';liveAbort=false;
+ try{
+  let audio;if(lastAudio&&lastSig===sig(o))audio=lastAudio;else{audio=await makeAudio(o);lastAudio=audio;lastSig=sig(o)}
+  if(isPreview){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(toWav(audio));
+   $('#player').classList.remove('hide');$('#vplayer').classList.add('hide');$('#iplayer').classList.add('hide');$('#dl').classList.add('hide');$('#pvLabel').classList.remove('hide');
+   $('#player').src=url;$('#result').style.display='block';msg(`🎧 미리듣기 · ${(audio.length/SR).toFixed(1)}초`);try{await $('#player').play()}catch{}return}
+  setProg(1,'파일 생성 중…');await sleep(30);
+  let blob,ext=o.fmt;
+  if(ext==='mp4')blob=await toMp4(audio);else if(ext==='mp3'&&window.lamejs)blob=toMp3(audio);else{blob=toWav(audio);ext='wav'}
+  $('#dl').classList.remove('hide');$('#pvLabel').classList.add('hide');showResult(blob,ext);msg(`✅ 완료 · ${(audio.length/SR).toFixed(1)}초 · ${(blob.size/1024).toFixed(0)}KB`);
+ }catch(e){msg('⚠ '+(e.message||e),true)}
+ finally{btns.forEach(b=>b.disabled=engine==='live'&&!canLive);$('#stop').style.display='none';$('#bar').style.display='none'}
+}
+$('#go').onclick=()=>run(false);
+$('#preview').onclick=()=>run(true);
+$('#png').onclick=async()=>{$('#dl').classList.remove('hide');$('#pvLabel').classList.add('hide');const[W,H]=$('#ratio .on').dataset.r.split('x').map(Number);const C=await cardPainter(W,H);C.draw(0,0,'');
+ C.cv.toBlob(b=>{showResult(b,'png');msg('✅ 명언 카드 이미지 생성 완료')},'image/png')};
+
+// 시작: 오늘 날짜 기준 명언
+cur=nextQuote(true);showQuote();setPal('dawn');writeScript();syncOut();
+</script>
+</body>
+</html>
