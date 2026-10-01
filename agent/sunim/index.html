@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TTS 에이전트 · 사찰 효과음</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<style>
+:root{--bg:#f4f0e6;--card:#fffdf8;--ink:#1f1c18;--sub:#6b645a;--line:#e2dacb;--acc:#a8402a;--acc2:#2f6b5a;--soft:#f1e9da;--shadow:0 1px 2px rgba(60,40,20,.06),0 6px 24px rgba(60,40,20,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#171512;--card:#211e1a;--ink:#ece6da;--sub:#a59c8e;--line:#363029;--acc:#d9694f;--acc2:#5fa58c;--soft:#2a2620;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans KR",system-ui,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 16px 60px}
+header{display:flex;align-items:flex-end;gap:14px;margin-bottom:22px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+header .seal{width:46px;height:46px;border-radius:10px;background:var(--acc);color:#fff;display:grid;place-items:center;font:700 22px "Noto Serif KR",serif;flex:none}
+h1{font:700 26px/1.2 "Noto Serif KR",serif;margin:0}
+header p{margin:2px 0 0;color:var(--sub);font-size:13.5px}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.grid>div,.row>div,.tabs button{min-width:0}
+select{text-overflow:ellipsis}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.card+.card{margin-top:18px}
+.step{font:700 12px "Noto Sans KR";letter-spacing:.08em;color:var(--acc);margin-bottom:6px}
+h2{font:700 17px "Noto Serif KR",serif;margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--sub);margin:12px 0 5px;font-weight:500}
+textarea,input[type=text],input[type=password],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:190px;resize:vertical}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--acc2);outline-offset:-1px}
+.tabs{display:flex;gap:6px;background:var(--soft);padding:4px;border-radius:11px;margin-bottom:12px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--sub);padding:9px 6px;border-radius:8px;font:500 13px "Noto Sans KR";cursor:pointer;line-height:1.3}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow);font-weight:700}
+.tabs small{display:block;font-weight:400;font-size:11px;opacity:.8}
+.note{font-size:12.5px;color:var(--sub);background:var(--soft);border-radius:9px;padding:9px 11px;margin-top:10px}
+.note b{color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rng{display:flex;align-items:center;gap:10px}
+.rng input{flex:1;accent-color:var(--acc)}
+.rng input{min-width:0}
+.rng output{min-width:44px;font-size:12px;text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 11px;border-radius:99px;font:500 13px "Noto Sans KR";cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px;color:var(--ink);cursor:pointer}
+.chk input{accent-color:var(--acc);width:17px;height:17px}
+.pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pv button{border:1px dashed var(--line);background:transparent;color:var(--sub);padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer}
+.pv button:hover{color:var(--acc);border-color:var(--acc)}
+.go{width:100%;margin-top:16px;padding:14px;border:0;border-radius:11px;background:var(--acc);color:#fff;font:700 16px "Noto Sans KR";cursor:pointer}
+.go:disabled{opacity:.55;cursor:wait}
+.stop{display:none;width:100%;margin-top:8px;padding:10px;border:1px solid var(--acc);border-radius:11px;background:transparent;color:var(--acc);font:700 14px "Noto Sans KR";cursor:pointer}
+.bar{height:6px;background:var(--soft);border-radius:9px;overflow:hidden;margin-top:14px;display:none}
+.bar i{display:block;height:100%;width:0;background:var(--acc2);transition:width .25s}
+#msg{font-size:13.5px;margin-top:8px;min-height:20px}
+#msg.err{color:var(--acc)}
+#result{display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+audio{width:100%}
+.dl{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:10px 16px;border-radius:9px;background:var(--acc2);color:#fff;text-decoration:none;font-weight:700}
+.hide{display:none!important}
+.fmt{display:flex;gap:16px;margin-top:6px}
+.fmt label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="seal">卍</div><div><h1>TTS 에이전트 · 사찰 효과음</h1><p>텍스트 → 음성 파일(MP3·WAV) 변환 · 목탁 / 범종 / 싱잉볼 / 풍경 / 배경음 / 법당 잔향 믹싱</p></div></header>
+
+<div class="grid">
+<div>
+ <div class="card">
+  <div class="step">STEP 1</div><h2>음성 엔진 · 원고</h2>
+  <div class="tabs" id="tabs">
+   <button data-e="google" class="on">Google 신경망<small>API 키 · 고음질</small></button>
+   <button data-e="live">브라우저 음성<small>무료 · 실시간 녹음</small></button>
+   <button data-e="file">음성 파일<small>업로드 후 효과만</small></button>
+  </div>
+
+  <div id="eng-google">
+   <label>Google Cloud API 키</label>
+   <input type="password" id="gkey" placeholder="AIza...">
+   <label class="chk" style="margin-top:8px"><input type="checkbox" id="gsave">이 브라우저에 키 저장</label>
+   <label>목소리</label>
+   <select id="gvoice">
+    <option value="ko-KR-Neural2-A">Neural2-A · 여성</option>
+    <option value="ko-KR-Neural2-B">Neural2-B · 여성</option>
+    <option value="ko-KR-Neural2-C">Neural2-C · 남성</option>
+    <option value="ko-KR-Wavenet-A">Wavenet-A · 여성</option>
+    <option value="ko-KR-Wavenet-B">Wavenet-B · 여성</option>
+    <option value="ko-KR-Wavenet-C">Wavenet-C · 남성</option>
+    <option value="ko-KR-Wavenet-D">Wavenet-D · 남성</option>
+    <option value="ko-KR-Standard-C">Standard-C · 남성</option>
+   </select>
+   <div class="note">키 발급: Google Cloud 콘솔 → <b>Text-to-Speech API 사용 설정</b> → 사용자 인증 정보 → API 키. 월 무료 한도(신경망 100만 자) 내 과금 없음.</div>
+  </div>
+
+  <div id="eng-live" class="hide">
+   <label>목소리 (PC에 설치된 한국어 음성)</label>
+   <select id="lvoice"></select>
+   <div class="note"><b>녹음 방식:</b> 변환 시작 → 공유 창에서 <b>「전체 화면」 + 「시스템 오디오 공유」 체크</b> → 재생되는 소리를 그대로 녹음. Windows Chrome·Edge 권장(Edge는 고품질 ‘Natural’ 음성 제공). 녹음 중 다른 소리 재생 금지. 법당 잔향은 효과음에만 적용.</div>
+  </div>
+
+  <div id="eng-file" class="hide">
+   <label>음성 파일 (mp3·wav·m4a 등)</label>
+   <input type="file" id="vfile" accept="audio/*">
+   <div class="note">직접 녹음했거나 다른 TTS로 만든 음성에 효과를 입힘. ‘문장 사이 목탁’은 음성의 쉼 구간을 자동 감지해 배치.</div>
+  </div>
+
+  <div id="textbox">
+   <label>원고 <span id="cnt" style="float:right"></span></label>
+   <textarea id="text" placeholder="문장 단위(. ! ? 또는 줄바꿈)로 나누어 합성합니다.">나무아미타불. 오늘 하루도 평안하시기를 바랍니다.
+모든 생명이 고통에서 벗어나 행복하기를.</textarea>
+  </div>
+  <div class="row">
+   <div><label>속도</label><div class="rng"><input type="range" id="rate" min="-50" max="50" step="5" value="0"><output id="rateO"></output></div></div>
+   <div><label>음높이</label><div class="rng"><input type="range" id="pitch" min="-10" max="10" step="1" value="0"><output id="pitchO"></output></div></div>
+  </div>
+ </div>
+</div>
+
+<div>
+ <div class="card">
+  <div class="step">STEP 2</div><h2>효과음</h2>
+  <label>프리셋</label>
+  <div class="chips" id="presets"></div>
+
+  <label>목탁</label>
+  <select id="moktak">
+   <option value="none">없음</option><option value="ends">시작·끝 3타</option>
+   <option value="between">문장 사이 1타</option><option value="beat">염불 반주 (일정 박자)</option>
+  </select>
+  <div class="row">
+   <div><label>반주 박자</label><div class="rng"><input type="range" id="bpm" min="40" max="140" step="2" value="72"><output id="bpmO"></output></div></div>
+   <div><label>문장 간격</label><div class="rng"><input type="range" id="gap" min="0.3" max="3" step="0.1" value="0.9"><output id="gapO"></output></div></div>
+  </div>
+  <div class="row">
+   <div><label>도입</label><select id="intro"><option value="none">없음</option><option value="bell">범종 1타</option><option value="roll">목탁 또르르</option><option value="bowl">싱잉볼</option></select></div>
+   <div><label>마무리</label><select id="outro"><option value="none">없음</option><option value="bell">범종 1타</option><option value="three">목탁 3타</option><option value="bowl">싱잉볼</option></select></div>
+  </div>
+  <label class="chk"><input type="checkbox" id="chime">풍경 소리 (처마 끝 바람종)</label>
+  <label>배경음</label>
+  <select id="amb"><option value="none">없음</option><option value="stream">계곡 물소리</option><option value="rain">빗소리</option><option value="wind">산사 바람</option></select>
+  <div class="row">
+   <div><label>배경음 크기</label><div class="rng"><input type="range" id="ambG" min="0" max="1" step="0.05" value="0.5"><output id="ambGO"></output></div></div>
+   <div><label>효과음 크기</label><div class="rng"><input type="range" id="fxG" min="0" max="1.5" step="0.05" value="0.8"><output id="fxGO"></output></div></div>
+  </div>
+  <label>법당 잔향</label>
+  <div class="rng"><input type="range" id="rev" min="0" max="1" step="0.05" value="0"><output id="revO"></output></div>
+  <div class="pv"><span style="font-size:12px;color:var(--sub);align-self:center">미리듣기</span>
+   <button data-p="moktak">목탁</button><button data-p="roll">또르르</button><button data-p="bell">범종</button><button data-p="bowl">싱잉볼</button><button data-p="chime">풍경</button>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="step">STEP 3</div><h2>변환 · 저장</h2>
+  <div class="fmt"><label><input type="radio" name="fmt" value="mp3" checked>MP3</label><label><input type="radio" name="fmt" value="wav">WAV</label></div>
+  <button class="go" id="go">🎙 변환 및 저장</button>
+  <button class="stop" id="stop">■ 녹음 중단</button>
+  <div class="bar" id="bar"><i></i></div>
+  <div id="msg"></div>
+  <div id="result"><audio id="player" controls></audio><a class="dl" id="dl">⬇ 파일 다운로드</a></div>
+ </div>
+</div>
+</div>
+</div>
+
+<script>
+"use strict";
+const SR = 24000;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const store = {get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch{}}};
+
+/* ───────── 1. 효과음 합성 (음원 파일 없음) ───────── */
+const gauss = () => (Math.random()+Math.random()+Math.random()+Math.random()-2)*1.2;
+function norm(y, peak=1){let p=1e-9;for(let i=0;i<y.length;i++){const a=Math.abs(y[i]);if(a>p)p=a}const k=peak/p;for(let i=0;i<y.length;i++)y[i]*=k;return y}
+function lp(x,a){const y=new Float32Array(x.length);let s=0;for(let i=0;i<x.length;i++){s+=a*(x[i]-s);y[i]=s}return y}
+function noise(n){const w=new Float32Array(n);for(let i=0;i<n;i++)w[i]=gauss();return w}
+
+const FX = {
+ moktak(str=1){ // 속 빈 나무 공명체: 타격 잡음 + 공명 모드
+  const p=1+(Math.random()-.5)*.02, n=SR*.45|0, y=new Float32Array(n);
+  const modes=[[430,.075,1],[980,.035,.45],[1820,.018,.25],[2650,.010,.12]];
+  for(let i=0;i<n;i++){const t=i/SR;let v=0;
+   for(const[f,tau,a] of modes)v+=a*Math.sin(2*Math.PI*f*p*t)*Math.exp(-t/tau);
+   v+=gauss()*Math.exp(-t/.002)*.35; y[i]=v*Math.min(1,t/.0008)}
+  return norm(y,.9*str);
+ },
+ bowl(base=220,dur=7){ // 싱잉볼: 비조화 배음 + 맥놀이
+  const n=SR*dur|0,y=new Float32Array(n),P=[[1,1,5.5],[2.76,.55,3.8],[5.4,.3,2.4],[8.93,.15,1.5]];
+  for(let i=0;i<n;i++){const t=i/SR;let v=0;
+   for(const[r,a,tau] of P){const f=base*r;v+=a*(Math.sin(2*Math.PI*f*t)+.6*Math.sin(2*Math.PI*(f+1.3)*t))*Math.exp(-t/tau)}
+   y[i]=v*Math.min(1,t/.01)}
+  return norm(y,.7);
+ },
+ bell(dur=10){ // 범종: 저음 + 맥놀이(웅~웅) + 긴 여운
+  const n=SR*dur|0,y=new Float32Array(n),b=72,P=[[2,.5,4],[2.92,.35,2.5],[4.2,.25,1.6],[5.4,.15,1]];
+  for(let i=0;i<n;i++){const t=i/SR;
+   let v=(Math.sin(2*Math.PI*b*t)+Math.sin(2*Math.PI*(b+.9)*t))*Math.exp(-t/6);
+   for(const[r,a,tau] of P)v+=a*Math.sin(2*Math.PI*b*r*t)*Math.exp(-t/tau);
+   v+=gauss()*Math.exp(-t/.01)*.3; y[i]=v*Math.min(1,t/.005)}
+  return norm(y,.85);
+ },
+ chime(){ // 풍경
+  const n=SR*2.5|0,y=new Float32Array(n),f0=[1320,1480,1760,1980][Math.random()*4|0];
+  for(let i=0;i<n;i++){const t=i/SR;let v=0;
+   for(const[r,a,tau] of [[1,1,.9],[2.71,.4,.45],[5.1,.2,.2]])v+=a*Math.sin(2*Math.PI*f0*r*t)*Math.exp(-t/tau);
+   y[i]=v*Math.min(1,t/.002)}
+  return norm(y,.35);
+ },
+ roll(){ // 또르르: 점점 빨라지는 연타
+  const ev=[];let t=0,g=.28;for(let i=0;i<9;i++){ev.push({clip:FX.moktak(.6+.04*i),at:t,gain:1});t+=g;g*=.78}
+  return mixEvents(ev,0);
+ },
+ three(){return mixEvents([0,.6,1.2].map(at=>({clip:FX.moktak(),at,gain:1})),0)},
+ ambience(kind,sec){
+  const n=Math.max(0,SR*sec|0); if(!n||kind==='none')return new Float32Array(n);
+  const w=noise(n); let y=new Float32Array(n);
+  if(kind==='stream'){const a=lp(w,.25),b=lp(w,.02),m=lp(noise(n),.0003);for(let i=0;i<n;i++)y[i]=(a[i]-b[i])*(.6+.4*m[i]*8)}
+  else if(kind==='rain'){const a=lp(w,.15);let d=0;for(let i=0;i<n;i++){if(Math.random()>.9993)d+=Math.random()*1.5;d*=.967;y[i]=w[i]-a[i]+d*gauss()}}
+  else if(kind==='wind'){const a=lp(w,.01);for(let i=0;i<n;i++)y[i]=a[i]*(.5+.5*Math.sin(2*Math.PI*.08*i/SR))*4}
+  return norm(y,.5);
+ },
+ ir(amount){ // 법당 잔향 임펄스 응답
+  const n=SR*(.4+2*amount)|0,x=new Float32Array(n),tau=.15+.6*amount;
+  for(let i=0;i<n;i++)x[i]=gauss()*Math.exp(-i/SR/tau);
+  const y=lp(x,.3);y[0]=0;let e=0;for(const v of y)e+=v*v;e=Math.sqrt(e)+1e-9;for(let i=0;i<n;i++)y[i]/=e;return y;
+ }
+};
+const INTRO={bell:[FX.bell,3.0],roll:[FX.roll,2.4],bowl:[FX.bowl,2.5]};
+const OUTRO={bell:FX.bell,three:FX.three,bowl:FX.bowl};
+
+function mixEvents(ev,minSec){
+ let n=SR*minSec|0;for(const e of ev)n=Math.max(n,(e.at*SR|0)+e.clip.length);
+ const out=new Float32Array(n);
+ for(const e of ev){const s=e.at*SR|0;for(let i=0;i<e.clip.length;i++)out[s+i]+=e.clip[i]*e.gain}
+ return out;
+}
+
+/* ───────── 2. 트랙 조립 (사전 렌더 방식) ───────── */
+function opts(){
+ const v=id=>$('#'+id).value;
+ return {moktak:v('moktak'),bpm:+v('bpm'),gap:+v('gap'),intro:v('intro'),outro:v('outro'),chime:$('#chime').checked,
+  amb:v('amb'),ambG:+v('ambG'),fxG:+v('fxG'),rev:+v('rev'),rate:+v('rate'),pitch:+v('pitch'),fmt:$('input[name=fmt]:checked').value};
+}
+
+// segs: 문장별 음성 배열 / pauses: (파일 모드) 쉼 구간 중심 시각 목록
+async function build(segs,o,pauses=null){
+ const V=[],F=[];let c=0;
+ if(o.intro!=='none'){const[f,d]=INTRO[o.intro];F.push({clip:f(),at:0,gain:1});c=d}
+ if(o.moktak==='ends'&&o.intro!=='roll'){for(let k=0;k<3;k++)F.push({clip:FX.moktak(),at:c+k*.6,gain:1});c+=2}
+ const s0=c;
+ segs.forEach((seg,i)=>{
+  V.push({clip:seg,at:c,gain:1});
+  if(pauses&&o.moktak==='between')pauses.forEach(p=>F.push({clip:FX.moktak(),at:c+p,gain:1}));
+  c+=seg.length/SR;
+  if(i<segs.length-1){if(o.moktak==='between'&&!pauses)F.push({clip:FX.moktak(),at:c+o.gap*.35,gain:1});c+=o.gap}
+ });
+ const s1=c;
+ if(o.moktak==='beat'){const b=60/Math.max(o.bpm,20);let k=0;for(let t=s0;t<s1;t+=b,k++)F.push({clip:FX.moktak(k%4?.75:1),at:t,gain:.7})}
+ c+=.8;
+ if(o.moktak==='ends'&&o.outro!=='three'){for(let k=0;k<3;k++)F.push({clip:FX.moktak(),at:c+k*.6,gain:1});c+=2}
+ if(o.outro!=='none'){const cl=OUTRO[o.outro]();F.push({clip:cl,at:c,gain:1});c+=cl.length/SR}
+ const total=c+.5;
+ if(o.chime){let t=1+Math.random()*3;while(t<total-2){F.push({clip:FX.chime(),at:t,gain:1});t+=6+Math.random()*6}}
+
+ const voice=mixEvents(V,total),fx=mixEvents(F,total),n=Math.max(voice.length,fx.length);
+ const bus=new Float32Array(n);for(let i=0;i<n;i++)bus[i]=(voice[i]||0)+(fx[i]||0)*o.fxG;
+ return await render(bus,o);
+}
+
+async function render(bus,o){ // 잔향 + 배경음 → 최종 정규화
+ const tail=o.rev>0?(SR*(.4+2*o.rev)|0):0,N=bus.length+tail;
+ const oc=new OfflineAudioContext(1,N,SR);
+ const src=oc.createBufferSource();src.buffer=oc.createBuffer(1,bus.length,SR);src.buffer.copyToChannel(bus,0);
+ src.connect(oc.destination);
+ if(o.rev>0){const cv=oc.createConvolver();cv.normalize=false;const ir=FX.ir(o.rev),ib=oc.createBuffer(1,ir.length,SR);ib.copyToChannel(ir,0);cv.buffer=ib;
+  const wg=oc.createGain();wg.gain.value=.6*o.rev;src.connect(cv).connect(wg).connect(oc.destination)}
+ if(o.amb!=='none'&&o.ambG>0){const bg=FX.ambience(o.amb,N/SR),f=Math.min(bg.length/4|0,SR*2);
+  for(let i=0;i<f;i++){bg[i]*=i/f;bg[bg.length-1-i]*=i/f}
+  const ab=oc.createBuffer(1,bg.length,SR);ab.copyToChannel(bg,0);const as=oc.createBufferSource();as.buffer=ab;
+  const ag=oc.createGain();ag.gain.value=o.ambG*.4;as.connect(ag).connect(oc.destination);as.start()}
+ src.start();
+ const out=await oc.startRendering();
+ return norm(out.getChannelData(0).slice(),.89);
+}
+
+/* ───────── 3. 음성 엔진 ───────── */
+const splitSent=t=>t.trim().split(/(?<=[.!?。…])\s+|\n+/).map(s=>s.trim()).filter(Boolean);
+async function decode(buf){const oc=new OfflineAudioContext(1,SR,SR);const ab=await oc.decodeAudioData(buf);return ab.getChannelData(0).slice()}
+
+async function googleTTS(text,key,voice,o){
+ const r=await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key='+encodeURIComponent(key),{
+  method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({input:{text},voice:{languageCode:'ko-KR',name:voice},
+   audioConfig:{audioEncoding:'LINEAR16',sampleRateHertz:SR,speakingRate:1+o.rate/100,pitch:o.pitch}})});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(j.error?.message||('HTTP '+r.status));
+ const bin=atob(j.audioContent),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+ return decode(u.buffer);
+}
+
+function findPauses(x){ // 파일 모드: 0.35초 이상 쉼 구간 감지
+ const W=SR*.02|0,rms=[];let mx=0;
+ for(let i=0;i+W<=x.length;i+=W){let s=0;for(let j=i;j<i+W;j++)s+=x[j]*x[j];const r=Math.sqrt(s/W);rms.push(r);if(r>mx)mx=r}
+ const th=mx*.06,out=[];let st=-1;
+ const first=rms.findIndex(r=>r>th),last=rms.length-1-[...rms].reverse().findIndex(r=>r>th);
+ for(let k=first;k<=last;k++){if(rms[k]<th){if(st<0)st=k}else{if(st>=0&&(k-st)*.02>=.35)out.push((st+Math.min(7,(k-st)*.35))*.02);st=-1}}
+ return out;
+}
+
+// 브라우저 음성: 실시간 재생 + 시스템 오디오 녹음
+let liveAbort=false;
+function loadVoices(){
+ const sel=$('#lvoice'),vs=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang));
+ sel.innerHTML=vs.length?vs.map(v=>`<option value="${v.name}">${v.name}${/natural|online/i.test(v.name)?' ★':''}</option>`).join(''):'<option value="">한국어 음성 없음 (Windows 설정 → 언어 → 한국어 음성 설치)</option>';
+ const best=vs.find(v=>/natural/i.test(v.name));if(best)sel.value=best.name;
+}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+
+function speak(text,o){return new Promise(res=>{
+ const u=new SpeechSynthesisUtterance(text),v=speechSynthesis.getVoices().find(v=>v.name===$('#lvoice').value);
+ if(v)u.voice=v;u.lang='ko-KR';u.rate=Math.max(.3,1+o.rate/100);u.pitch=Math.min(2,Math.max(0,1+o.pitch/12));
+ const guard=setTimeout(res,Math.max(8000,text.length*400));
+ u.onend=u.onerror=()=>{clearTimeout(guard);res()};speechSynthesis.speak(u)})}
+
+async function liveRecord(sents,o){
+ let stream;
+ try{stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:{suppressLocalAudioPlayback:false},systemAudio:'include'})}
+ catch{throw new Error('화면 공유가 취소되었습니다.')}
+ const at=stream.getAudioTracks();
+ if(!at.length){stream.getTracks().forEach(t=>t.stop());throw new Error('오디오가 공유되지 않았습니다. 공유 창에서 「시스템 오디오 공유」를 체크하세요.')}
+ const chunks=[],rec=new MediaRecorder(new MediaStream(at));rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+ const stopped=new Promise(r=>rec.onstop=r);
+ const ac=new AudioContext({sampleRate:SR}),fxOut=ac.createGain();fxOut.gain.value=o.fxG;fxOut.connect(ac.destination);
+ if(o.rev>0){const cv=ac.createConvolver();cv.normalize=false;const ir=FX.ir(o.rev),ib=ac.createBuffer(1,ir.length,SR);ib.copyToChannel(ir,0);cv.buffer=ib;const wg=ac.createGain();wg.gain.value=.6*o.rev;fxOut.connect(cv).connect(wg).connect(ac.destination)}
+ const play=(clip,gain=1)=>{const b=ac.createBuffer(1,clip.length,SR);b.copyToChannel(clip,0);const s=ac.createBufferSource(),g=ac.createGain();g.gain.value=gain;s.buffer=b;s.connect(g).connect(fxOut);s.start();return clip.length/SR};
+ let ambSrc=null,timer=null,chimeT=null;
+ rec.start(250);await sleep(600);
+ try{
+  if(o.amb!=='none'&&o.ambG>0){const bg=FX.ambience(o.amb,20),b=ac.createBuffer(1,bg.length,SR);b.copyToChannel(bg,0);ambSrc=ac.createBufferSource();ambSrc.buffer=b;ambSrc.loop=true;const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(o.ambG*.4,ac.currentTime+2);ambSrc.connect(g).connect(ac.destination);ambSrc.start();ambSrc._g=g}
+  if(o.chime){const ring=()=>{play(FX.chime());chimeT=setTimeout(ring,6000+Math.random()*6000)};chimeT=setTimeout(ring,1000+Math.random()*3000)}
+  if(o.intro!=='none'){const[f,d]=INTRO[o.intro];play(f());await sleep(d*1000)}
+  if(o.moktak==='ends'&&o.intro!=='roll'){for(let k=0;k<3;k++){play(FX.moktak());await sleep(600)}await sleep(200)}
+  if(o.moktak==='beat'){let k=0;const tick=()=>{play(FX.moktak(k++%4?.75:1),.7)};tick();timer=setInterval(tick,60000/o.bpm)}
+  for(let i=0;i<sents.length&&!liveAbort;i++){
+   setProg((i+.5)/sents.length,`낭독·녹음 중 ${i+1}/${sents.length}`);
+   await speak(sents[i],o);
+   if(i<sents.length-1){if(o.moktak==='between'){await sleep(o.gap*350);play(FX.moktak());await sleep(o.gap*650)}else await sleep(o.gap*1000)}
+  }
+  clearInterval(timer);await sleep(800);
+  if(!liveAbort){
+   if(o.moktak==='ends'&&o.outro!=='three'){for(let k=0;k<3;k++){play(FX.moktak());await sleep(600)}await sleep(200)}
+   if(o.outro!=='none'){const d=play(OUTRO[o.outro]());await sleep(d*1000)}
+  }
+  if(ambSrc){ambSrc._g.gain.linearRampToValueAtTime(0,ac.currentTime+1.5);await sleep(1600)}
+  await sleep(400);
+ }finally{
+  clearInterval(timer);clearTimeout(chimeT);speechSynthesis.cancel();
+  rec.stop();await stopped;stream.getTracks().forEach(t=>t.stop());ac.close();
+ }
+ const raw=await decode(await new Blob(chunks).arrayBuffer());
+ return norm(trimSilence(raw),.89);
+}
+function trimSilence(x){let a=0,b=x.length-1;const th=.003;while(a<b&&Math.abs(x[a])<th)a++;while(b>a&&Math.abs(x[b])<th)b--;return x.slice(Math.max(0,a-SR*.2|0),Math.min(x.length,b+SR*.3|0))}
+
+/* ───────── 4. 인코딩 ───────── */
+function toI16(f){const o=new Int16Array(f.length);for(let i=0;i<f.length;i++){const v=Math.max(-1,Math.min(1,f[i]));o[i]=v<0?v*32768:v*32767}return o}
+function toWav(f){
+ const d=toI16(f),b=new ArrayBuffer(44+d.length*2),v=new DataView(b);let p=0;
+ const w=s=>{for(const c of s)v.setUint8(p++,c.charCodeAt(0))},u32=x=>{v.setUint32(p,x,true);p+=4},u16=x=>{v.setUint16(p,x,true);p+=2};
+ w('RIFF');u32(36+d.length*2);w('WAVE');w('fmt ');u32(16);u16(1);u16(1);u32(SR);u32(SR*2);u16(2);u16(16);w('data');u32(d.length*2);
+ new Int16Array(b,44).set(d);return new Blob([b],{type:'audio/wav'});
+}
+function toMp3(f){
+ const enc=new lamejs.Mp3Encoder(1,SR,192),d=toI16(f),out=[];
+ for(let i=0;i<d.length;i+=1152){const m=enc.encodeBuffer(d.subarray(i,i+1152));if(m.length)out.push(new Uint8Array(m))}
+ const e=enc.flush();if(e.length)out.push(new Uint8Array(e));return new Blob(out,{type:'audio/mpeg'});
+}
+
+/* ───────── 5. UI ───────── */
+let engine='google',url=null;
+const PRESETS={
+ '🪷 염불·독경':{moktak:'beat',bpm:72,intro:'roll',outro:'bell',chime:false,amb:'none',rev:.55,rate:-10},
+ '🧘 명상 안내':{moktak:'none',intro:'bowl',outro:'bowl',chime:true,amb:'stream',rev:.35,rate:-15},
+ '📿 법문 낭독':{moktak:'between',intro:'bell',outro:'three',chime:false,amb:'wind',rev:.45,rate:-5},
+ '📢 일반 안내':{moktak:'none',intro:'none',outro:'none',chime:false,amb:'none',rev:0,rate:0}};
+$('#presets').innerHTML=Object.keys(PRESETS).map(k=>`<button class="chip">${k}</button>`).join('');
+$$('#presets .chip').forEach(b=>b.onclick=()=>{
+ $$('#presets .chip').forEach(x=>x.classList.toggle('on',x===b));
+ const p=PRESETS[b.textContent];
+ for(const[k,v] of Object.entries(p)){const el=$('#'+k);if(el.type==='checkbox')el.checked=v;else el.value=v}
+ syncOut();
+});
+const FMT={rate:v=>(v>0?'+':'')+v+'%',pitch:v=>(v>0?'+':'')+v,bpm:v=>v+' BPM',gap:v=>(+v).toFixed(1)+'초',ambG:v=>Math.round(v*100)+'%',fxG:v=>Math.round(v*100)+'%',rev:v=>v==0?'끔':Math.round(v*100)+'%'};
+function syncOut(){for(const k in FMT)$('#'+k+'O').textContent=FMT[k]($('#'+k).value)}
+for(const k in FMT)$('#'+k).addEventListener('input',syncOut);syncOut();
+const cnt=()=>$('#cnt').textContent=$('#text').value.length.toLocaleString()+'자';$('#text').addEventListener('input',cnt);cnt();
+
+$$('#tabs button').forEach(b=>b.onclick=()=>{
+ engine=b.dataset.e;$$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+ ['google','live','file'].forEach(e=>$('#eng-'+e).classList.toggle('hide',e!==engine));
+ $('#textbox').classList.toggle('hide',engine==='file');
+ $('#go').textContent=engine==='live'?'🎙 낭독 시작 및 녹음':'🎙 변환 및 저장';
+});
+const k0=store.get('gtts_key');if(k0){$('#gkey').value=k0;$('#gsave').checked=true}
+$('#gsave').onchange=()=>store.set('gtts_key',$('#gsave').checked?$('#gkey').value:null);
+$('#gkey').oninput=()=>$('#gsave').checked&&store.set('gtts_key',$('#gkey').value);
+
+let pvCtx;
+$$('.pv button').forEach(b=>b.onclick=()=>{
+ pvCtx=pvCtx||new AudioContext({sampleRate:SR});const c=(b.dataset.p==='moktak'?FX.moktak:FX[b.dataset.p])();
+ const buf=pvCtx.createBuffer(1,c.length,SR);buf.copyToChannel(c,0);const s=pvCtx.createBufferSource();s.buffer=buf;s.connect(pvCtx.destination);s.start();
+});
+
+function setProg(p,t){$('#bar').style.display='block';$('#bar i').style.width=Math.round(p*100)+'%';msg(t)}
+function msg(t,err){$('#msg').textContent=t||'';$('#msg').className=err?'err':''}
+$('#stop').onclick=()=>{liveAbort=true;speechSynthesis.cancel();msg('중단 중…')};
+
+$('#go').onclick=async()=>{
+ const o=opts(),go=$('#go');go.disabled=true;$('#result').style.display='none';liveAbort=false;
+ try{
+  let audio;
+  if(engine==='google'){
+   const key=$('#gkey').value.trim();if(!key)throw new Error('API 키를 입력하세요.');
+   const s=splitSent($('#text').value);if(!s.length)throw new Error('원고를 입력하세요.');
+   const segs=[];for(let i=0;i<s.length;i++){setProg(i/s.length,`음성 합성 ${i+1}/${s.length}`);segs.push(await googleTTS(s[i],key,$('#gvoice').value,o))}
+   setProg(.95,'효과음 믹싱 중…');audio=await build(segs,o);
+  }else if(engine==='file'){
+   const f=$('#vfile').files[0];if(!f)throw new Error('음성 파일을 선택하세요.');
+   setProg(.3,'파일 디코딩 중…');const v=await decode(await f.arrayBuffer());
+   setProg(.7,'효과음 믹싱 중…');audio=await build([v],o,o.moktak==='between'?findPauses(v):null);
+  }else{
+   if(!navigator.mediaDevices?.getDisplayMedia)throw new Error('이 브라우저는 녹음을 지원하지 않습니다. PC용 Chrome·Edge를 사용하세요.');
+   const s=splitSent($('#text').value);if(!s.length)throw new Error('원고를 입력하세요.');
+   $('#stop').style.display='block';audio=await liveRecord(s,o);
+  }
+  setProg(1,'파일 인코딩 중…');await sleep(30);
+  let blob,ext=o.fmt;
+  if(ext==='mp3'&&window.lamejs)blob=toMp3(audio);else{blob=toWav(audio);ext='wav'}
+  if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);
+  const d=new Date(),z=n=>String(n).padStart(2,'0'),name=`tts_${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}.${ext}`;
+  $('#player').src=url;$('#dl').href=url;$('#dl').download=name;$('#dl').textContent=`⬇ ${name} 다운로드`;
+  $('#result').style.display='block';
+  msg(`✅ 완료 · ${(audio.length/SR).toFixed(1)}초 · ${(blob.size/1024).toFixed(0)}KB${o.fmt==='mp3'&&ext==='wav'?' (MP3 모듈 미로드 → WAV 저장)':''}`);
+ }catch(e){msg('⚠ '+(e.message||e),true)}
+ finally{go.disabled=false;$('#stop').style.display='none';$('#bar').style.display='none'}
+};
+</script>
+</body>
+</html>
