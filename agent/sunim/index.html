@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
 <style>
 :root{--bg:#f4f0e6;--card:#fffdf8;--ink:#1f1c18;--sub:#6b645a;--line:#e2dacb;--acc:#a8402a;--acc2:#2f6b5a;--soft:#f1e9da;--shadow:0 1px 2px rgba(60,40,20,.06),0 6px 24px rgba(60,40,20,.06)}
 @media (prefers-color-scheme:dark){:root{--bg:#171512;--card:#211e1a;--ink:#ece6da;--sub:#a59c8e;--line:#363029;--acc:#d9694f;--acc2:#5fa58c;--soft:#2a2620;--shadow:none}}
@@ -102,7 +103,10 @@ audio{width:100%}
   </div>
 
   <div id="eng-file" class="hide">
-   <label>음성 파일 (mp3·wav·m4a 등)</label>
+   <label>🎤 직접 녹음 (스마트폰 가능)</label>
+   <button type="button" class="chip" id="mic" style="width:100%;padding:11px">● 녹음 시작</button>
+   <audio id="micPlay" controls class="hide" style="margin-top:8px"></audio>
+   <label>또는 음성 파일 (mp3·wav·m4a 등)</label>
    <input type="file" id="vfile" accept="audio/*">
    <div class="note">직접 녹음했거나 다른 TTS로 만든 음성에 효과를 입힘. ‘문장 사이 목탁’은 음성의 쉼 구간을 자동 감지해 배치.</div>
   </div>
@@ -154,12 +158,19 @@ audio{width:100%}
 
  <div class="card">
   <div class="step">STEP 3</div><h2>변환 · 저장</h2>
-  <div class="fmt"><label><input type="radio" name="fmt" value="mp3" checked>MP3</label><label><input type="radio" name="fmt" value="wav">WAV</label></div>
+  <div class="fmt"><label><input type="radio" name="fmt" value="mp3" checked>MP3</label><label><input type="radio" name="fmt" value="wav">WAV</label><label><input type="radio" name="fmt" value="mp4">MP4 영상</label></div>
+  <div id="vopt" class="hide">
+   <label>화면 비율</label>
+   <div class="chips" id="ratio"><button type="button" class="chip on" data-r="1080x1080">정사각 1:1</button><button type="button" class="chip" data-r="1080x1920">세로 9:16 (릴스)</button><button type="button" class="chip" data-r="1280x720">가로 16:9</button></div>
+   <label>영상 제목 (선택)</label><input type="text" id="vtitle" placeholder="예: 오늘의 법문">
+   <label>배경 이미지 (선택 · 없으면 기본 배경)</label><input type="file" id="vbg" accept="image/*">
+   <label class="chk"><input type="checkbox" id="vsub" checked>자막 표시 (Google 엔진: 문장별 자동 / 그 외: 원고 전체 고정)</label>
+  </div>
   <button class="go" id="go">🎙 변환 및 저장</button>
   <button class="stop" id="stop">■ 녹음 중단</button>
   <div class="bar" id="bar"><i></i></div>
   <div id="msg"></div>
-  <div id="result"><audio id="player" controls></audio><a class="dl" id="dl">⬇ 파일 다운로드</a></div>
+  <div id="result"><audio id="player" controls></audio><video id="vplayer" controls playsinline class="hide" style="width:100%;border-radius:10px;background:#000"></video><a class="dl" id="dl">⬇ 파일 다운로드</a></div>
  </div>
 </div>
 </div>
@@ -247,13 +258,14 @@ function opts(){
 }
 
 // segs: 문장별 음성 배열 / pauses: (파일 모드) 쉼 구간 중심 시각 목록
-async function build(segs,o,pauses=null){
- const V=[],F=[];let c=0;
+let CAPS=[];
+async function build(segs,o,pauses=null,texts=null){
+ const V=[],F=[];let c=0;CAPS=[];
  if(o.intro!=='none'){const[f,d]=INTRO[o.intro];F.push({clip:f(),at:0,gain:1});c=d}
  if(o.moktak==='ends'&&o.intro!=='roll'){for(let k=0;k<3;k++)F.push({clip:FX.moktak(),at:c+k*.6,gain:1});c+=2}
  const s0=c;
  segs.forEach((seg,i)=>{
-  V.push({clip:seg,at:c,gain:1});
+  V.push({clip:seg,at:c,gain:1});if(texts)CAPS.push({t:texts[i],a:c,b:c+seg.length/SR});
   if(pauses&&o.moktak==='between')pauses.forEach(p=>F.push({clip:FX.moktak(),at:c+p,gain:1}));
   c+=seg.length/SR;
   if(i<segs.length-1){if(o.moktak==='between'&&!pauses)F.push({clip:FX.moktak(),at:c+o.gap*.35,gain:1});c+=o.gap}
@@ -314,7 +326,7 @@ function findPauses(x){ // 파일 모드: 0.35초 이상 쉼 구간 감지
 // 브라우저 음성: 실시간 재생 + 시스템 오디오 녹음
 let liveAbort=false;
 function loadVoices(){
- const sel=$('#lvoice'),vs=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang));
+ const sel=$('#lvoice');if(!sel)return;const vs=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang));
  sel.innerHTML=vs.length?vs.map(v=>`<option value="${v.name}">${v.name}${/natural|online/i.test(v.name)?' ★':''}</option>`).join(''):'<option value="">한국어 음성 없음 (Windows 설정 → 언어 → 한국어 음성 설치)</option>';
  const best=vs.find(v=>/natural/i.test(v.name));if(best)sel.value=best.name;
 }
@@ -380,8 +392,80 @@ function toMp3(f){
  const e=enc.flush();if(e.length)out.push(new Uint8Array(e));return new Blob(out,{type:'audio/mpeg'});
 }
 
+/* ───────── 4-2. MP4 영상 (WebCodecs) ───────── */
+async function resample(x,rate){const oc=new OfflineAudioContext(1,Math.ceil(x.length*rate/SR),rate);const b=oc.createBuffer(1,x.length,SR);b.copyToChannel(x,0);const s=oc.createBufferSource();s.buffer=b;s.connect(oc.destination);s.start();return (await oc.startRendering()).getChannelData(0)}
+async function pick(Enc,list){for(const c of list){try{if((await Enc.isConfigSupported(c)).supported)return c}catch{}}return null}
+function wrapLines(ctx,text,maxW){const out=[];for(const para of text.split('\n')){let line='';for(const w of para.split(' ')){const t=line?line+' '+w:w;if(ctx.measureText(t).width>maxW&&line){out.push(line);line=w}else line=t}
+ while(ctx.measureText(line).width>maxW){let k=line.length;while(k>1&&ctx.measureText(line.slice(0,k)).width>maxW)k--;out.push(line.slice(0,k));line=line.slice(k)}if(line)out.push(line)}return out}
+async function toMp4(audio,fullText){
+ if(!window.VideoEncoder||!window.AudioEncoder)throw new Error('이 브라우저는 영상 인코딩을 지원하지 않습니다. 최신 Chrome·Edge·Samsung 인터넷을 사용하세요.');
+ if(!window.Mp4Muxer)throw new Error('MP4 모듈을 불러오지 못했습니다. 인터넷 연결 확인 후 새로고침하세요.');
+ const [W,H]=$('#ratio .on').dataset.r.split('x').map(Number),FPS=15,AR=48000;
+ const vc=await pick(VideoEncoder,['avc1.640028','avc1.4d0028','avc1.42002a','vp09.00.40.08'].map(codec=>({codec,width:W,height:H,bitrate:2_000_000,framerate:FPS})));
+ const ac=await pick(AudioEncoder,['mp4a.40.2','opus'].map(codec=>({codec,sampleRate:AR,numberOfChannels:1,bitrate:128000})));
+ if(!vc||!ac)throw new Error('이 기기에서 지원하는 영상/음성 코덱이 없습니다.');
+ const muxer=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),fastStart:'in-memory',
+  video:{codec:vc.codec.startsWith('avc')?'avc':'vp9',width:W,height:H},audio:{codec:ac.codec==='opus'?'opus':'aac',numberOfChannels:1,sampleRate:AR}});
+ let err=null;
+ const ve=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>err=e});ve.configure(vc);
+ const ae=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>err=e});ae.configure(ac);
+ // 오디오
+ const a48=await resample(audio,AR);
+ for(let i=0;i<a48.length;i+=4800){const d=a48.slice(i,i+4800);ae.encode(new AudioData({format:'f32-planar',sampleRate:AR,numberOfFrames:d.length,numberOfChannels:1,timestamp:Math.round(i/AR*1e6),data:d}))}
+ // 배경
+ let bg=null;const bf=$('#vbg').files[0];if(bf){try{bg=await createImageBitmap(bf)}catch{}}
+ try{await document.fonts.load('700 40px "Noto Sans KR"');await document.fonts.load('700 40px "Noto Serif KR"')}catch{}
+ const cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
+ const dur=audio.length/SR,N=Math.ceil(dur*FPS),title=$('#vtitle').value.trim(),showSub=$('#vsub').checked,S=Math.min(W,H)/1080;
+ const env=new Float32Array(N);for(let k=0;k<N;k++){const a=k/FPS*SR|0,b=Math.min(audio.length,a+(SR/FPS|0));let m=0;for(let j=a;j<b;j+=8)m=Math.max(m,Math.abs(audio[j]));env[k]=m}
+ const fixed=showSub&&!CAPS.length&&fullText?fullText.trim():'';
+ for(let k=0;k<N;k++){
+  if(err)throw err;
+  const t=k/FPS;
+  if(bg){const r=Math.max(W/bg.width,H/bg.height),bw=bg.width*r,bh=bg.height*r;g.drawImage(bg,(W-bw)/2,(H-bh)/2,bw,bh);g.fillStyle='rgba(15,12,10,.55)';g.fillRect(0,0,W,H)}
+  else{const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#2a211b');gr.addColorStop(1,'#120f0c');g.fillStyle=gr;g.fillRect(0,0,W,H);
+   g.strokeStyle='rgba(214,170,110,.18)';g.lineWidth=3*S;g.beginPath();g.arc(W/2,H*.36,Math.min(W,H)*.27,0,Math.PI*2);g.stroke();
+   g.fillStyle='rgba(214,170,110,.10)';g.font=`700 ${220*S}px "Noto Serif KR",serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('卍',W/2,H*.36)}
+  g.textAlign='center';g.textBaseline='middle';
+  if(title){g.fillStyle='#e9c995';g.font=`700 ${58*S}px "Noto Serif KR",serif`;g.fillText(title,W/2,H*.11)}
+  let sub=fixed;if(showSub&&CAPS.length){const c=CAPS.find(c=>t>=c.a-.15&&t<=c.b+.4);sub=c?c.t:''}
+  if(sub){const fs=(sub.length>120?40:52)*S;g.font=`700 ${fs}px "Noto Sans KR",sans-serif`;const L=wrapLines(g,sub,W*.84).slice(0,8),lh=fs*1.45,y0=H*.66-(L.length-1)*lh/2;
+   g.lineWidth=8*S;g.strokeStyle='rgba(0,0,0,.6)';g.fillStyle='#fff';L.forEach((l,i)=>{g.strokeText(l,W/2,y0+i*lh);g.fillText(l,W/2,y0+i*lh)})}
+  // 파형 막대 + 진행선
+  const bars=32,bw=W*.6/bars,by=H*.9;g.fillStyle='rgba(233,201,149,.85)';
+  for(let b=0;b<bars;b++){const e=env[Math.max(0,Math.min(N-1,k-(Math.abs(b-bars/2)|0)))],h=(6+e*90*(1-Math.abs(b-bars/2)/bars))*S;g.fillRect(W*.2+b*bw+bw*.2,by-h,bw*.6,h*2)}
+  g.fillStyle='rgba(255,255,255,.15)';g.fillRect(W*.1,H*.965,W*.8,4*S);g.fillStyle='#c4573c';g.fillRect(W*.1,H*.965,W*.8*t/dur,4*S);
+  const f=new VideoFrame(cv,{timestamp:Math.round(t*1e6),duration:Math.round(1e6/FPS)});ve.encode(f,{keyFrame:k%(FPS*2)===0});f.close();
+  if(ve.encodeQueueSize>8)await new Promise(r=>{const w=()=>ve.encodeQueueSize>2?setTimeout(w,5):r();w()});
+  if(k%15===0){setProg(k/N,`영상 인코딩 ${Math.round(k/N*100)}%`);await sleep(0)}
+ }
+ await ve.flush();await ae.flush();if(err)throw err;muxer.finalize();ve.close();ae.close();
+ return new Blob([muxer.target.buffer],{type:'video/mp4'});
+}
+
 /* ───────── 5. UI ───────── */
 let engine='google',url=null;
+$$('input[name=fmt]').forEach(r=>r.onchange=()=>$('#vopt').classList.toggle('hide',$('input[name=fmt]:checked').value!=='mp4'));
+$$('#ratio .chip').forEach(b=>b.onclick=()=>$$('#ratio .chip').forEach(x=>x.classList.toggle('on',x===b)));
+/* 모바일: 시스템 오디오 녹음 미지원 → ② 비활성 안내 */
+const canLive=!!navigator.mediaDevices?.getDisplayMedia;
+if(!canLive){
+ $('#tabs [data-e=live] small').textContent='PC 전용';
+ $('#eng-live').innerHTML='<div class="note"><b>스마트폰 미지원</b> — 모바일 브라우저는 시스템 소리 녹음 기능이 없음.<br>대안: <b>Google 신경망</b>(API 키) 또는 <b>음성 파일 → 🎤 직접 녹음</b> 후 효과 입히기.</div>';
+}
+/* 마이크 직접 녹음 */
+let micBlob=null,micRec=null;
+$('#mic').onclick=async()=>{
+ if(micRec&&micRec.state==='recording'){micRec.stop();return}
+ try{
+  const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+  const ch=[];micRec=new MediaRecorder(st);micRec.ondataavailable=e=>e.data.size&&ch.push(e.data);
+  micRec.onstop=()=>{st.getTracks().forEach(t=>t.stop());micBlob=new Blob(ch,{type:micRec.mimeType});
+   $('#micPlay').src=URL.createObjectURL(micBlob);$('#micPlay').classList.remove('hide');
+   $('#mic').textContent='● 다시 녹음';$('#mic').classList.remove('on');$('#vfile').value='';msg('녹음 완료 → 효과 선택 후 [변환 및 저장]')};
+  micRec.start();$('#mic').textContent='■ 녹음 중지';$('#mic').classList.add('on');msg('녹음 중… 원고를 읽어 주세요');
+ }catch{msg('⚠ 마이크 권한이 필요합니다.',true)}
+};
 const PRESETS={
  '🪷 염불·독경':{moktak:'beat',bpm:72,intro:'roll',outro:'bell',chime:false,amb:'none',rev:.55,rate:-10},
  '🧘 명상 안내':{moktak:'none',intro:'bowl',outro:'bowl',chime:true,amb:'stream',rev:.35,rate:-15},
@@ -403,6 +487,7 @@ $$('#tabs button').forEach(b=>b.onclick=()=>{
  engine=b.dataset.e;$$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
  ['google','live','file'].forEach(e=>$('#eng-'+e).classList.toggle('hide',e!==engine));
  $('#textbox').classList.toggle('hide',engine==='file');
+ $('#go').disabled=engine==='live'&&!canLive;
  $('#go').textContent=engine==='live'?'🎙 낭독 시작 및 녹음':'🎙 변환 및 저장';
 });
 const k0=store.get('gtts_key');if(k0){$('#gkey').value=k0;$('#gsave').checked=true}
@@ -427,9 +512,9 @@ $('#go').onclick=async()=>{
    const key=$('#gkey').value.trim();if(!key)throw new Error('API 키를 입력하세요.');
    const s=splitSent($('#text').value);if(!s.length)throw new Error('원고를 입력하세요.');
    const segs=[];for(let i=0;i<s.length;i++){setProg(i/s.length,`음성 합성 ${i+1}/${s.length}`);segs.push(await googleTTS(s[i],key,$('#gvoice').value,o))}
-   setProg(.95,'효과음 믹싱 중…');audio=await build(segs,o);
+   setProg(.95,'효과음 믹싱 중…');audio=await build(segs,o,null,s);
   }else if(engine==='file'){
-   const f=$('#vfile').files[0];if(!f)throw new Error('음성 파일을 선택하세요.');
+   const f=$('#vfile').files[0]||micBlob;if(!f)throw new Error('녹음하거나 음성 파일을 선택하세요.');
    setProg(.3,'파일 디코딩 중…');const v=await decode(await f.arrayBuffer());
    setProg(.7,'효과음 믹싱 중…');audio=await build([v],o,o.moktak==='between'?findPauses(v):null);
   }else{
@@ -439,10 +524,12 @@ $('#go').onclick=async()=>{
   }
   setProg(1,'파일 인코딩 중…');await sleep(30);
   let blob,ext=o.fmt;
-  if(ext==='mp3'&&window.lamejs)blob=toMp3(audio);else{blob=toWav(audio);ext='wav'}
+  if(ext==='mp4'){blob=await toMp4(audio,engine==='file'?'':$('#text').value)}
+  else if(ext==='mp3'&&window.lamejs)blob=toMp3(audio);else{blob=toWav(audio);ext='wav'}
+  $('#player').classList.toggle('hide',ext==='mp4');$('#vplayer').classList.toggle('hide',ext!=='mp4');
   if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);
   const d=new Date(),z=n=>String(n).padStart(2,'0'),name=`tts_${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}.${ext}`;
-  $('#player').src=url;$('#dl').href=url;$('#dl').download=name;$('#dl').textContent=`⬇ ${name} 다운로드`;
+  (ext==='mp4'?$('#vplayer'):$('#player')).src=url;$('#dl').href=url;$('#dl').download=name;$('#dl').textContent=`⬇ ${name} 다운로드`;
   $('#result').style.display='block';
   msg(`✅ 완료 · ${(audio.length/SR).toFixed(1)}초 · ${(blob.size/1024).toFixed(0)}KB${o.fmt==='mp3'&&ext==='wav'?' (MP3 모듈 미로드 → WAV 저장)':''}`);
  }catch(e){msg('⚠ '+(e.message||e),true)}
