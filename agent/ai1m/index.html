@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 꿀팁 1분 에이전트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
+<style>
+:root{--bg:#f1f3f7;--card:#fff;--ink:#141821;--sub:#5f6675;--line:#e1e5ec;--acc:#3b5bdb;--acc2:#0ca678;--soft:#ecebe5;--shadow:0 1px 2px rgba(20,30,50,.05),0 8px 26px rgba(20,30,50,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#14161a;--card:#1d2026;--ink:#e9e7e2;--sub:#a3a6ad;--line:#30343c;--acc:#7b93f0;--acc2:#38d9a9;--soft:#262a31;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans KR",system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
+header{display:flex;align-items:flex-end;gap:14px;margin-bottom:22px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+.seal{width:46px;height:46px;border-radius:10px;background:var(--acc);color:#fff;display:grid;place-items:center;font:700 26px "Noto Serif KR",serif;flex:none}
+h1{font:700 26px/1.2 "Noto Serif KR",serif;margin:0}
+header p{margin:2px 0 0;color:var(--sub);font-size:13.5px}
+.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+@media (max-width:840px){.grid{grid-template-columns:1fr}}
+.grid>div,.row>div,.tabs button{min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.card+.card{margin-top:18px}
+.step{font:700 12px "Noto Sans KR";letter-spacing:.08em;color:var(--acc2);margin-bottom:6px}
+h2{font:700 17px "Noto Serif KR",serif;margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--sub);margin:12px 0 5px;font-weight:500}
+textarea,input[type=text],input[type=password],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit}
+select{text-overflow:ellipsis}
+textarea{min-height:180px;resize:vertical}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--acc);outline-offset:-1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 11px;border-radius:99px;font:500 13px "Noto Sans KR";cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tip{margin-top:14px;padding:18px;border-radius:14px;background:linear-gradient(135deg,#101828,#1e2a5a);color:#eef2ff}
+.tip .no{font:700 12px "Noto Sans KR";color:#7ee2b8;letter-spacing:.06em}
+.tip .tt{font:700 20px/1.4 "Noto Sans KR";margin:4px 0 6px}
+.tip .si{font-size:13px;opacity:.8;margin-bottom:10px}
+.tip .pr{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.6}
+.tip .pr b{display:block;font-size:11px;color:#7ee2b8;margin-bottom:3px;letter-spacing:.05em}
+.tip .rs{font-size:13.5px;margin-top:10px;color:#ffe39a}
+.qedit{display:grid;grid-template-columns:1fr 90px;gap:8px;margin-top:10px}
+@media (max-width:480px){.qedit{grid-template-columns:1fr}}
+.qedit input{font-size:13px;padding:8px 10px}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:11px 16px;font:700 14px "Noto Sans KR";cursor:pointer;background:var(--soft);color:var(--ink)}
+.btn.pri{background:var(--acc);color:#fff;flex:1}
+.persona{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:480px){.persona{grid-template-columns:1fr}}
+.pc{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:var(--bg);cursor:pointer;text-align:left;color:var(--ink);font:inherit;position:relative}
+.pc b{display:block;font-size:14px}
+.pc small{color:var(--sub);font-size:12px}
+.pc.on{border-color:var(--acc);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.pc .play{position:absolute;right:8px;top:8px;border:0;background:transparent;color:var(--acc);font-size:15px;cursor:pointer;padding:4px}
+.tabs{display:flex;gap:6px;background:var(--soft);padding:4px;border-radius:11px;margin-bottom:10px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--sub);padding:8px 6px;border-radius:8px;font:500 13px "Noto Sans KR";cursor:pointer;line-height:1.3}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow);font-weight:700}
+.tabs small{display:block;font-weight:400;font-size:11px;opacity:.8}
+.note{font-size:12.5px;color:var(--sub);background:var(--soft);border-radius:9px;padding:9px 11px;margin-top:10px}
+.note b{color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rng{display:flex;align-items:center;gap:10px}
+.rng input{flex:1;min-width:0;accent-color:var(--acc)}
+.rng output{min-width:44px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px}
+.chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px;color:var(--ink);cursor:pointer}
+.chk input{accent-color:var(--acc);width:17px;height:17px}
+.pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pv button{border:1px dashed var(--line);background:transparent;color:var(--sub);padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer}
+.go{width:100%;margin-top:16px;padding:14px;border:0;border-radius:11px;background:var(--acc);color:#fff;font:700 16px "Noto Sans KR";cursor:pointer}
+.go:disabled{opacity:.55;cursor:wait}
+.stop{display:none;width:100%;margin-top:8px;padding:10px;border:1px solid var(--acc);border-radius:11px;background:transparent;color:var(--acc);font:700 14px "Noto Sans KR";cursor:pointer}
+.bar{height:6px;background:var(--soft);border-radius:9px;overflow:hidden;margin-top:14px;display:none}
+.bar i{display:block;height:100%;width:0;background:var(--acc2);transition:width .25s}
+#msg{font-size:13.5px;margin-top:8px;min-height:20px}
+#msg.err{color:#c0392b}
+#result{display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+audio{width:100%}
+.dl{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:10px 16px;border-radius:9px;background:var(--acc2);color:#fff;text-decoration:none;font-weight:700}
+.fmt{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap}
+.fmt label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
+.hide{display:none!important}
+.swatch{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+.swatch.on{border-color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="seal">AI</div><div><h1>AI 꿀팁 1분 에이전트</h1><p>꿀팁 선택 → 숏츠 원고 자동 작성 → 성우 낭독 + BGM → 프롬프트 카드 영상(MP4)·이미지·유튜브 문구</p></div></header>
+
+<div class="grid">
+<div>
+ <div class="card">
+  <div class="step">STEP 1</div><h2>오늘의 AI 꿀팁</h2>
+  <label>채널 프리셋 <span style="font-weight:400">(목소리·형태·BGM 자동 설정)</span></label>
+  <div class="chips" id="moods"></div>
+  <label>분야</label>
+  <div class="chips" id="themes"></div>
+  <div class="tip"><div class="no" id="noView"></div><div class="tt" id="tView"></div><div class="si" id="sView"></div>
+   <div class="pr"><b>💬 이렇게 물어보세요</b><span id="pView"></span></div><div class="rs" id="rView"></div></div>
+  <div class="qedit"><input type="text" id="tText" placeholder="꿀팁 제목"><input type="text" id="noText" placeholder="회차" inputmode="numeric"></div>
+  <textarea id="pText" style="min-height:70px;margin-top:8px;font-size:13.5px" placeholder="프롬프트 (직접 수정 가능)"></textarea>
+  <div class="btns"><button class="btn pri" id="refresh">🔄 새 꿀팁</button><button class="btn" id="copyP">📋 프롬프트 복사</button><button class="btn" id="rewrite">✍ 원고 다시 쓰기</button></div>
+
+  <label>원고 형태</label>
+  <select id="form"></select>
+  <label>숏츠 원고 <span style="font-weight:400">(자동 작성 · 수정 가능)</span> <span id="cnt" style="float:right"></span></label>
+  <textarea id="text"></textarea>
+ </div>
+
+ <div class="card">
+  <div class="step">STEP 2</div><h2>성우 목소리</h2>
+  <div class="tabs" id="tabs">
+   <button data-e="google" class="on">성우 음성<small>Google 신경망</small></button>
+   <button data-e="live">브라우저 음성<small>무료 · PC 녹음</small></button>
+   <button data-e="mic">내 목소리<small>직접 녹음</small></button>
+  </div>
+  <div id="eng-google">
+   <div class="persona" id="personas"></div>
+   <label>Google Cloud API 키</label>
+   <input type="password" id="gkey" placeholder="AIza...">
+   <label class="chk" style="margin-top:8px"><input type="checkbox" id="gsave">이 브라우저에 키 저장</label>
+  </div>
+  <div id="eng-live" class="hide">
+   <label>목소리 (PC에 설치된 한국어 음성)</label><select id="lvoice"></select>
+   <div class="note"><b>녹음 방식:</b> 시작 → 공유 창에서 <b>「전체 화면」 + 「시스템 오디오 공유」</b> 체크. Windows Chrome·Edge 전용.</div>
+  </div>
+  <div id="eng-mic" class="hide">
+   <button type="button" class="chip" id="mic" style="width:100%;padding:11px">● 녹음 시작 — 원고를 읽어 주세요</button>
+   <audio id="micPlay" controls class="hide" style="margin-top:8px"></audio>
+   <div class="note">강사 본인 목소리로 녹음하면 채널 신뢰도가 높아집니다. 녹음에 BGM·효과를 입혀 저장합니다.</div>
+  </div>
+  <div class="row">
+   <div><label>속도 보정</label><div class="rng"><input type="range" id="rate" min="-30" max="30" step="5" value="0"><output id="rateO"></output></div></div>
+   <div><label>문장 간격</label><div class="rng"><input type="range" id="gap" min="0.3" max="3" step="0.1" value="0.8"><output id="gapO"></output></div></div>
+  </div>
+ </div>
+</div>
+
+<div>
+ <div class="card">
+  <div class="step">STEP 3</div><h2>배경음악 · 효과</h2>
+  <label>BGM</label>
+  <select id="bgm">
+   <option value="none">없음</option><option value="tech">테크 비트</option><option value="lofi">로파이</option><option value="piano">잔잔한 피아노</option><option value="dream">몽환 패드</option>
+  </select>
+  <div class="row">
+   <div><label>도입</label><select id="intro"><option value="none">없음</option><option value="ding">알림 띵</option><option value="swoosh">휙 전환</option><option value="chime">맑은 차임</option></select></div>
+   <div><label>마무리</label><select id="outro"><option value="none">없음</option><option value="ding">알림 띵</option><option value="chime">맑은 차임</option><option value="swoosh">휙 전환</option></select></div>
+  </div>
+  <div class="row">
+   <div><label>BGM 크기</label><div class="rng"><input type="range" id="bgmG" min="0" max="1" step="0.05" value="0.45"><output id="bgmGO"></output></div></div>
+   <div><label>공간감</label><div class="rng"><input type="range" id="rev" min="0" max="1" step="0.05" value="0.2"><output id="revO"></output></div></div>
+  </div>
+  <div class="pv"><span style="font-size:12px;color:var(--sub);align-self:center">미리듣기</span>
+   <button data-p="tech">테크</button><button data-p="lofi">로파이</button><button data-p="piano">피아노</button><button data-p="ding">띵</button><button data-p="swoosh">휙</button><button data-p="stop">■</button>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="step">STEP 4</div><h2>변환 · 저장</h2>
+  <div class="fmt"><label><input type="radio" name="fmt" value="mp3">MP3</label><label><input type="radio" name="fmt" value="wav">WAV</label><label><input type="radio" name="fmt" value="mp4" checked>MP4 영상</label></div>
+  <div id="vopt">
+   <label>화면 비율</label>
+   <div class="chips" id="ratio"><button type="button" class="chip on" data-r="1080x1920">세로 9:16 (숏츠)</button><button type="button" class="chip" data-r="1080x1080">정사각 1:1</button><button type="button" class="chip" data-r="1280x720">가로 16:9</button></div>
+   <label class="chk"><input type="checkbox" id="vsub" checked>낭독 자막 표시</label>
+  </div>
+  <label>카드 배경</label>
+  <div class="chips" id="palette" style="align-items:center"></div>
+  <label>배경 이미지 (선택)</label><input type="file" id="vbg" accept="image/*">
+  <div class="btns" style="margin-top:16px"><button class="btn" id="preview" style="flex:1;padding:14px;font-size:15px">▶ 미리듣기</button><button class="go" id="go" style="margin:0;flex:2">🎙 변환 및 저장</button></div>
+  <button class="stop" id="stop">■ 녹음 중단</button>
+  <div class="btns"><button class="btn" id="png" style="flex:1">🖼 꿀팁 카드 이미지(PNG)</button></div>
+  <div class="bar" id="bar"><i></i></div>
+  <div id="msg"></div>
+  <div id="result"><div id="pvLabel" class="note hide" style="margin:0 0 8px">🎧 미리듣기 — 마음에 들면 [변환 및 저장]을 누르세요. 음성을 다시 합성하지 않습니다.</div><audio id="player" controls></audio><video id="vplayer" controls playsinline class="hide" style="width:100%;border-radius:10px;background:#000"></video><img id="iplayer" class="hide" style="width:100%;border-radius:10px"><a class="dl" id="dl">⬇ 다운로드</a></div>
+ </div>
+ <div class="card">
+  <div class="step">STEP 5</div><h2>📋 유튜브 숏츠 문구</h2>
+  <label>제목 <span style="font-weight:400">(<span id="ytLen"></span>)</span></label>
+  <div style="display:flex;gap:6px"><input type="text" id="ytTitle"><button class="btn" id="ytNext" title="다른 제목" style="padding:8px 12px">🔄</button></div>
+  <label>설명란</label>
+  <textarea id="ytDesc" style="min-height:220px;font-size:13.5px"></textarea>
+  <label>해시태그</label>
+  <input type="text" id="ytTags">
+  <label>고정 댓글 <span style="font-weight:400">(프롬프트 복사용 · 참여 유도)</span></label>
+  <textarea id="ytPin" style="min-height:90px;font-size:13.5px"></textarea>
+  <div class="btns">
+   <button class="btn" data-copy="title" style="flex:1">제목 복사</button>
+   <button class="btn" data-copy="desc" style="flex:1">설명+태그 복사</button>
+   <button class="btn" data-copy="pin" style="flex:1">고정댓글 복사</button>
+   <button class="btn pri" data-copy="all" style="flex:1.3">📋 전체 복사</button>
+  </div>
+  <div class="note">새 꿀팁·형태가 바뀌면 자동으로 다시 작성됩니다. 설명란에 프롬프트 전문이 들어가 시청자가 복사해 갈 수 있습니다(구독 유입 핵심).</div>
+ </div>
+</div>
+</div>
+</div>
+
+<script>
+/* AI 꿀팁 DB — t: 제목, s: 상황, p: 프롬프트(그대로 복사해 쓰는 문장), r: 결과, k: 추가 팁. ChatGPT·Claude·Gemini 등 어디서나 사용 가능 */
+const TIPS = {
+"업무·문서":[
+ {t:"회의록 3줄 요약",s:"회의 녹취나 메모가 너무 길 때",p:"아래 회의 내용을 결정사항, 담당자, 마감일 3가지로 나눠 표로 정리해줘.",r:"누가, 무엇을, 언제까지 할지 한눈에 보이는 표가 완성됩니다.",k:"마지막에 '빠진 쟁점이 있으면 알려줘'를 붙이면 놓친 부분까지 짚어 줍니다."},
+ {t:"보고서 첫 문단 쓰기",s:"보고서 첫 줄부터 막막할 때",p:"다음 내용을 바탕으로 결론부터 말하는 두괄식 보고서 첫 문단을 3문장으로 써줘.",r:"상사가 첫 문단만 읽어도 핵심을 파악하는 도입부가 나옵니다.",k:"'임원 보고용으로'처럼 독자를 지정하면 말투가 정확해집니다."},
+ {t:"긴 문서 핵심만 뽑기",s:"수십 쪽 문서를 읽을 시간이 없을 때",p:"이 문서에서 꼭 알아야 할 핵심 5가지를 중요한 순서대로, 각각 한 문장으로 알려줘.",r:"5분 만에 문서 전체의 뼈대를 파악할 수 있습니다.",k:"'근거가 된 쪽 번호도 같이 적어줘'라고 하면 확인이 쉬워집니다."},
+ {t:"업무 일정 계획표",s:"할 일은 많은데 순서가 안 잡힐 때",p:"아래 할 일 목록을 긴급도와 중요도로 나눠 이번 주 요일별 계획표로 만들어줘.",r:"우선순위가 정리된 주간 계획표가 바로 만들어집니다.",k:"하루 업무 가능 시간을 알려 주면 현실적인 계획이 나옵니다."},
+ {t:"어려운 문서 쉽게 풀기",s:"법령이나 계약서 문장이 어려울 때",p:"이 문장을 중학생도 이해할 수 있게 쉬운 말로 풀어주고, 주의할 점을 하나 알려줘.",r:"전문 용어가 일상 언어로 바뀌어 바로 이해됩니다.",k:"중요한 계약은 AI 설명을 참고만 하고 최종 확인은 전문가에게 받으세요."},
+ {t:"발표 대본 만들기",s:"슬라이드는 있는데 말할 내용이 없을 때",p:"이 슬라이드 내용으로 3분 발표 대본을 써줘. 첫 문장은 청중의 관심을 끄는 질문으로 시작해줘.",r:"자연스러운 말투의 발표 대본이 완성됩니다.",k:"'예상 질문 3개와 답변도 만들어줘'를 추가하면 질의응답까지 대비됩니다."},
+ {t:"아이디어 회의 상대",s:"혼자 기획하다 생각이 막힐 때",p:"이 기획안의 약점을 냉정하게 5가지 지적하고, 각각 보완 아이디어를 하나씩 제안해줘.",r:"혼자서는 못 본 허점과 개선안을 얻을 수 있습니다.",k:"'반대 입장에서 비판해줘'라고 하면 더 날카로운 의견이 나옵니다."},
+ {t:"표를 문장으로 바꾸기",s:"데이터 표를 보고서 문장으로 써야 할 때",p:"이 표의 내용을 증감 추이 중심으로 보고서 문장 3줄로 요약해줘.",r:"숫자를 해석한 보고서 문장이 바로 나옵니다.",k:"숫자는 반드시 원본 표와 한 번 더 대조하세요."}],
+"엑셀·데이터":[
+ {t:"엑셀 수식 만들기",s:"원하는 계산은 아는데 수식을 모를 때",p:"엑셀에서 A열 날짜 중 이번 달 데이터만 골라 B열 금액을 합산하는 수식을 알려줘.",r:"바로 붙여 넣을 수 있는 수식과 설명이 나옵니다.",k:"열 이름과 데이터 예시를 함께 주면 정확도가 크게 올라갑니다."},
+ {t:"수식 오류 해결",s:"엑셀에 오류 표시가 떠서 막혔을 때",p:"이 엑셀 수식에서 오류가 나는 이유와 고친 수식을 알려줘.",r:"오류 원인과 수정된 수식을 한 번에 받을 수 있습니다.",k:"오류 메시지 이름을 그대로 적어 주면 더 빨리 찾습니다."},
+ {t:"지저분한 데이터 정리",s:"이름, 전화번호 형식이 제각각일 때",p:"아래 목록에서 전화번호를 010-0000-0000 형식으로 통일하고 중복은 지워줘.",r:"형식이 통일된 깔끔한 목록을 얻습니다.",k:"개인정보가 담긴 실제 명단은 AI에 올리지 않는 것이 원칙입니다."},
+ {t:"피벗 없이 집계표",s:"피벗 테이블이 어려울 때",p:"이 데이터를 부서별, 월별 합계표로 정리하고 가장 많이 증가한 부서를 알려줘.",r:"집계표와 핵심 분석이 동시에 나옵니다.",k:"결과 표를 엑셀에 붙일 수 있게 '탭으로 구분해줘'라고 요청하세요."},
+ {t:"그래프 추천받기",s:"어떤 차트를 써야 할지 모를 때",p:"이 데이터를 보고서에 넣으려는데, 가장 잘 전달되는 그래프 종류와 이유를 알려줘.",r:"데이터 성격에 맞는 차트와 구성법을 추천받습니다.",k:"'제목과 축 이름도 지어줘'를 붙이면 바로 완성됩니다."},
+ {t:"함수 쉽게 배우기",s:"VLOOKUP이 늘 헷갈릴 때",p:"VLOOKUP과 XLOOKUP의 차이를 예시 표 하나로 쉽게 설명해줘.",r:"내 수준에 맞춘 맞춤 과외를 받는 효과가 있습니다.",k:"'연습 문제 3개 내줘'라고 하면 바로 실습까지 할 수 있습니다."},
+ {t:"설문 결과 분석",s:"주관식 설문 응답이 수백 개일 때",p:"이 설문 응답을 비슷한 의견끼리 묶어서 주제별 개수와 대표 의견을 정리해줘.",r:"수백 개 의견이 몇 개 주제로 깔끔하게 정리됩니다.",k:"응답자 이름 등 식별 정보는 지우고 넣으세요."}],
+"글쓰기·메일":[
+ {t:"정중한 거절 메일",s:"부탁을 거절해야 하는데 껄끄러울 때",p:"관계를 해치지 않으면서 이번 요청을 정중히 거절하는 메일을 써줘. 대안도 하나 제시해줘.",r:"예의를 지키면서도 분명한 거절 메일이 완성됩니다.",k:"상대와의 관계를 한 줄 설명해 주면 말투가 딱 맞춰집니다."},
+ {t:"맞춤법 검사와 다듬기",s:"중요한 글을 보내기 전 불안할 때",p:"이 글의 맞춤법을 고치고, 의미는 그대로 두되 더 자연스럽게 다듬어줘. 바뀐 부분은 표시해줘.",r:"수정 내역이 표시된 깔끔한 글을 받습니다.",k:"'원문 말투는 유지해줘'라고 하면 내 문체가 살아 있습니다."},
+ {t:"말투 바꾸기",s:"같은 내용을 상대에 맞게 바꿔야 할 때",p:"이 글을 상사에게 보내는 공손한 말투와 동료에게 보내는 편한 말투 두 가지로 바꿔줘.",r:"상황별로 골라 쓸 수 있는 두 가지 버전이 나옵니다.",k:"문자, 메일, 카톡처럼 채널을 지정하면 길이까지 맞춰집니다."},
+ {t:"글 길이 줄이기",s:"글자 수 제한이 있을 때",p:"이 글을 핵심은 유지하면서 300자 이내로 줄여줘.",r:"제한 글자 수에 맞춘 압축된 글을 얻습니다.",k:"결과 글자 수를 한 번 더 세어 달라고 요청하면 확실합니다."},
+ {t:"축사·인사말 쓰기",s:"행사 인사말을 맡았을 때",p:"직원 송년회에서 1분 동안 할 따뜻하고 짧은 인사말을 써줘. 올해 성과 하나와 감사 인사를 넣어줘.",r:"상황에 맞는 인사말 초안이 바로 나옵니다.",k:"실제 에피소드 하나를 알려 주면 훨씬 진정성 있는 글이 됩니다."},
+ {t:"자기소개서 첨삭",s:"자기소개서가 평범하게 느껴질 때",p:"이 자기소개서를 면접관 입장에서 평가하고, 가장 약한 문단을 구체적인 경험 중심으로 고쳐줘.",r:"평가 의견과 개선된 문단을 함께 받습니다.",k:"없는 경험을 지어내지 않도록 '사실만 활용해줘'라고 덧붙이세요."},
+ {t:"사과문 쓰기",s:"실수를 사과해야 할 때",p:"변명 없이 책임을 인정하고, 재발 방지 대책을 담은 짧은 사과 메시지를 써줘.",r:"진정성 있게 전달되는 사과문 초안이 나옵니다.",k:"마지막 문장은 꼭 내 말로 고쳐 쓰는 것이 좋습니다."}],
+"공부·자기계발":[
+ {t:"1:1 과외 선생님",s:"어려운 개념이 이해되지 않을 때",p:"이 개념을 처음 배우는 사람에게 비유를 들어 설명하고, 이해했는지 확인하는 질문을 하나 해줘.",r:"내 수준에 맞춰 설명하고 확인까지 해 주는 과외가 됩니다.",k:"'틀리면 다시 쉽게 설명해줘'라고 하면 끝까지 이해할 수 있습니다."},
+ {t:"시험 문제 만들기",s:"공부한 내용을 점검하고 싶을 때",p:"이 내용으로 객관식 5문제를 만들고, 정답과 해설은 맨 아래에 따로 적어줘.",r:"나만의 모의고사가 바로 만들어집니다.",k:"'헷갈리기 쉬운 선지로'라고 하면 실전 난도가 됩니다."},
+ {t:"외국어 회화 연습",s:"말할 상대가 없을 때",p:"카페에서 주문하는 상황으로 영어 회화 연습을 하자. 너는 점원, 나는 손님이고, 내 표현이 어색하면 고쳐줘.",r:"실전처럼 대화하며 교정까지 받을 수 있습니다.",k:"음성 입력 기능을 쓰면 발음 연습까지 됩니다."},
+ {t:"책 한 권 요약",s:"읽은 책을 정리하고 싶을 때",p:"내가 정리한 독서 메모를 바탕으로 핵심 메시지 3개와 실천할 행동 1개를 정리해줘.",r:"오래 기억에 남는 독서 노트가 완성됩니다.",k:"책 내용을 AI가 지어내지 않도록 내 메모를 기반으로 요청하세요."},
+ {t:"공부 계획 세우기",s:"자격증 시험까지 시간이 빠듯할 때",p:"시험까지 8주 남았고 하루 2시간 공부할 수 있어. 과목별 주간 학습 계획표를 만들어줘.",r:"현실적인 주차별 학습 로드맵이 나옵니다.",k:"취약 과목을 알려 주면 시간 배분을 조정해 줍니다."},
+ {t:"암기 문장 만들기",s:"외울 게 너무 많을 때",p:"이 항목들을 쉽게 외울 수 있도록 앞글자를 딴 암기 문장을 만들어줘.",r:"재미있게 외워지는 연상 문장을 얻습니다.",k:"여러 버전을 요청해 가장 입에 붙는 것을 고르세요."},
+ {t:"면접 연습",s:"면접을 앞두고 긴장될 때",p:"이 직무 면접관이 되어 질문을 하나씩 해줘. 내가 답하면 점수와 개선점을 알려줘.",r:"실전 같은 모의 면접과 피드백을 받습니다.",k:"압박 면접 버전도 요청해 보세요."}],
+"생활·여행":[
+ {t:"냉장고 파먹기 레시피",s:"냉장고 재료로 뭘 만들지 모를 때",p:"지금 있는 재료는 계란, 두부, 대파, 김치야. 20분 안에 만들 수 있는 요리 3가지를 알려줘.",r:"남은 재료로 만드는 메뉴와 조리법이 나옵니다.",k:"'아이 반찬용으로'처럼 대상을 말하면 맞춤 추천을 받습니다."},
+ {t:"여행 일정 짜기",s:"여행 계획이 귀찮을 때",p:"부모님과 2박 3일 경주 여행 일정을 짜줘. 많이 걷지 않는 동선으로, 식사 장소 유형도 추천해줘.",r:"동선과 체력을 고려한 일정표가 완성됩니다.",k:"영업시간과 휴무일은 출발 전 꼭 직접 확인하세요."},
+ {t:"사진 속 글자 번역",s:"해외에서 메뉴판을 못 읽을 때",p:"이 사진 속 메뉴를 한국어로 번역하고, 맵거나 특이한 재료가 들어간 음식은 표시해줘.",r:"사진 한 장으로 메뉴 설명까지 받을 수 있습니다.",k:"알레르기가 있다면 꼭 함께 알려 주세요."},
+ {t:"가계부 분석",s:"돈이 어디로 새는지 모를 때",p:"이번 달 지출 목록을 항목별로 분류하고, 줄일 수 있는 지출 3가지를 제안해줘.",r:"지출 패턴과 절약 포인트가 한눈에 보입니다.",k:"카드번호 같은 금융 정보는 지우고 넣으세요."},
+ {t:"선물 고르기",s:"선물 고민이 길어질 때",p:"60대 아버지 생신 선물을 5만 원 이내로 추천해줘. 등산을 좋아하시고 실용적인 걸 좋아하셔.",r:"취향과 예산에 맞춘 선물 후보를 받습니다.",k:"받는 사람의 취미를 구체적으로 알려 줄수록 좋아집니다."},
+ {t:"분리수거 헷갈릴 때",s:"이건 어디에 버려야 할지 모를 때",p:"이 물건의 올바른 분리배출 방법을 알려줘. 재질별로 나눠야 하면 순서대로 설명해줘.",r:"재질별 분리 방법을 바로 확인합니다.",k:"지역마다 기준이 다를 수 있으니 구청 안내도 확인하세요."},
+ {t:"운동 루틴 만들기",s:"운동을 시작하고 싶은데 막막할 때",p:"운동 초보가 집에서 하루 15분 할 수 있는 주 3회 운동 루틴을 만들어줘.",r:"수준에 맞는 운동 계획표가 나옵니다.",k:"건강 문제가 있다면 운동 전 전문가와 상담하세요."}],
+"이미지·영상":[
+ {t:"사진 설명 듣기",s:"사진 속 내용을 정리해야 할 때",p:"이 사진에 보이는 내용을 빠짐없이 목록으로 정리해줘.",r:"사진 속 정보가 텍스트로 정리됩니다.",k:"현장 사진, 화이트보드 사진 정리에 특히 유용합니다."},
+ {t:"이미지 생성 프롬프트",s:"원하는 그림을 AI로 만들고 싶을 때",p:"따뜻한 수채화 느낌으로, 가을 공원 벤치에 앉은 노부부를 그려줘. 색감은 주황과 갈색 위주로.",r:"원하는 분위기에 가까운 이미지를 얻습니다.",k:"화풍, 색감, 구도, 분위기 네 가지를 넣으면 결과가 좋아집니다."},
+ {t:"유튜브 대본 만들기",s:"영상 아이디어는 있는데 대본이 없을 때",p:"이 주제로 60초 쇼츠 대본을 써줘. 첫 3초에 시선을 끄는 문장으로 시작해줘.",r:"후킹 문장부터 마무리까지 대본이 완성됩니다.",k:"'자막용으로 한 줄씩 끊어줘'라고 하면 편집이 쉬워집니다."},
+ {t:"썸네일 문구 짓기",s:"클릭을 부르는 문구가 안 떠오를 때",p:"이 영상의 썸네일 문구를 10자 이내로 5개 만들어줘. 호기심을 자극하는 표현으로.",r:"바로 쓸 수 있는 썸네일 문구 후보를 받습니다.",k:"과장된 낚시 문구는 오히려 시청 유지율을 떨어뜨립니다."},
+ {t:"사진으로 영수증 정리",s:"영수증이 쌓여 있을 때",p:"이 영수증 사진에서 날짜, 상호, 금액을 표로 정리해줘.",r:"영수증 내용이 표로 정리됩니다.",k:"여러 장을 한 번에 올리면 합계까지 계산해 줍니다."},
+ {t:"PPT 구성 짜기",s:"발표 자료 목차가 안 잡힐 때",p:"이 주제로 10장짜리 발표 자료 목차를 짜고, 장마다 핵심 메시지 한 줄과 넣을 그림을 제안해줘.",r:"슬라이드별 설계도가 완성됩니다.",k:"청중과 발표 시간을 알려 주면 분량이 맞춰집니다."}],
+"현장·안전 AI":[
+ {t:"위험성평가 초안",s:"작업 전 위험요인을 빠르게 뽑아야 할 때",p:"고소작업대를 이용한 외벽 도장 작업의 위험요인과 감소대책을 표로 정리해줘.",r:"위험요인과 대책이 정리된 초안이 나옵니다.",k:"AI 초안은 출발점일 뿐, 현장 확인과 관리감독자 검토는 반드시 거쳐야 합니다."},
+ {t:"TBM 멘트 만들기",s:"매일 아침 안전 조회 멘트가 고민될 때",p:"오늘은 비가 오고 철골 작업이 있어. 3분 TBM에서 강조할 안전 수칙을 말하기 쉬운 문장으로 써줘.",r:"날씨와 작업에 맞춘 조회 멘트가 완성됩니다.",k:"작업자 질문 하나를 넣어 달라고 하면 참여형 TBM이 됩니다."},
+ {t:"외국인 근로자 안내문",s:"외국인 근로자에게 수칙을 전달해야 할 때",p:"이 안전 수칙을 쉬운 한국어와 베트남어로 나란히 번역하고, 그림으로 표현할 아이디어도 알려줘.",r:"다국어 안전 안내문 초안이 만들어집니다.",k:"번역문은 가능하면 해당 언어 사용자에게 한 번 확인받으세요."},
+ {t:"사고 사례 교훈 정리",s:"사고 사례로 교육 자료를 만들 때",p:"이 사고 사례를 원인, 교훈, 우리 현장 적용점 세 가지로 정리해줘.",r:"교육에 바로 쓸 수 있는 사례 요약이 나옵니다.",k:"특정 개인을 비난하지 않는 표현으로 요청하는 것이 좋습니다."},
+ {t:"점검표 만들기",s:"작업별 체크리스트가 필요할 때",p:"이동식 비계 사용 전 점검표를 예, 아니오로 체크할 수 있게 10개 항목으로 만들어줘.",r:"바로 출력할 수 있는 점검표가 완성됩니다.",k:"관련 법령과 기준은 최신 내용인지 꼭 확인하세요."},
+ {t:"안전 표어 짓기",s:"안전 캠페인 문구가 필요할 때",p:"추락 사고 예방을 주제로 짧고 기억에 남는 안전 표어를 10개 만들어줘.",r:"현수막과 포스터에 쓸 표어 후보를 받습니다.",k:"현장 이름이나 슬로건을 넣어 달라고 하면 더 친근해집니다."}]
+};
+
+</script>
+<script>
+"use strict";
+const SR=24000;
+const pick=a=>a[Math.random()*a.length|0];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const store={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch{}}};
+
+
+/* ════════ 1. 숏츠 원고 자동 작성 ════════ */
+const josa=(w,a,b)=>{const c=w.charCodeAt(w.length-1);if(c<0xAC00||c>0xD7A3)return w+b;return w+((c-0xAC00)%28?a:b)};
+function today(){const d=new Date(),W='일월화수목금토'[d.getDay()];return {d,dot:`${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')} (${W})`,h:d.getHours()}}
+const HOOKS=["이거 모르면 AI 반만 쓰는 겁니다.","AI, 이렇게 쓰면 퇴근이 빨라집니다.","1분이면 됩니다. 바로 따라 해 보세요.","아직도 이걸 직접 하세요?","오늘도 바로 써먹는 AI 꿀팁입니다."];
+const PRINCIPLE=["원하는 결과의 형식을 구체적으로 지정하는 것","상황과 대상을 함께 알려 주는 것","결과물의 분량과 순서를 정해 주는 것"];
+const FORMS={
+ basic:{name:"① 1분 꿀팁 (기본)",gap:.45,make:T=>`${pick(HOOKS)}\nAI 꿀팁 ${T.no}번, ${T.t}.\n${T.s}, AI에게 이렇게 물어보세요.\n${T.p}\n${T.r}\n꿀팁 하나 더! ${T.k}\n프롬프트는 설명란에 있어요. 저장해 두고 써 보세요.`},
+ story:{name:"② 문제 → 해결 스토리",gap:.5,make:T=>`${T.s}, 혹시 이런 적 있으신가요?\n${pick(['저도 예전엔 이런 일에 한참을 썼는데요.','생각보다 많은 분들이 여기서 시간을 버립니다.'])}\n이제는 AI에게 이렇게 한 줄만 부탁하면 됩니다.\n${T.p}\n${T.r}\n${T.k}\n오늘 바로 써 보세요. 내일은 또 다른 꿀팁으로 찾아올게요.`},
+ quick:{name:"③ 15초 초간단",gap:.3,make:T=>`${T.t}, 이렇게 하세요.\n${T.p}\n끝! 프롬프트는 설명란에 있어요.`},
+ prof:{name:"④ 강의형 (교수님 톤)",gap:.6,make:T=>`안녕하세요, 오늘의 AI 활용 수업입니다.\n주제는 ${T.t}입니다.\n${T.s} 유용한 방법인데요.\n핵심은 ${pick(PRINCIPLE)}입니다.\n예를 들어 이렇게 요청해 보세요.\n${T.p}\n${T.r}\n실무 팁을 하나 드리면, ${T.k}\n다음 시간에도 바로 써먹는 AI 활용법으로 찾아뵙겠습니다.`},
+ ba:{name:"⑤ 비포·애프터",gap:.45,make:T=>`AI에게 그냥 '${T.t}' 해 달라고만 하시나요?\n그러면 평범한 답밖에 안 나옵니다.\n이렇게 바꿔 보세요.\n${T.p}\n차이가 느껴지시죠? ${T.r}\n${T.k}\n구독해 두시면 매일 하나씩 알려 드릴게요.`}
+};
+const THEMES=["전체",...Object.keys(TIPS)];
+let theme="전체",cur=null;const recent=[];
+
+function allT(){const r=[];for(const c in TIPS)TIPS[c].forEach(x=>r.push({...x,c}));return r}
+function nextTip(byDate=false){
+ const pool=theme==="전체"?allT():TIPS[theme].map(x=>({...x,c:theme}));let q;
+ if(byDate){const T=today().d,k=T.getFullYear()*372+T.getMonth()*31+T.getDate();q=pool[(k*2654435761>>>0)%pool.length]}
+ else{const fresh=pool.filter(x=>!recent.includes(x.t));q=pick(fresh.length?fresh:pool)}
+ recent.push(q.t);if(recent.length>25)recent.shift();return q;
+}
+const tipNo=()=>Math.max(1,parseInt($('#noText').value)||1);
+function curT(){return {...cur,t:$('#tText').value.trim()||cur.t,p:$('#pText').value.trim()||cur.p,no:tipNo()}}
+function showTip(){$('#tText').value=cur.t;$('#pText').value=cur.p;syncView()}
+function syncView(){const T=curT();$('#noView').textContent=`AI 꿀팁 #${String(T.no).padStart(3,'0')} · ${T.c}`;$('#tView').textContent=T.t;$('#sView').textContent='📌 '+T.s;$('#pView').textContent=T.p;$('#rView').textContent='✅ '+T.r}
+function writeScript(){$('#text').value=FORMS[$('#form').value].make(curT());$('#gap').value=FORMS[$('#form').value].gap;syncOut();cnt();syncView();if(window.ytReady)ytBuild(false)}
+
+/* ════════ 2. 성우 페르소나 ════════ */
+const PERSONAS=[
+ {id:'tuber',name:'⚡ 빠른 테크 유튜버',d:'남성 · 경쾌하고 빠른',v:'ko-KR-Chirp3-HD-Puck',fb:'ko-KR-Wavenet-D',rate:12,pitch:1},
+ {id:'sec',name:'💼 스마트한 비서',d:'여성 · 또렷하고 깔끔한',v:'ko-KR-Chirp3-HD-Kore',fb:'ko-KR-Neural2-A',rate:5,pitch:0},
+ {id:'prof',name:'👨‍🏫 친절한 교수님',d:'남성 · 차분한 강의 톤',v:'ko-KR-Chirp3-HD-Charon',fb:'ko-KR-Neural2-C',rate:-3,pitch:-1},
+ {id:'senior',name:'🙂 다정한 선배',d:'여성 · 편안한 설명',v:'ko-KR-Chirp3-HD-Aoede',fb:'ko-KR-Neural2-B',rate:2,pitch:0},
+ {id:'anchor',name:'🎙 뉴스 앵커',d:'여성 · 신뢰감 있는 보도 톤',v:'ko-KR-Chirp3-HD-Zephyr',fb:'ko-KR-Wavenet-A',rate:4,pitch:0},
+ {id:'boss',name:'🦺 현장 소장님',d:'남성 · 묵직한 현장 톤',v:'ko-KR-Chirp3-HD-Fenrir',fb:'ko-KR-Wavenet-C',rate:0,pitch:-3}];
+let persona=PERSONAS[0];const voiceOK={};
+
+/* ════════ 3. 채널 프리셋 ════════ */
+const MOODS={
+ '⚡ 숏츠 기본':{p:'tuber',form:'basic',bgm:'tech',intro:'ding',outro:'ding',pal:'navy'},
+ '⏱ 15초 초간단':{p:'tuber',form:'quick',bgm:'tech',intro:'swoosh',outro:'none',pal:'neon'},
+ '👨‍🏫 강의형':{p:'prof',form:'prof',bgm:'lofi',intro:'chime',outro:'chime',pal:'paper'},
+ '🔁 비포·애프터':{p:'senior',form:'ba',bgm:'lofi',intro:'swoosh',outro:'ding',pal:'mint'},
+ '📖 스토리형':{p:'anchor',form:'story',bgm:'piano',intro:'ding',outro:'chime',pal:'sky'},
+ '🦺 현장 AI':{p:'boss',form:'basic',bgm:'tech',intro:'ding',outro:'ding',pal:'safety',theme:'현장·안전 AI'}};
+
+/* ════════ 4. BGM · 효과 합성 ════════ */
+const gauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)*1.2;
+function norm(y,peak=1){let p=1e-9;for(let i=0;i<y.length;i++){const a=Math.abs(y[i]);if(a>p)p=a}const k=peak/p;for(let i=0;i<y.length;i++)y[i]*=k;return y}
+function lp(x,a){const y=new Float32Array(x.length);let s=0;for(let i=0;i<x.length;i++){s+=a*(x[i]-s);y[i]=s}return y}
+function noise(n){const w=new Float32Array(n);for(let i=0;i<n;i++)w[i]=gauss();return w}
+const mtof=m=>440*2**((m-69)/12);
+function tone(y,st,dur,f,amp,att,dec,harm=[[1,1]],sustain=true){ // 한 음 가산
+ const s=st*SR|0,n=Math.min(y.length-s,dur*SR|0);
+ for(let i=0;i<n;i++){const t=i/SR;let env=Math.min(1,t/att);env*=sustain?Math.min(1,(dur-t)/dec):Math.exp(-t/dec);
+  let v=0;for(const[h,a]of harm)v+=a*Math.sin(2*Math.PI*f*h*t);y[s+i]+=v*amp*env}
+}
+const PROG={piano:[[48,[60,64,67,71]],[45,[57,60,64,67]],[41,[57,60,65,69]],[43,[55,59,62,67]]],
+            dream:[[45,[57,60,64,71]],[41,[57,60,65,72]],[48,[55,60,64,67]],[43,[55,59,62,69]]]};
+const BGM={
+ tech(sec){const y=new Float32Array(SR*sec|0),n=y.length,bt=60/112,P=[[45,[69,72,76]],[41,[69,72,77]],[48,[67,72,76]],[43,[67,71,74]]];
+  for(let b=0;b*bt<sec;b++){const t0=b*bt,s=t0*SR|0;let ph=0;
+   for(let i=0;i<SR*.25&&s+i<n;i++){const t=i/SR;ph+=2*Math.PI*(45+80*Math.exp(-t/.03))/SR;y[s+i]+=Math.sin(ph)*Math.exp(-t/.13)*.9}
+   const h=(t0+bt/2)*SR|0;for(let i=0;i<SR*.04&&h+i<n;i++)y[h+i]+=(Math.random()*2-1)*Math.exp(-i/SR/.012)*.25;
+   const[root,ch]=P[(b/4|0)%4];if(b%4===0)tone(y,t0,bt*4,mtof(root-12),.35,.01,.3,[[1,1],[2,.2]]);
+   for(let k=0;k<2;k++)if(Math.random()<.75)tone(y,t0+k*bt/2,.4,mtof(ch[(b*2+k)%3]+12),.13,.003,.12,[[1,1],[3,.3],[5,.12]],false)}
+  return norm(y,.5)},
+ lofi(sec){const y=new Float32Array(SR*sec|0),n=y.length,bt=60/80,P=[[48,[64,67,71,74]],[45,[60,64,67,71]],[50,[60,65,69,72]],[43,[59,62,65,69]]];
+  for(let b=0;b*bt<sec;b++){const t0=b*bt,s=t0*SR|0;
+   if(b%2===0){let ph=0;for(let i=0;i<SR*.3&&s+i<n;i++){const t=i/SR;ph+=2*Math.PI*(50+50*Math.exp(-t/.04))/SR;y[s+i]+=Math.sin(ph)*Math.exp(-t/.18)*.7}}
+   else{let f=0;for(let i=0;i<SR*.18&&s+i<n;i++){f+=.35*((Math.random()*2-1)-f);y[s+i]+=f*Math.exp(-i/SR/.06)*.45}}
+   if(b%4===0){const[r,ch]=P[(b/4|0)%4];tone(y,t0,bt*4,mtof(r-12),.3,.02,.4);ch.forEach((m,k)=>tone(y,t0+k*.03,bt*4,mtof(m),.07,.02,.8,[[1,1],[2,.35],[3,.08]]))}}
+  for(let i=0;i<n;i++)if(Math.random()>.9997)y[i]+=(Math.random()-.5)*.6;
+  return norm(lp(y,.55),.5)},
+ piano(sec){const y=new Float32Array(SR*sec|0),P=PROG.piano,L=4;
+  for(let c=0;c*L<sec;c++){const[b,ch]=P[c%4],t0=c*L;
+   tone(y,t0,L+1.2,mtof(b),.35,.05,2.2,[[1,1],[2,.25]],false);
+   ch.forEach(m=>tone(y,t0,L+.8,mtof(m),.08,1.2,1.2,[[1,1],[2,.15]]));
+   for(let k=0;k<8;k++)if(Math.random()<.7){const m=ch[(k+c)%4]+12;tone(y,t0+k*.5,2.2,mtof(m),.16,.004,.7,[[1,1],[2,.3],[3,.1]],false)}}
+  return norm(y,.5)},
+ dream(sec){const y=new Float32Array(SR*sec|0),P=PROG.dream,L=6;
+  for(let c=0;c*L<sec;c++){const[b,ch]=P[c%4],t0=c*L;
+   tone(y,t0,L+2,mtof(b),.25,2,2);ch.forEach(m=>{tone(y,t0,L+2,mtof(m),.07,2.5,2.5);tone(y,t0,L+2,mtof(m)*1.004,.06,2.5,2.5)});
+   for(let k=0;k<3;k++)if(Math.random()<.6)tone(y,t0+k*2+Math.random(),3,mtof(pick(ch)+24),.05,.01,1.4,[[1,1]],false)}
+  return norm(y,.45)},
+ birds(sec){const n=SR*sec|0,y=new Float32Array(n),w=lp(noise(n),.008);for(let i=0;i<n;i++)y[i]=w[i]*3;
+  let t=.5;while(t<sec-1){const cnt=2+Math.random()*4|0,f0=2600+Math.random()*1800,up=Math.random()<.5;
+   for(let k=0;k<cnt;k++){const st=t+k*(.09+Math.random()*.05),d=.05+Math.random()*.07,s=st*SR|0,m=d*SR|0;
+    let ph=0;for(let i=0;i<m&&s+i<n;i++){const r=i/m,f=f0*(up?1+.35*r:1.35-.35*r);ph+=2*Math.PI*f/SR;y[s+i]+=Math.sin(ph)*Math.sin(Math.PI*r)*.25}}
+   t+=.8+Math.random()*2.8}
+  return norm(y,.4)},
+ waves(sec){const n=SR*sec|0,w=lp(noise(n),.06),y=new Float32Array(n);for(let i=0;i<n;i++){const t=i/SR;y[i]=w[i]*(.2+.8*Math.sin(Math.PI*t/7.5)**4)}return norm(y,.5)},
+ rain(sec){const n=SR*sec|0,w=noise(n),a=lp(w,.15),y=new Float32Array(n);let d=0;for(let i=0;i<n;i++){if(Math.random()>.9993)d+=Math.random()*1.5;d*=.967;y[i]=w[i]-a[i]+d*gauss()}return norm(y,.45)},
+ stream(sec){const n=SR*sec|0,w=noise(n),a=lp(w,.25),b=lp(w,.02),m=lp(noise(n),.0003),y=new Float32Array(n);for(let i=0;i<n;i++)y[i]=(a[i]-b[i])*(.6+.4*m[i]*8);return norm(y,.45)}
+};
+const FX={
+ ding(){const y=new Float32Array(SR*1.4|0);tone(y,0,1.3,1318.5,.5,.002,.35,[[1,1],[2.4,.2]],false);tone(y,.11,1.2,1760,.45,.002,.45,[[1,1],[2.4,.2]],false);return norm(y,.55)},
+ swoosh(){const n=SR*.7|0,w=noise(n),y=new Float32Array(n);let a=0;for(let i=0;i<n;i++){const r=i/n,c=.02+.5*Math.sin(Math.PI*r)**2;a+=c*(w[i]-a);y[i]=a*Math.sin(Math.PI*r)**1.5}return norm(y,.5)},
+ chime(){const y=new Float32Array(SR*3.2|0);[76,79,84].forEach((m,i)=>tone(y,i*.22,3-i*.22,mtof(m),.4,.003,1.1,[[1,1],[2.76,.3],[5.4,.12]],false));return norm(y,.6)},
+ bowl(){const n=SR*6|0,y=new Float32Array(n);[[1,1,4.5],[2.76,.5,3],[5.4,.28,2]].forEach(([r,a,tau])=>{tone(y,0,6,220*r,a,.01,tau,[[1,1]],false);tone(y,0,6,220*r+1.3,a*.6,.01,tau,[[1,1]],false)});return norm(y,.6)},
+ music(){const y=new Float32Array(SR*4|0);[72,76,79,84,79,76,77,74].forEach((m,i)=>tone(y,i*.32,1.6,mtof(m+12),.3,.002,.5,[[1,1],[3,.25],[5.1,.1]],false));return norm(y,.5)},
+ ir(a){const n=SR*(.4+2*a)|0,x=new Float32Array(n),tau=.12+.5*a;for(let i=0;i<n;i++)x[i]=gauss()*Math.exp(-i/SR/tau);const y=lp(x,.3);y[0]=0;let e=0;for(const v of y)e+=v*v;e=Math.sqrt(e)+1e-9;for(let i=0;i<n;i++)y[i]/=e;return y}
+};
+const INTRO_LEN={chime:1.6,bowl:2.2,music:2.8,ding:.9,swoosh:.6};
+
+function mixEvents(ev,minSec){let n=SR*minSec|0;for(const e of ev)n=Math.max(n,(e.at*SR|0)+e.clip.length);const out=new Float32Array(n);
+ for(const e of ev){const s=e.at*SR|0;for(let i=0;i<e.clip.length;i++)out[s+i]+=e.clip[i]*e.gain}return out}
+function opts(){const v=id=>$('#'+id).value;return{gap:+v('gap'),intro:v('intro'),outro:v('outro'),bgm:v('bgm'),bgmG:+v('bgmG'),rev:+v('rev'),rate:+v('rate'),fmt:$('input[name=fmt]:checked').value}}
+
+let CAPS=[];
+async function build(segs,o,texts=null){
+ const V=[],F=[];let c=.4;CAPS=[];
+ if(o.intro!=='none'){F.push({clip:FX[o.intro](),at:.2,gain:.8});c=.2+INTRO_LEN[o.intro]}
+ segs.forEach((seg,i)=>{V.push({clip:seg,at:c,gain:1});if(texts)CAPS.push({t:texts[i],a:c,b:c+seg.length/SR});c+=seg.length/SR;if(i<segs.length-1)c+=o.gap});
+ c+=.9;
+ if(o.outro!=='none'){const cl=FX[o.outro]();F.push({clip:cl,at:c,gain:.8});c+=cl.length/SR}else c+=1.2;
+ const total=c+.3,voice=mixEvents(V,total),fx=mixEvents(F,total),n=Math.max(voice.length,fx.length);
+ const bus=new Float32Array(n);for(let i=0;i<n;i++)bus[i]=(voice[i]||0)+(fx[i]||0);
+ return render(bus,o,true);
+}
+async function render(bus,o,withBgm){
+ const tail=o.rev>0?(SR*(.4+2*o.rev)|0):0,N=bus.length+tail,oc=new OfflineAudioContext(1,N,SR);
+ const src=oc.createBufferSource();src.buffer=oc.createBuffer(1,bus.length,SR);src.buffer.copyToChannel(bus,0);src.connect(oc.destination);
+ if(o.rev>0){const cv=oc.createConvolver();cv.normalize=false;const ir=FX.ir(o.rev),ib=oc.createBuffer(1,ir.length,SR);ib.copyToChannel(ir,0);cv.buffer=ib;const wg=oc.createGain();wg.gain.value=.5*o.rev;src.connect(cv).connect(wg).connect(oc.destination)}
+ if(withBgm&&o.bgm!=='none'&&o.bgmG>0){const bg=BGM[o.bgm](N/SR),f=Math.min(bg.length/4|0,SR*2.5);for(let i=0;i<f;i++){bg[i]*=i/f;bg[bg.length-1-i]*=i/f}
+  const ab=oc.createBuffer(1,bg.length,SR);ab.copyToChannel(bg,0);const as=oc.createBufferSource();as.buffer=ab;const ag=oc.createGain();ag.gain.value=o.bgmG*.45;as.connect(ag).connect(oc.destination);as.start()}
+ src.start();const out=await oc.startRendering();return norm(out.getChannelData(0).slice(),.89);
+}
+
+/* ════════ 5. 음성 엔진 ════════ */
+const splitSent=t=>t.trim().split(/(?<=[.!?。…])\s+|\n+/).map(s=>s.trim()).filter(Boolean);
+async function decode(buf){const oc=new OfflineAudioContext(1,SR,SR);return (await oc.decodeAudioData(buf)).getChannelData(0).slice()}
+async function gCall(text,key,voice,rate,pitch){
+ const ac={audioEncoding:'LINEAR16',sampleRateHertz:SR};if(rate)ac.speakingRate=Math.max(.25,1+rate/100);if(pitch&&!/Chirp/.test(voice))ac.pitch=pitch;
+ const r=await fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({input:{text},voice:{languageCode:'ko-KR',name:voice},audioConfig:ac})});
+ const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error?.message||('HTTP '+r.status));e.status=r.status;throw e}
+ const bin=atob(j.audioContent),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return decode(u.buffer);
+}
+async function personaTTS(text,key,P,extraRate){ // 고품질 음성 실패 시 대체 음성 자동 전환
+ const rate=P.rate+extraRate,tries=voiceOK[P.id]?[voiceOK[P.id]]:[[P.v,rate],[P.v,0],[P.fb,rate]];
+ let last;for(const[v,r]of tries){try{const a=await gCall(text,key,v,r,P.pitch);voiceOK[P.id]=[v,r];return a}catch(e){last=e;if(e.status===403||e.status===401||/referer|API key|billing/i.test(e.message))throw e}}
+ throw last;
+}
+
+// 브라우저 음성 (PC 실시간 녹음)
+const canLive=!!navigator.mediaDevices?.getDisplayMedia;let liveAbort=false;
+function loadVoices(){const sel=$('#lvoice');if(!sel)return;const vs=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang));
+ sel.innerHTML=vs.length?vs.map(v=>`<option value="${v.name}">${v.name}${/natural|online/i.test(v.name)?' ★':''}</option>`).join(''):'<option value="">한국어 음성 없음</option>';
+ const best=vs.find(v=>/natural/i.test(v.name));if(best)sel.value=best.name}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function speak(text,o){return new Promise(res=>{const u=new SpeechSynthesisUtterance(text),v=speechSynthesis.getVoices().find(v=>v.name===$('#lvoice').value);
+ if(v)u.voice=v;u.lang='ko-KR';u.rate=Math.max(.3,1+o.rate/100);const g=setTimeout(res,Math.max(8000,text.length*400));u.onend=u.onerror=()=>{clearTimeout(g);res()};speechSynthesis.speak(u)})}
+async function liveRecord(sents,o){
+ let stream;try{stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:{suppressLocalAudioPlayback:false},systemAudio:'include'})}catch{throw new Error('화면 공유가 취소되었습니다.')}
+ const at=stream.getAudioTracks();if(!at.length){stream.getTracks().forEach(t=>t.stop());throw new Error('「시스템 오디오 공유」를 체크하세요.')}
+ const chunks=[],rec=new MediaRecorder(new MediaStream(at));rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const stopped=new Promise(r=>rec.onstop=r);
+ rec.start(250);await sleep(500);
+ try{for(let i=0;i<sents.length&&!liveAbort;i++){setProg((i+.5)/sents.length,`낭독·녹음 중 ${i+1}/${sents.length}`);await speak(sents[i],o);await sleep(o.gap*1000)}}
+ finally{speechSynthesis.cancel();rec.stop();await stopped;stream.getTracks().forEach(t=>t.stop())}
+ return trimSilence(await decode(await new Blob(chunks).arrayBuffer()));
+}
+function trimSilence(x){let a=0,b=x.length-1;const th=.003;while(a<b&&Math.abs(x[a])<th)a++;while(b>a&&Math.abs(x[b])<th)b--;return x.slice(Math.max(0,a-SR*.1|0),Math.min(x.length,b+SR*.2|0))}
+
+/* ════════ 6. 인코딩 ════════ */
+function toI16(f){const o=new Int16Array(f.length);for(let i=0;i<f.length;i++){const v=Math.max(-1,Math.min(1,f[i]));o[i]=v<0?v*32768:v*32767}return o}
+function toWav(f){const d=toI16(f),b=new ArrayBuffer(44+d.length*2),v=new DataView(b);let p=0;const w=s=>{for(const c of s)v.setUint8(p++,c.charCodeAt(0))},u32=x=>{v.setUint32(p,x,true);p+=4},u16=x=>{v.setUint16(p,x,true);p+=2};
+ w('RIFF');u32(36+d.length*2);w('WAVE');w('fmt ');u32(16);u16(1);u16(1);u32(SR);u32(SR*2);u16(2);u16(16);w('data');u32(d.length*2);new Int16Array(b,44).set(d);return new Blob([b],{type:'audio/wav'})}
+function toMp3(f){const enc=new lamejs.Mp3Encoder(1,SR,192),d=toI16(f),out=[];for(let i=0;i<d.length;i+=1152){const m=enc.encodeBuffer(d.subarray(i,i+1152));if(m.length)out.push(new Uint8Array(m))}const e=enc.flush();if(e.length)out.push(new Uint8Array(e));return new Blob(out,{type:'audio/mpeg'})}
+
+/* ════════ 7. 명언 카드 그리기 (영상·이미지 공용) ════════ */
+const PAL={
+ navy:{n:'네이비',g:['#0b1020','#1e2a5a'],fg:'#f2f5ff',ac:'#7ee2b8',sub:'#aab4d4',bb:'rgba(255,255,255,.08)',hl:'#ffe39a'},
+ neon:{n:'네온',g:['#0b0b12','#2b0f3f'],fg:'#fff',ac:'#ff6bd6',sub:'#c7b3d9',bb:'rgba(255,255,255,.08)',hl:'#7cf3ff'},
+ sky:{n:'스카이',g:['#0e3a66','#1c7ed6'],fg:'#fff',ac:'#ffe066',sub:'#cfe3fb',bb:'rgba(255,255,255,.12)',hl:'#ffe066'},
+ mint:{n:'민트',g:['#ecfbf5','#c9f0e2'],fg:'#0f2a22',ac:'#0c8a62',sub:'#3f6b5c',bb:'rgba(255,255,255,.7)',hl:'#b8410f'},
+ paper:{n:'화이트',g:['#fafaf7','#ececdf'],fg:'#16181d',ac:'#3b5bdb',sub:'#5b6170',bb:'rgba(59,91,219,.07)',hl:'#c2410c'},
+ safety:{n:'안전',g:['#141414','#3a3000'],fg:'#fff',ac:'#ffd43b',sub:'#d9d2b0',bb:'rgba(255,212,59,.1)',hl:'#ffd43b'}};
+let pal='navy';
+function wrapLines(g,text,maxW){const out=[];for(const para of text.split('\n')){let line='';for(const w of para.split(' ')){const t=line?line+' '+w:w;if(g.measureText(t).width>maxW&&line){out.push(line);line=w}else line=t}
+ while(g.measureText(line).width>maxW){let k=line.length;while(k>1&&g.measureText(line.slice(0,k)).width>maxW)k--;out.push(line.slice(0,k));line=line.slice(k)}if(line)out.push(line)}return out}
+function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+async function cardPainter(W,H){
+ let bg=null;const bf=$('#vbg').files[0];if(bf){try{bg=await createImageBitmap(bf)}catch{}}
+ try{await document.fonts.load('700 40px "Noto Sans KR"')}catch{}
+ const cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d'),P=PAL[pal],S=Math.min(W,H)/1080,T=curT(),M=W*.08,CW=W-2*M,F='"Noto Sans KR",sans-serif';
+ // 레이아웃 계산 (영역에 맞을 때까지 글자 크기 축소)
+ const top=H*.11,bottom=H*(H>W?.74:.8);let k=1,L;
+ for(;;){g.font=`700 ${78*S*k}px ${F}`;const lt=wrapLines(g,T.t,CW);g.font=`500 ${36*S*k}px ${F}`;const ls=wrapLines(g,'📌 '+T.s,CW);
+  g.font=`500 ${44*S*k}px ${F}`;const lp=wrapLines(g,T.p,CW-60*S*k);g.font=`700 ${38*S*k}px ${F}`;const lr=wrapLines(g,'✅ '+T.r,CW);
+  const h=lt.length*78*1.3*S*k+30*S*k+ls.length*36*1.5*S*k+40*S*k+(lp.length*44*1.55+110)*S*k+36*S*k+lr.length*38*1.5*S*k;
+  L={lt,ls,lp,lr,h};if(h<=bottom-top||k<.45)break;k*=.92}
+ return {cv,g,draw(t,dur,sub,env){
+  if(bg){const r=Math.max(W/bg.width,H/bg.height),bw=bg.width*r,bh=bg.height*r;g.drawImage(bg,(W-bw)/2,(H-bh)/2,bw,bh);g.fillStyle='rgba(8,10,18,.72)';g.fillRect(0,0,W,H)}
+  else{const gr=g.createLinearGradient(0,0,W*.5,H);gr.addColorStop(0,P.g[0]);gr.addColorStop(1,P.g[1]);g.fillStyle=gr;g.fillRect(0,0,W,H)}
+  const fg=bg?'#fff':P.fg,sb=bg?'#ddd':P.sub;g.textBaseline='middle';
+  // 상단 배지
+  const badge=`AI 꿀팁 #${String(T.no).padStart(3,'0')}`;g.font=`700 ${34*S}px ${F}`;const bw=g.measureText(badge).width+44*S;
+  g.fillStyle=P.ac;rr(g,M,H*.05,bw,58*S,29*S);g.fill();g.fillStyle=P.g[0];g.textAlign='left';g.fillText(badge,M+22*S,H*.05+29*S);
+  g.fillStyle=sb;g.font=`500 ${28*S}px ${F}`;g.textAlign='right';g.fillText(T.c,W-M,H*.05+29*S);
+  // 본문
+  let y=top+Math.max(0,(bottom-top-L.h)/2);g.textAlign='left';
+  g.fillStyle=fg;g.font=`700 ${78*S*k}px ${F}`;L.lt.forEach(l=>{y+=78*1.3*S*k/2;g.fillText(l,M,y);y+=78*1.3*S*k/2});y+=30*S*k;
+  g.fillStyle=sb;g.font=`500 ${36*S*k}px ${F}`;L.ls.forEach(l=>{y+=36*.75*S*k;g.fillText(l,M,y);y+=36*.75*S*k});y+=40*S*k;
+  const bh=(L.lp.length*44*1.55+110)*S*k;g.fillStyle=P.bb;rr(g,M,y,CW,bh,28*S);g.fill();g.strokeStyle=P.ac;g.globalAlpha=.55;g.lineWidth=3*S;rr(g,M,y,CW,bh,28*S);g.stroke();g.globalAlpha=1;
+  g.fillStyle=P.ac;g.font=`700 ${30*S*k}px ${F}`;g.fillText('💬 이렇게 물어보세요',M+30*S*k,y+45*S*k);
+  g.fillStyle=fg;g.font=`500 ${44*S*k}px ${F}`;let py=y+90*S*k;L.lp.forEach(l=>{py+=44*.775*S*k;g.fillText(l,M+30*S*k,py);py+=44*.775*S*k});y+=bh+36*S*k;
+  g.fillStyle=bg?'#ffe39a':P.hl;g.font=`700 ${38*S*k}px ${F}`;L.lr.forEach(l=>{y+=38*.75*S*k;g.fillText(l,M,y);y+=38*.75*S*k});
+  // 자막
+  g.textAlign='center';
+  if(sub){const sf=(H>W?40:32)*S;g.font=`700 ${sf}px ${F}`;const SL=wrapLines(g,sub,W*.84).slice(0,3),sy=H*(H>W?.82:.86),bh2=SL.length*sf*1.45+sf*.9;
+   g.fillStyle='rgba(0,0,0,.55)';rr(g,W*.05,sy-bh2/2,W*.9,bh2,18*S);g.fill();g.fillStyle='#fff';SL.forEach((l,i)=>g.fillText(l,W/2,sy-(SL.length-1)*sf*.725+i*sf*1.45))}
+  else{g.fillStyle=sb;g.font=`500 ${30*S}px ${F}`;g.fillText('프롬프트 전문은 설명란에 👇',W/2,H*(H>W?.84:.88))}
+  if(dur){const bars=28,bw2=W*.5/bars,by=H*.925;g.fillStyle=P.ac;g.globalAlpha=.85;
+   for(let b=0;b<bars;b++){const e=env?env(b):0,h=(3+e*40*(1-Math.abs(b-bars/2)/bars))*S;g.fillRect(W*.25+b*bw2+bw2*.25,by-h,bw2*.5,h*2)}g.globalAlpha=1;
+   g.fillStyle='rgba(127,127,127,.25)';g.fillRect(M,H*.965,W-2*M,5*S);g.fillStyle=P.ac;g.fillRect(M,H*.965,(W-2*M)*t/dur,5*S)}
+ }};
+}
+async function resample(x,rate){const oc=new OfflineAudioContext(1,Math.ceil(x.length*rate/SR),rate);const b=oc.createBuffer(1,x.length,SR);b.copyToChannel(x,0);const s=oc.createBufferSource();s.buffer=b;s.connect(oc.destination);s.start();return (await oc.startRendering()).getChannelData(0)}
+async function pickCfg(Enc,list){for(const c of list){try{if((await Enc.isConfigSupported(c)).supported)return c}catch{}}return null}
+async function toMp4(audio){
+ if(!window.VideoEncoder||!window.AudioEncoder)throw new Error('이 브라우저는 영상 인코딩을 지원하지 않습니다. 최신 Chrome·Edge·삼성 인터넷을 사용하세요.');
+ if(!window.Mp4Muxer)throw new Error('MP4 모듈을 불러오지 못했습니다. 새로고침하세요.');
+ const[W,H]=$('#ratio .on').dataset.r.split('x').map(Number),FPS=15,AR=48000;
+ const vc=await pickCfg(VideoEncoder,['avc1.640028','avc1.4d0028','avc1.42002a','vp09.00.40.08'].map(codec=>({codec,width:W,height:H,bitrate:2_000_000,framerate:FPS})));
+ const ac=await pickCfg(AudioEncoder,['mp4a.40.2','opus'].map(codec=>({codec,sampleRate:AR,numberOfChannels:1,bitrate:128000})));
+ if(!vc||!ac)throw new Error('이 기기에서 지원하는 영상/음성 코덱이 없습니다.');
+ const muxer=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),fastStart:'in-memory',video:{codec:vc.codec.startsWith('avc')?'avc':'vp9',width:W,height:H},audio:{codec:ac.codec==='opus'?'opus':'aac',numberOfChannels:1,sampleRate:AR}});
+ let err=null;const ve=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>err=e});ve.configure(vc);
+ const ae=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>err=e});ae.configure(ac);
+ const a48=await resample(audio,AR);for(let i=0;i<a48.length;i+=4800){const d=a48.slice(i,i+4800);ae.encode(new AudioData({format:'f32-planar',sampleRate:AR,numberOfFrames:d.length,numberOfChannels:1,timestamp:Math.round(i/AR*1e6),data:d}))}
+ const C=await cardPainter(W,H),dur=audio.length/SR,N=Math.ceil(dur*FPS),showSub=$('#vsub').checked;
+ const envA=new Float32Array(N);for(let k=0;k<N;k++){const a=k/FPS*SR|0,b=Math.min(audio.length,a+(SR/FPS|0));let m=0;for(let j=a;j<b;j+=8)m=Math.max(m,Math.abs(audio[j]));envA[k]=m}
+ for(let k=0;k<N;k++){if(err)throw err;const t=k/FPS;let sub='';if(showSub&&CAPS.length){const c=CAPS.find(c=>t>=c.a-.15&&t<=c.b+.4);sub=c?c.t:''}
+  C.draw(t,dur,sub,b=>envA[Math.max(0,Math.min(N-1,k-(Math.abs(b-14)|0)))]);
+  const f=new VideoFrame(C.cv,{timestamp:Math.round(t*1e6),duration:Math.round(1e6/FPS)});ve.encode(f,{keyFrame:k%(FPS*2)===0});f.close();
+  if(ve.encodeQueueSize>8)await new Promise(r=>{const w=()=>ve.encodeQueueSize>2?setTimeout(w,5):r();w()});
+  if(k%15===0){setProg(k/N,`영상 인코딩 ${Math.round(k/N*100)}%`);await sleep(0)}}
+ await ve.flush();await ae.flush();if(err)throw err;muxer.finalize();ve.close();ae.close();
+ return new Blob([muxer.target.buffer],{type:'video/mp4'});
+}
+
+/* ════════ 8. UI ════════ */
+function setProg(p,t){$('#bar').style.display='block';$('#bar i').style.width=Math.round(p*100)+'%';msg(t)}
+function msg(t,err){$('#msg').textContent=t||'';$('#msg').className=err?'err':''}
+const FMT={rate:v=>(v>0?'+':'')+v+'%',gap:v=>(+v).toFixed(1)+'초',bgmG:v=>Math.round(v*100)+'%',rev:v=>v==0?'끔':Math.round(v*100)+'%'};
+function syncOut(){for(const k in FMT)$('#'+k+'O').textContent=FMT[k]($('#'+k).value)}
+for(const k in FMT)$('#'+k).addEventListener('input',syncOut);
+const cnt=()=>$('#cnt').textContent=$('#text').value.length.toLocaleString()+'자';$('#text').addEventListener('input',cnt);
+
+// 분야·형태
+$('#themes').innerHTML=THEMES.map(t=>`<button class="chip${t===theme?' on':''}">${t}</button>`).join('');
+$$('#themes .chip').forEach(b=>b.onclick=()=>{theme=b.textContent;$$('#themes .chip').forEach(x=>x.classList.toggle('on',x===b));cur=nextTip();showTip();writeScript()});
+$('#form').innerHTML=Object.entries(FORMS).map(([k,f])=>`<option value="${k}">${f.name}</option>`).join('');$('#form').value='basic';
+$('#form').onchange=writeScript;
+const nextNo=()=>(parseInt(store.get('aitip_no'))||0)+1;
+$('#noText').value=nextNo();
+$('#refresh').onclick=()=>{cur=nextTip();$('#noText').value=nextNo();showTip();writeScript()};
+$('#rewrite').onclick=writeScript;
+['tText','pText','noText'].forEach(id=>$('#'+id).addEventListener('input',()=>{syncView();if(window.ytReady)ytBuild(false)}));
+$('#copyP').onclick=async()=>{const ok=await copyText(curT().p),b=$('#copyP'),o=b.textContent;b.textContent=ok?'✅ 복사됨':'⚠ 실패';setTimeout(()=>b.textContent=o,1500)};
+
+// 페르소나
+function renderPersonas(){$('#personas').innerHTML=PERSONAS.map(p=>`<div class="pc${p===persona?' on':''}" data-id="${p.id}" role="button" tabindex="0"><b>${p.name}</b><small>${p.d}</small><button class="play" data-id="${p.id}" title="목소리 듣기">▶</button></div>`).join('');
+ $$('#personas .pc').forEach(el=>el.onclick=e=>{if(e.target.classList.contains('play'))return;persona=PERSONAS.find(p=>p.id===el.dataset.id);renderPersonas()});
+ $$('#personas .play').forEach(b=>b.onclick=async e=>{e.stopPropagation();const P=PERSONAS.find(p=>p.id===b.dataset.id),key=$('#gkey').value.trim();if(!key){msg('⚠ 목소리 듣기에는 API 키가 필요합니다.',true);return}
+  b.textContent='…';try{const a=await personaTTS('안녕하세요. 오늘의 명언을 전해 드립니다.',key,P,0);playClip(a)}catch(er){msg('⚠ '+er.message,true)}b.textContent='▶'})}
+renderPersonas();
+
+// 분위기
+$('#moods').innerHTML=Object.keys(MOODS).map(k=>`<button class="chip">${k}</button>`).join('');
+$$('#moods .chip').forEach(b=>b.onclick=()=>{$$('#moods .chip').forEach(x=>x.classList.toggle('on',x===b));const m=MOODS[b.textContent];
+ persona=PERSONAS.find(p=>p.id===m.p);renderPersonas();$('#form').value=m.form;$('#bgm').value=m.bgm;$('#intro').value=m.intro;$('#outro').value=m.outro;setPal(m.pal);
+ if(m.theme){theme=m.theme;$$('#themes .chip').forEach(x=>x.classList.toggle('on',x.textContent===theme));cur=nextTip();showTip()}writeScript()});
+
+// 카드 팔레트
+$('#palette').innerHTML=Object.entries(PAL).map(([k,p])=>`<span class="swatch" data-k="${k}" title="${p.n}" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})"></span>`).join('');
+function setPal(k){pal=k;$$('#palette .swatch').forEach(s=>s.classList.toggle('on',s.dataset.k===k));const P=PAL[k],qb=$('.tip');qb.style.background=`linear-gradient(135deg,${P.g[0]},${P.g[1]})`;qb.style.color=P.fg;$('.tip .no').style.color=P.ac;$('.tip .pr b').style.color=P.ac;$('.tip .pr').style.background=P.bb;$('#rView').style.color=P.hl}
+$$('#palette .swatch').forEach(s=>s.onclick=()=>setPal(s.dataset.k));
+
+// 엔진 탭
+let engine='google',url=null;
+if(!canLive){$('#tabs [data-e=live] small').textContent='PC 전용';$('#eng-live').innerHTML='<div class="note"><b>스마트폰 미지원</b> — 성우 음성 또는 내 목소리 녹음을 이용하세요.</div>'}
+$$('#tabs button').forEach(b=>b.onclick=()=>{engine=b.dataset.e;$$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));['google','live','mic'].forEach(e=>$('#eng-'+e).classList.toggle('hide',e!==engine));$('#go').disabled=$('#preview').disabled=engine==='live'&&!canLive});
+const k0=store.get('gtts_key');if(k0){$('#gkey').value=k0;$('#gsave').checked=true}
+$('#gsave').onchange=()=>store.set('gtts_key',$('#gsave').checked?$('#gkey').value:null);
+$('#gkey').oninput=()=>$('#gsave').checked&&store.set('gtts_key',$('#gkey').value);
+$$('input[name=fmt]').forEach(r=>r.onchange=()=>$('#vopt').classList.toggle('hide',$('input[name=fmt]:checked').value!=='mp4'));
+$$('#ratio .chip').forEach(b=>b.onclick=()=>$$('#ratio .chip').forEach(x=>x.classList.toggle('on',x===b)));
+
+// 마이크
+let micBlob=null,micRec=null;
+$('#mic').onclick=async()=>{if(micRec&&micRec.state==='recording'){micRec.stop();return}
+ try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}}),ch=[];micRec=new MediaRecorder(st);micRec.ondataavailable=e=>e.data.size&&ch.push(e.data);
+  micRec.onstop=()=>{st.getTracks().forEach(t=>t.stop());micBlob=new Blob(ch,{type:micRec.mimeType});$('#micPlay').src=URL.createObjectURL(micBlob);$('#micPlay').classList.remove('hide');$('#mic').textContent='● 다시 녹음';$('#mic').classList.remove('on');msg('녹음 완료 → [변환 및 저장]')};
+  micRec.start();$('#mic').textContent='■ 녹음 중지';$('#mic').classList.add('on');msg('녹음 중… 원고를 읽어 주세요')}catch{msg('⚠ 마이크 권한이 필요합니다.',true)}};
+
+// 미리듣기
+let pvCtx,pvSrc;
+function playClip(c){pvCtx=pvCtx||new AudioContext({sampleRate:SR});try{pvSrc&&pvSrc.stop()}catch{}const b=pvCtx.createBuffer(1,c.length,SR);b.copyToChannel(c,0);pvSrc=pvCtx.createBufferSource();pvSrc.buffer=b;pvSrc.connect(pvCtx.destination);pvSrc.start()}
+$$('.pv button').forEach(b=>b.onclick=()=>{const p=b.dataset.p;if(p==='stop'){try{pvSrc&&pvSrc.stop()}catch{}return}playClip(BGM[p]?BGM[p](12):FX[p]())});
+$('#stop').onclick=()=>{liveAbort=true;speechSynthesis.cancel();msg('중단 중…')};
+
+function stamp(ext){const d=new Date(),z=n=>String(n).padStart(2,'0');return `AI꿀팁_${String(tipNo()).padStart(3,'0')}_${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}.${ext}`}
+function showResult(blob,ext){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);const name=stamp(ext);
+ $('#player').classList.toggle('hide',!['mp3','wav'].includes(ext));$('#vplayer').classList.toggle('hide',ext!=='mp4');$('#iplayer').classList.toggle('hide',ext!=='png');
+ ({mp4:$('#vplayer'),png:$('#iplayer')}[ext]||$('#player')).src=url;$('#dl').href=url;$('#dl').download=name;$('#dl').textContent=`⬇ ${name}`;$('#result').style.display='block'}
+
+
+// 음성 합성 캐시: 같은 원고·성우·속도면 재합성하지 않음 (API 사용량 절약)
+const segCache=new Map();
+async function makeAudio(o){
+ const s=splitSent($('#text').value);if(!s.length&&engine!=='mic')throw new Error('원고가 비어 있습니다.');
+ if(engine==='google'){const key=$('#gkey').value.trim();if(!key)throw new Error('API 키를 입력하세요.');
+  const segs=[];for(let i=0;i<s.length;i++){const ck=persona.id+'|'+o.rate+'|'+s[i];
+   if(!segCache.has(ck)){setProg(i/s.length,`${persona.name} 낭독 합성 ${i+1}/${s.length}`);segCache.set(ck,await personaTTS(s[i],key,persona,o.rate))}segs.push(segCache.get(ck))}
+  setProg(.95,'BGM 믹싱 중…');return build(segs,o,s)}
+ if(engine==='mic'){if(!micBlob)throw new Error('먼저 녹음하세요.');setProg(.5,'BGM 믹싱 중…');return build([trimSilence(await decode(await micBlob.arrayBuffer()))],o)}
+ const lk='live|'+$('#text').value;if(!segCache.has(lk)){$('#stop').style.display='block';segCache.set(lk,await liveRecord(s,o))}
+ setProg(.95,'BGM 믹싱 중…');return build([segCache.get(lk)],o);
+}
+let lastAudio=null,lastSig='';
+const sig=o=>JSON.stringify([engine,persona.id,$('#text').value,o.gap,o.intro,o.outro,o.bgm,o.bgmG,o.rev,o.rate,engine==='mic'?micBlob?.size:0]);
+async function run(isPreview){
+ const o=opts(),btns=[$('#go'),$('#preview')];btns.forEach(b=>b.disabled=true);$('#result').style.display='none';liveAbort=false;
+ try{
+  let audio;if(lastAudio&&lastSig===sig(o))audio=lastAudio;else{audio=await makeAudio(o);lastAudio=audio;lastSig=sig(o)}
+  if(isPreview){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(toWav(audio));
+   $('#player').classList.remove('hide');$('#vplayer').classList.add('hide');$('#iplayer').classList.add('hide');$('#dl').classList.add('hide');$('#pvLabel').classList.remove('hide');
+   $('#player').src=url;$('#result').style.display='block';msg(`🎧 미리듣기 · ${(audio.length/SR).toFixed(1)}초`);try{await $('#player').play()}catch{}return}
+  setProg(1,'파일 생성 중…');await sleep(30);
+  let blob,ext=o.fmt;
+  if(ext==='mp4')blob=await toMp4(audio);else if(ext==='mp3'&&window.lamejs)blob=toMp3(audio);else{blob=toWav(audio);ext='wav'}
+  $('#dl').classList.remove('hide');$('#pvLabel').classList.add('hide');showResult(blob,ext);store.set('aitip_no',String(Math.max(tipNo(),parseInt(store.get('aitip_no'))||0)));msg(`✅ 완료 · ${(audio.length/SR).toFixed(1)}초 · ${(blob.size/1024).toFixed(0)}KB`);
+ }catch(e){msg('⚠ '+(e.message||e),true)}
+ finally{btns.forEach(b=>b.disabled=engine==='live'&&!canLive);$('#stop').style.display='none';$('#bar').style.display='none'}
+}
+$('#go').onclick=()=>run(false);
+$('#preview').onclick=()=>run(true);
+$('#png').onclick=async()=>{$('#dl').classList.remove('hide');$('#pvLabel').classList.add('hide');const[W,H]=$('#ratio .on').dataset.r.split('x').map(Number);const C=await cardPainter(W,H);C.draw(0,0,'');
+ C.cv.toBlob(b=>{showResult(b,'png');msg('✅ 명언 카드 이미지 생성 완료')},'image/png')};
+
+
+/* ════════ 유튜브 숏츠 문구 자동 작성 ════════ */
+const YT_HOOK={_:["90%가 모르는 AI 활용법","이거 모르면 AI 반만 쓰는 겁니다","AI 이렇게 쓰면 퇴근이 빨라집니다","1분이면 끝나는 AI 꿀팁","챗GPT 이렇게 물어보세요"],
+ "업무·문서":["직장인 필수 AI 꿀팁","보고서 시간 절반 줄이는 법","일 잘하는 사람의 AI 사용법"],"엑셀·데이터":["엑셀 수식 외우지 마세요","엑셀 몰라도 됩니다","엑셀 야근 끝내는 AI 꿀팁"],
+ "글쓰기·메일":["메일 쓰기 1분 컷","글 못 써도 괜찮아요","센스 있는 문장, AI가 대신"],"공부·자기계발":["AI를 과외 선생님으로 쓰는 법","공부 효율 2배 AI 활용","혼자 공부할 때 필수"],
+ "생활·여행":["일상이 편해지는 AI 활용","AI로 고민 끝내는 법","생활이 편해지는 1분"],"이미지·영상":["사진 한 장으로 끝내는 AI 활용","숏츠 만드는 사람 필수","이미지 작업 1분 컷"],
+ "현장·안전 AI":["현장 소장님 필수 AI 꿀팁","안전관리자 업무 1시간 줄이기","건설현장 AI 활용법"]};
+const YT_TAGS={"업무·문서":["업무자동화","직장인꿀팁"],"엑셀·데이터":["엑셀","엑셀꿀팁"],"글쓰기·메일":["글쓰기","직장인꿀팁"],"공부·자기계발":["공부법","자기계발"],"생활·여행":["생활꿀팁","일상"],"이미지·영상":["AI이미지","유튜브쇼츠"],"현장·안전 AI":["건설안전","안전관리","스마트건설"]};
+let ytIdx=0;
+function ytBuild(newTitle){
+ const T=curT(),pool=[...(YT_HOOK[T.c]||[]),...YT_HOOK._];if(newTitle)ytIdx++;const hook=pool[ytIdx%pool.length];
+ let title=`${hook} 🔥 ${T.t} | AI꿀팁 #${T.no}`;if(title.length>70)title=`${T.t}, AI에게 이렇게 물어보세요 | AI꿀팁 #${T.no}`;
+ const tags=[...new Set(['#AI꿀팁','#AI활용','#챗GPT',...(YT_TAGS[T.c]||[]).map(x=>'#'+x),'#shorts'])].slice(0,8);
+ const desc=`🤖 AI 꿀팁 #${T.no} | ${T.t}\n\n📌 이럴 때: ${T.s}\n\n💬 프롬프트 (복사해서 쓰세요)\n${T.p}\n\n✅ 결과: ${T.r}\n💡 한 줄 팁: ${T.k}\n\nChatGPT · Claude · Gemini 어디서나 사용할 수 있습니다.\n🔔 구독하면 매일 1분, 바로 써먹는 AI 활용법을 받아볼 수 있어요.\n💬 알고 싶은 AI 활용 주제를 댓글로 남겨 주세요. 영상으로 만들어 드립니다.`;
+ $('#ytTitle').value=title;$('#ytDesc').value=desc;$('#ytTags').value=tags.join(' ');$('#ytPin').value=`📋 오늘의 프롬프트 (꾹 눌러 복사)\n\n${T.p}\n\n👉 써 보고 결과를 댓글로 알려 주세요!`;ytLen();
+}
+const ytLen=()=>{const n=$('#ytTitle').value.length;$('#ytLen').textContent=`${n}자${n>60?' · 길면 잘릴 수 있음':''}`};
+$('#ytTitle').addEventListener('input',ytLen);
+$('#ytNext').onclick=()=>ytBuild(true);
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch{}ta.remove();return ok}}
+$$('[data-copy]').forEach(b=>b.onclick=async()=>{const T=$('#ytTitle').value,D=$('#ytDesc').value+'\n\n'+$('#ytTags').value;
+ const Pn=$('#ytPin').value,txt={title:T,desc:D,pin:Pn,all:`[제목]\n${T}\n\n[설명]\n${D}\n\n[고정 댓글]\n${Pn}`}[b.dataset.copy];const ok=await copyText(txt),o=b.textContent;b.textContent=ok?'✅ 복사됨':'⚠ 실패';setTimeout(()=>b.textContent=o,1500)});
+
+// 시작: 오늘 날짜 기준 꿀팁
+window.ytReady=true;cur=nextTip(true);showTip();setPal('navy');writeScript();syncOut();
+</script>
+</body>
+</html>
