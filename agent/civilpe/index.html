@@ -131,10 +131,17 @@ canvas#cv{width:100%;height:auto;border-radius:10px;background:#000;display:bloc
   <h2><span class="n">4</span>영상 · BGM</h2>
   <div class="row">
     <div><label>화면 비율</label>
-      <select id="fmt"><option value="169">16:9 가로 (1280×720)</option><option value="916">9:16 세로 · 숏츠 (720×1280)</option><option value="11">1:1 정사각 (1080×1080)</option></select></div>
+      <select id="fmt"><option value="169">16:9 가로</option><option value="916">9:16 세로 · 숏츠</option><option value="11">1:1 정사각</option></select></div>
     <div><label>자막</label>
       <select id="sub"><option value="1">표시</option><option value="0">숨김</option></select></div>
   </div>
+  <div class="row">
+    <div><label>화질</label>
+      <select id="res"><option value="hd" selected>고화질 1080p (권장)</option><option value="sd">표준 720p (빠름)</option></select></div>
+    <div><label>글씨 선명화</label>
+      <select id="sharp"><option value="0">끄기</option><option value="0.6" selected>보통 (권장)</option><option value="1">강하게</option></select></div>
+  </div>
+  <p class="hint">화면 캡처 원본이 낮은 해상도이면 영상도 흐려집니다. 가능하면 PPT를 PDF 또는 고해상도 이미지로 내보내 첨부하세요.</p>
   <label>BGM 파일 (선택, mp3·wav)</label>
   <input type="file" id="bgm" accept="audio/*">
   <label>BGM 음량 <span id="bgmV">0.12</span></label>
@@ -218,7 +225,7 @@ function splitCaption(text,maxc){
 }
 
 /* ========== 파일 첨부 ========== */
-function bmpToCanvas(bmp,w,h){const m=1600,s=Math.min(1,m/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return c}
+function bmpToCanvas(bmp,w,h){const m=2560,s=Math.min(1,m/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return c}
 function longestRun(ok,tol){
   let best=[0,0],s=-1,last=-1;
   for(let i=0;i<=ok.length;i++){
@@ -241,11 +248,14 @@ function autoCropRect(c){
   const asp=(x1-x0)/(y1-y0);if(asp<1.2||asp>2.2)return null;
   return {t:y0/h,b:1-y1/h,l:x0/w,r:1-x1/w};
 }
+function scaled(c,max){const s=Math.min(1,max/Math.max(c.width,c.height)),o=document.createElement('canvas');o.width=Math.max(1,Math.round(c.width*s));o.height=Math.max(1,Math.round(c.height*s));const g=o.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(c,0,0,o.width,o.height);return o}
+function thumb(c){return scaled(c,520).toDataURL('image/jpeg',0.8)}
+function apiImage(c){return scaled(c,1568).toDataURL('image/jpeg',0.88)}
 function applyCrop(p){
   const c=p.src,w=c.width,h=c.height,k=p.crop;
   const x=Math.round(k.l*w),y=Math.round(k.t*h),cw=Math.max(8,Math.round(w*(1-k.l-k.r))),ch=Math.max(8,Math.round(h*(1-k.t-k.b)));
   const o=document.createElement('canvas');o.width=cw;o.height=ch;o.getContext('2d').drawImage(c,x,y,cw,ch,0,0,cw,ch);
-  p.cv=o;p.img=o.toDataURL('image/jpeg',0.88);
+  p.cv=o;p.ver=(p.ver||0)+1;p._sc=null;p.img=thumb(o);
 }
 function addCanvas(c,name){
   const p={id:++uid,name,src:c,crop:{t:0,b:0,l:0,r:0},title:'',script:''};
@@ -260,7 +270,7 @@ async function addPdf(f){
   const n=Math.min(doc.numPages,40);
   for(let i=1;i<=n;i++){
     setMsg(`PDF 변환 중 ${i}/${n}`);
-    const pg=await doc.getPage(i);const v0=pg.getViewport({scale:1});const sc=1600/Math.max(v0.width,v0.height);const v=pg.getViewport({scale:sc});
+    const pg=await doc.getPage(i);const v0=pg.getViewport({scale:1});const sc=2400/Math.max(v0.width,v0.height);const v=pg.getViewport({scale:sc});
     const c=document.createElement('canvas');c.width=Math.round(v.width);c.height=Math.round(v.height);
     await pg.render({canvasContext:c.getContext('2d'),viewport:v}).promise;
     const p={id:++uid,name:f.name.replace(/\.[^.]+$/,'')+'_p'+i,src:c,crop:{t:0,b:0,l:0,r:0},title:'',script:''};
@@ -326,7 +336,7 @@ const SYS_SCRIPT=`당신은 토목시공기술사 수험 교육 방송의 원고
 async function genScript(p){
   const n=$('#len').value,ex=$('#extra').value.trim();
   const txt=await claude([
-    {type:'image',source:{type:'base64',media_type:'image/jpeg',data:p.img.split(',')[1]}},
+    {type:'image',source:{type:'base64',media_type:'image/jpeg',data:apiImage(p.cv).split(',')[1]}},
     {type:'text',text:`이 페이지의 낭독 원고를 작성하세요. 분량 목표: 본문 약 ${n}자(한글 기준).`+(ex?`\n추가 지시: ${ex}`:'')}
   ],SYS_SCRIPT,2500);
   const m=txt.match(/^\s*제목\s*[:：]\s*(.+)\n+/);
@@ -504,16 +514,20 @@ function emit(blob,name){
 }
 
 /* ========== 캔버스 렌더 ========== */
-const FORMATS={'169':[1280,720],'916':[720,1280],'11':[1080,1080]};
+const DIMS={hd:{'169':[1920,1080],'916':[1080,1920],'11':[1080,1080]},sd:{'169':[1280,720],'916':[720,1280],'11':[720,720]}};
+function dimsOf(){return DIMS[$('#res').value][$('#fmt').value]}
 const cv=$('#cv'),cx=cv.getContext('2d');
 const FONT='"Nanum Gothic","Malgun Gothic",sans-serif';
 function layoutOf(W,H){
-  if(W>H)return {title:null,img:[0,0,W,H-140],cap:[0,H-140,W,140],fs:34,lines:2};
-  if(W===H)return {title:[0,0,W,100],img:[0,110,W,Math.round(W*9/16)],cap:[0,110+Math.round(W*9/16),W,H-110-Math.round(W*9/16)],fs:44,lines:4};
-  return {title:[0,0,W,130],img:[0,150,W,Math.round(W*9/16)],cap:[0,150+Math.round(W*9/16),W,H-150-Math.round(W*9/16)],fs:46,lines:6};
+  const sub=$('#sub').value==='1';
+  if(W>H){const k=W/1280,ch=sub?Math.round(120*k):0;return {k,title:null,img:[0,0,W,H-ch],cap:[0,H-ch,W,ch],fs:Math.round(32*k),lines:2,pad:Math.round(10*k)}}
+  const ih=Math.round(W*9/16);
+  if(W===H){const k=W/1080,t=Math.round(100*k),y=t+Math.round(10*k);return {k,title:[0,0,W,t],img:[0,y,W,ih],cap:[0,y+ih,W,H-y-ih],fs:Math.round(44*k),lines:4,pad:Math.round(20*k)}}
+  const k=W/720,t=Math.round(130*k),y=Math.round(150*k);
+  return {k,title:[0,0,W,t],img:[0,y,W,ih],cap:[0,y+ih,W,H-y-ih],fs:Math.round(46*k),lines:6,pad:Math.round(20*k)};
 }
-function maxcOf(){const [W,H]=FORMATS[$('#fmt').value],L=layoutOf(W,H);return Math.max(14,Math.floor(((L.cap[2]-120)/(L.fs*0.95))*L.lines*0.88))}
-function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
+function maxcOf(){const [W,H]=dimsOf(),L=layoutOf(W,H);return Math.max(14,Math.floor(((L.cap[2]-120*L.k)/(L.fs*0.95))*L.lines*0.88))}
+function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
 function wrap(text,maxW){
   const lines=[];let line='';
   for(const ch of text){
@@ -525,30 +539,62 @@ function wrap(text,maxW){
   }
   if(line.trim())lines.push(line.trim());return lines;
 }
-let capsCache=null;
+/* 선명화: 언샤프 마스크(3×3) — 스크린샷을 확대할 때 글씨 가장자리를 보정 */
+function sharpen(c,a){
+  const w=c.width,h=c.height,g=c.getContext('2d'),id=g.getImageData(0,0,w,h),s=id.data,o=new Uint8ClampedArray(s),w4=w*4,k=1+4*a;
+  for(let y=1;y<h-1;y++){let i=y*w4+4;for(let x=1;x<w-1;x++,i+=4){
+    o[i]=s[i]*k-a*(s[i-4]+s[i+4]+s[i-w4]+s[i+w4]);
+    o[i+1]=s[i+1]*k-a*(s[i-3]+s[i+5]+s[i-w4+1]+s[i+w4+1]);
+    o[i+2]=s[i+2]*k-a*(s[i-2]+s[i+6]+s[i-w4+2]+s[i+w4+2]);
+  }}
+  id.data.set(o);g.putImageData(id,0,0);
+}
+function fitRect(p,L){
+  const [ix,iy,iw,ih]=L.img,aw=iw-L.pad*2,ah=ih-L.pad*2,s=Math.min(aw/p.cv.width,ah/p.cv.height);
+  const dw=Math.round(p.cv.width*s),dh=Math.round(p.cv.height*s);
+  return {dw,dh,dx:ix+Math.round((iw-dw)/2),dy:iy+Math.round((ih-dh)/2)};
+}
+function pageImg(p,dw,dh){
+  const key=dw+'x'+dh+'|'+p.ver+'|'+$('#sharp').value;
+  if(p._sc&&p._sc.key===key)return p._sc.cv;
+  let src=p.cv;
+  while(src.width/2>dw){const t=document.createElement('canvas');t.width=Math.round(src.width/2);t.height=Math.round(src.height/2);const tg=t.getContext('2d');tg.imageSmoothingQuality='high';tg.drawImage(src,0,0,t.width,t.height);src=t}
+  const o=document.createElement('canvas');o.width=dw;o.height=dh;const g=o.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(src,0,0,dw,dh);
+  const a=parseFloat($('#sharp').value);if(a>0)sharpen(o,a);
+  p._sc={key,cv:o};return o;
+}
+let capsCache=null,baseC=null;
+function getBase(pi){
+  const [W,H]=dimsOf(),L=layoutOf(W,H),p=pages[pi];
+  const key=[W,H,$('#sub').value,$('#sharp').value,pi,pages.length,p?p.ver+'|'+(p.title||p.name):''].join('|');
+  if(baseC&&baseC.key===key)return baseC.cv;
+  const b=(baseC&&baseC.cv)||document.createElement('canvas');b.width=W;b.height=H;
+  const g=b.getContext('2d'),k=L.k,multi=pages.length>1;
+  const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#10263f');gr.addColorStop(1,'#0a1727');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  if(p&&p.cv){
+    if(L.title){
+      g.fillStyle='#f2a93b';g.font=`800 ${Math.round(38*k)}px ${FONT}`;g.textAlign='left';g.textBaseline='middle';
+      const tt=p.title||p.name;g.fillText(tt.length>22?tt.slice(0,22)+'…':tt,36*k,L.title[3]/2+4*k);
+      if(multi){g.fillStyle='#93a6bd';g.font=`700 ${Math.round(24*k)}px ${FONT}`;g.textAlign='right';g.fillText(`${pi+1} / ${pages.length}`,W-36*k,L.title[3]/2+4*k)}
+    }
+    const r=fitRect(p,L);
+    g.save();rr(g,r.dx,r.dy,r.dw,r.dh,10*k);g.clip();g.drawImage(pageImg(p,r.dw,r.dh),r.dx,r.dy);g.restore();
+    if(!L.title&&multi){g.fillStyle='rgba(147,166,189,.9)';g.font=`700 ${Math.round(20*k)}px ${FONT}`;g.textAlign='right';g.textBaseline='top';g.fillText(`${pi+1} / ${pages.length}`,W-20*k,12*k)}
+  }
+  baseC={key,cv:b};return b;
+}
 function drawIdle(){if(!AUD)drawBase(0,'')}
 function drawBase(pi,caption){
-  const [W,H]=FORMATS[$('#fmt').value];
+  const [W,H]=dimsOf();
   if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
-  const L=layoutOf(W,H),p=pages[pi];
-  const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#10263f');g.addColorStop(1,'#0a1727');cx.fillStyle=g;cx.fillRect(0,0,W,H);
-  if(L.title&&p){
-    cx.fillStyle='#f2a93b';cx.font=`800 ${W>H?34:38}px ${FONT}`;cx.textAlign='left';cx.textBaseline='middle';
-    const tt=p.title||p.name;cx.fillText(tt.length>22?tt.slice(0,22)+'…':tt,36,L.title[3]/2+4);
-    cx.fillStyle='#93a6bd';cx.font=`700 24px ${FONT}`;cx.textAlign='right';cx.fillText(`${pi+1} / ${pages.length}`,W-36,L.title[3]/2+4);
-  }
-  if(p&&p.cv){
-    const [ix,iy,iw,ih]=L.img,pad=W>H?10:20,aw=iw-pad*2,ah=ih-pad*2,s=Math.min(aw/p.cv.width,ah/p.cv.height),dw=p.cv.width*s,dh=p.cv.height*s,dx=ix+(iw-dw)/2,dy=iy+(ih-dh)/2;
-    cx.save();rr(dx,dy,dw,dh,10);cx.clip();cx.drawImage(p.cv,dx,dy,dw,dh);cx.restore();
-  }
-  if(W>H&&p){cx.fillStyle='rgba(147,166,189,.9)';cx.font=`700 20px ${FONT}`;cx.textAlign='right';cx.textBaseline='top';cx.fillText(`${pi+1} / ${pages.length}`,W-20,12)}
+  cx.drawImage(getBase(pi),0,0);
   if(caption&&$('#sub').value==='1'){
-    const [x,y,w,h]=L.cap;let fs=L.fs,lines;
+    const L=layoutOf(W,H),k=L.k,[x,y,w,h]=L.cap;let fs=L.fs,lines;
     cx.textAlign='center';cx.textBaseline='middle';
-    for(;;){cx.font=`800 ${fs}px ${FONT}`;lines=wrap(caption,w-100);if(lines.length<=L.lines||fs<22)break;fs-=2}
-    const lh=fs*1.38,th=lines.length*lh,top=W>H?y+(h-th)/2:y+Math.min(40,(h-th)/2);
+    for(;;){cx.font=`800 ${fs}px ${FONT}`;lines=wrap(caption,w-100*k);if(lines.length<=L.lines||fs<22*k)break;fs-=Math.max(2,Math.round(2*k))}
+    const lh=fs*1.38,th=lines.length*lh,top=W>H?y+(h-th)/2:y+Math.min(40*k,(h-th)/2);
     if(W>H){cx.fillStyle='rgba(6,14,26,.92)';cx.fillRect(x,y,w,h)}
-    cx.fillStyle='#fff';cx.shadowColor='rgba(0,0,0,.6)';cx.shadowBlur=6;
+    cx.fillStyle='#fff';cx.shadowColor='rgba(0,0,0,.6)';cx.shadowBlur=6*k;
     lines.forEach((ln,i)=>cx.fillText(ln,w/2,top+lh*i+lh/2));cx.shadowBlur=0;
   }
 }
@@ -559,15 +605,18 @@ function drawFrame(t){
   const c=capsCache.caps.find(c=>t>=c.start&&t<c.end);
   drawBase(pi,c?c.text:'');
 }
-['fmt','sub'].forEach(id=>$('#'+id).addEventListener('change',()=>{capsCache=null;AUD?drawFrame(0):drawIdle()}));
+['fmt','sub','res','sharp'].forEach(id=>$('#'+id).addEventListener('change',()=>{capsCache=null;AUD?drawFrame(0):drawIdle()}));
 async function loadFonts(){try{await Promise.all([document.fonts.load(`800 34px "Nanum Gothic"`),document.fonts.load(`700 24px "Nanum Gothic"`)])}catch(e){}}
+document.fonts&&document.fonts.ready.then(()=>{baseC=null;AUD?drawFrame(0):drawIdle()});
 
 /* ========== 재생 · 녹화 ========== */
 let playing=false;
 async function run(record){
   if(playing)return;
   if(!await needAud())return;
-  playing=true;await loadFonts();capsCache=null;
+  playing=true;await loadFonts();capsCache=null;baseC=null;pages.forEach(p=>{p._sc=null});
+  const [W0,H0]=dimsOf();cv.width=W0;cv.height=H0;
+  { setMsg('화면 준비 중...');const L0=layoutOf(W0,H0);for(const p of pages){const r=fitRect(p,L0);pageImg(p,r.dw,r.dh);await sleep(0)} }
   const btns=['bPlay','bMp4','bWav','bMp3'].map(id=>$('#'+id));btns.forEach(b=>b.disabled=true);
   let ctx;
   try{
@@ -582,7 +631,7 @@ async function run(record){
       mime=cands.find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m))||'';
       if(!mime)throw new Error('이 브라우저는 영상 녹화를 지원하지 않습니다. 최신 Chrome을 사용하세요.');
       const stream=cv.captureStream(30);dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
-      rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:5e6,audioBitsPerSecond:160e3});
+      rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:Math.round(Math.min(16e6,Math.max(6e6,W0*H0*6.5))),audioBitsPerSecond:192e3});
       rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     }
     src.connect(ctx.destination);
