@@ -143,16 +143,26 @@ canvas#cv{width:100%;height:auto;border-radius:10px;background:#000;display:bloc
   </div>
   <p class="hint">화면 캡처 원본이 낮은 해상도이면 영상도 흐려집니다. 가능하면 PPT를 PDF 또는 고해상도 이미지로 내보내 첨부하세요.</p>
   <div class="row">
-    <div><label>인트로 화면 (MP4·미리보기)</label>
+    <div><label>인트로 화면</label>
       <select id="introOn"><option value="1" selected>사용</option><option value="0">사용 안 함</option></select></div>
     <div><label>인트로 길이</label>
       <select id="introLen"><option value="2">2초</option><option value="3" selected>3초</option><option value="4">4초</option><option value="5">5초</option></select></div>
   </div>
   <label>인트로 제목 (비우면 첫 페이지 제목)</label>
   <input type="text" id="introTitle" placeholder="예: 지하탐사법">
-  <label>인트로 부제</label>
-  <input type="text" id="introSub" value="토목시공기술사 스터디">
-  <div class="btns"><button id="btnRoll">배경색 새로 뽑기</button><button id="btnIntroPrev">인트로 미리보기</button></div>
+  <label>채널·부제 (인트로 상단, 아웃트로에 표시)</label>
+  <input type="text" id="introSub" value="시러스의 토목시공기술사 스터디">
+  <div class="row">
+    <div><label>아웃트로 화면</label>
+      <select id="outroOn"><option value="1" selected>사용</option><option value="0">사용 안 함</option></select></div>
+    <div><label>아웃트로 길이</label>
+      <select id="outroLen"><option value="4">4초</option><option value="5" selected>5초</option><option value="6">6초</option><option value="8">8초</option></select></div>
+  </div>
+  <label>아웃트로 문구</label>
+  <input type="text" id="outroTitle" value="시청해 주셔서 감사합니다">
+  <label>아웃트로 안내 문구 (선택)</label>
+  <input type="text" id="outroSub" value="구독 · 좋아요 · 알림설정으로 응원해 주세요">
+  <div class="btns"><button id="btnRoll">배경색 새로 뽑기</button><button id="btnIntroPrev">인트로 미리보기</button><button id="btnOutroPrev">아웃트로 미리보기</button></div>
   <div class="chk"><input type="checkbox" id="rollEach" checked><span>MP4 생성 때마다 배경색 새로 뽑기</span></div>
   <label>BGM 파일 (선택, mp3·wav)</label>
   <input type="file" id="bgm" accept="audio/*">
@@ -329,12 +339,16 @@ function renderPages(){
 }
 
 /* ========== Claude (원고 · 메타데이터) ========== */
-async function claude(content,system,max){
+async function claudeReq(body){
   const key=$('#kAnth').value.trim();if(!key)throw new Error('Anthropic API 키를 입력하세요. (원고를 직접 입력하면 키 없이도 진행 가능)');
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:$('#model').value.trim()||'claude-sonnet-5-5',max_tokens:max||2000,system,messages:[{role:'user',content}]})});
+    body:JSON.stringify(Object.assign({model:$('#model').value.trim()||'claude-sonnet-5-5'},body))});
   const j=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error('Claude 오류: '+((j.error&&j.error.message)||r.status));
+  return j;
+}
+async function claude(content,system,max){
+  const j=await claudeReq({max_tokens:max||2000,system,messages:[{role:'user',content}]});
   return (j.content||[]).map(c=>c.text||'').join('').trim();
 }
 const SYS_SCRIPT=`당신은 토목시공기술사 수험 교육 방송의 원고 작가입니다. 첨부된 교재·강의 카드 한 페이지를 보고, 아나운서가 소리 내어 읽을 낭독 원고를 작성합니다.
@@ -471,12 +485,12 @@ async function needAud(){if(AUD)return true;return await buildAudio()}
 /* ========== BGM 믹스 ========== */
 $('#bgm').addEventListener('change',async e=>{const f=e.target.files[0];bgmAB=f?await f.arrayBuffer():null;mixCache=null});
 $('#bgmVol').addEventListener('input',()=>{$('#bgmV').textContent=$('#bgmVol').value;mixCache=null});
-async function getMix(lead){
-  lead=lead||0;
-  const vol=parseFloat($('#bgmVol').value),sig=AUD.id+'|'+(bgmAB?bgmAB.byteLength:0)+'|'+vol+'|'+lead;
+async function getMix(lead,tail){
+  lead=lead||0;tail=tail||0;
+  const vol=parseFloat($('#bgmVol').value),sig=AUD.id+'|'+(bgmAB?bgmAB.byteLength:0)+'|'+vol+'|'+lead+'|'+tail;
   if(mixCache&&mixCache.sig===sig)return mixCache.data;
   const o0=Math.round(lead*SR);let base=AUD.pcm;
-  if(o0>0){base=new Float32Array(o0+AUD.pcm.length);base.set(AUD.pcm,o0)}
+  if(o0>0||tail>0){base=new Float32Array(o0+AUD.pcm.length+Math.round(tail*SR));base.set(AUD.pcm,o0)}
   const dur=base.length/SR;let out=base;
   if(bgmAB){
     const off=new OfflineAudioContext(1,base.length,SR);
@@ -624,51 +638,178 @@ function drawFrame(t){
 async function loadFonts(){try{await Promise.all([document.fonts.load(`800 34px "Nanum Gothic"`),document.fonts.load(`700 24px "Nanum Gothic"`)])}catch(e){}}
 document.fonts&&document.fonts.ready.then(()=>{baseC=null;AUD?drawFrame(0):drawIdle()});
 
-/* ========== 인트로 ========== */
+/* ========== 인트로 · 아웃트로 ========== */
 let INTRO=null;
 const hsl=(c,a)=>`hsla(${c[0]},${c[1]}%,${c[2]}%,${a==null?1:a})`;
+const cl=x=>Math.max(0,Math.min(1,x));
+const easeOut=x=>1-Math.pow(1-cl(x),3);
+const easeBack=x=>{x=cl(x);const c1=1.9,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function rollIntro(){
   const h=Math.random()*360,d=(40+Math.random()*90)*(Math.random()<.5?1:-1),ls=[26,37,48];
-  INTRO={angle:Math.random()*360,c:[h,h+d*0.5,h+d].map((x,i)=>{x=((x%360)+360)%360;const b=(x>50&&x<190)?0.76:1;return [Math.round(x),76+i*4,Math.round(ls[i]*b)]})};
+  const seed=Math.floor(Math.random()*1e9),rn=rng(seed),bub=[];
+  for(let i=0;i<36;i++){const q=rn();bub.push({x:rn(),r:8+q*q*74,sp:34+rn()*80,ph:rn(),wob:6+rn()*22,wf:.6+rn()*1.5,wp:rn()*6.28})}
+  INTRO={angle:Math.random()*360,seed,bub,c:[h,h+d*0.5,h+d].map((x,i)=>{x=((x%360)+360)%360;const b=(x>50&&x<190)?0.76:1;return [Math.round(x),76+i*4,Math.round(ls[i]*b)]})};
 }
 rollIntro();
 function introLead(){return $('#introOn').value==='1'?parseFloat($('#introLen').value):0}
+function outroLen(){return $('#outroOn').value==='1'?parseFloat($('#outroLen').value):0}
 function introTitle(){return $('#introTitle').value.trim()||(pages[0]&&(pages[0].title||pages[0].name))||'토목시공기술사 스터디'}
-function introBg(W,H){
-  const a=INTRO.angle*Math.PI/180,dx=Math.cos(a),dy=Math.sin(a),len=Math.abs(W*dx)+Math.abs(H*dy),m=Math.max(W,H);
+/* 입력값 보존 */
+['introTitle','introSub','introOn','introLen','outroOn','outroLen','outroTitle','outroSub'].forEach(id=>{
+  const el=$('#'+id),v=LS.get('ksn_tts_ui_'+id);if(v!==''&&v!=null)el.value=v;
+  el.addEventListener('change',()=>LS.set('ksn_tts_ui_'+id,el.value));
+});
+
+function introBg(W,H,t){
+  const a=(INTRO.angle+t*9)*Math.PI/180,dx=Math.cos(a),dy=Math.sin(a),len=Math.abs(W*dx)+Math.abs(H*dy),m=Math.max(W,H);
   const gr=cx.createLinearGradient(W/2-dx*len/2,H/2-dy*len/2,W/2+dx*len/2,H/2+dy*len/2);
   gr.addColorStop(0,hsl(INTRO.c[0]));gr.addColorStop(.5,hsl(INTRO.c[1]));gr.addColorStop(1,hsl(INTRO.c[2]));
   cx.fillStyle=gr;cx.fillRect(0,0,W,H);
-  [[.15,.2,.7,INTRO.c[2]],[.9,.85,.8,INTRO.c[0]]].forEach(([x,y,r,c])=>{
+  [[.15+.10*Math.sin(t*.9),.2+.08*Math.cos(t*.7),.7,INTRO.c[2]],[.9-.08*Math.cos(t*.8),.85-.08*Math.sin(t*.6),.8,INTRO.c[0]]].forEach(([x,y,r,c])=>{
     const rg=cx.createRadialGradient(W*x,H*y,0,W*x,H*y,m*r);
-    rg.addColorStop(0,hsl([c[0],c[1],Math.min(68,c[2]+22)],.30));rg.addColorStop(1,hsl(c,0));cx.fillStyle=rg;cx.fillRect(0,0,W,H);
+    rg.addColorStop(0,hsl([c[0],c[1],Math.min(68,c[2]+22)],.32));rg.addColorStop(1,hsl(c,0));cx.fillStyle=rg;cx.fillRect(0,0,W,H);
   });
   const vg=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,m*0.75);
   vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.30)');cx.fillStyle=vg;cx.fillRect(0,0,W,H);
 }
+function bubbleAt(x,y,r,al){
+  const g=cx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);
+  g.addColorStop(0,`rgba(255,255,255,${.10*al})`);g.addColorStop(.7,`rgba(255,255,255,${.06*al})`);g.addColorStop(1,`rgba(255,255,255,${.40*al})`);
+  cx.fillStyle=g;cx.beginPath();cx.arc(x,y,r,0,6.2832);cx.fill();
+  cx.strokeStyle=`rgba(255,255,255,${.55*al})`;cx.lineWidth=Math.max(1.5,r*.05);cx.stroke();
+  cx.fillStyle=`rgba(255,255,255,${.8*al})`;cx.beginPath();cx.ellipse(x-r*.38,y-r*.42,r*.22,r*.12,-.7,0,6.2832);cx.fill();
+}
+function bubbles(W,H,u,t,al){
+  INTRO.bub.forEach(b=>{
+    const r=b.r*u,cyc=H+2*r,y=H+r-((b.ph*cyc+t*b.sp*u*1.6)%cyc),x=b.x*W+Math.sin(t*b.wf+b.wp)*b.wob*u;
+    bubbleAt(x,y,r,al);
+  });
+}
+function dropAt(x,y,s){
+  cx.beginPath();cx.moveTo(x,y-s*1.9);
+  cx.bezierCurveTo(x+s*.15,y-s*1.2,x+s*.95,y-s*.5,x+s*.95,y+s*.25);
+  cx.arc(x,y+s*.25,s*.95,0,Math.PI,false);
+  cx.bezierCurveTo(x-s*.95,y-s*.5,x-s*.15,y-s*1.2,x,y-s*1.9);cx.closePath();
+  const g=cx.createLinearGradient(x-s,y-s*1.9,x+s,y+s*1.2);g.addColorStop(0,'rgba(255,255,255,.98)');g.addColorStop(1,'rgba(170,225,255,.9)');
+  cx.fillStyle=g;cx.shadowColor='rgba(255,255,255,.7)';cx.shadowBlur=s*.9;cx.fill();cx.shadowBlur=0;
+  cx.fillStyle='rgba(255,255,255,.95)';cx.beginPath();cx.ellipse(x-s*.38,y+s*.05,s*.16,s*.34,.25,0,6.2832);cx.fill();
+}
+function ring(x,y,r,w,al){if(r<=0||al<=0)return;cx.strokeStyle=`rgba(255,255,255,${al})`;cx.lineWidth=Math.max(1,w);cx.beginPath();cx.arc(x,y,r,0,6.2832);cx.stroke()}
+function ripples(x,y,u,t,t0,n){
+  for(let i=0;i<n;i++){const s=t-t0-i*.2;if(s<=0||s>1.9)continue;const p=s/1.9;ring(x,y,easeOut(p)*640*u,(9*(1-p)+1)*u,.65*Math.pow(1-p,1.6))}
+}
+function popText(lines,cx0,top,lh,fs,u,t0,step,t){
+  const ga=cx.globalAlpha;let idx=0;
+  cx.font=`800 ${fs}px ${FONT}`;cx.textAlign='center';cx.textBaseline='middle';
+  lines.forEach((ln,li)=>{
+    const w=cx.measureText(ln).width;let x=cx0-w/2;
+    for(const ch of ln){
+      const cw=cx.measureText(ch).width,s=cl((t-t0-idx*step)/0.5);
+      if(s>0&&ch!==' '){const e=easeBack(s);cx.save();cx.globalAlpha=ga*cl(s*2.4);cx.translate(x+cw/2,top+lh*li+lh/2+(1-e)*80*u);const sc=.35+.65*e;cx.scale(sc,sc);cx.fillText(ch,0,0);cx.restore()}
+      x+=cw;idx++;
+    }
+  });
+}
+function sweep(W,H,u,p){
+  if(p<=0||p>=1)return;
+  cx.save();cx.globalCompositeOperation='lighter';cx.translate(-.3*W+p*1.6*W,0);cx.transform(1,0,-.35,1,0,0);
+  const g=cx.createLinearGradient(-110*u,0,110*u,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.30)');g.addColorStop(1,'rgba(255,255,255,0)');
+  cx.fillStyle=g;cx.fillRect(-110*u,0,220*u,H);cx.restore();
+}
+function sizeSync(){const [W,H]=dimsOf();if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}return [W,H]}
+
 function drawIntro(t,lead){
-  const [W,H]=dimsOf();if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
-  const u=Math.min(W,H)/720,cl=x=>Math.max(0,Math.min(1,x)),ease=x=>1-Math.pow(1-cl(x),3);
+  const [W,H]=sizeSync(),u=Math.min(W,H)/720,IMP=.55;
   const out=lead<99?cl((lead-t)/0.5):1;
   if(out<1&&AUD)drawFrame(0);
-  cx.save();cx.globalAlpha=out;introBg(W,H);
-  const a=ease(t/0.9),a2=ease((t-0.35)/0.9);
-  cx.textAlign='center';cx.textBaseline='middle';
-  const maxW=W-180*u,maxL=W>H?3:5;let fs=Math.round(68*u),lines;
+  cx.save();cx.globalAlpha=out;
+  const sh=(t>IMP&&t<IMP+.5)?(1-(t-IMP)/.5):0;
+  if(sh>0)cx.translate(Math.sin(t*95)*8*u*sh,Math.cos(t*81)*8*u*sh);
+  introBg(W,H,t);bubbles(W,H,u,t,out);
+  const mx=W/2,my=H/2-(W>H?0:H*0.04);
+  // 물방울 낙하 → 충격 → 파문
+  if(t<IMP){const k=t/IMP,y0=-90*u,y=y0+(my-y0)*k*k;cx.globalAlpha=out;for(let i=1;i<=4;i++){cx.fillStyle=`rgba(255,255,255,${.10*(5-i)/4})`;cx.fillRect(mx-2*u,y-i*34*u-40*u,4*u,34*u)}dropAt(mx,y,24*u)}
+  ripples(mx,my,u,t,IMP,4);
+  if(t>IMP&&t<IMP+.4){const fa=(1-(t-IMP)/.4),g=cx.createRadialGradient(mx,my,0,mx,my,Math.max(W,H)*.45*(.4+.6*easeOut((t-IMP)/.4)));g.addColorStop(0,`rgba(255,255,255,${.75*fa*out})`);g.addColorStop(1,'rgba(255,255,255,0)');cx.fillStyle=g;cx.fillRect(0,0,W,H)}
+  // 제목
+  const maxW=W-180*u,maxL=W>H?3:5;let fs=Math.round(70*u),lines;
   for(;;){cx.font=`800 ${fs}px ${FONT}`;lines=wrap(introTitle(),maxW);if(lines.length<=maxL||fs<30*u)break;fs-=Math.round(3*u)}
-  const lh=fs*1.28,th=lines.length*lh,sub=$('#introSub').value.trim(),cy=H/2-(W>H?0:H*0.04),top=cy-th/2;
-  cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=18*u;
-  if(sub){cx.globalAlpha=out*a;cx.fillStyle='rgba(255,255,255,.9)';cx.font=`700 ${Math.round(26*u)}px ${FONT}`;cx.fillText(sub.split('').join(' '),W/2,top-54*u+(1-a)*18*u)}
-  cx.globalAlpha=out*a2;cx.fillStyle='#fff';cx.font=`800 ${fs}px ${FONT}`;
-  lines.forEach((ln,i)=>cx.fillText(ln,W/2,top+lh*i+lh/2+(1-a2)*26*u));
+  const lh=fs*1.28,th=lines.length*lh,sub=$('#introSub').value.trim(),top=my-th/2;
+  cx.shadowColor='rgba(0,0,0,.5)';cx.shadowBlur=18*u;cx.fillStyle='#fff';cx.globalAlpha=out;
+  popText(lines,mx,top,lh,fs,u,IMP+.05,.05,t);
   cx.shadowBlur=0;
-  const lw=Math.round(150*u)*ease((t-0.7)/0.7);
-  cx.globalAlpha=out*a2;cx.fillStyle='#f2a93b';cx.fillRect(W/2-lw/2,top+th+30*u,lw,Math.max(3,Math.round(5*u)));
+  const sa=easeOut((t-.95)/.6);
+  if(sub&&sa>0){cx.globalAlpha=out*sa;cx.fillStyle='rgba(255,255,255,.92)';cx.font=`700 ${Math.round(28*u)}px ${FONT}`;cx.textAlign='center';cx.textBaseline='middle';cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=10*u;cx.fillText(sub.split('').join(' '),mx,top-56*u-(1-sa)*30*u);cx.shadowBlur=0}
+  const lw=Math.round(170*u)*easeOut((t-1.25)/.7);
+  cx.globalAlpha=out;cx.fillStyle='#f2a93b';if(lw>0)cx.fillRect(mx-lw/2,top+th+30*u,lw,Math.max(3,Math.round(5*u)));
+  cx.globalAlpha=out;sweep(W,H,u,(t-1.5)/.9);
   cx.restore();
 }
-function showIntro(){drawIntro(3,99);cv.scrollIntoView({block:'center',behavior:'smooth'})}
-$('#btnRoll').addEventListener('click',()=>{rollIntro();showIntro()});
-$('#btnIntroPrev').addEventListener('click',showIntro);
+
+function pill(x,y,w,h,fill,label,tc,sc,al,fs,dx){
+  cx.save();cx.globalAlpha*=al;cx.translate(x,y);cx.scale(sc,sc);
+  rr(cx,-w/2,-h/2,w,h,h/2);cx.fillStyle=fill;cx.shadowColor='rgba(0,0,0,.35)';cx.shadowBlur=h*.25;cx.fill();cx.shadowBlur=0;
+  cx.fillStyle=tc;cx.font=`800 ${fs}px ${FONT}`;cx.textAlign='center';cx.textBaseline='middle';cx.fillText(label,dx||0,h*.03);cx.restore();
+}
+function bellIcon(x,y,s,rot,col){
+  cx.save();cx.translate(x,y);cx.rotate(rot);cx.scale(s,s);cx.fillStyle=col;
+  cx.beginPath();cx.moveTo(-17,11);cx.quadraticCurveTo(-13,9,-13,-2);cx.bezierCurveTo(-13,-15,-6,-21,0,-21);cx.bezierCurveTo(6,-21,13,-15,13,-2);cx.quadraticCurveTo(13,9,17,11);cx.closePath();cx.fill();
+  cx.beginPath();cx.arc(0,16,4.6,0,Math.PI);cx.fill();cx.beginPath();cx.arc(0,-23,2.6,0,6.2832);cx.fill();cx.restore();
+}
+function cursorAt(x,y,s,press){
+  cx.save();cx.translate(x,y);cx.scale(s*(press?.9:1),s*(press?.9:1));cx.beginPath();cx.moveTo(0,0);cx.lineTo(0,30);cx.lineTo(8,23);cx.lineTo(14,36);cx.lineTo(19,34);cx.lineTo(13,21.5);cx.lineTo(23,21);cx.closePath();
+  cx.fillStyle='#fff';cx.strokeStyle='#111';cx.lineWidth=2.4;cx.shadowColor='rgba(0,0,0,.4)';cx.shadowBlur=6;cx.fill();cx.shadowBlur=0;cx.stroke();cx.restore();
+}
+function drawOutro(t,len){
+  const [W,H]=sizeSync(),u=Math.min(W,H)/720,land=W>H;
+  const inA=cl(t/0.5),outA=len<99?cl((len-t)/0.45):1;
+  if(inA<1){if(AUD)drawFrame(Math.max(0,AUD.dur-0.05));else{cx.fillStyle='#0a1727';cx.fillRect(0,0,W,H)}}
+  cx.save();cx.globalAlpha=inA;
+  introBg(W,H,t+3);bubbles(W,H,u,t+3,inA);
+  const mx=W/2,ty=H*(land?.34:.30);
+  ripples(mx,ty,u,t,.35,3);
+  const maxW=W-160*u,maxL=land?2:3;let fs=Math.round(62*u),lines;const title=$('#outroTitle').value.trim()||'시청해 주셔서 감사합니다';
+  for(;;){cx.font=`800 ${fs}px ${FONT}`;lines=wrap(title,maxW);if(lines.length<=maxL||fs<28*u)break;fs-=Math.round(3*u)}
+  const lh=fs*1.28,th=lines.length*lh,top=ty-th/2;
+  cx.shadowColor='rgba(0,0,0,.5)';cx.shadowBlur=16*u;cx.fillStyle='#fff';cx.globalAlpha=inA;
+  popText(lines,mx,top,lh,fs,u,.45,.045,t);cx.shadowBlur=0;
+  const ca=easeOut((t-1.0)/.6),ch=$('#introSub').value.trim();
+  if(ch&&ca>0){cx.globalAlpha=inA*ca;cx.fillStyle='rgba(255,255,255,.92)';cx.font=`700 ${Math.round(32*u)}px ${FONT}`;cx.textAlign='center';cx.textBaseline='middle';cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=10*u;cx.fillText(ch,mx,top+th+46*u+(1-ca)*24*u);cx.shadowBlur=0}
+  cx.globalAlpha=inA;
+  // 구독 · 좋아요 · 알림 버튼
+  const by=H*(land?.66:.60),bh=70*u,gap=24*u,w1=150*u,w2=180*u,w3=230*u,tot=w1+w2+w3+gap*2;
+  const x1=mx-tot/2+w1/2,x2=x1+w1/2+gap+w2/2,x3=x2+w2/2+gap+w3/2;
+  const subbed=t>2.6;
+  const s1=easeBack((t-1.3)/.5),s2=easeBack((t-1.5)/.5),s3=easeBack((t-1.7)/.5);
+  const pulse=1+.05*Math.sin(Math.max(0,t-1.8)*7)*(subbed?0:1);
+  if(s1>0)pill(x1,by,w1*(subbed?1.1:1),bh,subbed?'#4a4a4f':'#e62117',subbed?'구독중':'구독','#fff',s1*pulse,1,Math.round(30*u));
+  if(s2>0)pill(x2,by,w2,bh,'#ffffff','좋아요','#1a2a3d',s2,1,Math.round(30*u));
+  if(s3>0){pill(x3,by,w3,bh,'rgba(255,255,255,.2)','알림설정','#fff',s3,1,Math.round(30*u),Math.round(22*u));
+    const rot=(t>2.8&&t<4.2)?Math.sin((t-2.8)*22)*.5*Math.max(0,1-(t-2.8)/1.4):0;bellIcon(x3-w3/2+40*u,by,.9*u*s3,rot,'#fff');}
+  // 마우스 커서 + 클릭 파문
+  if(t>2.0&&t<3.5){
+    const k=easeOut((t-2.0)/.6),sx=x1+260*u,sy=by+190*u,ex=x1+14*u,ey=by+16*u,px=sx+(ex-sx)*k,py=sy+(ey-sy)*k;
+    cursorAt(px,py,1.3*u,t>2.55&&t<2.75);
+    if(t>2.6){const s=(t-2.6)/.6;ring(x1,by,easeOut(s)*130*u,(8*(1-s)+1)*u,.8*(1-s))}
+  }
+  const hint=$('#outroSub').value.trim(),ha=easeOut((t-2.1)/.6);
+  if(hint&&ha>0){cx.globalAlpha=inA*ha;cx.fillStyle='rgba(255,255,255,.85)';cx.font=`700 ${Math.round(26*u)}px ${FONT}`;cx.textAlign='center';cx.textBaseline='middle';cx.fillText(hint,mx,by+bh+70*u)}
+  cx.globalAlpha=inA;sweep(W,H,u,(t-.9)/.9);
+  cx.restore();
+  if(outA<1){cx.fillStyle=`rgba(5,10,18,${1-outA})`;cx.fillRect(0,0,W,H)}
+}
+
+let pvRaf=0;
+function previewAnim(kind){
+  cancelAnimationFrame(pvRaf);cv.scrollIntoView({block:'center',behavior:'smooth'});
+  const len=kind==='intro'?(parseFloat($('#introLen').value)||3):(parseFloat($('#outroLen').value)||5),t0=performance.now();
+  const tick=()=>{const t=Math.min(len,(performance.now()-t0)/1000);kind==='intro'?drawIntro(t,99):drawOutro(t,99);if(t<len)pvRaf=requestAnimationFrame(tick)};
+  tick();
+}
+$('#btnRoll').addEventListener('click',()=>{rollIntro();previewAnim('intro')});
+$('#btnIntroPrev').addEventListener('click',()=>previewAnim('intro'));
+$('#btnOutroPrev').addEventListener('click',()=>previewAnim('outro'));
 
 /* ========== 재생 · 녹화 ========== */
 let playing=false;
@@ -681,7 +822,7 @@ async function run(record){
   const btns=['bPlay','bMp4','bWav','bMp3'].map(id=>$('#'+id));btns.forEach(b=>b.disabled=true);
   let ctx;
   try{
-    const lead=introLead(),total=lead+AUD.dur;if(record&&$('#rollEach').checked)rollIntro();const mix=await getMix(lead);
+    const lead=introLead(),tail=outroLen(),total=lead+AUD.dur+tail;if(record&&$('#rollEach').checked)rollIntro();const mix=await getMix(lead,tail);
     ctx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:SR});
     const buf=ctx.createBuffer(1,mix.length,SR);buf.copyToChannel(mix,0);
     const src=ctx.createBufferSource();src.buffer=buf;
@@ -704,7 +845,7 @@ async function run(record){
       const tick=()=>{
         const t=ctx.currentTime-t0;
         if(t>=total+0.3){res();return}
-        const tt=Math.max(0,t);if(tt<lead)drawIntro(tt,lead);else drawFrame(tt-lead);setProg(tt/total);setMsg(`${record?'녹화':'재생'} 중 ${fmtT(tt)} / ${fmtT(total)}`+(record?' · 화면을 켠 상태로 유지하세요':''));
+        const tt=Math.max(0,t);if(tt<lead)drawIntro(tt,lead);else if(tt<lead+AUD.dur)drawFrame(tt-lead);else drawOutro(tt-lead-AUD.dur,tail);setProg(tt/total);setMsg(`${record?'녹화':'재생'} 중 ${fmtT(tt)} / ${fmtT(total)}`+(record?' · 화면을 켠 상태로 유지하세요':''));
         requestAnimationFrame(tick);
       };tick();
     });
@@ -740,16 +881,29 @@ $('#bSrt').addEventListener('click',async()=>{
 });
 
 /* ========== 유튜브 메타데이터 ========== */
+const META_TOOL={name:'youtube_metadata',description:'유튜브 업로드용 메타데이터(제목·설명·해시태그)를 제출한다.',input_schema:{type:'object',properties:{
+  title:{type:'string',description:'영상 제목. 40자 안팎. 형식 예: 지하탐사법: 짚어보기·터파보기·물리탐사 | 토목시공기술사'},
+  description:{type:'string',description:'영상 설명. 3~5줄을 줄바꿈으로 구분. 다루는 핵심 수치·내용과 학습 대상 안내 포함'},
+  hashtags:{type:'array',items:{type:'string'},description:'해시태그 8~12개. # 기호 없이 단어만'}},required:['title','description','hashtags']}};
+function fmtMeta(m){
+  const tags=[...new Set((m.hashtags||[]).map(t=>String(t).replace(/^#+/,'').replace(/\s+/g,'')).filter(Boolean))].map(t=>'#'+t).join(' ');
+  return `제목: ${String(m.title||'').trim()}\n\n설명:\n${String(m.description||'').trim()}\n\n해시태그: ${tags}`;
+}
 $('#bMeta').addEventListener('click',async()=>{
-  const script=pages.map(p=>`## ${p.title||p.name}\n${clean(p.script)}`).join('\n\n');
+  const script=pages.map(p=>`## ${p.title||p.name}\n${clean(p.script)}`).join('\n\n').slice(0,12000);
   if(!script.replace(/##[^\n]*/g,'').trim()){setMsg('원고가 없습니다.','err');return}
   const b=$('#bMeta');b.disabled=true;setMsg('메타데이터 생성 중...');
   try{
-    const out=await claude([{type:'text',text:`다음은 토목시공기술사 수험생을 위한 학습 영상의 낭독 원고입니다.\n\n${script}\n\n유튜브 업로드용 메타데이터를 작성하세요.\n- 제목: 40자 이내, 핵심 용어를 앞에 두고 정보형으로. "토목시공기술사"를 포함.\n- 설명: 3~5줄. 영상에서 다루는 핵심 내용 요약과 학습 대상 안내.\n- 해시태그: 8~12개, 한 줄.\n형식:\n제목: ...\n\n설명:\n...\n\n해시태그: #... #...`}],'당신은 토목·건설 분야 교육 채널의 유튜브 운영 담당자입니다. 과장·낚시 표현 없이 간결하고 정확하게 씁니다.',1200);
-    $('#metaOut').value=out;setMsg('메타데이터 생성 완료','ok');
+    const j=await claudeReq({max_tokens:1500,
+      system:'당신은 토목·건설 분야 교육 채널의 유튜브 운영 담당자입니다. 과장·낚시 표현 없이 간결하고 정확하게 씁니다. 반드시 youtube_metadata 도구로만 결과를 제출하며, 원고를 다시 쓰지 않습니다.',
+      tools:[META_TOOL],tool_choice:{type:'tool',name:'youtube_metadata'},
+      messages:[{role:'user',content:[{type:'text',text:`<원고>\n${script}\n</원고>\n\n위 원고는 토목시공기술사 수험생을 위한 학습 영상의 낭독 원고입니다. 이 영상의 유튜브 제목·설명·해시태그를 youtube_metadata 도구로 제출하세요.\n- 제목: "핵심주제: 세부항목·세부항목 | 토목시공기술사" 형식, 40자 안팎\n- 설명: 3~5줄. 방법·수치·현장사례·중점관리 등 핵심 내용과 학습 대상 안내\n- 해시태그: 8~12개`}]}]});
+    const tu=(j.content||[]).find(c=>c.type==='tool_use');
+    if(!tu||!tu.input||!tu.input.title)throw new Error('메타데이터 형식 응답을 받지 못했습니다.');
+    $('#metaOut').value=fmtMeta(tu.input);$('#metaOut').scrollTop=0;setMsg('메타데이터 생성 완료','ok');
   }catch(err){
     const t=pages.map(p=>p.title||p.name).join(' · ');
-    $('#metaOut').value=`제목: 토목시공기술사 | ${t}`.slice(0,60)+`\n\n설명:\n토목시공기술사 수험생을 위한 학습 영상입니다.\n다룬 주제: ${t}\n\n해시태그: #토목시공기술사 #토목시공 #기술사 #건설안전 #자격증`;
+    $('#metaOut').value=`제목: ${t} | 토목시공기술사`.slice(0,70)+`\n\n설명:\n토목시공기술사 수험생을 위한 학습 영상입니다.\n다룬 주제: ${t}\n\n해시태그: #토목시공기술사 #토목시공 #기술사 #건설안전 #자격증`;
     setMsg(err.message+' (기본 템플릿으로 대체)','err');
   }
   b.disabled=false;
