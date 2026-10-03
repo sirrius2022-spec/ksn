@@ -142,6 +142,18 @@ canvas#cv{width:100%;height:auto;border-radius:10px;background:#000;display:bloc
       <select id="sharp"><option value="0">끄기</option><option value="0.6" selected>보통 (권장)</option><option value="1">강하게</option></select></div>
   </div>
   <p class="hint">화면 캡처 원본이 낮은 해상도이면 영상도 흐려집니다. 가능하면 PPT를 PDF 또는 고해상도 이미지로 내보내 첨부하세요.</p>
+  <div class="row">
+    <div><label>인트로 화면 (MP4·미리보기)</label>
+      <select id="introOn"><option value="1" selected>사용</option><option value="0">사용 안 함</option></select></div>
+    <div><label>인트로 길이</label>
+      <select id="introLen"><option value="2">2초</option><option value="3" selected>3초</option><option value="4">4초</option><option value="5">5초</option></select></div>
+  </div>
+  <label>인트로 제목 (비우면 첫 페이지 제목)</label>
+  <input type="text" id="introTitle" placeholder="예: 지하탐사법">
+  <label>인트로 부제</label>
+  <input type="text" id="introSub" value="토목시공기술사 스터디">
+  <div class="btns"><button id="btnRoll">배경색 새로 뽑기</button><button id="btnIntroPrev">인트로 미리보기</button></div>
+  <div class="chk"><input type="checkbox" id="rollEach" checked><span>MP4 생성 때마다 배경색 새로 뽑기</span></div>
   <label>BGM 파일 (선택, mp3·wav)</label>
   <input type="file" id="bgm" accept="audio/*">
   <label>BGM 음량 <span id="bgmV">0.12</span></label>
@@ -161,7 +173,7 @@ canvas#cv{width:100%;height:auto;border-radius:10px;background:#000;display:bloc
     <button id="bTxt">원고 TXT</button>
     <button id="bSrt">자막 SRT</button>
   </div>
-  <p class="hint">MP4는 실시간 녹화 방식입니다. 영상 길이만큼 소요되며, 완료까지 화면을 켠 상태로 이 탭을 유지하세요. 브라우저가 MP4를 지원하지 않으면 WEBM으로 저장됩니다.</p>
+  <p class="hint">MP4는 실시간 녹화 방식입니다. 영상 길이만큼 소요되며, 완료까지 화면을 켠 상태로 이 탭을 유지하세요. 브라우저가 MP4를 지원하지 않으면 WEBM으로 저장됩니다. 자막(SRT)은 인트로 길이가 반영되어 MP4와 싱크가 맞습니다.</p>
   <div id="outs"></div>
 </section>
 
@@ -459,17 +471,20 @@ async function needAud(){if(AUD)return true;return await buildAudio()}
 /* ========== BGM 믹스 ========== */
 $('#bgm').addEventListener('change',async e=>{const f=e.target.files[0];bgmAB=f?await f.arrayBuffer():null;mixCache=null});
 $('#bgmVol').addEventListener('input',()=>{$('#bgmV').textContent=$('#bgmVol').value;mixCache=null});
-async function getMix(){
-  const vol=parseFloat($('#bgmVol').value),sig=AUD.id+'|'+(bgmAB?bgmAB.byteLength:0)+'|'+vol;
+async function getMix(lead){
+  lead=lead||0;
+  const vol=parseFloat($('#bgmVol').value),sig=AUD.id+'|'+(bgmAB?bgmAB.byteLength:0)+'|'+vol+'|'+lead;
   if(mixCache&&mixCache.sig===sig)return mixCache.data;
-  let out=AUD.pcm;
+  const o0=Math.round(lead*SR);let base=AUD.pcm;
+  if(o0>0){base=new Float32Array(o0+AUD.pcm.length);base.set(AUD.pcm,o0)}
+  const dur=base.length/SR;let out=base;
   if(bgmAB){
-    const off=new OfflineAudioContext(1,AUD.pcm.length,SR);
-    const nb=off.createBuffer(1,AUD.pcm.length,SR);nb.copyToChannel(AUD.pcm,0);
+    const off=new OfflineAudioContext(1,base.length,SR);
+    const nb=off.createBuffer(1,base.length,SR);nb.copyToChannel(base,0);
     const ns=off.createBufferSource();ns.buffer=nb;ns.connect(off.destination);
     const bb=await off.decodeAudioData(bgmAB.slice(0));
     const bs=off.createBufferSource();bs.buffer=bb;bs.loop=true;
-    const g=off.createGain();g.gain.setValueAtTime(vol,0);g.gain.setValueAtTime(vol,Math.max(0,AUD.dur-2.5));g.gain.linearRampToValueAtTime(0,AUD.dur);
+    const g=off.createGain();g.gain.setValueAtTime(vol,0);g.gain.setValueAtTime(vol,Math.max(0,dur-2.5));g.gain.linearRampToValueAtTime(0,dur);
     bs.connect(g);g.connect(off.destination);ns.start();bs.start();
     const r=await off.startRendering();out=r.getChannelData(0).slice();
     let pk=0;for(let i=0;i<out.length;i++){const a=Math.abs(out[i]);if(a>pk)pk=a}
@@ -609,6 +624,52 @@ function drawFrame(t){
 async function loadFonts(){try{await Promise.all([document.fonts.load(`800 34px "Nanum Gothic"`),document.fonts.load(`700 24px "Nanum Gothic"`)])}catch(e){}}
 document.fonts&&document.fonts.ready.then(()=>{baseC=null;AUD?drawFrame(0):drawIdle()});
 
+/* ========== 인트로 ========== */
+let INTRO=null;
+const hsl=(c,a)=>`hsla(${c[0]},${c[1]}%,${c[2]}%,${a==null?1:a})`;
+function rollIntro(){
+  const h=Math.random()*360,d=(40+Math.random()*90)*(Math.random()<.5?1:-1),ls=[26,37,48];
+  INTRO={angle:Math.random()*360,c:[h,h+d*0.5,h+d].map((x,i)=>{x=((x%360)+360)%360;const b=(x>50&&x<190)?0.76:1;return [Math.round(x),76+i*4,Math.round(ls[i]*b)]})};
+}
+rollIntro();
+function introLead(){return $('#introOn').value==='1'?parseFloat($('#introLen').value):0}
+function introTitle(){return $('#introTitle').value.trim()||(pages[0]&&(pages[0].title||pages[0].name))||'토목시공기술사 스터디'}
+function introBg(W,H){
+  const a=INTRO.angle*Math.PI/180,dx=Math.cos(a),dy=Math.sin(a),len=Math.abs(W*dx)+Math.abs(H*dy),m=Math.max(W,H);
+  const gr=cx.createLinearGradient(W/2-dx*len/2,H/2-dy*len/2,W/2+dx*len/2,H/2+dy*len/2);
+  gr.addColorStop(0,hsl(INTRO.c[0]));gr.addColorStop(.5,hsl(INTRO.c[1]));gr.addColorStop(1,hsl(INTRO.c[2]));
+  cx.fillStyle=gr;cx.fillRect(0,0,W,H);
+  [[.15,.2,.7,INTRO.c[2]],[.9,.85,.8,INTRO.c[0]]].forEach(([x,y,r,c])=>{
+    const rg=cx.createRadialGradient(W*x,H*y,0,W*x,H*y,m*r);
+    rg.addColorStop(0,hsl([c[0],c[1],Math.min(68,c[2]+22)],.30));rg.addColorStop(1,hsl(c,0));cx.fillStyle=rg;cx.fillRect(0,0,W,H);
+  });
+  const vg=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,m*0.75);
+  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.30)');cx.fillStyle=vg;cx.fillRect(0,0,W,H);
+}
+function drawIntro(t,lead){
+  const [W,H]=dimsOf();if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
+  const u=Math.min(W,H)/720,cl=x=>Math.max(0,Math.min(1,x)),ease=x=>1-Math.pow(1-cl(x),3);
+  const out=lead<99?cl((lead-t)/0.5):1;
+  if(out<1&&AUD)drawFrame(0);
+  cx.save();cx.globalAlpha=out;introBg(W,H);
+  const a=ease(t/0.9),a2=ease((t-0.35)/0.9);
+  cx.textAlign='center';cx.textBaseline='middle';
+  const maxW=W-180*u,maxL=W>H?3:5;let fs=Math.round(68*u),lines;
+  for(;;){cx.font=`800 ${fs}px ${FONT}`;lines=wrap(introTitle(),maxW);if(lines.length<=maxL||fs<30*u)break;fs-=Math.round(3*u)}
+  const lh=fs*1.28,th=lines.length*lh,sub=$('#introSub').value.trim(),cy=H/2-(W>H?0:H*0.04),top=cy-th/2;
+  cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=18*u;
+  if(sub){cx.globalAlpha=out*a;cx.fillStyle='rgba(255,255,255,.9)';cx.font=`700 ${Math.round(26*u)}px ${FONT}`;cx.fillText(sub.split('').join(' '),W/2,top-54*u+(1-a)*18*u)}
+  cx.globalAlpha=out*a2;cx.fillStyle='#fff';cx.font=`800 ${fs}px ${FONT}`;
+  lines.forEach((ln,i)=>cx.fillText(ln,W/2,top+lh*i+lh/2+(1-a2)*26*u));
+  cx.shadowBlur=0;
+  const lw=Math.round(150*u)*ease((t-0.7)/0.7);
+  cx.globalAlpha=out*a2;cx.fillStyle='#f2a93b';cx.fillRect(W/2-lw/2,top+th+30*u,lw,Math.max(3,Math.round(5*u)));
+  cx.restore();
+}
+function showIntro(){drawIntro(3,99);cv.scrollIntoView({block:'center',behavior:'smooth'})}
+$('#btnRoll').addEventListener('click',()=>{rollIntro();showIntro()});
+$('#btnIntroPrev').addEventListener('click',showIntro);
+
 /* ========== 재생 · 녹화 ========== */
 let playing=false;
 async function run(record){
@@ -620,7 +681,7 @@ async function run(record){
   const btns=['bPlay','bMp4','bWav','bMp3'].map(id=>$('#'+id));btns.forEach(b=>b.disabled=true);
   let ctx;
   try{
-    const mix=await getMix();
+    const lead=introLead(),total=lead+AUD.dur;if(record&&$('#rollEach').checked)rollIntro();const mix=await getMix(lead);
     ctx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:SR});
     const buf=ctx.createBuffer(1,mix.length,SR);buf.copyToChannel(mix,0);
     const src=ctx.createBufferSource();src.buffer=buf;
@@ -636,13 +697,14 @@ async function run(record){
     }
     src.connect(ctx.destination);
     await ctx.resume();
+    if(lead>0)drawIntro(0,lead);else drawFrame(0);
     if(rec)rec.start(500);
     const t0=ctx.currentTime+0.1;src.start(t0);
     await new Promise(res=>{
       const tick=()=>{
         const t=ctx.currentTime-t0;
-        if(t>=AUD.dur+0.3){res();return}
-        drawFrame(Math.max(0,t));setProg(Math.max(0,t)/AUD.dur);setMsg(`${record?'녹화':'재생'} 중 ${fmtT(Math.max(0,t))} / ${fmtT(AUD.dur)}`+(record?' · 화면을 켠 상태로 유지하세요':''));
+        if(t>=total+0.3){res();return}
+        const tt=Math.max(0,t);if(tt<lead)drawIntro(tt,lead);else drawFrame(tt-lead);setProg(tt/total);setMsg(`${record?'녹화':'재생'} 중 ${fmtT(tt)} / ${fmtT(total)}`+(record?' · 화면을 켠 상태로 유지하세요':''));
         requestAnimationFrame(tick);
       };tick();
     });
@@ -673,8 +735,8 @@ $('#bTxt').addEventListener('click',()=>{
 });
 $('#bSrt').addEventListener('click',async()=>{
   if(!await needAud())return;
-  const caps=buildCaptions(28);
-  emit(new Blob([caps.map((c,i)=>`${i+1}\n${srtTime(c.start)} --> ${srtTime(c.end)}\n${c.text}\n`).join('\n')],{type:'application/x-subrip'}),slug()+'.srt');
+  const caps=buildCaptions(28),off=introLead();
+  emit(new Blob([caps.map((c,i)=>`${i+1}\n${srtTime(c.start+off)} --> ${srtTime(c.end+off)}\n${c.text}\n`).join('\n')],{type:'application/x-subrip'}),slug()+'.srt');
 });
 
 /* ========== 유튜브 메타데이터 ========== */
