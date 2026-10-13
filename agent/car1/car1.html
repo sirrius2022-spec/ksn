@@ -1,273 +1,313 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#18486f"><meta name="color-scheme" content="light dark">
 <title>이동식 크레인 안전성검토</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: 좌측 단계별 입력(인양물→장비→줄걸이→샤클), 우측 고정 판정 패널. 검토서·제원표는 탭으로 분리 */
+/* Layout: 모바일 1열(상단 판정 3카드 → 입력 4단계 → 하단 고정 저장바), 데스크톱은 좌 입력 / 우 고정 판정패널 */
 :root{
-  --bg:#eef1f4; --surface:#ffffff; --surface2:#f6f8fa; --ink:#16202a; --muted:#566573; --line:#d3dae1;
-  --steel:#1f4a6e; --steel-ink:#ffffff; --accent:#f2b600; --accent-ink:#5c3d00;
-  --ok:#157347; --ok-bg:#e1f3e9; --ng:#b8312a; --ng-bg:#fbe6e4; --warn:#8f5700; --warn-bg:#fdf1d6;
-  --input-bg:#fff9db; --input-line:#d9c565;
-  --font:"Malgun Gothic","맑은 고딕","Noto Sans KR","Apple SD Gothic Neo",sans-serif;
-  --mono:"JetBrains Mono",Consolas,"D2Coding",monospace;
+  --bg:#f1f3f5; --surface:#ffffff; --surface2:#f6f7f9; --ink:#121c26; --muted:#5d6b78; --line:#d6dce2; --line2:#b9c3cc;
+  --brand:#18486f; --brand-ink:#ffffff; --brand-soft:#e3edf5;
+  --ok:#0e7a44; --ok-bg:#dff3e7; --ng:#c0302b; --ng-bg:#fde7e5; --warn:#a15f00; --warn-bg:#fcefcf;
+  --paper:#ffffff; --paper-ink:#111111; --paper-line:#444444; --paper-soft:#eef1f4;
+  --font:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+  --mono:Consolas,"D2Coding",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0f151b; --surface:#17202a; --surface2:#1d2833; --ink:#e5ebf0; --muted:#97a5b2; --line:#2d3a47;
-  --steel:#7db1dd; --steel-ink:#0c1822; --accent:#f2b600; --accent-ink:#f5d57a;
-  --ok:#4cc38a; --ok-bg:#12301f; --ng:#ff7f73; --ng-bg:#3a1a18; --warn:#f0b64a; --warn-bg:#3a2d10;
-  --input-bg:#2a2812; --input-line:#6f6430; color-scheme:dark}}
+  --bg:#0e141a; --surface:#16202a; --surface2:#1c2833; --ink:#e8eef3; --muted:#9aa8b5; --line:#2c3a47; --line2:#41525f;
+  --brand:#7fb4e0; --brand-ink:#0b1822; --brand-soft:#1a2c3b;
+  --ok:#4cc38a; --ok-bg:#10301f; --ng:#ff7f73; --ng-bg:#3b1b19; --warn:#f0b64a; --warn-bg:#3a2d10; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f151b; --surface:#17202a; --surface2:#1d2833; --ink:#e5ebf0; --muted:#97a5b2; --line:#2d3a47;
-  --steel:#7db1dd; --steel-ink:#0c1822; --accent:#f2b600; --accent-ink:#f5d57a;
-  --ok:#4cc38a; --ok-bg:#12301f; --ng:#ff7f73; --ng-bg:#3a1a18; --warn:#f0b64a; --warn-bg:#3a2d10;
-  --input-bg:#2a2812; --input-line:#6f6430; color-scheme:dark}
+  --bg:#0e141a; --surface:#16202a; --surface2:#1c2833; --ink:#e8eef3; --muted:#9aa8b5; --line:#2c3a47; --line2:#41525f;
+  --brand:#7fb4e0; --brand-ink:#0b1822; --brand-soft:#1a2c3b;
+  --ok:#4cc38a; --ok-bg:#10301f; --ng:#ff7f73; --ng-bg:#3b1b19; --warn:#f0b64a; --warn-bg:#3a2d10; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.55;padding-inline:16px;padding-block:0 40px}
-.wrap{max-width:1180px;margin:0 auto}
-header.top{padding-block:22px 14px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:flex-end;justify-content:space-between}
-h1{margin:0;font-size:24px;letter-spacing:-.01em;text-wrap:balance}
-.sub{color:var(--muted);margin:2px 0 0;font-size:13px}
-.tabs{display:flex;gap:2px;border-bottom:2px solid var(--line);margin-bottom:16px;overflow-x:auto}
-.tabs button{font:inherit;font-weight:500;background:none;border:0;padding:10px 18px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
-.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
-:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
-.main{display:flex;flex-direction:column;gap:14px;min-width:0}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
-.card h2{margin:0 0 12px;font-size:16px;display:flex;align-items:center;gap:10px}
-.card h2 .tag{font-family:var(--mono);font-size:11px;font-weight:600;background:var(--steel);color:var(--steel-ink);padding:2px 7px;border-radius:3px;letter-spacing:.04em}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.f{display:flex;flex-direction:column;gap:4px;min-width:0}
-.f label,.f .lab{font-size:12px;color:var(--muted);font-weight:500}
-.iw{display:flex;align-items:stretch}
-input,select,textarea{font:inherit;color:var(--ink);background:var(--input-bg);border:1px solid var(--input-line);border-radius:4px;padding:7px 9px;min-width:0;width:100%}
-select{background:var(--input-bg)}
-textarea{font-family:var(--mono);font-size:12px;background:var(--surface2);border-color:var(--line)}
-input.plain,.plain{background:var(--surface2);border-color:var(--line)}
-.iw input{border-top-right-radius:0;border-bottom-right-radius:0}
-.iw .u{display:flex;align-items:center;padding:0 9px;background:var(--surface2);border:1px solid var(--input-line);border-left:0;border-radius:0 4px 4px 0;color:var(--muted);font-size:12px;white-space:nowrap}
-input[type=number]{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
-.seg button{font:inherit;background:var(--surface2);color:var(--muted);border:0;padding:7px 16px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--steel);color:var(--steel-ink);font-weight:700}
-details.adv{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
-details.adv summary{cursor:pointer;color:var(--muted);font-size:12.5px}
-details.adv .grid{margin-top:10px}
-.hint{font-size:12px;color:var(--muted);margin:8px 0 0}
-.res{margin-top:14px;border:1px solid var(--line);border-radius:5px;background:var(--surface2);padding:12px 14px}
-.res .fm{font-family:var(--mono);font-size:12.5px;line-height:1.9;font-variant-numeric:tabular-nums;overflow-x:auto;white-space:nowrap}
-.fm .k{color:var(--muted)}
-.fm b{font-weight:600}
-.vr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
-.pill{font-weight:700;font-size:13px;padding:3px 12px;border-radius:99px;letter-spacing:.04em}
-.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.ng{background:var(--ng-bg);color:var(--ng)} .pill.warn{background:var(--warn-bg);color:var(--warn)}
-.cmp{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.bar{position:relative;height:10px;border-radius:5px;background:var(--line);margin-top:8px;overflow:visible}
-.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--ok)}
-.bar i.ng{background:var(--ng)} .bar i.warn{background:var(--warn)}
-.bar s{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.7}
-.msgs{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
-.msgs li{font-size:12.5px;padding:5px 9px;border-radius:4px;background:var(--warn-bg);color:var(--warn)}
-.msgs li.ng{background:var(--ng-bg);color:var(--ng)}
-.split{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:16px;align-items:start}
-.diag{width:100%;height:auto;max-width:190px}
-.diag text{fill:var(--muted);font-size:11px;font-family:var(--mono)}
-.sum{position:sticky;top:env(safe-area-inset-top,0px);margin-top:0;display:flex;flex-direction:column;gap:10px}
-.verdict{border-radius:6px;padding:16px 18px;border:2px solid var(--ok);background:var(--ok-bg);color:var(--ok)}
-.verdict.ng{border-color:var(--ng);background:var(--ng-bg);color:var(--ng)}
-.verdict .big{font-size:26px;font-weight:700;letter-spacing:.02em;line-height:1.2}
-.verdict .s{font-size:12.5px;color:var(--ink);margin-top:2px}
-.rows{display:flex;flex-direction:column}
-.row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-top:1px solid var(--line);align-items:center}
-.row:first-child{border-top:0}
-.row .n{font-weight:700}
-.row .d{grid-column:1/-1;font-size:12px;color:var(--muted);font-family:var(--mono)}
-table{border-collapse:collapse;width:100%}
-.tw{overflow-x:auto;border:1px solid var(--line);border-radius:5px}
-.tw table{min-width:560px}
-th,td{padding:5px 9px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px}
-th{background:var(--surface2);font-weight:700;position:sticky;top:0;text-align:center}
-td:first-child,th:first-child{text-align:center;font-weight:700}
-td.hit{background:var(--accent);color:#2b1d00;font-weight:700}
-td.rowhit{background:var(--warn-bg)}
-td.empty{color:var(--line)}
-.btn{font:inherit;font-weight:700;border:0;border-radius:4px;padding:8px 16px;background:var(--steel);color:var(--steel-ink);cursor:pointer}
-.btn.sec{background:var(--surface2);color:var(--ink);border:1px solid var(--line);font-weight:500}
-.btn.dng{background:var(--ng-bg);color:var(--ng);border:1px solid var(--ng)}
-.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
-.stat{font-size:12.5px;color:var(--muted)}
-.paper{overflow-x:auto;background:var(--surface);border:1px solid var(--line);padding:22px 24px;max-width:860px}
-.paper h3{text-align:center;font-size:20px;margin:0 0 4px;letter-spacing:.2em}
-.paper .cap{text-align:center;color:var(--muted);font-size:12.5px;margin-bottom:14px}
-.paper table{min-width:560px;border:1px solid var(--ink);margin-bottom:12px}
-.paper th,.paper td{border:1px solid var(--muted);text-align:left;font-size:13px;padding:6px 9px}
-.paper th{background:var(--surface2);width:22%;text-align:center}
-.paper td.num{text-align:right;font-family:var(--mono)}
-.paper .sec{background:var(--steel);color:var(--steel-ink);font-weight:700;text-align:left;width:auto}
-.paper .res-ok{color:var(--ok);font-weight:700}.paper .res-ng{color:var(--ng);font-weight:700}
-.meta{max-width:860px;margin-bottom:14px}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:0 96px;-webkit-text-size-adjust:100%}
+.wrap{max-width:1120px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.bar-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px 12px;flex-wrap:wrap}
+h1{margin:0;font-size:22px;letter-spacing:-.01em}
+.sub{margin:0;color:var(--muted);font-size:13px}
+.tabs{display:flex;gap:4px;margin-bottom:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tabs button{flex:1;border:0;background:none;padding:10px 8px;border-radius:7px;color:var(--muted);font-weight:700;cursor:pointer;min-height:44px}
+.tabs button[aria-selected="true"]{background:var(--brand);color:var(--brand-ink)}
 .hidden{display:none!important}
-.note{font-size:12px;color:var(--muted);margin:14px 0 0;line-height:1.7}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.steps{display:flex;flex-direction:column;gap:12px;min-width:0}
+.side{position:sticky;top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;gap:10px}
+
+/* 판정 패널 */
+.banner{border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;background:var(--ok-bg);color:var(--ok);border:2px solid var(--ok)}
+.banner.ng{background:var(--ng-bg);color:var(--ng);border-color:var(--ng)}
+.banner .ico{font-size:34px;font-weight:700;line-height:1}
+.banner .t{font-size:22px;font-weight:700;line-height:1.2}
+.banner .s{font-size:13px;color:var(--ink);opacity:.85}
+.gauges{display:grid;grid-template-columns:1fr;gap:10px}
+.g{background:var(--surface);border:1px solid var(--line);border-left-width:8px;border-radius:10px;padding:12px 14px}
+.g.ok{border-left-color:var(--ok)} .g.warn{border-left-color:var(--warn)} .g.ng{border-left-color:var(--ng)}
+.g .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.g .n{font-weight:700;font-size:16px}
+.g .sb{font-size:12px;color:var(--muted)}
+.g .st{font-weight:700;font-size:20px}
+.g.ok .st{color:var(--ok)} .g.warn .st{color:var(--warn)} .g.ng .st{color:var(--ng)}
+.g .v{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted)}
+.g .v b{color:var(--ink);font-size:15px}
+.meter{position:relative;height:12px;background:var(--line);border-radius:6px;margin-top:8px}
+.meter i{position:absolute;inset:0 auto 0 0;border-radius:6px;background:var(--ok)}
+.g.warn .meter i{background:var(--warn)} .g.ng .meter i{background:var(--ng)}
+.meter s{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--ink);border-radius:2px;left:66.66%}
+.g .pc{font-size:12px;color:var(--muted);margin-top:4px;display:flex;justify-content:space-between}
+.g .why{font-size:12.5px;color:var(--ng);margin-top:6px;font-weight:700}
+.exp{display:flex;gap:8px}
+.btn{border:0;border-radius:10px;background:var(--brand);color:var(--brand-ink);font-weight:700;padding:12px 16px;min-height:48px;cursor:pointer;flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.sec{background:var(--surface);color:var(--ink);border:1.5px solid var(--line2)}
+.btn.dng{background:var(--ng-bg);color:var(--ng);border:1.5px solid var(--ng)}
+.btn[disabled]{opacity:.55;cursor:progress}
+.toast{min-height:20px;font-size:12.5px;color:var(--muted)}
+
+/* 입력 카드 */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{margin:0 0 12px;font-size:17px;display:flex;align-items:center;gap:10px}
+.no{width:26px;height:26px;border-radius:50%;background:var(--brand);color:var(--brand-ink);font-size:14px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f.full{grid-column:1/-1}
+.f>label{font-size:13px;font-weight:700;color:var(--muted)}
+.f>label small{font-weight:400}
+input,select,textarea{width:100%;min-height:46px;padding:9px 12px;border:1.5px solid var(--line2);border-radius:9px;background:var(--surface);font-size:16px;min-width:0}
+input[type=number]{font-variant-numeric:tabular-nums;font-weight:700}
+textarea{font-family:var(--mono);font-size:13px;min-height:120px}
+input.plain{font-weight:400}
+.stp{display:flex}
+.stp input{border-radius:0;text-align:center;border-inline:0}
+.stp button{width:48px;flex:none;border:1.5px solid var(--line2);background:var(--surface2);font-size:22px;font-weight:700;cursor:pointer;color:var(--brand)}
+.stp button:first-child{border-radius:9px 0 0 9px}.stp button:last-child{border-radius:0 9px 9px 0}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--line2);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.seg button{border:0;background:var(--surface);padding:12px;font-weight:700;cursor:pointer;min-height:48px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
+.hint{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.chip{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:14px;padding:10px 12px;background:var(--surface2);border-radius:9px;font-size:13.5px}
+.pill{font-weight:700;padding:3px 12px;border-radius:99px;font-size:13px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.ng{background:var(--ng-bg);color:var(--ng)}
+.chip .c{font-variant-numeric:tabular-nums}
+.msgs{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.msgs li{font-size:12.5px;padding:6px 10px;border-radius:7px;background:var(--warn-bg);color:var(--warn)}
+.msgs li.ng{background:var(--ng-bg);color:var(--ng);font-weight:700}
+details.calc{margin-top:10px}
+details.calc summary{cursor:pointer;font-size:13px;color:var(--brand);font-weight:700;padding:6px 0;min-height:32px}
+.fm{font-family:var(--mono);font-size:12.5px;line-height:1.9;background:var(--surface2);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+.fm .k{color:var(--muted)}
+details.adv{margin-top:12px}
+details.adv summary{cursor:pointer;font-size:13px;color:var(--muted);padding:6px 0}
+.rig{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:14px;align-items:start}
+.diag{width:100%;max-width:150px;height:auto}
+.diag text{fill:var(--muted);font-size:11px;font-family:var(--mono)}
+
+/* 표 */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%}
+.tw table{min-width:520px}
+.tw th,.tw td{padding:5px 9px;border-bottom:1px solid var(--line);text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
+.tw th{background:var(--surface2);text-align:center;position:sticky;top:0}
+.tw td:first-child,.tw th:first-child{text-align:center;font-weight:700}
+.tw td.hit{background:var(--brand);color:var(--brand-ink);font-weight:700}
+.tw td.empty{color:var(--line2)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stat{font-size:13px;color:var(--muted)}
+
+/* 하단 고정바 (모바일) */
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line2);padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px));display:none;gap:8px;align-items:center;z-index:5}
+.dock .dv{flex:1;font-weight:700;font-size:15px;line-height:1.2}
+.dock .dv.ok{color:var(--ok)} .dock .dv.ng{color:var(--ng)}
+.dock .btn{flex:none;min-height:44px;padding:8px 14px}
+
+/* 검토서 문서 (A4 · 항상 흰 종이) */
+.docwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface2);padding:12px}
+.doc{width:794px;background:var(--paper);color:var(--paper-ink);padding:44px 48px;font-family:var(--font);font-size:13px;line-height:1.5}
+.doc h3{margin:0;text-align:center;font-size:24px;letter-spacing:.18em}
+.doc .cap{text-align:center;font-size:12px;color:#555;margin:6px 0 14px}
+.doc .vd{margin:0 0 14px;padding:12px;text-align:center;font-size:20px;font-weight:700;border:3px solid #0e7a44;color:#0e7a44;background:#e6f5ec}
+.doc .vd.ng{border-color:#c0302b;color:#c0302b;background:#fde9e7}
+.doc table{border:1.5px solid var(--paper-line);margin-bottom:12px}
+.doc th,.doc td{border:1px solid #777;padding:6px 9px;text-align:left;font-size:13px;color:var(--paper-ink)}
+.doc th{background:var(--paper-soft);width:21%;text-align:center;font-weight:700}
+.doc th.sec{background:#18486f;color:#fff;text-align:left;width:auto;font-size:14px}
+.doc td.num{text-align:right}
+.doc .o{color:#0e7a44;font-weight:700}.doc .x{color:#c0302b;font-weight:700}
+.doc .foot{font-size:11px;color:#555;line-height:1.6}
+.pdfhost{position:fixed;left:-10000px;top:0}
+
 @media (max-width:900px){
   .layout{grid-template-columns:minmax(0,1fr)}
-  .sum{position:static;order:-1}
-  .split{grid-template-columns:minmax(0,1fr)}
-  .diag{max-width:150px}
+  .side{position:static;order:-1}
+  .gauges{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .g{padding:10px 10px;border-left-width:1px;border-top-width:6px}
+  .g.ok{border-left-color:var(--line);border-top-color:var(--ok)}.g.warn{border-left-color:var(--line);border-top-color:var(--warn)}.g.ng{border-left-color:var(--line);border-top-color:var(--ng)}
+  .g .h{flex-direction:column;gap:0}.g .sb,.g .v span:first-child{display:none}.g .v{justify-content:flex-end}
+  .exp{display:none}
+  .dock{display:flex}
+  .rig{grid-template-columns:minmax(0,1fr)}
+  .diag{max-width:130px;margin:0 auto}
 }
+@media (max-width:460px){.grid{gap:10px}h1{font-size:20px}}
 @media print{
-  body{background:#fff;color:#000}
-  header.top,.tabs,.meta,.actions,.no-print{display:none!important}
-  .paper{border:0;padding:0;max-width:none}
+  body{background:#fff;padding:0}.bar-top,.tabs,.docwrap~*,.dock,#p-calc,#p-data,#metacard{display:none!important}
+  .docwrap{border:0;padding:0;background:#fff;overflow:visible}.doc{width:auto;padding:0}
 }
 </style>
 
+<style>[hidden]{display:none!important}body{margin:0}</style></head>
+<body>
 <div class="wrap">
-<header class="top">
-  <div>
-    <h1>이동식 크레인 안전성검토</h1>
-    <p class="sub">인양물 · 크레인 정격하중 · 줄걸이(와이어로프/슬링벨트) · 샤클 일괄 검토 — 산업안전보건기준에 관한 규칙 제163조</p>
-  </div>
-</header>
-
+<div class="bar-top">
+  <div><h1>이동식 크레인 안전성검토</h1><p class="sub">산업안전보건기준에 관한 규칙 제163조 · 장비 / 줄걸이 / 샤클</p></div>
+  <button class="btn sec" id="reset" style="flex:none;min-height:40px;padding:6px 14px">입력 초기화</button>
+</div>
 <nav class="tabs" role="tablist">
-  <button role="tab" id="tab-calc" aria-selected="true" data-tab="calc">안전성 검토</button>
+  <button role="tab" id="tab-calc" aria-selected="true" data-tab="calc">검토</button>
   <button role="tab" id="tab-report" aria-selected="false" data-tab="report">검토서</button>
-  <button role="tab" id="tab-data" aria-selected="false" data-tab="data">제원표 · 크레인 관리</button>
+  <button role="tab" id="tab-data" aria-selected="false" data-tab="data">제원표</button>
 </nav>
 
-<!-- ============ 검토 ============ -->
+<!-- ===== 검토 ===== -->
 <div id="p-calc" class="layout">
-  <div class="main">
+  <div class="steps">
 
     <section class="card">
-      <h2><span class="tag">A</span>인양물</h2>
+      <h2><span class="no">1</span>인양물</h2>
       <div class="grid">
-        <div class="f"><label for="load">인양물 중량</label><div class="iw"><input id="load" type="number" step="0.1" min="0" value="5"><span class="u">ton</span></div></div>
-        <div class="f"><label for="rigw">훅블록·달기기구 중량 (장비 검토에 가산)</label><div class="iw"><input id="rigw" type="number" step="0.1" min="0" value="0"><span class="u">ton</span></div></div>
+        <div class="f"><label for="load">인양물 중량 <small>(ton)</small></label><input id="load" type="number" inputmode="decimal" step="0.1" min="0" value="5"></div>
+        <div class="f"><label for="rigw">훅블록·달기기구 <small>(ton, 장비에만 가산)</small></label><input id="rigw" type="number" inputmode="decimal" step="0.1" min="0" value="0"></div>
       </div>
-      <p class="hint">샤클·줄걸이는 인양물 중량, 크레인은 인양물 + 훅블록·달기기구 중량으로 비교한다.</p>
     </section>
 
     <section class="card">
-      <h2><span class="tag">B</span>장비 검토 <span class="stat" style="font-weight:400">(정격하중표 조회)</span></h2>
+      <h2><span class="no">2</span>크레인 (정격하중표)</h2>
       <div class="grid">
-        <div class="f"><label for="crane">크레인 (제원표)</label><select id="crane"></select></div>
-        <div class="f"><label for="boom">작업 붐길이</label><select id="boom"></select></div>
-        <div class="f"><label for="radius">작업 반경</label><div class="iw"><input id="radius" type="number" step="0.1" min="0" value="10"><span class="u">m</span></div></div>
-        <div class="f"><label for="sfeq">안전율 적용기준 (정격×)</label><div class="iw"><input id="sfeq" type="number" step="0.01" min="0.1" max="1" value="0.85"><span class="u">배</span></div></div>
+        <div class="f full"><label for="crane">크레인</label><select id="crane"></select></div>
+        <div class="f"><label for="boom">붐길이</label><select id="boom"></select></div>
+        <div class="f"><label for="radius">작업반경 <small>(m)</small></label><input id="radius" type="number" inputmode="decimal" step="0.5" min="0" value="10"></div>
+        <div class="f"><label for="sfeq">적용률 <small>(정격하중 × )</small></label><input id="sfeq" type="number" inputmode="decimal" step="0.05" min="0.1" max="1" value="0.85"></div>
       </div>
-      <p class="hint">작업계획서 기준 0.85(정격하중의 85% 이내). 현장 자체 기준이 있으면 변경한다. 작업 반경이 표의 값 사이이면 큰 쪽 반경(안전 측)을 적용한다.</p>
-      <div class="res" id="r-eq"></div>
+      <p class="hint">작업계획서 기준 0.85 (정격하중의 85% 이내). 반경이 표 값 사이이면 큰 반경(안전 측)을 적용한다.</p>
+      <div class="chip" id="c-eq"></div><ul class="msgs" id="m-eq"></ul>
+      <details class="calc"><summary>계산 과정</summary><div class="fm" id="f-eq"></div></details>
     </section>
 
     <section class="card">
-      <h2><span class="tag">C</span>줄걸이 검토</h2>
+      <h2><span class="no">3</span>줄걸이</h2>
       <div class="seg" role="group" aria-label="줄걸이 종류">
         <button id="seg-wire" aria-pressed="true" data-rig="wire">와이어로프</button>
         <button id="seg-belt" aria-pressed="false" data-rig="belt">슬링벨트</button>
       </div>
-
-      <div id="box-wire" style="margin-top:14px">
-        <div class="split"><div>
-          <div class="grid">
-            <div class="f"><label for="w-core">심(core) 종류</label><select id="w-core"><option>철심</option><option>마심</option></select></div>
-            <div class="f"><label for="w-dia">줄걸이 규격(지름)</label><select id="w-dia"></select></div>
-            <div class="f"><label for="w-n">사용 갯수</label><div class="iw"><input id="w-n" type="number" min="1" step="1" value="2"><span class="u">줄</span></div></div>
-            <div class="f"><label for="w-sf">안전율 <span class="stat">(화물 5↑ / 탑승 10↑)</span></label><input id="w-sf" type="number" min="1" step="0.5" value="5"></div>
-            <div class="f"><label for="w-ang">줄걸이 각도 (수평각)</label><div class="iw"><input id="w-ang" type="number" min="20" max="90" step="1" value="60"><span class="u">°</span></div></div>
-            <div class="f"><label for="w-end">단말가공 방법</label><select id="w-end"></select></div>
-          </div>
-          <details class="adv"><summary>제조사 시험성적서 값을 직접 입력</summary>
-            <div class="grid"><div class="f"><label for="w-ov">절단하중 (비우면 표 값)</label><div class="iw"><input id="w-ov" type="number" step="0.01" min="0" placeholder="표 값 사용"><span class="u">ton</span></div></div></div>
-          </details>
+      <div id="box-wire"><div class="rig"><div>
+        <div class="grid">
+          <div class="f"><label for="w-core">심(core)</label><select id="w-core"><option>철심</option><option>마심</option></select></div>
+          <div class="f"><label for="w-dia">지름</label><select id="w-dia"></select></div>
+          <div class="f"><label for="w-n">줄 수</label><div class="stp"><button type="button" data-d="-1" aria-label="줄 수 감소">−</button><input id="w-n" type="number" inputmode="numeric" min="1" step="1" value="2"><button type="button" data-d="1" aria-label="줄 수 증가">+</button></div></div>
+          <div class="f"><label for="w-ang">수평각 <small>(°)</small></label><div class="stp"><button type="button" data-d="-1" aria-label="각도 감소">−</button><input id="w-ang" type="number" inputmode="numeric" min="20" max="90" step="5" value="60"><button type="button" data-d="1" aria-label="각도 증가">+</button></div></div>
+          <div class="f"><label for="w-sf">안전율 <small>(화물 5↑, 탑승 10↑)</small></label><input id="w-sf" type="number" inputmode="decimal" min="1" step="0.5" value="5"></div>
+          <div class="f"><label for="w-end">단말가공</label><select id="w-end"></select></div>
         </div>
-        <svg class="diag" id="dg-wire" viewBox="0 0 190 150" role="img" aria-label="줄걸이 각도 도해"></svg></div>
-        <div class="res" id="r-wire"></div>
+        <details class="adv"><summary>제조사 절단하중 직접 입력</summary><div class="f" style="margin-top:8px"><label for="w-ov">절단하중 <small>(ton, 비우면 표 값)</small></label><input id="w-ov" type="number" inputmode="decimal" step="0.01" min="0" placeholder="표 값 사용"></div></details>
+      </div><svg class="diag" id="dg-wire" viewBox="0 0 190 150" role="img" aria-label="줄걸이 각도"></svg></div>
+        <div class="chip" id="c-wire"></div><ul class="msgs" id="m-wire"></ul>
+        <details class="calc"><summary>계산 과정</summary><div class="fm" id="f-wire"></div></details>
       </div>
-
-      <div id="box-belt" class="hidden" style="margin-top:14px">
-        <div class="split"><div>
-          <div class="grid">
-            <div class="f"><label for="b-w">줄걸이 규격(폭)</label><select id="b-w"></select></div>
-            <div class="f"><label for="b-t">슬링벨트 타입</label><select id="b-t"><option value="eye">EYE &amp; EYE TYPE</option><option value="endless">ENDLESS TYPE</option></select></div>
-            <div class="f"><label for="b-m">양중방식</label><select id="b-m"><option value="1">Straight</option><option value="2" selected>Choker</option><option value="3">Basket (Single ply)</option><option value="4">Basket (Two ply)</option></select></div>
-            <div class="f"><label for="b-ang">줄걸이 각도 (줄 사이각)</label><select id="b-ang"></select></div>
-            <div class="f"><label for="b-n">사용 갯수</label><div class="iw"><input id="b-n" type="number" min="1" step="1" value="2"><span class="u">줄</span></div></div>
-            <div class="f"><label for="b-sf">안전율 <span class="stat">(화물 5↑ / 탑승 10↑)</span></label><input id="b-sf" type="number" min="1" step="0.5" value="5"></div>
-          </div>
-          <details class="adv"><summary>제조사 라벨 값을 직접 입력</summary>
-            <div class="grid">
-              <div class="f"><label for="b-ov1">절단하중 (비우면 표 값)</label><div class="iw"><input id="b-ov1" type="number" step="0.01" min="0" placeholder="표 값 사용"><span class="u">ton</span></div></div>
-              <div class="f"><label for="b-ov2">해당 양중방식 사용하중 (0° 기준)</label><div class="iw"><input id="b-ov2" type="number" step="0.01" min="0" placeholder="표 값 사용"><span class="u">ton</span></div></div>
-            </div>
-          </details>
+      <div id="box-belt" class="hidden"><div class="rig"><div>
+        <div class="grid">
+          <div class="f"><label for="b-w">폭</label><select id="b-w"></select></div>
+          <div class="f"><label for="b-t">타입</label><select id="b-t"><option value="eye">EYE &amp; EYE</option><option value="endless">ENDLESS</option></select></div>
+          <div class="f"><label for="b-m">양중방식</label><select id="b-m"><option value="1">Straight</option><option value="2" selected>Choker</option><option value="3">Basket (Single ply)</option><option value="4">Basket (Two ply)</option></select></div>
+          <div class="f"><label for="b-ang">줄 사이각</label><select id="b-ang"></select></div>
+          <div class="f"><label for="b-n">줄 수</label><div class="stp"><button type="button" data-d="-1" aria-label="줄 수 감소">−</button><input id="b-n" type="number" inputmode="numeric" min="1" step="1" value="2"><button type="button" data-d="1" aria-label="줄 수 증가">+</button></div></div>
+          <div class="f"><label for="b-sf">안전율 <small>(화물 5↑, 탑승 10↑)</small></label><input id="b-sf" type="number" inputmode="decimal" min="1" step="0.5" value="5"></div>
         </div>
-        <svg class="diag" id="dg-belt" viewBox="0 0 190 150" role="img" aria-label="줄걸이 각도 도해"></svg></div>
-        <div class="res" id="r-belt"></div>
+        <details class="adv"><summary>제조사 라벨 값 직접 입력</summary><div class="grid" style="margin-top:8px">
+          <div class="f"><label for="b-ov1">절단하중 <small>(ton)</small></label><input id="b-ov1" type="number" inputmode="decimal" step="0.01" min="0" placeholder="표 값 사용"></div>
+          <div class="f"><label for="b-ov2">사용하중 <small>(ton, 0° 기준)</small></label><input id="b-ov2" type="number" inputmode="decimal" step="0.01" min="0" placeholder="표 값 사용"></div></div></details>
+      </div><svg class="diag" id="dg-belt" viewBox="0 0 190 150" role="img" aria-label="줄걸이 각도"></svg></div>
+        <div class="chip" id="c-belt"></div><ul class="msgs" id="m-belt"></ul>
+        <details class="calc"><summary>계산 과정</summary><div class="fm" id="f-belt"></div></details>
       </div>
     </section>
 
     <section class="card">
-      <h2><span class="tag">D</span>샤클 검토</h2>
+      <h2><span class="no">4</span>샤클</h2>
       <div class="grid">
-        <div class="f"><label for="s-size">샤클 규격</label><select id="s-size"></select></div>
-        <div class="f"><label for="s-n">사용 갯수</label><div class="iw"><input id="s-n" type="number" min="1" step="1" value="2"><span class="u">EA</span></div></div>
-        <div class="f"><label for="s-sf">안전율 <span class="stat">(3 이상)</span></label><input id="s-sf" type="number" min="1" step="0.5" value="3"></div>
+        <div class="f"><label for="s-size">규격</label><select id="s-size"></select></div>
+        <div class="f"><label for="s-n">개수</label><div class="stp"><button type="button" data-d="-1" aria-label="개수 감소">−</button><input id="s-n" type="number" inputmode="numeric" min="1" step="1" value="2"><button type="button" data-d="1" aria-label="개수 증가">+</button></div></div>
+        <div class="f"><label for="s-sf">안전율 <small>(3 이상)</small></label><input id="s-sf" type="number" inputmode="decimal" min="1" step="0.5" value="3"></div>
+        <div class="f"><label for="s-ov">사용하중 직접 입력 <small>(ton)</small></label><input id="s-ov" type="number" inputmode="decimal" step="0.01" min="0" placeholder="표 값 사용"></div>
       </div>
-      <details class="adv"><summary>제조사 사용하중(WLL)을 직접 입력</summary>
-        <div class="grid"><div class="f"><label for="s-ov">사용하중 (비우면 표 값)</label><div class="iw"><input id="s-ov" type="number" step="0.01" min="0" placeholder="표 값 사용"><span class="u">ton</span></div></div></div>
-      </details>
-      <div class="res" id="r-sh"></div>
+      <div class="chip" id="c-sh"></div><ul class="msgs" id="m-sh"></ul>
+      <details class="calc"><summary>계산 과정</summary><div class="fm" id="f-sh"></div></details>
     </section>
   </div>
 
-  <aside class="sum" aria-live="polite">
-    <div id="verdict" class="verdict"></div>
-    <div class="card"><div class="rows" id="rows"></div></div>
-    <p class="note" style="margin:0">판정은 안전하중이 인양하중보다 클 때(안전하중 &gt; 인양하중) OK이다. 값이 같으면 NG로 본다.</p>
+  <aside class="side" aria-live="polite">
+    <div id="banner" class="banner"></div>
+    <div class="gauges" id="gauges"></div>
+    <div class="exp">
+      <button class="btn js-pdf" type="button">PDF 저장</button>
+      <button class="btn sec js-xlsx" type="button">엑셀 저장</button>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
   </aside>
 </div>
 
-<!-- ============ 검토서 ============ -->
+<!-- ===== 검토서 ===== -->
 <div id="p-report" class="hidden">
-  <div class="card meta">
-    <h2 style="margin-bottom:10px">검토서 기재사항</h2>
-    <div class="grid">
-      <div class="f"><label for="m-co">업체명 / 공사명</label><input class="plain" id="m-co" type="text"></div>
-      <div class="f"><label for="m-date">검토일</label><input class="plain" id="m-date" type="date"></div>
-      <div class="f"><label for="m-who">검토자</label><input class="plain" id="m-who" type="text"></div>
-      <div class="f"><label for="m-veh">장비명 / 차량번호</label><input class="plain" id="m-veh" type="text" placeholder="예) 100톤 크레인 / 00가 0000"></div>
-      <div class="f"><label for="m-cargo">화물 종류</label><input class="plain" id="m-cargo" type="text"></div>
-      <div class="f"><label for="m-size">화물 규격 (가로×세로×높이)</label><input class="plain" id="m-size" type="text"></div>
-    </div>
-    <div class="actions"><button class="btn" id="copy">검토서 텍스트 복사</button><span class="stat" id="copymsg"></span></div>
+  <div class="steps">
+    <section class="card" id="metacard">
+      <h2>검토서 기재사항</h2>
+      <div class="grid">
+        <div class="f"><label for="m-co">업체명 / 공사명</label><input class="plain" id="m-co" type="text"></div>
+        <div class="f"><label for="m-date">검토일</label><input class="plain" id="m-date" type="date"></div>
+        <div class="f"><label for="m-who">검토자</label><input class="plain" id="m-who" type="text"></div>
+        <div class="f"><label for="m-veh">장비명 / 차량번호</label><input class="plain" id="m-veh" type="text"></div>
+        <div class="f"><label for="m-cargo">화물 종류</label><input class="plain" id="m-cargo" type="text"></div>
+        <div class="f"><label for="m-size">화물 규격 (가×세×높이)</label><input class="plain" id="m-size" type="text"></div>
+      </div>
+      <div class="actions"><button class="btn js-pdf" type="button">PDF 저장</button><button class="btn sec js-xlsx" type="button">엑셀 저장</button><button class="btn sec" id="copy" type="button">텍스트 복사</button></div>
+      <div class="toast js-toast" style="margin-top:6px"></div>
+    </section>
+    <div class="docwrap"><div id="paper"></div></div>
   </div>
-  <div class="paper" id="paper"></div>
 </div>
 
-<!-- ============ 제원표 ============ -->
+<!-- ===== 제원표 ===== -->
 <div id="p-data" class="hidden">
-  <div class="main">
+  <div class="steps">
     <section class="card">
       <h2>크레인 정격하중표</h2>
-      <div class="grid" style="grid-template-columns:minmax(0,320px)"><div class="f"><label for="crane2">표시할 크레인</label><select id="crane2"></select></div></div>
-      <p class="hint">노란 칸이 현재 검토에 사용 중인 정격하중이다. 빈 칸은 해당 붐길이로 작업할 수 없는 반경이다.</p>
+      <div class="f"><label for="crane2">크레인</label><select id="crane2"></select></div>
+      <p class="hint">진한 칸이 현재 검토에 쓰이는 정격하중이다. 점(·)은 해당 붐길이로 작업할 수 없는 반경이다.</p>
       <div class="tw" style="max-height:460px;margin-top:10px"><table id="ctable"></table></div>
     </section>
     <section class="card">
       <h2>크레인 추가</h2>
-      <p class="hint" style="margin-top:0">장비 업체의 정격하중표를 엑셀에서 복사해 붙여 넣는다. 첫 행은 붐길이, 첫 열은 작업반경이며 왼쪽 위 모서리 칸은 있어도 없어도 된다. 입력한 크레인은 이 브라우저에 저장된다.</p>
-      <div class="grid" style="grid-template-columns:minmax(0,320px)"><div class="f"><label for="n-name">제조사 / 모델명</label><input class="plain" id="n-name" type="text" placeholder="예) TADANO GR-1000XL"></div></div>
-      <div class="f" style="margin-top:10px"><label for="n-text">정격하중표 붙여넣기</label><textarea id="n-text" rows="7" placeholder="붐길이&#9;10.0&#9;15.0&#9;20.0&#10;3&#9;50.0&#9;&#9;&#10;4&#9;45.0&#9;38.0&#9;&#10;6&#9;30.0&#9;28.0&#9;20.0"></textarea></div>
-      <div class="actions"><button class="btn" id="n-add">추가</button><button class="btn dng hidden" id="n-del">선택한 크레인 삭제</button><span class="stat" id="n-msg"></span></div>
+      <p class="hint" style="margin-top:0">장비업체의 정격하중표를 엑셀에서 복사해 붙여 넣는다. 첫 행은 붐길이, 첫 열은 작업반경이다. 이 브라우저에 저장된다.</p>
+      <div class="grid" style="margin-top:10px"><div class="f full"><label for="n-name">제조사 / 모델명</label><input class="plain" id="n-name" type="text" placeholder="예) TADANO GR-1000XL"></div>
+      <div class="f full"><label for="n-text">정격하중표 붙여넣기</label><textarea id="n-text" placeholder="붐길이&#9;10&#9;15&#9;20&#10;3&#9;50&#9;&#9;&#10;5&#9;40&#9;30&#9;&#10;8&#9;25&#9;22&#9;15"></textarea></div></div>
+      <div class="actions"><button class="btn" id="n-add" type="button" style="flex:none">추가</button><button class="btn dng hidden" id="n-del" type="button" style="flex:none">선택한 크레인 삭제</button><span class="stat" id="n-msg"></span></div>
     </section>
     <section class="card">
       <h2>샤클 · 슬링벨트 · 와이어로프 제원</h2>
       <div id="refs" style="display:flex;flex-direction:column;gap:10px"></div>
-      <p class="note">표의 값은 통용되는 일반 제원이다. 제조사·시험성적서 값이 다르면 각 단계의 「직접 입력」을 사용한다. 와이어로프 형태별 사용하중은 절대적 수치가 아니며 제조사마다 다를 수 있다.</p>
+      <p class="hint">통용되는 일반 제원이다. 제조사 값이 다르면 각 단계의 직접 입력을 사용한다. 와이어로프 형태별 사용하중은 절대적 수치가 아니다.</p>
     </section>
   </div>
 </div>
 </div>
+
+<div class="dock" id="dock">
+  <div class="dv" id="dockv"></div>
+  <button class="btn js-pdf" type="button">PDF</button>
+  <button class="btn sec js-xlsx" type="button">엑셀</button>
+</div>
+<div class="pdfhost" id="pdfhost" aria-hidden="true"></div>
 
 <script>
 const DATA={"shackle": [["3/16", 0.33], ["1/4", 0.5], ["5/16", 0.75], ["3/8", 1], ["7/16", 1.5], ["1/2", 2], ["5/8", 3.25], ["3/4", 4.75], ["7/8", 6.5], ["1", 8.5], ["1-1/8", 9.5], ["1-1/4", 12], ["1-3/8", 13.5], ["1-1/2", 17], ["1-3/4", 25], ["2", 35], ["2-1/4", 42.5], ["2-1/2", 55], ["3", 85], ["3-1/2", 120], ["4", 150]], "belt": [[25, 0.8, 0.65, 1.6, 3.2, 5, "보라색"], [50, 1.6, 1.3, 3.2, 6.4, 10, "녹색"], [75, 2.4, 1.9, 4.8, 9.6, 15, "노랑색"], [100, 3.2, 2.55, 6.4, 12.8, 20, "회색"], [125, 4, 3.2, 8, 16, 25, "빨간색"], [150, 4.8, 3.85, 9.6, 19.2, 30, "갈색"], [200, 6.4, 5.1, 12.8, 25.6, 40, "파랑색"], [250, 8, 6.4, 16, 32, 50, "주황색"], [300, 9.6, 8.3, 19.2, 38.4, 60, "주황색"]], "beltAngle": {"deg": [0, 30, 45, 60, 90, 120], "f": [1, 0.95, 0.9, 0.85, 0.7, 0.5]}, "wireFC": [[8, 2.98], [9, 3.77], [10, 4.65], [12, 6.7], [14, 9.12], [16, 11.9], [18, 15.1], [20, 18.6], [22, 23.3], [24, 26.8], [26, 31.4], [28, 36.5], [30, 41.9], [32, 47.6], [36, 60.3], [38, 67.2], [40, 74.4], [42, 82], [46, 98.4], [50, 116]], "wireIWRC": [[8, 4.31], [9, 5.46], [10, 6.74], [12, 9.7], [14, 13.2], [16, 17.2], [18, 21.8], [19, 24.3], [20, 26.9], [22, 33.8], [24, 38.8], [25, 42.1], [26, 45.5], [28, 52.8], [30, 60.6], [32, 69], [36, 87.3], [38, 97.3], [40, 108], [44, 130], [46, 143], [50, 168]], "crane": {"name": "LIEBHERR LTM 1095-5.1", "booms": ["12.5(백)", 12.5, 16.6, 20.8, 25, 29.2, 33.4, 37.6, 41.8, 46, 50.2, 54.4, 58], "rows": [[3, 95, 63.3, 63.3, null, null, null, null, null, null, null, null, null, null], [3.5, 74, 63.3, 63.3, 60.2, null, null, null, null, null, null, null, null, null], [4, 69.5, 62.8, 62.8, 59.3, 48.5, null, null, null, null, null, null, null, null], [4.5, 66.3, 59.1, 58.9, 55.9, 47.9, 38, null, null, null, null, null, null, null], [5, 60.7, 54.2, 54.6, 53.3, 47.2, 37.6, 29.9, null, null, null, null, null, null], [6, 49.7, 46.3, 46.7, 46.8, 45.1, 36.6, 29.4, 23, null, null, null, null, null], [7, 41.4, 39.9, 40.2, 40.3, 40.1, 35.2, 28.5, 22.5, 18.1, null, null, null, null], [8, 35.1, 34.1, 34.5, 34.6, 34.4, 33.8, 27.4, 21.2, 17.6, 13.9, null, null, null], [9, 30.2, 29.5, 30.3, 30, 30.6, 30.4, 25.9, 20, 16.8, 13.6, 10.5, null, null], [10, 26.5, 26, 26.7, 26.4, 26.9, 26.7, 24.4, 18.8, 15.9, 13.1, 10.3, 8.3, null], [11, null, null, 23.6, 23.9, 23.9, 23.6, 23.2, 17.6, 15, 12.6, 10, 8.2, 6.4], [12, null, null, 21.1, 21.4, 21.4, 21.1, 21.5, 16.5, 14.1, 12.1, 9.7, 8, 6.3], [14, null, null, 17.2, 17.5, 17.4, 17.9, 17.7, 14.6, 12.6, 11, 9.1, 7.6, 6], [16, null, null, null, 14.7, 14.9, 14.9, 14.5, 12.9, 11.3, 9.9, 8.4, 7.2, 5.7], [18, null, null, null, 12.4, 12.5, 12.4, 12.1, 11.4, 10.2, 9, 7.7, 6.7, 5.4], [20, null, null, null, null, 10.6, 10.5, 10.1, 10.1, 9.2, 8.1, 7.2, 6.2, 5.1], [22, null, null, null, null, 9.1, 9, 8.8, 9.1, 8.3, 7.4, 6.6, 5.8, 4.8], [24, null, null, null, null, null, 7.8, 8.1, 7.9, 7.1, 6.8, 6.1, 5.4, 4.5], [26, null, null, null, null, null, 6.8, 7.2, 6.9, 6.5, 6.2, 5.6, 5, 4.3], [28, null, null, null, null, null, null, 6.3, 6, 5.9, 5.4, 5.2, 4.7, 4], [30, null, null, null, null, null, null, 5.6, 5.3, 5.5, 4.8, 4.8, 4.4, 3.8], [32, null, null, null, null, null, null, null, 4.7, 4.9, 4.4, 4.3, 4.1, 3.5], [34, null, null, null, null, null, null, null, 4.4, 4.3, 4.1, 3.8, 3.8, 3.3], [36, null, null, null, null, null, null, null, null, 3.8, 3.8, 3.5, 3.4, 3.1], [38, null, null, null, null, null, null, null, null, 3.4, 3.4, 3.3, 3, 2.9], [40, null, null, null, null, null, null, null, null, null, 3, 2.9, 2.6, 2.7], [42, null, null, null, null, null, null, null, null, null, 2.8, 2.6, 2.3, 2.3], [44, null, null, null, null, null, null, null, null, null, null, 2.3, 2, 2], [46, null, null, null, null, null, null, null, null, null, null, 2, 1.7, 1.7], [48, null, null, null, null, null, null, null, null, null, null, null, 1.4, 1.5], [50, null, null, null, null, null, null, null, null, null, null, null, 1.2, 1.2], [52, null, null, null, null, null, null, null, null, null, null, null, null, 1], [54, null, null, null, null, null, null, null, null, null, null, null, null, 0.8]]}};
@@ -276,285 +316,392 @@ const fmt=(x,d=2)=>Number.isFinite(x)?x.toLocaleString('ko-KR',{minimumFractionD
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const num=id=>{const v=parseFloat($(id).value);return Number.isFinite(v)?v:NaN};
 const optnum=id=>{const v=parseFloat($(id).value);return Number.isFinite(v)&&v>0?v:null};
-
 const ENDS=[['소켓',1],['스웨이징',.95],['락크',.95],['웨지',.75],['클립',.5],['슬링(10mm≥)',.85],['슬링(20mm≥)',.75],['슬링(20mm＜)',.7]];
 const BELT_MODE=['','Straight','Choker','Basket (Single ply)','Basket (Two ply)'];
-const COEF=[['수직',1],['원형 초크',.75],['사각 초크',.5],['바구니 0°',2],['바구니 60°>',1.73],['바구니 90°>',1.41],['바구니 120°>',1],['기타 사각 0°',1],['60°>',.87],['90°>',.71],['120°>',.5]];
+const COEF=[['수직',1],['원형 초크',.75],['사각 초크',.5],['바구니 0°',2],['바구니 60°>',1.73],['바구니 90°>',1.41],['바구니 120°>',1],['기타 0°',1],['60°>',.87],['90°>',.71],['120°>',.5]];
+const FIELDS=['load','rigw','radius','sfeq','w-core','w-n','w-sf','w-ang','w-end','w-ov','b-w','b-t','b-m','b-ang','b-n','b-sf','b-ov1','b-ov2','s-size','s-n','s-sf','s-ov','m-co','m-who','m-veh','m-cargo','m-size'];
 
-/* ---------- 크레인 저장소 ---------- */
+/* ---------- 저장소 ---------- */
 let cranes=[DATA.crane], curCrane=0;
-function loadCranes(){try{const s=JSON.parse(localStorage.getItem('mc-cranes')||'[]');if(Array.isArray(s))s.forEach(c=>{if(c&&c.name&&c.booms&&c.rows)cranes.push(c)})}catch(e){}}
-function saveCranes(){try{localStorage.setItem('mc-cranes',JSON.stringify(cranes.slice(1)))}catch(e){}}
+function loadCranes(){try{const s=JSON.parse(localStorage.getItem('mc2-cranes')||'[]');if(Array.isArray(s))s.forEach(c=>{if(c&&c.name&&c.booms&&c.rows)cranes.push(c)})}catch(e){}}
+function saveCranes(){try{localStorage.setItem('mc2-cranes',JSON.stringify(cranes.slice(1)))}catch(e){}}
+function saveState(){try{const o={rig:rigMode(),crane:cranes[curCrane].name,boom:$('boom').value,wdia:$('w-dia').value};FIELDS.forEach(k=>o[k]=$(k).value);localStorage.setItem('mc2-state',JSON.stringify(o))}catch(e){}}
+function restoreState(){
+  try{const o=JSON.parse(localStorage.getItem('mc2-state')||'null');if(!o)return;
+    const ci=cranes.findIndex(c=>c.name===o.crane);if(ci>=0){curCrane=ci;fillCraneSelects();}
+    fillBooms(false);if(o.boom!==undefined&&cranes[curCrane].booms[o.boom]!==undefined)$('boom').value=o.boom;
+    FIELDS.forEach(k=>{if(o[k]!==undefined&&k!=='m-date')$(k).value=o[k]});
+    fillWireDia();if(o.wdia)$('w-dia').value=o.wdia;
+    if(o.rig)setRig(o.rig,true);
+  }catch(e){}
+}
 
-/* ---------- 계산 ---------- */
+/* ---------- 계산 (엑셀 수식과 동일) ---------- */
 function calcEq(){
   const c=cranes[curCrane], load=num('load'), rig=num('rigw')||0, sf=num('sfeq'), R=num('radius');
   const bi=parseInt($('boom').value), msgs=[];
   const all=c.rows.flatMap(r=>r.slice(1)).filter(v=>typeof v==='number');
-  const maxRated=all.length?Math.max(...all):NaN;
-  const out={name:'장비',maxRated,load:load+rig,sf,R,msgs,boom:c.booms[bi],ok:false,safe:NaN,rated:NaN,Reff:NaN};
-  if(!(load>=0)||!(sf>0)||!(R>0)||bi<0){out.msgs.push(['ng','입력값을 확인한다.']);return out}
+  const out={name:'크레인',maxRated:all.length?Math.max(...all):NaN,load:load+rig,sf,R,msgs,boom:c.booms[bi],ok:false,safe:NaN,rated:NaN,Reff:NaN};
+  if(!(load>=0)||!(sf>0)||!(R>0)||bi<0){msgs.push(['ng','입력값을 확인한다.']);return out}
   const row=c.rows.find(r=>r[0]>=R-1e-9);
-  if(!row){out.msgs.push(['ng',`작업반경 ${R} m는 정격하중표 범위(최대 ${c.rows[c.rows.length-1][0]} m)를 초과한다.`]);return out}
-  out.Reff=row[0];
-  const v=row[1+bi];
-  if(typeof v!=='number'){out.msgs.push(['ng',`붐 ${c.booms[bi]} m, 반경 ${row[0]} m는 정격하중표 공란(작업 불가 구간)이다.`]);return out}
-  out.rated=v; out.safe=v*sf; out.ok=out.safe>out.load; out.rowIdx=c.rows.indexOf(row); out.colIdx=bi;
-  if(R!==row[0])out.msgs.push(['warn',`표에 ${R} m가 없어 안전 측으로 ${row[0]} m 값을 적용했다.`]);
-  if(sf>1)out.msgs.push(['warn','안전율 적용기준은 1 이하(정격하중의 비율)로 입력한다.']);
+  if(!row){msgs.push(['ng',`작업반경 ${R} m가 정격하중표 범위(최대 ${c.rows[c.rows.length-1][0]} m)를 초과한다.`]);return out}
+  out.Reff=row[0];const v=row[1+bi];
+  if(typeof v!=='number'){msgs.push(['ng',`붐 ${c.booms[bi]} m · 반경 ${row[0]} m는 정격표 공란(작업 불가)이다.`]);return out}
+  out.rated=v;out.safe=v*sf;out.ok=out.safe>out.load;out.rowIdx=c.rows.indexOf(row);out.colIdx=bi;
+  if(R!==row[0])msgs.push(['warn',`표에 ${R} m가 없어 안전 측으로 ${row[0]} m 값을 적용했다.`]);
+  if(sf>1)msgs.push(['warn','적용률은 1 이하로 입력한다.']);
   return out;
 }
 function calcShackle(){
-  const size=$('s-size').value, n=num('s-n'), sf=num('s-sf'), load=num('load');
-  const row=DATA.shackle.find(r=>r[0]===size), tbl=row?row[1]:NaN, ov=optnum('s-ov'), wll=ov??tbl, msgs=[];
-  const safe=wll*n/sf, ok=safe>load;
-  if(sf<3)msgs.push(['ng','샤클 안전계수는 3 이상이어야 한다 (산안규칙 제163조).']);
+  const size=$('s-size').value,n=num('s-n'),sf=num('s-sf'),load=num('load'),row=DATA.shackle.find(r=>r[0]===size),ov=optnum('s-ov'),wll=ov??(row?row[1]:NaN),msgs=[];
+  const safe=wll*n/sf;
+  if(sf<3)msgs.push(['ng','샤클 안전계수는 3 이상이어야 한다 (제163조).']);
   if(ov)msgs.push(['warn','사용하중을 직접 입력한 값으로 계산했다.']);
-  return {name:'샤클',wll,n,sf,safe,load,ok:ok&&sf>=3,msgs};
+  return {name:'샤클',size,wll,n,sf,safe,load,ok:safe>load&&sf>=3,msgs};
 }
 function calcWire(){
-  const core=$('w-core').value, dia=parseFloat($('w-dia').value), n=num('w-n'), sf=num('w-sf'), th=num('w-ang'), load=num('load');
-  const tab=core==='마심'?DATA.wireFC:DATA.wireIWRC, row=tab.find(r=>r[0]===dia), ov=optnum('w-ov'), cut=ov??(row?row[1]:NaN);
-  const endName=$('w-end').value, eff=(ENDS.find(e=>e[0]===endName)||[0,1])[1], msgs=[];
+  const core=$('w-core').value,dia=parseFloat($('w-dia').value),n=num('w-n'),sf=num('w-sf'),th=num('w-ang'),load=num('load');
+  const tab=core==='마심'?DATA.wireFC:DATA.wireIWRC,row=tab.find(r=>r[0]===dia),ov=optnum('w-ov'),cut=ov??(row?row[1]:NaN);
+  const endName=$('w-end').value,eff=(ENDS.find(e=>e[0]===endName)||[0,1])[1],msgs=[];
   const lf=Math.round(1/Math.cos((90-th)*Math.PI/180)*1000)/1000;
-  const safe=cut*n*eff/sf/lf, ok=safe>load;
-  if(sf<5)msgs.push(['ng','화물 지지 와이어로프 안전계수는 5 이상이어야 한다 (근로자 탑승 시 10 이상).']);
-  if(!(th>=20&&th<=90))msgs.push(['ng','수평각은 20°~90° 범위로 입력한다.']);
-  else if(th<60)msgs.push(['warn','수평각 60° 미만(줄 사이각 60° 초과)이면 장력이 급증한다. 60° 이상을 권장한다.']);
+  const safe=cut*n*eff/sf/lf, angOk=th>=20&&th<=90;
+  if(sf<5)msgs.push(['ng','화물 지지 와이어로프 안전계수는 5 이상이어야 한다 (탑승 시 10 이상).']);
+  if(!angOk)msgs.push(['ng','수평각은 20°~90° 범위로 입력한다.']);
+  else if(th<60)msgs.push(['warn','수평각 60° 미만이면 장력이 급증한다. 60° 이상을 권장한다.']);
   if(ov)msgs.push(['warn','절단하중을 직접 입력한 값으로 계산했다.']);
-  return {name:'와이어로프',core,dia,cut,n,sf,th,lf,end:endName,eff,safe,load,ok:ok&&sf>=5&&th>=20&&th<=90,msgs};
+  return {name:'와이어로프',core,dia,cut,n,sf,th,lf,end:endName,eff,safe,load,ok:safe>load&&sf>=5&&angOk,msgs};
 }
 function calcBelt(){
-  const w=parseInt($('b-w').value), type=$('b-t').value, m=parseInt($('b-m').value), ang=parseInt($('b-ang').value), n=num('b-n'), sf=num('b-sf'), load=num('load');
-  const row=DATA.belt.find(r=>r[0]===w), k=type==='endless'?2:1, ov1=optnum('b-ov1'), ov2=optnum('b-ov2'), msgs=[];
-  const cut=ov1??row[5]*k, wll=ov2??row[m]*k;
-  const ai=DATA.beltAngle.deg.indexOf(ang), af=DATA.beltAngle.f[ai];
-  const s1=cut*n/sf, wa=wll*af, s2=wa*n, safe=Math.min(s1,s2), ok=safe>load;
-  if(sf<5)msgs.push(['ng','화물 지지 슬링벨트 안전계수는 5 이상이어야 한다 (근로자 탑승 시 10 이상).']);
+  const w=parseInt($('b-w').value),type=$('b-t').value,m=parseInt($('b-m').value),ang=parseInt($('b-ang').value),n=num('b-n'),sf=num('b-sf'),load=num('load');
+  const row=DATA.belt.find(r=>r[0]===w),k=type==='endless'?2:1,ov1=optnum('b-ov1'),ov2=optnum('b-ov2'),msgs=[];
+  const cut=ov1??row[5]*k,wll=ov2??row[m]*k,af=DATA.beltAngle.f[DATA.beltAngle.deg.indexOf(ang)];
+  const s1=cut*n/sf,wa=wll*af,s2=wa*n,safe=Math.min(s1,s2);
+  if(sf<5)msgs.push(['ng','화물 지지 슬링벨트 안전계수는 5 이상이어야 한다 (탑승 시 10 이상).']);
   if(ov1||ov2)msgs.push(['warn','제조사 라벨 값을 직접 입력한 값으로 계산했다.']);
-  return {name:'슬링벨트',w,type,m,ang,af,cut,wll,wa,n,sf,s1,s2,safe,load,ok:ok&&sf>=5,msgs};
+  return {name:'슬링벨트',w,type,m,ang,af,cut,wll,wa,n,sf,s1,s2,safe,load,ok:safe>load&&sf>=5,msgs};
 }
 const rigMode=()=>$('seg-wire').getAttribute('aria-pressed')==='true'?'wire':'belt';
-function calcAll(){const rm=rigMode();return {eq:calcEq(),rig:rm==='wire'?calcWire():calcBelt(),rm,sh:calcShackle()}}
+function calcAll(){const rm=rigMode();return{eq:calcEq(),rig:rm==='wire'?calcWire():calcBelt(),rm,sh:calcShackle()}}
 
-/* ---------- 표시 ---------- */
-function bar(load,safe,ok){
-  if(!Number.isFinite(safe)||safe<=0)return '';
-  const r=load/safe, w=Math.min(r,1.5)/1.5*100, cls=ok?(r>.9?'warn':''):'ng';
-  return `<div class="bar" aria-hidden="true"><i class="${cls}" style="width:${w}%"></i><s style="left:${100/1.5}%"></s></div>`;
+/* ---------- 화면 ---------- */
+function chip(id,r,label){
+  const rt=r.safe>0?r.load/r.safe:NaN;
+  $('c-'+id).innerHTML=`<span class="pill ${r.ok?'ok':'ng'}">${r.ok?'OK':'NG'}</span><span class="c">${label} <b>${fmt(r.safe)}</b> t ${r.safe>r.load?'&gt;':(r.safe<r.load?'&lt;':'=')} 인양하중 <b>${fmt(r.load)}</b> t</span><span class="stat">${Number.isFinite(rt)?'사용률 '+fmt(rt*100,0)+'%':''}</span>`;
+  $('m-'+id).innerHTML=r.msgs.map(m=>`<li class="${m[0]}">${esc(m[1])}</li>`).join('');
 }
-function verdictRow(r,labelSafe){
-  const rt=Number.isFinite(r.safe)&&r.safe>0?r.load/r.safe:NaN;
-  return `<div class="vr"><span class="pill ${r.ok?'ok':'ng'}">${r.ok?'OK':'NG'}</span>
-    <span class="cmp">${labelSafe} ${fmt(r.safe)} t ${r.safe>r.load?'&gt;':(r.safe<r.load?'&lt;':'=')} 인양하중 ${fmt(r.load)} t</span>
-    <span class="stat">${Number.isFinite(rt)?'사용률 '+fmt(rt*100,1)+' %':''}</span></div>${bar(r.load,r.safe,r.ok)}
-    ${r.msgs.length?'<ul class="msgs">'+r.msgs.map(m=>`<li class="${m[0]}">${esc(m[1])}</li>`).join('')+'</ul>':''}`;
-}
-function renderEq(r){
-  $('r-eq').innerHTML=`<div class="fm"><span class="k">정격하중(붐 ${r.boom} m, 반경 ${Number.isFinite(r.Reff)?r.Reff:'-'} m)</span> = <b>${fmt(r.rated)}</b> t<br>
-  <span class="k">안전하중 = 정격하중 × 안전율</span> = ${fmt(r.rated)} × ${r.sf} = <b>${fmt(r.safe)}</b> t<br>
-  <span class="k">크레인 최대인양하중(표 최대)</span> = ${fmt(r.maxRated,1)} t</div>`+verdictRow(r,'안전하중');
-}
-function renderShackle(r){
-  $('r-sh').innerHTML=`<div class="fm"><span class="k">안전하중 = 사용하중 × 사용갯수 / 안전율</span><br>
-  = ${fmt(r.wll)} × ${r.n} / ${r.sf} = <b>${fmt(r.safe)}</b> t</div>`+verdictRow(r,'안전하중');
-}
-function renderWire(r){
-  $('r-wire').innerHTML=`<div class="fm"><span class="k">줄걸이 하중계수 = 1 / cos(90°−θ)</span> = 1 / cos(${90-r.th}°) = <b>${fmt(r.lf,3)}</b><br>
-  <span class="k">단말가공 효율</span> (${esc(r.end)}) = <b>${r.eff}</b> &nbsp; <span class="k">절단하중</span> = <b>${fmt(r.cut)}</b> t<br>
-  <span class="k">안전하중 = 절단하중 × 갯수 × 효율 / 안전율 / 하중계수</span><br>
-  = ${fmt(r.cut)} × ${r.n} × ${r.eff} / ${r.sf} / ${fmt(r.lf,3)} = <b>${fmt(r.safe)}</b> t</div>`+verdictRow(r,'안전하중');
-}
-function renderBelt(r){
-  $('r-belt').innerHTML=`<div class="fm"><span class="k">안전하중1(파단) = 절단하중 × 갯수 / 안전율</span><br>
-  = ${fmt(r.cut)} × ${r.n} / ${r.sf} = <b>${fmt(r.s1)}</b> t<br>
-  <span class="k">안전하중2(사용방법) = 양중방식 사용하중 × 각도계수 × 갯수</span><br>
-  = ${fmt(r.wll)} × ${r.af} × ${r.n} = <b>${fmt(r.s2)}</b> t &nbsp; <span class="k">(${BELT_MODE[r.m]}, ${r.ang}°)</span><br>
-  <span class="k">안전하중 = min(1, 2)</span> = <b>${fmt(r.safe)}</b> t</div>`+verdictRow(r,'안전하중');
-}
-function drawRig(svgId,halfFromVert,label){
-  const a=halfFromVert*Math.PI/180, L=96, dx=L*Math.sin(a), dy=L*Math.cos(a), cx=95, y0=18, y1=y0+dy;
-  const x1=cx-dx, x2=cx+dx;
-  const arc=halfFromVert>2?`<path d="M ${cx-22*Math.sin(a)} ${y0+22*Math.cos(a)} A 22 22 0 0 0 ${cx+22*Math.sin(a)} ${y0+22*Math.cos(a)}" fill="none" stroke="var(--accent)" stroke-width="2"/>`:'';
+function drawRig(svgId,halfDeg,label){
+  const a=halfDeg*Math.PI/180,L=96,dx=L*Math.sin(a),dy=L*Math.cos(a),cx=95,y0=18,y1=y0+dy,x1=cx-dx,x2=cx+dx;
+  const arc=halfDeg>2?`<path d="M ${cx-22*Math.sin(a)} ${y0+22*Math.cos(a)} A 22 22 0 0 0 ${cx+22*Math.sin(a)} ${y0+22*Math.cos(a)}" fill="none" stroke="var(--warn)" stroke-width="2.5"/>`:'';
   $(svgId).innerHTML=`<circle cx="${cx}" cy="${y0-6}" r="6" fill="none" stroke="var(--ink)" stroke-width="2"/>
-  <line x1="${cx}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="var(--steel)" stroke-width="2.5"/>
-  <line x1="${cx}" y1="${y0}" x2="${x2}" y2="${y1}" stroke="var(--steel)" stroke-width="2.5"/>
-  ${arc}
-  <rect x="${Math.min(x1,x2)-14}" y="${y1}" width="${Math.abs(x2-x1)+28}" height="14" fill="var(--muted)" opacity=".55" rx="2"/>
+  <line x1="${cx}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="var(--brand)" stroke-width="3"/><line x1="${cx}" y1="${y0}" x2="${x2}" y2="${y1}" stroke="var(--brand)" stroke-width="3"/>${arc}
+  <rect x="${Math.min(x1,x2)-14}" y="${y1}" width="${Math.abs(x2-x1)+28}" height="14" fill="var(--muted)" opacity=".5" rx="2"/>
   <text x="${cx}" y="${y1+30}" text-anchor="middle">${label}</text>`;
 }
+function gaugeCard(name,sub,r){
+  const rt=r.safe>0?r.load/r.safe:NaN, cls=!r.ok?'ng':(rt>.9?'warn':'ok'), w=Number.isFinite(rt)?Math.min(rt,1.5)/1.5*100:100;
+  const why=!r.ok&&r.msgs.find(m=>m[0]==='ng');
+  return `<div class="g ${cls}"><div class="h"><div><div class="n">${name}</div><div class="sb">${esc(sub)}</div></div><div class="st">${r.ok?(cls==='warn'?'OK·여유 적음':'OK'):'NG'}</div></div>
+  <div class="v"><span>안전하중 <b>${fmt(r.safe)}</b> t</span><span>인양하중 <b>${fmt(r.load)}</b> t</span></div>
+  <div class="meter" aria-hidden="true"><i style="width:${w}%"></i><s></s></div>
+  <div class="pc"><span>사용률 ${Number.isFinite(rt)?fmt(rt*100,0)+'%':'-'}</span><span>한계 100%</span></div>${why?`<div class="why">${esc(why[1])}</div>`:''}</div>`;
+}
 function renderSummary(S){
-  const items=[['장비',S.eq,'정격×'+S.eq.sf],[S.rig.name,S.rig,''],['샤클',S.sh,'']];
-  const bad=items.filter(i=>!i[1].ok).length;
-  $('verdict').className='verdict'+(bad?' ng':'');
-  $('verdict').innerHTML=`<div class="big">${bad?'NG '+bad+'건':'전 항목 OK'}</div><div class="s">${bad?'NG 항목의 규격·갯수·각도·붐/반경을 조정한다.':'인양물 '+fmt(S.eq.load-(num('rigw')||0))+' t 인양작업 가능'}</div>`;
-  $('rows').innerHTML=items.map(([n,r])=>{
-    const rt=r.safe>0?r.load/r.safe:NaN;
-    return `<div class="row"><span class="n">${n}</span><span class="pill ${r.ok?'ok':'ng'}">${r.ok?'OK':'NG'}</span>
-    <span class="d">안전하중 ${fmt(r.safe)} t / 하중 ${fmt(r.load)} t${Number.isFinite(rt)?' / '+fmt(rt*100,0)+'%':''}</span></div>`}).join('');
+  const rg=S.rig, items=[[S.eq,'크레인',`붐 ${S.eq.boom} m · 반경 ${num('radius')} m`],
+    [rg,S.rm==='wire'?'와이어로프':'슬링벨트',S.rm==='wire'?`${rg.core} ${rg.dia}mm × ${rg.n}줄 · ${rg.th}°`:`${rg.w}mm ${BELT_MODE[rg.m]} × ${rg.n}줄`],
+    [S.sh,'샤클',`${S.sh.size}" × ${S.sh.n}EA`]];
+  const bad=items.filter(i=>!i[0].ok).length;
+  $('banner').className='banner'+(bad?' ng':'');
+  $('banner').innerHTML=`<div class="ico">${bad?'✕':'✓'}</div><div><div class="t">${bad?`NG ${bad}건 — 작업 불가`:'전 항목 OK — 작업 가능'}</div><div class="s">인양물 ${fmt(num('load'),1)} t ${bad?'· NG 항목을 조정한다':''}</div></div>`;
+  $('gauges').innerHTML=items.map(i=>gaugeCard(i[1],i[2],i[0])).join('');
+  $('dockv').className='dv '+(bad?'ng':'ok'); $('dockv').textContent=bad?`NG ${bad}건`:'전 항목 OK';
+}
+function renderDetails(S){
+  const e=S.eq,s=S.sh,r=S.rig;
+  chip('eq',e,'안전하중'); chip('sh',s,'안전하중'); chip(S.rm,r,'안전하중');
+  $('f-eq').innerHTML=`<span class="k">정격하중(붐 ${e.boom} m · 반경 ${Number.isFinite(e.Reff)?e.Reff:'-'} m)</span> = <b>${fmt(e.rated)}</b> t<br><span class="k">안전하중 = 정격하중 × 적용률</span><br>= ${fmt(e.rated)} × ${e.sf} = <b>${fmt(e.safe)}</b> t<br><span class="k">크레인 최대인양하중(표 최대)</span> = ${fmt(e.maxRated,1)} t`;
+  $('f-sh').innerHTML=`<span class="k">안전하중 = 사용하중 × 개수 / 안전율</span><br>= ${fmt(s.wll)} × ${s.n} / ${s.sf} = <b>${fmt(s.safe)}</b> t`;
+  if(S.rm==='wire'){
+    $('f-wire').innerHTML=`<span class="k">하중계수 = 1 / cos(90°−θ)</span> = 1 / cos(${90-r.th}°) = <b>${fmt(r.lf,3)}</b><br><span class="k">단말효율</span> ${esc(r.end)} = <b>${r.eff}</b> · <span class="k">절단하중</span> <b>${fmt(r.cut)}</b> t<br><span class="k">안전하중 = 절단하중 × 줄수 × 효율 / 안전율 / 하중계수</span><br>= ${fmt(r.cut)} × ${r.n} × ${r.eff} / ${r.sf} / ${fmt(r.lf,3)} = <b>${fmt(r.safe)}</b> t`;
+    drawRig('dg-wire',90-Math.min(Math.max(Number.isFinite(r.th)?r.th:60,20),90),'수평각 '+r.th+'°');
+  }else{
+    $('f-belt').innerHTML=`<span class="k">안전하중1(파단) = 절단하중 × 줄수 / 안전율</span><br>= ${fmt(r.cut)} × ${r.n} / ${r.sf} = <b>${fmt(r.s1)}</b> t<br><span class="k">안전하중2(사용방법) = 사용하중 × 각도계수 × 줄수</span><br>= ${fmt(r.wll)} × ${r.af} × ${r.n} = <b>${fmt(r.s2)}</b> t (${BELT_MODE[r.m]}, ${r.ang}°)<br><span class="k">안전하중 = min(1, 2)</span> = <b>${fmt(r.safe)}</b> t`;
+    drawRig('dg-belt',r.ang/2,'줄 사이각 '+r.ang+'°');
+  }
 }
 
 /* ---------- 검토서 ---------- */
 let lastText='';
-function renderReport(S){
-  const g=id=>esc($(id).value||'');
-  const eq=S.eq, rg=S.rig, sh=S.sh, rw=S.rm==='wire';
-  const res=r=>`<span class="${r.ok?'res-ok':'res-ng'}">${r.ok?'OK (사용 가능)':'NG (사용 불가)'}</span>`;
-  const date=$('m-date').value||'';
-  const bind=(rw?`와이어로프 ${rg.core} ${rg.dia}mm × ${rg.n}줄`:`슬링벨트 ${rg.w}mm ${rg.type==='endless'?'ENDLESS':'EYE&EYE'} × ${rg.n}줄`)+` / 샤클 ${$('s-size').value}" × ${sh.n}EA`;
+function reportHTML(S){
+  const g=id=>esc($(id).value||''), eq=S.eq, rg=S.rig, sh=S.sh, rw=S.rm==='wire', rigw=num('rigw')||0;
+  const all=[eq,rg,sh].every(x=>x.ok);
+  const R=r=>`<span class="${r.ok?'o':'x'}">${r.ok?'OK (사용 가능)':'NG (사용 불가)'}</span>`;
+  const bind=(rw?`와이어로프 ${rg.core} ${rg.dia}mm × ${rg.n}줄`:`슬링벨트 ${rg.w}mm ${rg.type==='endless'?'ENDLESS':'EYE&EYE'} × ${rg.n}줄`)+` / 샤클 ${esc(sh.size)}" × ${sh.n}EA`;
+  const gt=(a,b)=>a>b?'&gt;':'≤';
   const rigRows=rw?`
-    <tr><th>줄걸이 종류 / 규격</th><td>와이어로프 / ${rg.dia} mm (${rg.core})</td><th>걸이 줄수 / 인양각도</th><td>${rg.n} 줄 / 수평각 ${rg.th}°</td></tr>
+    <tr><th>줄걸이 종류 / 규격</th><td>와이어로프 / ${rg.dia} mm (${rg.core})</td><th>줄 수 / 각도</th><td>${rg.n} 줄 / 수평각 ${rg.th}°</td></tr>
     <tr><th>절단하중</th><td class="num">${fmt(rg.cut)} t</td><th>안전계수</th><td class="num">${rg.sf}</td></tr>
     <tr><th>단말가공 / 효율</th><td>${esc(rg.end)} / ${rg.eff}</td><th>줄걸이 하중계수</th><td class="num">${fmt(rg.lf,3)}</td></tr>
-    <tr><th>안전하중</th><td colspan="3">${fmt(rg.cut)} × ${rg.n} × ${rg.eff} / ${rg.sf} / ${fmt(rg.lf,3)} = <b>${fmt(rg.safe)} t</b> ${rg.safe>rg.load?'&gt;':'≤'} 인양하중 ${fmt(rg.load)} t</td></tr>`:`
-    <tr><th>줄걸이 종류 / 규격</th><td>슬링벨트 / 폭 ${rg.w} mm</td><th>걸이 줄수 / 인양각도</th><td>${rg.n} 줄 / ${rg.ang}°</td></tr>
+    <tr><th>안전하중</th><td colspan="3">${fmt(rg.cut)} × ${rg.n} × ${rg.eff} / ${rg.sf} / ${fmt(rg.lf,3)} = <b>${fmt(rg.safe)} t</b> ${gt(rg.safe,rg.load)} 인양하중 ${fmt(rg.load)} t</td></tr>`:`
+    <tr><th>줄걸이 종류 / 규격</th><td>슬링벨트 / 폭 ${rg.w} mm</td><th>줄 수 / 각도</th><td>${rg.n} 줄 / ${rg.ang}°</td></tr>
     <tr><th>타입 / 양중방식</th><td>${rg.type==='endless'?'ENDLESS':'EYE & EYE'} / ${BELT_MODE[rg.m]}</td><th>안전계수</th><td class="num">${rg.sf}</td></tr>
-    <tr><th>절단하중 · 안전하중1</th><td class="num">${fmt(rg.cut)} t · ${fmt(rg.s1)} t</td><th>사용하중 · 안전하중2</th><td class="num">${fmt(rg.wll)}×${rg.af} · ${fmt(rg.s2)} t</td></tr>
-    <tr><th>안전하중</th><td colspan="3">min(${fmt(rg.s1)}, ${fmt(rg.s2)}) = <b>${fmt(rg.safe)} t</b> ${rg.safe>rg.load?'&gt;':'≤'} 인양하중 ${fmt(rg.load)} t</td></tr>`;
-  $('paper').innerHTML=`<h3>중량물 인양작업 안전성 검토서</h3><div class="cap">${g('m-co')||'업체명 미기재'} · ${date||'검토일 미기재'} · 검토자 ${g('m-who')||'-'}</div>
+    <tr><th>안전하중 1 · 2</th><td class="num">${fmt(rg.s1)} t · ${fmt(rg.s2)} t</td><th>절단하중 · 사용하중</th><td class="num">${fmt(rg.cut)} · ${fmt(rg.wll)} (×${rg.af})</td></tr>
+    <tr><th>안전하중</th><td colspan="3">min(${fmt(rg.s1)}, ${fmt(rg.s2)}) = <b>${fmt(rg.safe)} t</b> ${gt(rg.safe,rg.load)} 인양하중 ${fmt(rg.load)} t</td></tr>`;
+  return `<div class="doc"><h3>중량물 인양작업 안전성 검토서</h3>
+  <div class="cap">${g('m-co')||'업체명 미기재'} · ${g('m-date')||'검토일 미기재'} · 검토자 ${g('m-who')||'-'}</div>
+  <div class="vd ${all?'':'ng'}">${all?'종합 판정: 전 항목 OK — 인양작업 가능':'종합 판정: NG 항목 있음 — 계획 변경 필요'}</div>
   <table>
     <tr><th colspan="4" class="sec">1. 장비 · 화물 제원</th></tr>
     <tr><th>장비명 / 차량번호</th><td>${g('m-veh')||'-'}</td><th>크레인 제원표</th><td>${esc(cranes[curCrane].name)}</td></tr>
-    <tr><th>① 화물 종류</th><td>${g('m-cargo')||'-'}</td><th>② 화물 규격</th><td>${g('m-size')||'-'}</td></tr>
-    <tr><th>③ 화물 인양하중</th><td class="num">${fmt(eq.load-(num('rigw')||0))} t${num('rigw')?` (+달기기구 ${fmt(num('rigw'))} t)`:''}</td><th>④ 결속방법</th><td>${esc(bind)}</td></tr>
-    <tr><th>⑤ 작업반경</th><td class="num">${num('radius')} m</td><th>⑥ 붐길이</th><td class="num">${esc(eq.boom)} m</td></tr>
+    <tr><th>화물 종류</th><td>${g('m-cargo')||'-'}</td><th>화물 규격</th><td>${g('m-size')||'-'}</td></tr>
+    <tr><th>화물 인양하중</th><td class="num">${fmt(num('load'))} t${rigw?` (+달기기구 ${fmt(rigw)} t)`:''}</td><th>결속방법</th><td>${bind}</td></tr>
+    <tr><th>작업반경</th><td class="num">${num('radius')} m</td><th>붐길이</th><td class="num">${esc(eq.boom)} m</td></tr>
     <tr><th colspan="4" class="sec">2. 양중계획 (크레인)</th></tr>
-    <tr><th>① 크레인 최대인양하중</th><td class="num">${fmt(eq.maxRated,1)} t</td><th>② 붐구간 최대하중능력</th><td class="num">${fmt(eq.rated)} t (반경 ${Number.isFinite(eq.Reff)?eq.Reff:'-'} m)</td></tr>
-    <tr><th>검토결과</th><td colspan="3">안전하중 = ${fmt(eq.rated)} × ${eq.sf} = <b>${fmt(eq.safe)} t</b> ${eq.safe>eq.load?'&gt;':'≤'} 인양하중 ${fmt(eq.load)} t &nbsp; ${res(eq)}</td></tr>
+    <tr><th>크레인 최대인양하중</th><td class="num">${fmt(eq.maxRated,1)} t</td><th>붐구간 최대하중능력</th><td class="num">${fmt(eq.rated)} t (반경 ${Number.isFinite(eq.Reff)?eq.Reff:'-'} m)</td></tr>
+    <tr><th>검토결과</th><td colspan="3">안전하중 = ${fmt(eq.rated)} × ${eq.sf} = <b>${fmt(eq.safe)} t</b> ${gt(eq.safe,eq.load)} 인양하중 ${fmt(eq.load)} t &nbsp; ${R(eq)}</td></tr>
     <tr><th colspan="4" class="sec">3. 줄걸이 하중 확인</th></tr>${rigRows}
-    <tr><th>검토결과</th><td colspan="3">${res(rg)}</td></tr>
+    <tr><th>검토결과</th><td colspan="3">${R(rg)}</td></tr>
     <tr><th colspan="4" class="sec">4. 샤클 하중 확인</th></tr>
-    <tr><th>샤클 규격 / 사용갯수</th><td>${esc($('s-size').value)} inch / ${sh.n} EA</td><th>사용하중 / 안전계수</th><td class="num">${fmt(sh.wll)} t / ${sh.sf}</td></tr>
-    <tr><th>안전하중</th><td colspan="3">${fmt(sh.wll)} × ${sh.n} / ${sh.sf} = <b>${fmt(sh.safe)} t</b> ${sh.safe>sh.load?'&gt;':'≤'} 인양하중 ${fmt(sh.load)} t &nbsp; ${res(sh)}</td></tr>
-    <tr><th colspan="4" class="sec">종합 판정</th></tr>
-    <tr><td colspan="4" style="text-align:center;font-size:16px;font-weight:700">${[eq,rg,sh].every(x=>x.ok)?'<span class="res-ok">전 항목 OK — 인양작업 가능</span>':'<span class="res-ng">NG 항목 있음 — 계획 변경 필요</span>'}</td></tr>
+    <tr><th>샤클 규격 / 개수</th><td>${esc(sh.size)} inch / ${sh.n} EA</td><th>사용하중 / 안전계수</th><td class="num">${fmt(sh.wll)} t / ${sh.sf}</td></tr>
+    <tr><th>검토결과</th><td colspan="3">${fmt(sh.wll)} × ${sh.n} / ${sh.sf} = <b>${fmt(sh.safe)} t</b> ${gt(sh.safe,sh.load)} 인양하중 ${fmt(sh.load)} t &nbsp; ${R(sh)}</td></tr>
   </table>
-  <div class="note">근거: 산업안전보건기준에 관한 규칙 제163조(달기구 안전계수: 화물 지지 와이어로프·달기체인 5 이상, 훅·샤클 3 이상, 근로자 탑승 10 이상). 판정은 안전하중이 인양하중보다 큰 경우 OK.</div>`;
-  const L=[];
-  L.push('[중량물 인양작업 안전성 검토서]',`${$('m-co').value||''} ${date} 검토자:${$('m-who').value||''}`,
-   `장비: ${$('m-veh').value||'-'} / ${cranes[curCrane].name}`,
-   `화물: ${$('m-cargo').value||'-'} ${$('m-size').value||''} ${fmt(eq.load-(num('rigw')||0))}t, 작업반경 ${num('radius')}m, 붐 ${eq.boom}m`,
-   `1) 장비: 정격 ${fmt(eq.rated)}t × ${eq.sf} = ${fmt(eq.safe)}t ${eq.safe>eq.load?'>':'<='} ${fmt(eq.load)}t → ${eq.ok?'OK':'NG'}`);
-  L.push(rw?`2) 와이어로프 ${rg.core} ${rg.dia}mm ${rg.n}줄 θ${rg.th}°: ${fmt(rg.cut)}×${rg.n}×${rg.eff}/${rg.sf}/${fmt(rg.lf,3)} = ${fmt(rg.safe)}t → ${rg.ok?'OK':'NG'}`
-          :`2) 슬링벨트 ${rg.w}mm ${BELT_MODE[rg.m]} ${rg.ang}° ${rg.n}줄: min(${fmt(rg.s1)}, ${fmt(rg.s2)}) = ${fmt(rg.safe)}t → ${rg.ok?'OK':'NG'}`);
-  L.push(`3) 샤클 ${$('s-size').value}" ${sh.n}EA: ${fmt(sh.wll)}×${sh.n}/${sh.sf} = ${fmt(sh.safe)}t → ${sh.ok?'OK':'NG'}`,
-   `종합: ${[eq,rg,sh].every(x=>x.ok)?'전 항목 OK':'NG 항목 있음'}`);
+  <div class="foot">근거: 산업안전보건기준에 관한 규칙 제163조(달기구 안전계수 — 화물 지지 와이어로프·달기체인 5 이상, 훅·샤클 3 이상, 근로자 탑승 10 이상). 판정은 안전하중이 인양하중보다 큰 경우 OK.</div></div>`;
+}
+function renderReport(S){
+  $('paper').innerHTML=reportHTML(S);
+  const eq=S.eq,rg=S.rig,sh=S.sh,L=[];
+  L.push('[중량물 인양작업 안전성 검토서]',`${$('m-co').value||''} ${$('m-date').value||''} 검토자:${$('m-who').value||''}`,
+   `장비: ${$('m-veh').value||'-'} / ${cranes[curCrane].name}`,`화물: ${$('m-cargo').value||'-'} ${$('m-size').value||''} ${fmt(num('load'))}t, 반경 ${num('radius')}m, 붐 ${eq.boom}m`,
+   `1) 크레인: 정격 ${fmt(eq.rated)}t × ${eq.sf} = ${fmt(eq.safe)}t ${eq.safe>eq.load?'>':'<='} ${fmt(eq.load)}t → ${eq.ok?'OK':'NG'}`);
+  L.push(S.rm==='wire'?`2) 와이어로프 ${rg.core} ${rg.dia}mm ${rg.n}줄 θ${rg.th}°: ${fmt(rg.cut)}×${rg.n}×${rg.eff}/${rg.sf}/${fmt(rg.lf,3)} = ${fmt(rg.safe)}t → ${rg.ok?'OK':'NG'}`
+    :`2) 슬링벨트 ${rg.w}mm ${BELT_MODE[rg.m]} ${rg.ang}° ${rg.n}줄: min(${fmt(rg.s1)}, ${fmt(rg.s2)}) = ${fmt(rg.safe)}t → ${rg.ok?'OK':'NG'}`);
+  L.push(`3) 샤클 ${sh.size}" ${sh.n}EA: ${fmt(sh.wll)}×${sh.n}/${sh.sf} = ${fmt(sh.safe)}t → ${sh.ok?'OK':'NG'}`,`종합: ${[eq,rg,sh].every(x=>x.ok)?'전 항목 OK':'NG 항목 있음'}`);
   lastText=L.join('\n');
 }
 
-/* ---------- 제원표 ---------- */
+/* ---------- 제원표 탭 ---------- */
 function renderCraneTable(S){
   const c=cranes[curCrane];
-  let h='<thead><tr><th>반경(m)＼붐(m)</th>'+c.booms.map(b=>`<th>${esc(b)}</th>`).join('')+'</tr></thead><tbody>';
-  c.rows.forEach((r,ri)=>{
-    h+=`<tr><td>${r[0]}</td>`+c.booms.map((_,ci)=>{
-      const v=r[1+ci], hit=S&&S.eq.rowIdx===ri&&S.eq.colIdx===ci;
-      return typeof v==='number'?`<td class="${hit?'hit':''}">${v}</td>`:'<td class="empty">·</td>'}).join('')+'</tr>';
-  });
-  $('ctable').innerHTML=h+'</tbody>';
+  $('ctable').innerHTML='<thead><tr><th>반경＼붐(m)</th>'+c.booms.map(b=>`<th>${esc(b)}</th>`).join('')+'</tr></thead><tbody>'+
+   c.rows.map((r,ri)=>`<tr><td>${r[0]}</td>`+c.booms.map((_,ci)=>{const v=r[1+ci],hit=S&&S.eq.rowIdx===ri&&S.eq.colIdx===ci;return typeof v==='number'?`<td class="${hit?'hit':''}">${v}</td>`:'<td class="empty">·</td>'}).join('')+'</tr>').join('')+'</tbody>';
   $('n-del').classList.toggle('hidden',curCrane===0);
 }
 function tbl(head,rows){return `<div class="tw"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>'<tr>'+r.map(v=>`<td>${v}</td>`).join('')+'</tr>').join('')}</tbody></table></div>`}
 function renderRefs(){
-  const sec=(t,b)=>`<details><summary style="cursor:pointer;font-weight:700;padding:4px 0">${t}</summary><div style="margin-top:8px">${b}</div></details>`;
-  const w=(tab,name)=>{
-    return `<p class="hint" style="margin:0 0 6px">${name}. 사용하중 = 절단하중/5 × 모멘트계수 (안전율 5, 단말효율 미반영)</p>`+tbl(['지름(mm)','절단하중(t)',...COEF.map(c=>c[0]+'<br>×'+c[1])],
-      tab.map(r=>[r[0],r[1],...COEF.map(c=>(Math.floor(r[1]/5*c[1]*100+1e-9)/100).toFixed(2))]))};
-  $('refs').innerHTML=
-   sec('샤클 규격 및 사용하중',tbl(['규격(in)','사용하중(ton)'],DATA.shackle.map(r=>[r[0],r[1]])))+
-   sec('슬링벨트 사용하중 · 절단하중 (EYE & EYE, ENDLESS는 ×2)',tbl(['폭(mm)','Straight','Choker','Basket 1ply','Basket 2ply','절단하중','색상'],DATA.belt))+
+  const sec=(t,b)=>`<details><summary style="cursor:pointer;font-weight:700;padding:8px 0;min-height:40px">${t}</summary><div>${b}</div></details>`;
+  const w=(tab,name)=>`<p class="hint" style="margin:0 0 6px">${name} · 사용하중 = 절단하중/5 × 모멘트계수 (안전율 5, 단말효율 미반영)</p>`+tbl(['지름(mm)','절단(t)',...COEF.map(c=>c[0]+'<br>×'+c[1])],tab.map(r=>[r[0],r[1],...COEF.map(c=>(Math.floor(r[1]/5*c[1]*100+1e-9)/100).toFixed(2))]));
+  $('refs').innerHTML=sec('샤클 규격 및 사용하중',tbl(['규격(in)','사용하중(t)'],DATA.shackle))+
+   sec('슬링벨트 사용하중 · 절단하중 (EYE&EYE, ENDLESS는 ×2)',tbl(['폭(mm)','Straight','Choker','Basket 1ply','Basket 2ply','절단(t)','색상'],DATA.belt))+
    sec('슬링벨트 각도별 안전하중율',tbl(DATA.beltAngle.deg.map(d=>d+'°'),[DATA.beltAngle.f]))+
-   sec('와이어로프 형태별 사용하중 — 마심 (6×24 FC)',w(DATA.wireFC,'마심 6×24 FC'))+
-   sec('와이어로프 형태별 사용하중 — 철심 (6×25 IWRC)',w(DATA.wireIWRC,'철심 6×25 IWRC'))+
-   sec('와이어로프 단말가공 효율',tbl(['단말가공','적용 효율'],ENDS.map(e=>[e[0],e[1]])));
+   sec('와이어로프 — 마심 (6×24 FC)',w(DATA.wireFC,'마심 6×24 FC'))+sec('와이어로프 — 철심 (6×25 IWRC)',w(DATA.wireIWRC,'철심 6×25 IWRC'))+
+   sec('와이어로프 단말가공 효율',tbl(['단말가공','효율'],ENDS));
 }
 
-/* ---------- 선택지 구성 ---------- */
-function fillCraneSelects(){
-  const opts=cranes.map((c,i)=>`<option value="${i}">${esc(c.name)}${i===0?' (기본)':''}</option>`).join('');
-  $('crane').innerHTML=opts; $('crane2').innerHTML=opts; $('crane').value=$('crane2').value=curCrane;
+/* ---------- 파일 저장 ---------- */
+const LIBS={
+  html2canvas:'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+  jspdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  exceljs:'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'};
+const loaded={};
+function loadLib(k){return loaded[k]||(loaded[k]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=LIBS[k];s.onload=res;s.onerror=()=>{delete loaded[k];rej(new Error('라이브러리를 불러오지 못했다. 네트워크를 확인한다.'))};document.head.appendChild(s)}))}
+function toast(t){$('toast').textContent=t;document.querySelectorAll('.js-toast').forEach(e=>e.textContent=t)}
+async function saveFile(filename,data){
+  let dl=null;try{dl=await (window.claude&&window.claude.use?window.claude.use('downloads'):null)}catch(e){}
+  if(dl){try{await dl.save({filename,data});return 'saved'}catch(e){if(e&&e.code==='declined')return 'declined';throw new Error(e&&e.message||'저장하지 못했다.')}}
+  const blob=data instanceof Blob?data:new Blob([data]);const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);return 'saved';
 }
-function fillBooms(keep){
-  const c=cranes[curCrane], prev=keep?$('boom').value:'';
-  $('boom').innerHTML=c.booms.map((b,i)=>`<option value="${i}">${esc(b)} m</option>`).join('');
-  const def=c.booms.findIndex(b=>b===25); $('boom').value=prev!==''&&c.booms[prev]!==undefined?prev:(def>=0?def:0);
-}
-function fillWireDia(){
-  const tab=$('w-core').value==='마심'?DATA.wireFC:DATA.wireIWRC, prev=parseFloat($('w-dia').value);
-  $('w-dia').innerHTML=tab.map(r=>`<option value="${r[0]}">${r[0]} mm</option>`).join('');
-  const has=tab.some(r=>r[0]===prev); $('w-dia').value=has?prev:(tab.some(r=>r[0]===20)?20:tab[0][0]);
+const fname=ext=>{const co=($('m-co').value||'').trim().replace(/[\\/:*?"<>|]/g,'');return `크레인안전성검토_${co?co+'_':''}${($('m-date').value||'').replace(/-/g,'')}.${ext}`};
+function busy(on,msg){document.querySelectorAll('.js-pdf,.js-xlsx').forEach(b=>b.disabled=on);toast(msg||'')}
+
+async function exportPDF(){
+  busy(true,'PDF 생성 중…');
+  try{
+    await Promise.all([loadLib('html2canvas'),loadLib('jspdf')]);
+    const host=$('pdfhost');host.innerHTML=reportHTML(calcAll());
+    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+    const cv=await html2canvas(host.firstElementChild,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    host.innerHTML='';
+    const {jsPDF}=window.jspdf,pdf=new jsPDF('p','mm','a4'),mx=10,my=10,pw=210-2*mx,ph=297-2*my;
+    const pagePx=Math.floor(cv.width*ph/pw);let y=0,first=true;
+    while(y<cv.height){
+      const h=Math.min(pagePx,cv.height-y),sl=document.createElement('canvas');sl.width=cv.width;sl.height=h;
+      const cx=sl.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,sl.width,h);cx.drawImage(cv,0,y,cv.width,h,0,0,cv.width,h);
+      if(!first)pdf.addPage();first=false;
+      pdf.addImage(sl.toDataURL('image/jpeg',.95),'JPEG',mx,my,pw,h*pw/cv.width);y+=h;
+    }
+    const st=await saveFile(fname('pdf'),pdf.output('arraybuffer'));
+    toast(st==='saved'?'PDF를 저장했다.':'저장을 취소했다.');
+  }catch(e){toast('PDF 저장 실패: '+e.message)}finally{busy(false,$('toast').textContent)}
 }
 
-/* ---------- 메인 ---------- */
+async function exportXLSX(){
+  busy(true,'엑셀 생성 중…');
+  try{
+    await loadLib('exceljs');
+    const S=calcAll(),eq=S.eq,rg=S.rig,sh=S.sh,rw=S.rm==='wire';
+    const wb=new ExcelJS.Workbook();wb.creator='이동식 크레인 안전성검토';
+    const ws=wb.addWorksheet('안전성검토',{views:[{showGridLines:false}],pageSetup:{paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0}});
+    ws.columns=[{width:4},{width:30},{width:20},{width:12},{width:44}];
+    const F='맑은 고딕',thin={style:'thin',color:{argb:'FF9AA5B1'}},BD={top:thin,left:thin,bottom:thin,right:thin};
+    const NAVY='FF18486F',INP='FFFFF6C8';
+    let r=1;
+    const title=(t)=>{ws.mergeCells(r,1,r,5);const c=ws.getCell(r,1);c.value=t;c.font={name:F,size:16,bold:true};c.alignment={horizontal:'center',vertical:'middle'};ws.getRow(r).height=30;r++};
+    const sec=(t)=>{ws.mergeCells(r,1,r,5);const c=ws.getCell(r,1);c.value=t;c.font={name:F,size:11,bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:NAVY}};c.alignment={vertical:'middle'};ws.getRow(r).height=22;r++};
+    // row: label, value(or {f,v}), unit, note, isInput
+    const row=(label,val,unit,note,inp,nf)=>{
+      ws.getCell(r,2).value=label;ws.getCell(r,4).value=unit||'';ws.getCell(r,5).value=note||'';
+      const c=ws.getCell(r,3);c.value=(val&&typeof val==='object'&&'f' in val)?{formula:val.f,result:val.v}:val;
+      if(nf)c.numFmt=nf;
+      for(let i=1;i<=5;i++){const x=ws.getCell(r,i);x.font={name:F,size:10.5};x.border=BD;x.alignment={vertical:'middle',wrapText:i===5}}
+      ws.getCell(r,1).border=BD;ws.getCell(r,2).font={name:F,size:10.5,bold:true};ws.getCell(r,2).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEEF1F4'}};
+      c.alignment={horizontal:'right',vertical:'middle'};c.font={name:F,size:10.5,bold:!!(val&&val.f)};
+      if(inp)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:INP}};
+      ws.getCell(r,5).font={name:F,size:9.5,color:{argb:'FF5D6B78'}};
+      return r++;
+    };
+    const verdict=(label,safeRef,loadRef,extra,res)=>{
+      const rr=row(label,{f:`IF(AND(${safeRef}>${loadRef}${extra?','+extra:''}),"OK","NG")`,v:res?'OK':'NG'},'','안전하중 > 인양하중 이면 OK');
+      ws.getCell(rr,3).alignment={horizontal:'center',vertical:'middle'};ws.getCell(rr,3).font={name:F,size:12,bold:true};judge.push(`C${rr}`);return rr;
+    };
+    const judge=[];
+    title('중량물 인양작업 안전성 검토서');
+    const meta=[['업체명 / 공사명','m-co'],['검토일','m-date'],['검토자','m-who'],['장비명 / 차량번호','m-veh'],['화물 종류','m-cargo'],['화물 규격','m-size']];
+    meta.forEach(([l,id])=>row(l,$(id).value||'','','',true));
+    r++;
+    const sumRow=r;r++; // 종합판정 자리
+    r++;
+    sec('1. 인양물');
+    const rLoad=row('인양물 중량',num('load'),'ton','샤클·줄걸이 검토에 사용',true,'0.00');
+    const rRig=row('훅블록·달기기구 중량',num('rigw')||0,'ton','장비 검토에만 가산',true,'0.00');
+    r++;sec('2. 크레인 검토');
+    row('크레인 제원표',cranes[curCrane].name,'','');
+    row('붐길이',String(eq.boom),'m','',true);
+    row('작업반경 (입력)',num('radius'),'m','',true,'0.0');
+    const rRated=row('정격하중 (표 조회값)',Number.isFinite(eq.rated)?eq.rated:'공란','ton',`적용 반경 ${Number.isFinite(eq.Reff)?eq.Reff:'-'} m · 정격하중표 시트 참조`,false,'0.0');
+    const rSF=row('적용률 (정격하중 ×)',eq.sf,'배','작업계획서 기준 0.85',true,'0.00');
+    const rEqSafe=row('안전하중 = 정격하중 × 적용률',{f:`C${rRated}*C${rSF}`,v:eq.safe},'ton','',false,'0.00');
+    const rEqLoad=row('인양하중 = 인양물 + 달기기구',{f:`C${rLoad}+C${rRig}`,v:eq.load},'ton','',false,'0.00');
+    const eqV=Number.isFinite(eq.rated)?verdict('장비 판정',`C${rEqSafe}`,`C${rEqLoad}`,'',eq.ok):row('장비 판정','NG','','정격하중표 공란 · 범위 초과');
+    r++;sec('3. 줄걸이 검토 — '+(rw?'와이어로프':'슬링벨트'));
+    let rigV;
+    if(rw){
+      row('심(core) 종류',rg.core,'','',true);row('지름',rg.dia,'mm','',true);
+      const rCut=row('절단하중',rg.cut,'ton','제원표 값 또는 직접 입력',true,'0.00');
+      const rN=row('줄 수',rg.n,'줄','',true);
+      const rS=row('안전율',rg.sf,'','화물 5 이상 / 탑승 10 이상 (제163조)',true);
+      const rT=row('줄걸이 각도 (수평각)',rg.th,'°','20~90',true);
+      const rLF=row('줄걸이 하중계수',{f:`ROUND(1/COS(RADIANS(90-C${rT})),3)`,v:rg.lf},'','1 / cos(90°−θ)',false,'0.000');
+      row('단말가공 방법',rg.end,'','',true);
+      const rE=row('단말 효율',rg.eff,'','',true,'0.00');
+      const rSafe=row('안전하중 = 절단하중×줄수×효율/안전율/하중계수',{f:`C${rCut}*C${rN}*C${rE}/C${rS}/C${rLF}`,v:rg.safe},'ton','',false,'0.00');
+      rigV=verdict('줄걸이 판정',`C${rSafe}`,`C${rLoad}`,`C${rS}>=5,C${rT}>=20,C${rT}<=90`,rg.ok);
+    }else{
+      row('폭',rg.w,'mm','',true);row('타입',rg.type==='endless'?'ENDLESS':'EYE & EYE','','ENDLESS는 EYE&EYE의 2배',true);
+      row('양중방식',BELT_MODE[rg.m],'','',true);row('줄 사이각',rg.ang,'°','',true);
+      const rCut=row('절단하중',rg.cut,'ton','',true,'0.00');
+      const rW=row('양중방식별 사용하중 (0°)',rg.wll,'ton','',true,'0.00');
+      const rAF=row('각도 계수',rg.af,'','0°=1.0, 30°=0.95, 45°=0.9, 60°=0.85, 90°=0.7, 120°=0.5',true,'0.00');
+      const rN=row('줄 수',rg.n,'줄','',true);
+      const rS=row('안전율',rg.sf,'','화물 5 이상 / 탑승 10 이상 (제163조)',true);
+      const r1=row('안전하중1 = 절단하중×줄수/안전율',{f:`C${rCut}*C${rN}/C${rS}`,v:rg.s1},'ton','파단 검토',false,'0.00');
+      const r2=row('안전하중2 = 사용하중×각도계수×줄수',{f:`C${rW}*C${rAF}*C${rN}`,v:rg.s2},'ton','사용방법 검토',false,'0.00');
+      const rSafe=row('안전하중 = min(1, 2)',{f:`MIN(C${r1},C${r2})`,v:rg.safe},'ton','',false,'0.00');
+      rigV=verdict('줄걸이 판정',`C${rSafe}`,`C${rLoad}`,`C${rS}>=5`,rg.ok);
+    }
+    r++;sec('4. 샤클 검토');
+    row('샤클 규격',sh.size,'inch','',true);
+    const sW=row('사용하중',sh.wll,'ton','제원표 값 또는 직접 입력',true,'0.00');
+    const sN=row('개수',sh.n,'EA','',true);
+    const sS=row('안전율',sh.sf,'','3 이상 (제163조)',true);
+    const sSafe=row('안전하중 = 사용하중×개수/안전율',{f:`C${sW}*C${sN}/C${sS}`,v:sh.safe},'ton','',false,'0.00');
+    const shV=verdict('샤클 판정',`C${sSafe}`,`C${rLoad}`,`C${sS}>=3`,sh.ok);
+    // 종합
+    const all=[eq,rg,sh].every(x=>x.ok);
+    ws.mergeCells(sumRow,1,sumRow,5);
+    const sc=ws.getCell(sumRow,1);sc.value={formula:`IF(AND(C${eqV}="OK",C${rigV}="OK",C${shV}="OK"),"종합 판정: 전 항목 OK — 인양작업 가능","종합 판정: NG 항목 있음 — 계획 변경 필요")`,result:all?'종합 판정: 전 항목 OK — 인양작업 가능':'종합 판정: NG 항목 있음 — 계획 변경 필요'};
+    sc.font={name:F,size:14,bold:true};sc.alignment={horizontal:'center',vertical:'middle'};ws.getRow(sumRow).height=32;
+    for(let i=1;i<=5;i++)ws.getCell(sumRow,i).border={top:{style:'medium'},bottom:{style:'medium'},left:{style:'medium'},right:{style:'medium'}};
+    const okS={font:{color:{argb:'FF0E7A44'},bold:true},fill:{type:'pattern',pattern:'solid',bgColor:{argb:'FFDFF3E7'}}},ngS={font:{color:{argb:'FFC0302B'},bold:true},fill:{type:'pattern',pattern:'solid',bgColor:{argb:'FFFDE7E5'}}};
+    ws.addConditionalFormatting({ref:`C1:C${r}`,rules:[{type:'cellIs',operator:'equal',formulae:['"NG"'],style:ngS},{type:'cellIs',operator:'equal',formulae:['"OK"'],style:okS}]});
+    ws.addConditionalFormatting({ref:`A${sumRow}`,rules:[{type:'expression',formulae:[`ISNUMBER(SEARCH("NG",$A$${sumRow}))`],style:ngS},{type:'expression',formulae:[`ISNUMBER(SEARCH("전 항목 OK",$A$${sumRow}))`],style:okS}]});
+    r++;ws.mergeCells(r,1,r,5);
+    const fc=ws.getCell(r,1);fc.value='노란 칸은 입력값이다. 수정하면 안전하중과 판정이 자동 재계산된다. 근거: 산업안전보건기준에 관한 규칙 제163조. 판정 기준: 안전하중 > 인양하중.';
+    fc.font={name:F,size:9,color:{argb:'FF5D6B78'}};fc.alignment={wrapText:true,vertical:'top'};ws.getRow(r).height=28;
+    // 정격하중표
+    const c=cranes[curCrane],w2=wb.addWorksheet('정격하중표',{views:[{state:'frozen',xSplit:1,ySplit:2}]});
+    w2.getCell(1,1).value=c.name+' 정격하중표 (ton) — 굵은 칸이 이번 검토에 사용된 값';w2.getCell(1,1).font={name:F,size:12,bold:true};
+    w2.getCell(2,1).value='반경＼붐(m)';
+    c.booms.forEach((b,i)=>w2.getCell(2,2+i).value=b);
+    c.rows.forEach((rw_,ri)=>{w2.getCell(3+ri,1).value=rw_[0];c.booms.forEach((_,ci)=>{const v=rw_[1+ci];const cell=w2.getCell(3+ri,2+ci);cell.value=typeof v==='number'?v:null;
+      if(S.eq.rowIdx===ri&&S.eq.colIdx===ci){cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2B600'}};cell.font={name:F,bold:true}}})});
+    for(let ri=2;ri<=2+c.rows.length;ri++)for(let ci=1;ci<=1+c.booms.length;ci++){const cell=w2.getCell(ri,ci);cell.border=BD;if(!cell.font||!cell.font.bold)cell.font={name:F,size:10,bold:(ri===2||ci===1)};cell.alignment={horizontal:'center'};if(ri===2||ci===1){if(!(cell.fill&&cell.fill.fgColor&&cell.fill.fgColor.argb==='FFF2B600'))cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEEF1F4'}}}}
+    w2.getColumn(1).width=14;for(let i=0;i<c.booms.length;i++)w2.getColumn(2+i).width=9;
+    const buf=await wb.xlsx.writeBuffer();
+    const st=await saveFile(fname('xlsx'),buf);
+    toast(st==='saved'?'엑셀을 저장했다.':'저장을 취소했다.');
+  }catch(e){toast('엑셀 저장 실패: '+e.message)}finally{busy(false,$('toast').textContent)}
+}
+
+/* ---------- 선택지·이벤트 ---------- */
+function fillCraneSelects(){const o=cranes.map((c,i)=>`<option value="${i}">${esc(c.name)}${i===0?' (기본)':''}</option>`).join('');$('crane').innerHTML=o;$('crane2').innerHTML=o;$('crane').value=$('crane2').value=curCrane}
+function fillBooms(keep){const c=cranes[curCrane],prev=keep?$('boom').value:'';$('boom').innerHTML=c.booms.map((b,i)=>`<option value="${i}">${esc(b)} m</option>`).join('');const d=c.booms.findIndex(b=>b===25);$('boom').value=prev!==''&&c.booms[prev]!==undefined?prev:(d>=0?d:0)}
+function fillWireDia(){const t=$('w-core').value==='마심'?DATA.wireFC:DATA.wireIWRC,p=parseFloat($('w-dia').value);$('w-dia').innerHTML=t.map(r=>`<option value="${r[0]}">${r[0]} mm</option>`).join('');$('w-dia').value=t.some(r=>r[0]===p)?p:(t.some(r=>r[0]===20)?20:t[0][0])}
 function update(){
-  const S=calcAll();
-  renderEq(S.eq); renderShackle(S.sh);
-  if(S.rm==='wire'){renderWire(S.rig);drawRig('dg-wire',90-(Number.isFinite(S.rig.th)?Math.min(Math.max(S.rig.th,20),90):60),'수평각 '+S.rig.th+'°')}
-  else{renderBelt(S.rig);drawRig('dg-belt',S.rig.ang/2,'줄 사이각 '+S.rig.ang+'°')}
-  renderSummary(S); renderReport(S); renderCraneTable(S);
+  const S=calcAll();renderSummary(S);renderDetails(S);renderReport(S);renderCraneTable(S);saveState();
 }
-function setRig(m){
-  $('seg-wire').setAttribute('aria-pressed',m==='wire'); $('seg-belt').setAttribute('aria-pressed',m==='belt');
-  $('box-wire').classList.toggle('hidden',m!=='wire'); $('box-belt').classList.toggle('hidden',m!=='belt'); update();
+function setRig(m,silent){
+  $('seg-wire').setAttribute('aria-pressed',m==='wire');$('seg-belt').setAttribute('aria-pressed',m==='belt');
+  $('box-wire').classList.toggle('hidden',m!=='wire');$('box-belt').classList.toggle('hidden',m!=='belt');if(!silent)update();
 }
-function setTab(t){
-  ['calc','report','data'].forEach(k=>{$('p-'+k).classList.toggle('hidden',k!==t);$('tab-'+k).setAttribute('aria-selected',k===t)});
-}
+function setTab(t){['calc','report','data'].forEach(k=>{$('p-'+k).classList.toggle('hidden',k!==t);$('tab-'+k).setAttribute('aria-selected',k===t)});window.scrollTo(0,0)}
 function parseTable(text){
   const lines=text.split(/\r?\n/).filter(l=>l.trim()!=='');
-  if(lines.length<2)throw new Error('행이 부족하다. 첫 행은 붐길이, 이후 행은 작업반경별 정격하중이다.');
+  if(lines.length<2)throw new Error('행이 부족하다. 첫 행은 붐길이, 이후는 반경별 정격하중이다.');
   const split=l=>l.includes('\t')?l.split('\t'):l.trim().split(/[\s,]+/);
   const toN=s=>{const v=parseFloat(String(s).replace(/[^\d.\-]/g,''));return String(s).trim()===''||!Number.isFinite(v)?null:v};
-  let head=split(lines[0]).map(s=>s.trim()), body=lines.slice(1).map(split);
-  const width=Math.max(...body.map(r=>r.length));
-  if(head.length===width)head=head.slice(1);          // 모서리 칸 포함
-  else if(head.length!==width-1)throw new Error(`붐길이 ${head.length}개와 데이터 열 ${width-1}개가 맞지 않는다.`);
+  let head=split(lines[0]).map(s=>s.trim()),body=lines.slice(1).map(split);const width=Math.max(...body.map(r=>r.length));
+  if(head.length===width)head=head.slice(1);else if(head.length!==width-1)throw new Error(`붐길이 ${head.length}개와 데이터 열 ${width-1}개가 맞지 않는다.`);
   const booms=head.map(h=>{const v=parseFloat(h);return Number.isFinite(v)&&/^[\d.]+$/.test(h)?v:h});
-  const rows=body.map(r=>{const rad=toN(r[0]);if(rad===null)throw new Error('작업반경(첫 열)이 숫자가 아닌 행이 있다.');
-    const vals=[];for(let i=1;i<=booms.length;i++)vals.push(toN(r[i]===undefined?'':r[i]));return [rad,...vals]});
-  rows.sort((a,b)=>a[0]-b[0]);
-  return {booms,rows};
+  const rows=body.map(r=>{const rad=toN(r[0]);if(rad===null)throw new Error('작업반경(첫 열)이 숫자가 아닌 행이 있다.');const v=[];for(let i=1;i<=booms.length;i++)v.push(toN(r[i]===undefined?'':r[i]));return[rad,...v]});
+  rows.sort((a,b)=>a[0]-b[0]);return{booms,rows};
 }
-
+let DEFAULTS={};
 function init(){
-  loadCranes(); fillCraneSelects(); fillBooms(false);
-  $('w-end').innerHTML=ENDS.map(e=>`<option>${e[0]}</option>`).join(''); $('w-end').value='슬링(10mm≥)';
-  fillWireDia();
-  $('b-w').innerHTML=DATA.belt.map(r=>`<option value="${r[0]}">${r[0]} mm (${r[6]})</option>`).join(''); $('b-w').value=100;
+  loadCranes();fillCraneSelects();fillBooms(false);
+  $('w-end').innerHTML=ENDS.map(e=>`<option>${e[0]}</option>`).join('');$('w-end').value='슬링(10mm≥)';fillWireDia();$('w-dia').value=20;
+  $('b-w').innerHTML=DATA.belt.map(r=>`<option value="${r[0]}">${r[0]} mm (${r[6]})</option>`).join('');$('b-w').value=100;
   $('b-ang').innerHTML=DATA.beltAngle.deg.map(d=>`<option value="${d}">${d}°</option>`).join('');
-  $('s-size').innerHTML=DATA.shackle.map(r=>`<option value="${r[0]}">${r[0]}" (${r[1]} t)</option>`).join(''); $('s-size').value='1-3/4';
-  $('m-date').value=new Date().toISOString().slice(0,10);
-  renderRefs();
-  document.addEventListener('input',e=>{
-    if(e.target.closest('#n-text,#n-name'))return;
-    if(e.target.id==='w-core')fillWireDia();
-    update();
-  });
+  $('s-size').innerHTML=DATA.shackle.map(r=>`<option value="${r[0]}">${r[0]}" (${r[1]} t)</option>`).join('');$('s-size').value='1-3/4';
+  {const n=new Date();$('m-date').value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
+  DEFAULTS={};FIELDS.concat(['boom','w-dia']).forEach(k=>DEFAULTS[k]=$(k).value);DEFAULTS.crane=0;
+  renderRefs();restoreState();
+  document.addEventListener('input',e=>{if(e.target.closest('#n-text,#n-name'))return;if(e.target.id==='w-core')fillWireDia();update()});
   const sel=e=>{curCrane=parseInt(e.target.value);$('crane').value=$('crane2').value=curCrane;fillBooms(false);update()};
-  $('crane').addEventListener('change',sel); $('crane2').addEventListener('change',sel);
+  $('crane').addEventListener('change',sel);$('crane2').addEventListener('change',sel);
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('.stp button');if(!b)return;
+    const i=b.parentElement.querySelector('input'),st=parseFloat(i.step)||1,mn=i.min!==''?parseFloat(i.min):-Infinity,mx=i.max!==''?parseFloat(i.max):Infinity;
+    i.value=Math.min(mx,Math.max(mn,(parseFloat(i.value)||0)+parseFloat(b.dataset.d)*st));i.dispatchEvent(new Event('input',{bubbles:true}));
+  });
   document.querySelectorAll('[data-rig]').forEach(b=>b.addEventListener('click',()=>setRig(b.dataset.rig)));
   document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+  document.querySelectorAll('.js-pdf').forEach(b=>b.addEventListener('click',exportPDF));
+  document.querySelectorAll('.js-xlsx').forEach(b=>b.addEventListener('click',exportXLSX));
+  $('reset').addEventListener('click',()=>{
+    curCrane=0;fillCraneSelects();fillBooms(false);FIELDS.forEach(k=>{if(k!=='m-date'&&!k.startsWith('m-'))$(k).value=DEFAULTS[k]});
+    $('w-core').value='철심';fillWireDia();$('w-dia').value=DEFAULTS['w-dia'];$('boom').value=DEFAULTS.boom;setRig('wire',true);update();toast('입력을 초기화했다.');
+  });
   $('n-add').addEventListener('click',()=>{
-    const name=$('n-name').value.trim(), m=$('n-msg');
-    try{
-      if(!name)throw new Error('제조사/모델명을 입력한다.');
-      const t=parseTable($('n-text').value);
-      cranes.push({name,booms:t.booms,rows:t.rows}); saveCranes();
-      curCrane=cranes.length-1; fillCraneSelects(); fillBooms(false);
-      $('n-text').value='';$('n-name').value='';
-      m.textContent=`추가했다: 붐 ${t.booms.length}종, 반경 ${t.rows.length}행.`; update();
-    }catch(err){m.textContent=err.message}
+    const name=$('n-name').value.trim(),m=$('n-msg');
+    try{if(!name)throw new Error('제조사/모델명을 입력한다.');const t=parseTable($('n-text').value);cranes.push({name,booms:t.booms,rows:t.rows});saveCranes();curCrane=cranes.length-1;fillCraneSelects();fillBooms(false);$('n-text').value='';$('n-name').value='';m.textContent=`추가했다: 붐 ${t.booms.length}종 · 반경 ${t.rows.length}행`;update()}catch(err){m.textContent=err.message}
   });
-  $('n-del').addEventListener('click',()=>{
-    if(curCrane===0)return; cranes.splice(curCrane,1); saveCranes(); curCrane=0;
-    fillCraneSelects(); fillBooms(false); $('n-msg').textContent='삭제했다.'; update();
-  });
+  $('n-del').addEventListener('click',()=>{if(curCrane===0)return;cranes.splice(curCrane,1);saveCranes();curCrane=0;fillCraneSelects();fillBooms(false);$('n-msg').textContent='삭제했다.';update()});
   $('copy').addEventListener('click',async()=>{
-    const m=$('copymsg');
-    try{await navigator.clipboard.writeText(lastText);m.textContent='복사했다.'}
-    catch(e){const t=document.createElement('textarea');t.value=lastText;document.body.appendChild(t);t.select();try{document.execCommand('copy');m.textContent='복사했다.'}catch(_){m.textContent='복사하지 못했다. 검토서를 직접 선택해 복사한다.'}t.remove()}
+    try{await navigator.clipboard.writeText(lastText);toast('복사했다.')}
+    catch(e){const t=document.createElement('textarea');t.value=lastText;document.body.appendChild(t);t.select();try{document.execCommand('copy');toast('복사했다.')}catch(_){toast('복사하지 못했다.')}t.remove()}
   });
   update();
 }
 init();
 </script>
+
+</body></html>
