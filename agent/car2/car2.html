@@ -1,807 +1,1467 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>이동식 크레인 양중 안전성 검토 에이전트</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>항타기 지지력 검토</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-:root{
-  --ink:#0E1319; --paper:#fff; --field:#EDF1F5; --line:#C9D3DD; --line2:#E3E9EF;
-  --slate:#4A5B6E; --mute:#7C8B9C;
-  --boom:#E8A317; --boom-d:#B87F06;
-  --ok:#0B7A63; --ok-bg:#E6F3EF;
-  --ng:#C0341D; --ng-bg:#FBEAE6;
-  --warn:#B4690E; --warn-bg:#FCF3E3;
-  --sans:'Pretendard','Pretendard Variable',-apple-system,'Malgun Gothic','맑은 고딕',sans-serif;
-  --mono:ui-monospace,'SFMono-Regular','Consolas',monospace;
+html{color-scheme:light dark}body{margin:0}[hidden]{display:none!important}img{max-width:100%}
+/* 레이아웃: 상단 고정 바(판정·저장) + 좌측 입력 / 우측 결과(도해) 2단, 좁은 화면은 결과 우선 1단 */
+:root {
+  --font-ui: 'IBM Plex Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --font-num: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, 'Malgun Gothic', monospace;
+  --bg: #E8ECEE; --panel: #F8FAFB; --panel-2: #EDF1F3; --field: #FFFFFF;
+  --ink: #16252E; --mute: #566872; --line: #C6D0D6;
+  --accent: #1B5E8A; --accent-ink: #FFFFFF; --accent-soft: #D7E7F1;
+  --ok: #1B7447; --ok-bg: #DCEFE4; --warn: #85580A; --warn-bg: #F7EAC8; --bad: #B3261E; --bad-bg: #F7DAD6;
+  --crane: #EDB100; --crane-dk: #9A7300; --steel: #8B98A1; --steel-dk: #4E5B64;
+  --trk: #33404A; --trk-in: #4B5A66; --glass: #BFD9EA;
+  --soil-1: #D8CBB0; --soil-2: #B9C2B0; --soil-3: #C9B79F; --soil-4: #A9AFB4; --water: #2F7FB5;
 }
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  font-family:var(--sans); color:var(--ink); background:#DFE5EB;
-  font-size:15px; line-height:1.55; -webkit-text-size-adjust:100%;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1619; --panel: #182026; --panel-2: #202A31; --field: #0F1619;
+    --ink: #E4ECF0; --mute: #9AABB5; --line: #34434D;
+    --accent: #6DB5E6; --accent-ink: #0A1821; --accent-soft: #1E3949;
+    --ok: #62CF93; --ok-bg: #16372A; --warn: #F0C45E; --warn-bg: #3A3014; --bad: #FF8D84; --bad-bg: #43201E;
+    --crane: #F2B90D; --crane-dk: #B58A00; --steel: #6F7D87; --steel-dk: #9AA8B1;
+    --trk: #56646F; --trk-in: #6E7E8A; --glass: #3C5D73;
+    --soil-1: #4B4537; --soil-2: #3D473A; --soil-3: #4A4137; --soil-4: #3C4349; --water: #5AB0E8;
+    color-scheme: dark;
+  }
 }
-.wrap{max-width:960px;margin:0 auto;padding:0 0 80px}
+:root[data-theme="dark"] {
+  --bg: #0F1619; --panel: #182026; --panel-2: #202A31; --field: #0F1619;
+  --ink: #E4ECF0; --mute: #9AABB5; --line: #34434D;
+  --accent: #6DB5E6; --accent-ink: #0A1821; --accent-soft: #1E3949;
+  --ok: #62CF93; --ok-bg: #16372A; --warn: #F0C45E; --warn-bg: #3A3014; --bad: #FF8D84; --bad-bg: #43201E;
+  --crane: #F2B90D; --crane-dk: #B58A00; --steel: #6F7D87; --steel-dk: #9AA8B1;
+  --trk: #56646F; --trk-in: #6E7E8A; --glass: #3C5D73;
+  --soil-1: #4B4537; --soil-2: #3D473A; --soil-3: #4A4137; --soil-4: #3C4349; --water: #5AB0E8;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.5;
+  padding-inline: 16px; padding-block: 0 48px;
+}
+button, input { font-family: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.st-OK   { --st: var(--ok);   --st-bg: var(--ok-bg); }
+.st-WARN { --st: var(--warn); --st-bg: var(--warn-bg); }
+.st-NG   { --st: var(--bad);  --st-bg: var(--bad-bg); }
+.st-NA   { --st: var(--mute); --st-bg: var(--panel-2); }
 
 /* ---- 상단 바 ---- */
-header{
-  position:sticky; top:0; z-index:20; background:var(--ink); color:#fff;
-  border-bottom:3px solid var(--boom);
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  margin-inline: -16px; padding-inline: 16px; background: var(--bg); border-bottom: 1px solid var(--line);
 }
-.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;max-width:960px;margin:0 auto}
-.hd h1{font-size:15px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.25}
-.hd h1 small{display:block;font-size:11px;font-weight:500;color:#94A6B8;letter-spacing:.02em}
-.mark{width:30px;height:30px;flex:0 0 30px;background:var(--boom);position:relative;border-radius:2px}
-.mark::before{content:"";position:absolute;left:5px;top:5px;width:20px;height:3px;background:var(--ink);transform:rotate(-32deg);transform-origin:left center}
-.mark::after{content:"";position:absolute;right:6px;top:14px;width:2px;height:11px;background:var(--ink)}
-.total{margin-left:auto;display:flex;align-items:center;gap:8px}
-.badge{font-size:13px;font-weight:800;padding:6px 12px;border-radius:2px;background:#2A3542;color:#94A6B8;letter-spacing:.04em;white-space:nowrap}
-.badge.ok{background:var(--ok);color:#fff}
-.badge.ng{background:var(--ng);color:#fff}
+.top-in { max-width: 1380px; margin-inline: auto; display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 260px; }
+.brand svg { flex: none; color: var(--accent); }
+.brand h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.01em; line-height: 1.2; }
+.brand p { margin: 0; font-size: 12px; color: var(--mute); }
+.top-r { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 999px; font-weight: 700; font-size: 13px; background: var(--st-bg); color: var(--st); border: 1px solid var(--st); white-space: nowrap; }
+.chip .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--st); }
+.chip small { font: 500 12px var(--font-num); opacity: .9; }
+.btn { height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.wrap { max-width: 1380px; margin-inline: auto; padding-block: 16px 0; }
+.note { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: var(--mute); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; align-items: start; }
+@media (max-width: 1060px) { .grid { grid-template-columns: minmax(0, 1fr); } .res { order: -1; } }
+.stack { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.res { container-type: inline-size; container-name: res; }
 
 /* ---- 카드 ---- */
-.card{background:var(--paper);margin:14px 12px;border:1px solid var(--line);border-radius:3px}
-.card>h2{
-  display:flex;align-items:center;gap:10px;margin:0;padding:11px 14px;
-  font-size:14px;font-weight:800;letter-spacing:-.01em;border-bottom:1px solid var(--line2);
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; min-width: 0; }
+.ch { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.ch h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.ch .hint { margin-left: auto; font-size: 12px; color: var(--mute); }
+.stepn { flex: none; width: 22px; height: 22px; border-radius: 5px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font: 600 12px var(--font-num); }
+.sub { font-size: 12px; color: var(--mute); margin: 8px 0 0; }
+
+.fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 10px; }
+.fgrid.w2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.f > span { font-size: 12px; color: var(--mute); font-weight: 500; }
+.f > span em { font-style: normal; font-family: var(--font-num); }
+.f input[type="number"], .f input[type="text"], .f input[type="date"] {
+  width: 100%; height: 36px; padding: 0 9px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--field); color: var(--ink); font: 500 14px var(--font-num); font-variant-numeric: tabular-nums;
 }
-.no{flex:0 0 22px;height:22px;display:grid;place-items:center;background:var(--boom);color:var(--ink);font-size:12px;font-weight:800;border-radius:2px}
-.pill{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:2px;background:var(--field);color:var(--mute)}
-.pill.ok{background:var(--ok-bg);color:var(--ok)}
-.pill.ng{background:var(--ng-bg);color:var(--ng)}
-.body{padding:14px}
-.grid{display:grid;grid-template-columns:1fr;gap:10px 14px}
-@media(min-width:640px){.grid.c2{grid-template-columns:1fr 1fr}.grid.c3{grid-template-columns:1fr 1fr 1fr}}
-label{display:block;font-size:11.5px;font-weight:700;color:var(--slate);margin-bottom:4px;letter-spacing:.01em}
-input,select,textarea{
-  width:100%;font-family:var(--sans);font-size:14px;color:var(--ink);
-  background:var(--field);border:1px solid transparent;border-bottom:1px solid var(--line);
-  border-radius:2px 2px 0 0;padding:8px 9px;
-}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--boom);outline-offset:-2px;background:#fff}
-input[type=number]{font-family:var(--mono);font-variant-numeric:tabular-nums}
-textarea{font-family:var(--mono);font-size:12px;line-height:1.4;min-height:110px;resize:vertical}
-.hint{font-size:11px;color:var(--mute);margin-top:4px}
+.f input[type="text"], .f input[type="date"] { font-family: var(--font-ui); }
+.f input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.f input:disabled { opacity: .45; }
 
-/* ---- 계산 결과 / LMI 게이지 ---- */
-.calc{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
-.eq{font-family:var(--mono);font-size:12.5px;color:var(--slate);background:var(--field);padding:7px 9px;border-left:3px solid var(--line);margin:0 0 8px;word-break:break-all}
-.eq b{color:var(--ink)}
-.lmi{margin-top:10px}
-.lmi .top{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--slate);margin-bottom:5px}
-.lmi .top .val{font-family:var(--mono);color:var(--ink)}
-.track{position:relative;height:22px;background:var(--field);border:1px solid var(--line2);overflow:hidden}
-.fill{height:100%;width:0;background:var(--ok);transition:width .35s ease}
-.fill.ng{background:var(--ng)}
-.fill.warn{background:var(--warn)}
-.tick{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.55}
-.tick span{position:absolute;top:-1px;left:4px;font-size:9.5px;font-weight:800;color:var(--ink);white-space:nowrap;opacity:.75}
-.res{margin-top:9px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:13px}
-.res .fx{font-family:var(--mono);font-weight:700}
-.tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:2px}
-.tag.ok{background:var(--ok-bg);color:var(--ok)}
-.tag.ng{background:var(--ng-bg);color:var(--ng)}
-.note{font-size:11.5px;color:var(--warn);background:var(--warn-bg);padding:6px 8px;margin-top:8px;border-left:3px solid var(--boom)}
+.item { border: 1px solid var(--line); border-radius: 7px; padding: 10px; background: var(--panel-2); display: flex; flex-direction: column; gap: 10px; }
+.item-h { display: flex; gap: 8px; align-items: center; }
+.no { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font: 600 12px var(--font-num); }
+.item-h input { flex: 1; min-width: 0; height: 34px; padding: 0 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); color: var(--ink); font: 500 14px var(--font-ui); }
+.ico { flex: none; width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--mute); cursor: pointer; font-size: 17px; line-height: 1; }
+.ico:hover:not(:disabled) { color: var(--bad); border-color: var(--bad); }
+.ico:disabled { opacity: .35; cursor: not-allowed; }
+.chk { display: flex; align-items: center; gap: 8px; font-size: 13px; min-height: 36px; align-self: end; cursor: pointer; }
+.chk input { width: 18px; height: 18px; accent-color: var(--accent); }
+.add { width: 100%; height: 38px; border: 1px dashed var(--line); border-radius: 6px; background: transparent; color: var(--accent); font-weight: 600; font-size: 13px; cursor: pointer; }
+.add:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+.add:disabled { opacity: .4; cursor: not-allowed; }
+.list { display: flex; flex-direction: column; gap: 10px; }
+.sumrow { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font: 500 13px var(--font-num); color: var(--ink); }
+.sumrow span { color: var(--mute); font-family: var(--font-ui); }
+.reset { background: none; border: 0; color: var(--mute); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 6px 2px; align-self: flex-start; }
 
-/* ---- 탭 ---- */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:14px}
-.tab{flex:1;padding:9px 6px;font-size:13px;font-weight:800;color:var(--mute);background:none;border:0;border-bottom:3px solid transparent;cursor:pointer;font-family:var(--sans)}
-.tab.on{color:var(--ink);border-bottom-color:var(--boom)}
+/* ---- 결과 ---- */
+.issues { border: 1px solid var(--warn); background: var(--warn-bg); border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+.issues.err { border-color: var(--bad); background: var(--bad-bg); }
+.issues ul { margin: 0; padding-left: 18px; }
+.checks-w { container-type: inline-size; }
+.checks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@container (max-width: 640px) { .checks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (max-width: 380px) { .checks { grid-template-columns: minmax(0, 1fr); } }
+.ck { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ck.banner { background: var(--st-bg); border-color: var(--st); justify-content: center; }
+.ck-k { font-size: 12px; font-weight: 600; color: var(--st); }
+.ck-big { font-size: 30px; font-weight: 700; color: var(--st); line-height: 1.1; }
+.ck-s { font-size: 12px; color: var(--ink); }
+.ck-top { display: flex; align-items: center; gap: 6px; }
+.ck-n { flex: none; width: 18px; height: 18px; border-radius: 4px; background: var(--panel-2); color: var(--mute); display: grid; place-items: center; font: 600 11px var(--font-num); }
+.ck-t { font-size: 12.5px; font-weight: 600; flex: 1; min-width: 0; line-height: 1.3; }
+.pl { flex: none; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: var(--st-bg); color: var(--st); }
+.ck-v { font: 600 24px/1.15 var(--font-num); font-variant-numeric: tabular-nums; }
+.ck-v small { font-size: 12px; color: var(--mute); margin-left: 4px; font-weight: 500; }
+.ck-l { font: 500 12px var(--font-num); color: var(--mute); }
+.gauge { position: relative; height: 6px; border-radius: 3px; background: var(--panel-2); margin-top: 2px; }
+.gauge i { display: block; height: 100%; border-radius: 3px; background: var(--st); }
+.gauge b { position: absolute; left: 80%; top: -3px; bottom: -3px; width: 2px; background: var(--mute); border-radius: 1px; }
+.ck-f { font-size: 11.5px; color: var(--mute); line-height: 1.35; }
 
-/* ---- 버튼 ---- */
-.btn{
-  font-family:var(--sans);font-size:13.5px;font-weight:800;padding:11px 16px;cursor:pointer;
-  border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:2px;
-}
-.btn.pri{background:var(--ink);color:#fff}
-.btn.acc{background:var(--boom);border-color:var(--boom-d);color:var(--ink)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.fig { overflow-x: auto; }
+.fig svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.fig.s svg { min-width: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--mute); margin-top: 10px; }
+.legend span { display: inline-flex; align-items: center; }
+.legend b { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 600 11px var(--font-num); margin-right: 6px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@container res (max-width: 720px) { .two { grid-template-columns: minmax(0, 1fr); } }
 
-/* ---- 종합 / AI ---- */
-.sum{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line2);border:1px solid var(--line2)}
-@media(min-width:640px){.sum{grid-template-columns:1fr 1fr}}
-.sum .it{background:#fff;padding:10px 12px;display:flex;align-items:center;gap:10px}
-.sum .it .k{font-size:12.5px;font-weight:700}
-.sum .it .v{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--slate)}
-table.ra{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
-table.ra th,table.ra td{border:1px solid var(--line);padding:7px 8px;vertical-align:top;text-align:left}
-table.ra th{background:var(--field);font-size:11.5px;font-weight:800;color:var(--slate)}
-table.ra td.lv{text-align:center;font-weight:800;white-space:nowrap}
-.lv-상{color:var(--ng)}.lv-중{color:var(--warn)}.lv-하{color:var(--ok)}
-.opinion{background:var(--field);border-left:3px solid var(--boom);padding:10px 12px;font-size:13px;margin-top:10px;white-space:pre-wrap}
-.chk{font-size:13px;margin:8px 0 0;padding-left:18px}
-.chk li{margin-bottom:4px}
-.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
-@keyframes sp{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-.foot{font-size:11.5px;color:var(--slate);padding:0 24px;text-align:center;line-height:1.6}
+details.card > summary { cursor: pointer; font-weight: 600; font-size: 15px; list-style: none; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::before { content: '▸'; display: inline-block; width: 18px; color: var(--accent); }
+details.card[open] > summary::before { content: '▾'; }
+details.card[open] > summary { margin-bottom: 12px; }
+.dg { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.dg h4 { margin: 0 0 4px; font-size: 12px; color: var(--accent); font-weight: 700; }
+.dg table, .tw table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dg td { padding: 4px 0; border-bottom: 1px solid var(--line); }
+.dg td:last-child { text-align: right; font: 500 13px var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tw { overflow-x: auto; margin-top: 16px; }
+.tw h4 { margin: 0 0 6px; font-size: 12px; color: var(--accent); }
+.tw th, .tw td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font: 500 12.5px var(--font-num); }
+.tw th { color: var(--mute); font-family: var(--font-ui); font-weight: 600; }
+.tw th:first-child, .tw td:first-child { text-align: left; font-family: var(--font-ui); }
+.pvnote { font-size: 12px; color: var(--mute); margin: 0 0 10px; }
+.rpt-wrap { overflow-x: auto; padding: 12px; background: var(--panel-2); border-radius: 6px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.rpt-wrap .rpt-page { box-shadow: 0 1px 8px rgba(0, 0, 0, .3); }
 
-/* ---- 인쇄용 작업계획서 ---- */
-#doc{display:none}
-@media print{
-  body{background:#fff}
-  header,.card,.foot,.noprint{display:none!important}
-  #doc{display:block;padding:0;margin:0}
-  @page{size:A4;margin:12mm}
-}
-#doc table{width:100%;border-collapse:collapse;font-size:10.5px}
-#doc table th,#doc table td{border:1px solid #000;padding:3.5px 5px;vertical-align:middle}
-#doc th{background:#EEE;font-weight:800;text-align:center;width:15%}
-#doc h3{font-size:16px;text-align:center;margin:0 0 8px;letter-spacing:.3em}
-#doc .sec{background:#333;color:#fff;font-weight:800;text-align:left;padding:4px 6px;font-size:11px}
-#doc .sign{margin-top:14px;text-align:right;font-size:11px}
+#toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: calc(100vw - 32px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 40; opacity: 0; pointer-events: none; transition: opacity .2s; }
+#toast.on { opacity: 1; }
+#offscreen, #pvStage { position: absolute; left: -12000px; top: 0; width: 794px; pointer-events: none; }
+
+/* ---- 검토서 (A4 용지: 테마와 무관하게 흰 종이 · 고정색) ---- */
+.rpt-page { width: 794px; height: 1123px; flex: none; position: relative; background: #fff; color: #16252E; color-scheme: light; padding: 32px 44px 26px; display: flex; flex-direction: column; font-family: var(--font-ui); font-size: 11.5px; line-height: 1.55; }
+.rpt-h { display: flex; justify-content: space-between; font-size: 10px; color: #5B6C77; border-bottom: 1px solid #B9C4CA; padding-bottom: 6px; margin-bottom: 12px; }
+.rpt-b { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 12px; }
+.rpt-f { display: flex; justify-content: space-between; font-size: 10px; color: #5B6C77; border-top: 1px solid #B9C4CA; padding-top: 6px; margin-top: 10px; }
+.rpt-page .blk { flex: none; }
+.rpt-page h1 { font-size: 22px; margin: 0; font-weight: 700; color: #16252E; line-height: 1.25; }
+.rpt-page .ttl p { margin: 2px 0 0; color: #5B6C77; font-size: 11px; }
+.rpt-page .ttl { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 2px solid #16252E; padding-bottom: 8px; margin-bottom: 10px; }
+.rpt-page .bdg { padding: 5px 14px; border-radius: 4px; font-weight: 700; font-size: 15px; border: 1.5px solid; white-space: nowrap; }
+.rpt-page .bdg.sm-b { font-size: 13px; }
+.rpt-page .bdg-OK { color: #1B7447; background: #DCEFE4; border-color: #1B7447; }
+.rpt-page .bdg-WARN { color: #85580A; background: #F7EAC8; border-color: #85580A; }
+.rpt-page .bdg-NG { color: #B3261E; background: #F7DAD6; border-color: #B3261E; }
+.rpt-page h2 { font-size: 14px; margin: 0 0 6px; padding-bottom: 3px; border-bottom: 1px solid #16252E; font-weight: 700; color: #16252E; }
+.rpt-page h3 { font-size: 12px; margin: 8px 0 5px; font-weight: 700; color: #16252E; }
+.rpt-page .blk > h3:first-child { margin-top: 0; }
+.rpt-page table.rt { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: auto; }
+.rpt-page .rt th, .rpt-page .rt td { border: 1px solid #B9C4CA; padding: 3px 6px; text-align: left; vertical-align: top; color: #16252E; }
+.rpt-page .rt th { background: #E9EFF2; font-weight: 600; }
+.rpt-page .rt td.n, .rpt-page .rt th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.rpt-page .rt.kv td:nth-child(odd), .rpt-page .rt.meta td:nth-child(odd) { background: #F2F5F7; width: 17%; }
+.rpt-page .rt.sm-t { font-size: 10px; }
+.rpt-page .fm { border-left: 3px solid #1B5E8A; background: #F4F7F9; padding: 5px 9px; margin: 6px 0; font-size: 11px; }
+.rpt-page .fm div { margin: 2px 0; }
+.rpt-page .pl { display: inline-block; padding: 0 6px; border-radius: 3px; font-size: 10px; font-weight: 700; border: 1px solid; background: #fff; }
+.rpt-page .pl-OK { color: #1B7447; border-color: #1B7447; background: #DCEFE4; }
+.rpt-page .pl-WARN { color: #85580A; border-color: #85580A; background: #F7EAC8; }
+.rpt-page .pl-NG { color: #B3261E; border-color: #B3261E; background: #F7DAD6; }
+.rpt-page .pl-NA { color: #5B6C77; border-color: #B9C4CA; background: #fff; }
+.rpt-page .fig svg { width: 100%; min-width: 0; height: auto; display: block; border: 1px solid #D5DDE1; }
+.rpt-page .cap { font-size: 10px; color: #5B6C77; text-align: center; margin-top: 3px; }
+.rpt-page .fig2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rpt-page .fig2 svg { width: 100%; height: auto; display: block; border: 1px solid #D5DDE1; }
+.rpt-page .bl { margin: 0; padding-left: 16px; }
+.rpt-page .bl li { margin: 1px 0; }
+.rpt-page .op { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 6px; }
+.rpt-page .sm { font-size: 10px; color: #5B6C77; }
+.rpt-page .sign { margin-top: 10px; }
+.rpt-page .sign td { height: 34px; }
+.rpt-page .sign td:nth-child(odd) { width: 9%; text-align: center; background: #F2F5F7; }
+
+@media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+@media (max-width: 520px) { .brand h1 { font-size: 16px; } .ck-big { font-size: 26px; } }
 </style>
 </head>
 <body>
-
-<header>
-  <div class="hd">
-    <div class="mark" aria-hidden="true"></div>
-    <h1>이동식 크레인 양중 안전성 검토<small id="siteLabel">00자동차 공장 · 차량계 하역운반기계 작업계획서</small></h1>
-    <div class="total"><span class="badge" id="totalBadge">검토 대기</span></div>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+        <rect x="3" y="24" width="22" height="7" rx="3.5" stroke="currentColor" stroke-width="2"/>
+        <rect x="7" y="16" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+        <path d="M17 17 L27 3 M27 3 V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="24.5" y="9" width="5" height="5" fill="currentColor"/>
+      </svg>
+      <div>
+        <h1>항타기 지지력 검토</h1>
+        <p>크롤러형 항타기 · 접지압 · 지지력 · 전도</p>
+      </div>
+    </div>
+    <div class="top-r">
+      <div id="chip" class="chip st-NA"><span class="dot"></span><span id="chipText">계산 중</span></div>
+      <button id="btnPdf" class="btn primary" type="button">PDF 저장</button>
+      <button id="btnXls" class="btn" type="button">Excel 저장</button>
+    </div>
   </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
+  <div id="saveNote" class="note" hidden></div>
+  <div class="grid">
+    <section class="stack" id="inputs" aria-label="입력"></section>
 
-<!-- ① 작업 개요 -->
-<section class="card">
-  <h2><span class="no">1</span>작업 개요</h2>
-  <div class="body">
-    <div class="grid c2">
-      <div><label>사업장</label><input id="f_site" value="00자동차 공장"></div>
-      <div><label>업체명</label><input id="f_co" placeholder="공사업체명 (직접 대여 시 팀명)"></div>
-      <div><label>공종</label><input id="f_type" placeholder="예) 설비 반입"></div>
-      <div><label>관리책임자 / 연락처</label><input id="f_mgr" placeholder="성명 / 010-0000-0000"></div>
-      <div><label>작업기간</label><input id="f_period" placeholder="2026.00.00 ~ 00.00"></div>
-      <div><label>작업장소</label><input id="f_place" placeholder="예) 의장1공장 북측 야드"></div>
-      <div><label>운반·이동경로</label><input id="f_route" placeholder="주요 이동경로"></div>
-      <div><label>제한속도 / 노면상태</label><input id="f_road" placeholder="10km/h / 양호"></div>
-      <div><label>작업지휘자</label><input id="f_lead" placeholder="성명"></div>
-      <div><label>유도자(신호수) / 신호방법</label><input id="f_sig" placeholder="성명 / 무전기·수신호"></div>
-      <div><label>줄걸이 작업자</label><input id="f_rig" placeholder="성명 (자격 보유)"></div>
-      <div><label>줄걸이 보조자</label><input id="f_rig2" placeholder="성명"></div>
-    </div>
-  </div>
-</section>
+    <section class="stack res" aria-label="검토 결과">
+      <div id="issues" hidden></div>
+      <div class="checks-w"><div class="checks" id="checks"></div></div>
 
-<!-- ② 화물(중량물) 제원 -->
-<section class="card">
-  <h2><span class="no">2</span>중량물 제원</h2>
-  <div class="body">
-    <div class="grid c2">
-      <div><label>화물 종류</label><input id="f_cargo" placeholder="예) 컨베이어 프레임"></div>
-      <div><label>화물 규격 (가로×세로×높이)</label><input id="f_dim" placeholder="예) 3.2 × 1.8 × 1.5 m"></div>
-      <div><label>화물 중량 (ton)</label><input type="number" id="f_w" value="10" step="0.1" min="0"></div>
-      <div><label>인양보조구 중량 (ton)</label><input type="number" id="f_wa" value="0" step="0.1" min="0"><div class="hint">훅블록·슬링·스프레더빔 등</div></div>
-      <div><label>결속방법</label><input id="f_bind" placeholder="예) 슬링벨트 2줄 + 샤클 결속"></div>
-      <div><label>무게중심 / 편심 여부</label><input id="f_cog" placeholder="예) 중앙, 편심 없음"></div>
-    </div>
-    <div class="calc">
-      <div class="eq">설계 인양하중 = 화물중량 + 보조구중량 = <b id="o_total">10 ton</b></div>
-      <div class="hint">이하 모든 검토는 설계 인양하중을 기준으로 판정한다.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ③ 장비 제원 및 양중계획 -->
-<section class="card">
-  <h2><span class="no">3</span>장비 제원 및 양중계획<span class="pill" id="p_crane">–</span></h2>
-  <div class="body">
-    <div class="grid c2">
-      <div><label>장비명 / 차량번호</label><input id="f_eq" placeholder="이동식 크레인 / 00가0000"></div>
-      <div><label>제조사 · 모델명</label><input id="f_model" value="LIEBHERR LTM 1095-5.1"></div>
-      <div><label>검사유효기간</label><input id="f_insp" placeholder="~ 2027.00.00"></div>
-      <div><label>보험사 / 유효기간</label><input id="f_ins" placeholder="00화재 / ~ 2027.00.00"></div>
-      <div><label>운전자 성명 / 자격</label><input id="f_op" placeholder="성명 / 기중기 조종사면허"></div>
-      <div><label>아웃리거 전개 / 지반 보강</label><input id="f_out" placeholder="예) 100% 전개, 철판 900×1800×20t 4매"></div>
-    </div>
-    <div class="grid c3" style="margin-top:12px">
-      <div><label>붐 길이 (m)</label><select id="f_boom"></select></div>
-      <div><label>작업 반경 (m)</label><select id="f_rad"></select></div>
-      <div><label>정격하중 적용률</label>
-        <select id="f_ratio"><option value="0.85">85% (작업계획서 기준)</option><option value="0.9">90% (현장 자체기준)</option><option value="0.75">75% (특별관리)</option></select>
+      <div class="card">
+        <div class="ch"><h2>측면도</h2><span class="hint">번호는 하중 구성 순서와 동일 · R 은 합력</span></div>
+        <div class="fig" id="figElev"></div>
+        <div class="legend" id="legend"></div>
       </div>
-    </div>
-    <div class="calc">
-      <div class="eq" id="e_crane">–</div>
-      <div class="lmi">
-        <div class="top"><span>정격하중 대비 하중률</span><span class="val" id="v_crane">–</span></div>
-        <div class="track"><div class="fill" id="b_crane"></div><div class="tick" id="t_crane" style="left:85%"><span>85%</span></div></div>
+
+      <div class="two">
+        <div class="card"><div class="ch"><h2>접지압 분포</h2></div><div class="fig s" id="figPress"></div></div>
+        <div class="card"><div class="ch"><h2>평면도</h2></div><div class="fig s" id="figPlan"></div></div>
       </div>
-      <div class="res"><span>판정 :</span><span class="fx" id="r_crane">–</span><span class="tag" id="g_crane">–</span></div>
-      <div id="n_crane"></div>
-      <details style="margin-top:12px">
-        <summary style="font-size:12.5px;font-weight:700;color:var(--slate);cursor:pointer">정격하중표 교체 (장비별 제원표 붙여넣기)</summary>
-        <div style="margin-top:8px">
-          <textarea id="f_chart" placeholder="1행 : (빈칸) 붐길이1 붐길이2 …&#10;2행~ : 작업반경  정격하중  정격하중 …&#10;엑셀에서 복사 후 붙여넣기 (탭 구분)"></textarea>
-          <div class="btnrow" style="margin-top:8px">
-            <button class="btn" id="btnChart">정격하중표 적용</button>
-            <button class="btn" id="btnChartReset">기본표(LTM 1095-5.1) 복원</button>
-          </div>
-          <div class="hint" id="chartMsg">현재 적용 : LIEBHERR LTM 1095-5.1</div>
-        </div>
+
+      <details class="card" id="detail">
+        <summary>계산 상세</summary>
+        <div id="detailBody"></div>
       </details>
-    </div>
+
+      <details class="card" id="pv">
+        <summary>검토서 미리보기 (PDF 내용)</summary>
+        <p class="pvnote">PDF 와 동일한 A4 검토서입니다. 입력을 바꾸면 자동으로 갱신됩니다.</p>
+        <div class="rpt-wrap" id="pvBody"></div>
+      </details>
+    </section>
   </div>
-</section>
+</main>
 
-<!-- ④ 줄걸이 검토 -->
-<section class="card">
-  <h2><span class="no">4</span>줄걸이 검토<span class="pill" id="p_rig">–</span></h2>
-  <div class="body">
-    <div class="tabs">
-      <button class="tab on" data-t="sling">슬링벨트</button>
-      <button class="tab" data-t="wire">와이어로프</button>
-    </div>
-
-    <div id="pane-sling">
-      <div class="grid c2">
-        <div><label>슬링벨트 타입</label><select id="s_type"><option>EYE &amp; EYE</option><option>ENDLESS</option></select></div>
-        <div><label>줄걸이 규격 (폭 mm)</label><select id="s_w"></select></div>
-        <div><label>양중방식</label><select id="s_mode"><option>Straight</option><option selected>Choker</option><option>Basket</option></select></div>
-        <div><label>줄걸이 각도 (끼인각)</label><select id="s_ang"><option value="0">0˚</option><option value="30">30˚</option><option value="45">45˚</option><option value="60">60˚</option><option value="90">90˚</option><option value="120">120˚</option></select></div>
-        <div><label>걸이 줄수 (EA)</label><input type="number" id="s_qty" value="2" min="1" step="1"></div>
-        <div><label>안전계수</label><input type="number" id="s_sf" value="5" min="1" step="1"><div class="hint">화물 지지 5 이상 / 근로자 탑승 10 이상</div></div>
-      </div>
-      <div class="calc">
-        <div class="eq">① 파단 검토 = 절단하중 × 줄수 ÷ 안전계수 = <b id="e_s1">–</b></div>
-        <div class="eq">② 사용방법 검토 = 방식별 하중 × 각도계수 × 줄수 = <b id="e_s2">–</b></div>
-        <div class="lmi">
-          <div class="top"><span>안전하중(①②중 작은 값) 대비 하중률</span><span class="val" id="v_sling">–</span></div>
-          <div class="track"><div class="fill" id="b_sling"></div><div class="tick" style="left:100%"><span></span></div></div>
-        </div>
-        <div class="res"><span>판정 :</span><span class="fx" id="r_sling">–</span><span class="tag" id="g_sling">–</span></div>
-      </div>
-    </div>
-
-    <div id="pane-wire" style="display:none">
-      <div class="grid c2">
-        <div><label>심(core) 종류</label><select id="w_core"><option>철심</option><option>마심</option></select></div>
-        <div><label>줄걸이 규격 (지름 mm)</label><select id="w_d"></select></div>
-        <div><label>줄걸이 각도 (수평각 ˚)</label><input type="number" id="w_ang" value="60" min="1" max="90" step="1"><div class="hint">수직 = 90˚ · 하중계수 1/cos(90−θ)</div></div>
-        <div><label>단말가공 방법</label><select id="w_term"></select></div>
-        <div><label>걸이 줄수 (EA)</label><input type="number" id="w_qty" value="2" min="1" step="1"></div>
-        <div><label>안전계수</label><input type="number" id="w_sf" value="5" min="1" step="1"><div class="hint">화물 지지 5 이상 / 근로자 탑승 10 이상</div></div>
-      </div>
-      <div class="calc">
-        <div class="eq">안전하중 = 절단하중 × 줄수 × 단말효율 ÷ 안전계수 ÷ 하중계수 = <b id="e_w1">–</b></div>
-        <div class="lmi">
-          <div class="top"><span>안전하중 대비 하중률</span><span class="val" id="v_wire">–</span></div>
-          <div class="track"><div class="fill" id="b_wire"></div><div class="tick" style="left:100%"><span></span></div></div>
-        </div>
-        <div class="res"><span>판정 :</span><span class="fx" id="r_wire">–</span><span class="tag" id="g_wire">–</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ⑤ 샤클 검토 -->
-<section class="card">
-  <h2><span class="no">5</span>샤클 검토<span class="pill" id="p_sh">–</span></h2>
-  <div class="body">
-    <div class="grid c3">
-      <div><label>샤클 규격 (inch)</label><select id="h_size"></select></div>
-      <div><label>사용 개수 (EA)</label><input type="number" id="h_qty" value="2" min="1" step="1"></div>
-      <div><label>안전계수</label><input type="number" id="h_sf" value="3" min="1" step="1"><div class="hint">산업안전보건기준규칙 제163조</div></div>
-    </div>
-    <div class="calc">
-      <div class="eq">안전하중 = 사용하중 × 사용개수 ÷ 안전계수 = <b id="e_h">–</b></div>
-      <div class="lmi">
-        <div class="top"><span>안전하중 대비 하중률</span><span class="val" id="v_sh">–</span></div>
-        <div class="track"><div class="fill" id="b_sh"></div><div class="tick" style="left:100%"><span></span></div></div>
-      </div>
-      <div class="res"><span>판정 :</span><span class="fx" id="r_sh">–</span><span class="tag" id="g_sh">–</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ⑥ 종합 판정 -->
-<section class="card">
-  <h2><span class="no">6</span>종합 판정 및 위험성평가<span class="pill" id="p_ai">AI 대기</span></h2>
-  <div class="body">
-    <div class="sum" id="sumBox"></div>
-    <div class="btnrow" style="margin-top:14px">
-      <button class="btn acc" id="btnAI">AI 안전성 종합검토 · 위험성평가 생성</button>
-      <button class="btn" id="btnPrint">작업계획서 인쇄 · PDF</button>
-    </div>
-    <div class="btnrow" style="margin-top:8px">
-      <button class="btn" id="btnSave">입력 저장</button>
-      <select id="loadSel" style="max-width:190px"><option value="">저장 이력 불러오기</option></select>
-    </div>
-    <div id="aiOut"></div>
-  </div>
-</section>
-
-<p class="foot">검토 기준 : 산업안전보건기준에 관한 규칙 제38·39·98·163조 · KOSHA GUIDE M-77 · 발주처 제공 「중량물 작업 안전성 검토」 워크시트<br>본 검토는 제원표 입력값에 근거한 사전 검토이며, 현장 지반·풍속·간섭물 조건은 반드시 별도 확인한다.</p>
-</div>
-
-<!-- ===== 인쇄용 작업계획서 ===== -->
-<div id="doc"></div>
-
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="offscreen" aria-hidden="true"></div>
+<div id="pvStage" aria-hidden="true"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-/* ===== 데이터 테이블 (첨부 워크시트 <별첨> 시트 기준) ===== */
+'use strict';
+/* =====================================================================
+   1. 계산 모듈 (순수 함수)
+   - 접지압: 2궤도 직사각형 접지면, 선형분포 (편심 e ≤ L/6) / 삼각분포 (e > L/6)
+   - 극한지지력: Meyerhof(1963) 일반 지지력 공식 (형상·근입깊이 계수)
+   - 하부층: 2:1 하중분산 가상기초 + 순극한지지력 기준
+   - 전도: 궤도 전단(前端) 지점 모멘트 평형 (전방 작업)
+   ===================================================================== */
+const GW = 9.81;                       // 물의 단위중량 (kN/m³)
+const rad = d => d * Math.PI / 180;
 
-/* 샤클 규격(inch) → 사용하중(ton) */
-const SHACKLE = {
-  "3/16": 0.33, "1/4": 0.5, "5/16": 0.75, "3/8": 1, "7/16": 1.5, "1/2": 2,
-  "5/8": 3.25, "3/4": 4.75, "7/8": 6.5, "1": 8.5, "1-1/8": 9.5, "1-1/4": 12,
-  "1-3/8": 13.5, "1-1/2": 17, "1-3/4": 25, "2": 35, "2-1/4": 42.5,
-  "2-1/2": 55, "3": 85, "3-1/2": 120, "4": 150
-};
-
-/* 슬링벨트 : 폭(mm) → [Straight, Choker, Basket(1ply), Basket(2ply), 절단하중, 색상] */
-const SLING = {
-  "EYE & EYE": {
-    25:[0.8,0.65,1.6,3.2,5,"보라색"], 50:[1.6,1.3,3.2,6.4,10,"녹색"],
-    75:[2.4,1.9,4.8,9.6,15,"노랑색"], 100:[3.2,2.55,6.4,12.8,20,"회색"],
-    125:[4,3.2,8,16,25,"빨간색"], 150:[4.8,3.85,9.6,19.2,30,"갈색"],
-    200:[6.4,5.1,12.8,25.6,40,"파랑색"], 250:[8,6.4,16,32,50,"주황색"],
-    300:[9.6,8.3,19.2,38.4,60,"주황색"]
-  },
-  "ENDLESS": {
-    25:[1.6,1.3,3.2,6.4,10,"보라색"], 50:[3.2,2.6,6.4,12.8,20,"녹색"],
-    75:[4.8,3.8,9.6,19.2,30,"노랑색"], 100:[6.4,5.1,12.8,25.6,40,"회색"],
-    125:[8,6.4,16,32,50,"빨간색"], 150:[9.6,7.7,19.2,38.4,60,"갈색"],
-    200:[12.8,10.2,25.6,51.2,80,"파랑색"], 250:[16,12.8,32,64,100,"주황색"],
-    300:[19.2,16.6,38.4,76.8,120,"주황색"]
-  }
-};
-const SLING_MODE = { "Straight":0, "Choker":1, "Basket":2 };
-/* 줄걸이 각도(끼인각)에 따른 안전하중율 */
-const SLING_ANGLE = { 0:1, 30:0.95, 45:0.9, 60:0.85, 90:0.7, 120:0.5 };
-
-/* 와이어로프 지름(mm) → 절단하중(ton) : 마심(6×24 FC) / 철심(6×25 IWRC) */
-const WIRE = {
-  "마심": {8:2.98,9:3.77,10:4.65,12:6.7,14:9.12,16:11.9,18:15.1,20:18.6,22:23.3,
-    24:26.8,26:31.4,28:36.5,30:41.9,32:47.6,36:60.3,38:67.2,40:74.4,42:82,46:98.4,50:116},
-  "철심": {8:4.31,9:5.46,10:6.74,12:9.7,14:13.2,16:17.2,18:21.8,19:24.3,20:26.9,22:33.8,
-    24:38.8,25:42.1,26:45.5,28:52.8,30:60.6,32:69,36:87.3,38:97.3,40:108,44:130,46:143,50:168}
-};
-/* 단말가공 방법 → 효율 */
-const TERM_EFF = {
-  "소켓":1, "스웨이징":0.95, "락크":0.95, "웨지":0.75, "클립":0.5,
-  "슬링(10mm≥)":0.85, "슬링(20mm≥)":0.75, "슬링(20mm＜)":0.7
-};
-
-/* 크레인 정격하중표 (기본 내장 : LIEBHERR LTM 1095-5.1) */
-const CRANE = {
-  maker:"LIEBHERR", model:"LTM 1095-5.1",
-  booms:["12.5(백)",12.5,16.6,20.8,25,29.2,33.4,37.6,41.8,46,50.2,54.4,58],
-  radii:[3,3.5,4,4.5,5,6,7,8,9,10,11,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54],
-  rows:{
-    3:[95,63.3,63.3],
-    3.5:[74,63.3,63.3,60.2],
-    4:[69.5,62.8,62.8,59.3,48.5],
-    4.5:[66.3,59.1,58.9,55.9,47.9,38],
-    5:[60.7,54.2,54.6,53.3,47.2,37.6,29.9],
-    6:[49.7,46.3,46.7,46.8,45.1,36.6,29.4,23],
-    7:[41.4,39.9,40.2,40.3,40.1,35.2,28.5,22.5,18.1],
-    8:[35.1,34.1,34.5,34.6,34.4,33.8,27.4,21.2,17.6,13.9],
-    9:[30.2,29.5,30.3,30,30.6,30.4,25.9,20,16.8,13.6,10.5],
-    10:[26.5,26,26.7,26.4,26.9,26.7,24.4,18.8,15.9,13.1,10.3,8.3],
-    11:[null,null,23.6,23.9,23.9,23.6,23.2,17.6,15,12.6,10,8.2,6.4],
-    12:[null,null,21.1,21.4,21.4,21.1,21.5,16.5,14.1,12.1,9.7,8,6.3],
-    14:[null,null,17.2,17.5,17.4,17.9,17.7,14.6,12.6,11,9.1,7.6,6],
-    16:[null,null,null,14.7,14.9,14.9,14.5,12.9,11.3,9.9,8.4,7.2,5.7],
-    18:[null,null,null,12.4,12.5,12.4,12.1,11.4,10.2,9,7.7,6.7,5.4],
-    20:[null,null,null,null,10.6,10.5,10.1,10.1,9.2,8.1,7.2,6.2,5.1],
-    22:[null,null,null,null,9.1,9,8.8,9.1,8.3,7.4,6.6,5.8,4.8],
-    24:[null,null,null,null,null,7.8,8.1,7.9,7.1,6.8,6.1,5.4,4.5],
-    26:[null,null,null,null,null,6.8,7.2,6.9,6.5,6.2,5.6,5,4.3],
-    28:[null,null,null,null,null,null,6.3,6,5.9,5.4,5.2,4.7,4],
-    30:[null,null,null,null,null,null,5.6,5.3,5.5,4.8,4.8,4.4,3.8],
-    32:[null,null,null,null,null,null,null,4.7,4.9,4.4,4.3,4.1,3.5],
-    34:[null,null,null,null,null,null,null,4.4,4.3,4.1,3.8,3.8,3.3],
-    36:[null,null,null,null,null,null,null,null,3.8,3.8,3.5,3.4,3.1],
-    38:[null,null,null,null,null,null,null,null,3.4,3.4,3.3,3,2.9],
-    40:[null,null,null,null,null,null,null,null,null,3,2.9,2.6,2.7],
-    42:[null,null,null,null,null,null,null,null,null,2.8,2.6,2.3,2.3],
-    44:[null,null,null,null,null,null,null,null,null,null,2.3,2,2],
-    46:[null,null,null,null,null,null,null,null,null,null,2,1.7,1.7],
-    48:[null,null,null,null,null,null,null,null,null,null,null,1.4,1.5],
-    50:[null,null,null,null,null,null,null,null,null,null,null,1.2,1.2],
-    52:[null,null,null,null,null,null,null,null,null,null,null,null,1],
-    54:[null,null,null,null,null,null,null,null,null,null,null,null,0.8]
-  }
-};
-
-/* ===== 검토 함수 ===== */
-const r2 = v => Math.round(v * 100) / 100;
-const verdict = (safe, load) => ({ ok: safe > load, sign: safe > load ? ">" : (safe < load ? "<" : "="), ratio: load > 0 ? load / safe : 0 });
-
-/* 1. 샤클 : 안전하중 = 사용하중 × 사용개수 / 안전율(3 이상) */
-function checkShackle({ size, qty, sf, load }) {
-  const wll = SHACKLE[size];
-  if (wll == null) return { error: "샤클 규격 미확인" };
-  const safe = wll * qty / sf;
-  return { wll, safe: r2(safe), load, ...verdict(safe, load),
-    formula: `${wll} ton × ${qty} EA ÷ ${sf} = ${r2(safe)} ton` };
-}
-
-/* 2-1. 슬링벨트 : 안전하중1(파단) / 안전하중2(사용방법) 중 작은 값 */
-function checkSling({ type, width, mode, angle, qty, sf, load }) {
-  const row = (SLING[type] || {})[width];
-  if (!row) return { error: "슬링벨트 규격 미확인" };
-  const breaking = row[4], color = row[5];
-  const modeCap = row[SLING_MODE[mode]];
-  const af = SLING_ANGLE[angle];
-  const safe1 = breaking * qty / sf;
-  const safe2 = modeCap * af * qty;
-  const safe = Math.min(safe1, safe2);
-  return { breaking, color, modeCap, af, safe1: r2(safe1), safe2: r2(safe2), safe: r2(safe), load,
-    ...verdict(safe, load),
-    f1: `${breaking} ton × ${qty} EA ÷ ${sf} = ${r2(safe1)} ton`,
-    f2: `${modeCap} ton × ${af} × ${qty} EA = ${r2(safe2)} ton` };
-}
-
-/* 2-2. 와이어로프 : 절단하중 × 개수 × 단말효율 / 안전율 / 줄걸이 하중계수 */
-function checkWire({ core, dia, hAngle, term, qty, sf, load }) {
-  const breaking = (WIRE[core] || {})[dia];
-  if (breaking == null) return { error: "와이어로프 규격 미확인" };
-  const eff = TERM_EFF[term];
-  const k = Math.round((1 / Math.cos((90 - hAngle) * Math.PI / 180)) * 1000) / 1000;
-  const safe = breaking * qty * eff / sf / k;
-  return { breaking, eff, k, safe: r2(safe), load, ...verdict(safe, load),
-    formula: `${breaking} ton × ${qty} EA × ${eff} ÷ ${sf} ÷ ${k} = ${r2(safe)} ton` };
-}
-
-/* 3. 장비 : 정격하중 조회(보수적 : 상위 반경 / 상위 붐길이) → × 안전율(0.85) */
-function lookupRated(radius, boom, chart) {
-  const c = chart || CRANE;
-  const bi = c.booms.findIndex(b => (typeof b === "number" ? b >= boom : String(b) === String(boom)));
-  const bIdx = bi === -1 ? c.booms.length - 1 : bi;
-  const ri = c.radii.find(r => r >= radius);
-  if (ri === undefined) return { rated: null, note: "정격하중표 작업반경 범위 초과" };
-  const rated = (c.rows[ri] || [])[bIdx];
-  const exact = (ri === radius) && (c.booms[bIdx] === boom);
-  return { rated: rated == null ? null : rated, usedRadius: ri, usedBoom: c.booms[bIdx], exact,
-    note: rated == null ? "해당 붐길이·작업반경 조합의 정격하중 없음(작업 불가)" :
-          (exact ? "" : `표 값 보간 없이 보수적 적용(반경 ${ri}m / 붐 ${c.booms[bIdx]}m)`) };
-}
-function checkCrane({ radius, boom, ratio, load, chart }) {
-  const lk = lookupRated(radius, boom, chart);
-  if (lk.rated == null) return { error: lk.note, ...lk };
-  const safe = lk.rated * ratio;
-  return { ...lk, safe: r2(safe), load, ...verdict(safe, load),
-    formula: `${lk.rated} ton × ${ratio} = ${r2(safe)} ton`,
-    util: r2(load / lk.rated * 100) };
-}
-
-if (false) module.exports = { SHACKLE, SLING, SLING_ANGLE, WIRE, TERM_EFF, CRANE, checkShackle, checkSling, checkWire, checkCrane, lookupRated };
-
-
-/* ===== 상태 ===== */
-let chart = CRANE;
-let ai = null;
-const $ = id => document.getElementById(id);
-const num = id => parseFloat($(id).value) || 0;
-const fmt = v => (Math.round(v * 100) / 100).toLocaleString('ko-KR');
-
-/* ===== 셀렉트 초기화 ===== */
-function fillCraneSelects(){
-  $('f_boom').innerHTML = chart.booms.map(b => `<option value="${b}">${b}</option>`).join('');
-  $('f_rad').innerHTML = chart.radii.map(r => `<option value="${r}">${r}</option>`).join('');
-  const bi = chart.booms.indexOf(25); $('f_boom').selectedIndex = bi > -1 ? bi : 0;
-  const ri = chart.radii.indexOf(10); $('f_rad').selectedIndex = ri > -1 ? ri : 0;
-}
-function initSelects(){
-  fillCraneSelects();
-  $('h_size').innerHTML = Object.keys(SHACKLE).map(k => `<option value="${k}">${k}" — 사용하중 ${SHACKLE[k]} ton</option>`).join('');
-  $('h_size').value = '1-3/4';
-  $('w_d').innerHTML = Object.keys(WIRE['철심']).map(d => `<option value="${d}">${d} mm</option>`).join('');
-  $('w_d').value = '38';
-  $('w_term').innerHTML = Object.keys(TERM_EFF).map(k => `<option value="${k}">${k} — 효율 ${TERM_EFF[k]}</option>`).join('');
-  $('w_term').value = '슬링(10mm≥)';
-  fillSlingWidths();
-}
-function fillSlingWidths(){
-  const t = $('s_type').value, keep = $('s_w').value;
-  $('s_w').innerHTML = Object.keys(SLING[t]).map(w => `<option value="${w}">${w} mm (${SLING[t][w][5]})</option>`).join('');
-  $('s_w').value = SLING[t][keep] ? keep : '100';
-}
-function coreWidths(){
-  const c = $('w_core').value, keep = $('w_d').value;
-  $('w_d').innerHTML = Object.keys(WIRE[c]).map(d => `<option value="${d}">${d} mm</option>`).join('');
-  $('w_d').value = WIRE[c][keep] ? keep : Object.keys(WIRE[c])[0];
-}
-
-/* ===== 게이지 ===== */
-function gauge(barId, valId, ratio, ok){
-  const pct = Math.min(ratio * 100, 130);
-  const b = $(barId);
-  b.style.width = Math.min(pct, 100) + '%';
-  b.className = 'fill' + (ok ? (ratio > 0.85 ? ' warn' : '') : ' ng');
-  $(valId).textContent = isFinite(ratio) ? (Math.round(ratio * 1000) / 10) + ' %' : '–';
-}
-function stamp(pillId, tagId, resId, ok, safe, load){
-  const p = $(pillId), g = $(tagId);
-  p.textContent = ok ? 'OK' : 'NG'; p.className = 'pill ' + (ok ? 'ok' : 'ng');
-  g.textContent = ok ? 'OK' : 'NG'; g.className = 'tag ' + (ok ? 'ok' : 'ng');
-  $(resId).textContent = `안전하중 ${fmt(safe)} ton ${ok ? '>' : '≤'} 인양하중 ${fmt(load)} ton`;
-}
-function fail(pillId, tagId, resId, msg){
-  $(pillId).textContent = 'NG'; $(pillId).className = 'pill ng';
-  $(tagId).textContent = 'NG'; $(tagId).className = 'tag ng';
-  $(resId).textContent = msg;
-}
-
-/* ===== 검토 실행 ===== */
-let R = {};
-function run(){
-  const load = Math.round((num('f_w') + num('f_wa')) * 1000) / 1000;
-  $('o_total').textContent = fmt(load) + ' ton  ( 화물 ' + fmt(num('f_w')) + ' + 보조구 ' + fmt(num('f_wa')) + ' )';
-  $('siteLabel').textContent = ($('f_site').value || '00자동차 공장') + ' · 차량계 하역운반기계 작업계획서';
-
-  /* 장비 */
-  const boomRaw = $('f_boom').value;
-  const boom = isNaN(parseFloat(boomRaw)) ? boomRaw : (String(parseFloat(boomRaw)) === boomRaw ? parseFloat(boomRaw) : boomRaw);
-  const cr = checkCrane({ radius: parseFloat($('f_rad').value), boom: boom, ratio: parseFloat($('f_ratio').value), load, chart });
-  $('t_crane').style.left = (parseFloat($('f_ratio').value) * 100) + '%';
-  $('t_crane').querySelector('span').textContent = Math.round(parseFloat($('f_ratio').value) * 100) + '%';
-  if (cr.error){
-    $('e_crane').innerHTML = '정격하중 조회 불가';
-    fail('p_crane','g_crane','r_crane', cr.error);
-    gauge('b_crane','v_crane', 1.3, false);
-    $('n_crane').innerHTML = `<div class="note">${cr.error} — 붐길이·작업반경 재검토 또는 장비 상향 필요.</div>`;
-  } else {
-    $('e_crane').innerHTML = `정격하중 ${cr.rated} ton × 적용률 ${$('f_ratio').value} = <b>${fmt(cr.safe)} ton</b>`;
-    gauge('b_crane','v_crane', cr.load / cr.rated, cr.ok);
-    stamp('p_crane','g_crane','r_crane', cr.ok, cr.safe, load);
-    $('n_crane').innerHTML = cr.note ? `<div class="note">${cr.note}</div>` : '';
-  }
-
-  /* 슬링 */
-  const sl = checkSling({ type: $('s_type').value, width: parseInt($('s_w').value), mode: $('s_mode').value,
-    angle: parseInt($('s_ang').value), qty: num('s_qty'), sf: num('s_sf'), load });
-  if (sl.error){ $('e_s1').textContent = '–'; $('e_s2').textContent = '–'; fail('p_rig','g_sling','r_sling', sl.error); }
-  else {
-    $('e_s1').textContent = sl.f1; $('e_s2').textContent = sl.f2;
-    gauge('b_sling','v_sling', load / sl.safe, sl.ok);
-    stamp('p_rig','g_sling','r_sling', sl.ok, sl.safe, load);
-  }
-
-  /* 와이어 */
-  const wr = checkWire({ core: $('w_core').value, dia: parseInt($('w_d').value), hAngle: num('w_ang'),
-    term: $('w_term').value, qty: num('w_qty'), sf: num('w_sf'), load });
-  if (wr.error){ $('e_w1').textContent = '–'; fail('p_rig','g_wire','r_wire', wr.error); }
-  else {
-    $('e_w1').textContent = wr.formula;
-    gauge('b_wire','v_wire', load / wr.safe, wr.ok);
-    $('g_wire').textContent = wr.ok ? 'OK' : 'NG'; $('g_wire').className = 'tag ' + (wr.ok ? 'ok' : 'ng');
-    $('r_wire').textContent = `안전하중 ${fmt(wr.safe)} ton ${wr.ok ? '>' : '≤'} 인양하중 ${fmt(load)} ton`;
-  }
-
-  /* 줄걸이 통합 pill : 현재 선택 탭 기준 */
-  const useWire = $('pane-wire').style.display !== 'none';
-  const rig = useWire ? wr : sl;
-  $('p_rig').textContent = rig.error ? 'NG' : (rig.ok ? 'OK' : 'NG');
-  $('p_rig').className = 'pill ' + (!rig.error && rig.ok ? 'ok' : 'ng');
-
-  /* 샤클 */
-  const sh = checkShackle({ size: $('h_size').value, qty: num('h_qty'), sf: num('h_sf'), load });
-  if (sh.error){ $('e_h').textContent = '–'; fail('p_sh','g_sh','r_sh', sh.error); }
-  else {
-    $('e_h').textContent = sh.formula;
-    gauge('b_sh','v_sh', load / sh.safe, sh.ok);
-    stamp('p_sh','g_sh','r_sh', sh.ok, sh.safe, load);
-  }
-
-  R = { load, crane: cr, sling: sl, wire: wr, shackle: sh, rigType: useWire ? '와이어로프' : '슬링벨트', rig };
-  summarize();
-}
-
-function summarize(){
-  const rows = [
-    ['장비(정격하중)', R.crane.error ? null : R.crane, R.crane.error],
-    [R.rigType, R.rig.error ? null : R.rig, R.rig.error],
-    ['샤클', R.shackle.error ? null : R.shackle, R.shackle.error]
-  ];
-  $('sumBox').innerHTML = rows.map(([k, v, err]) => `
-    <div class="it"><span class="k">${k}</span>
-      <span class="v">${err ? '검토 불가' : `안전 ${fmt(v.safe)} / 인양 ${fmt(R.load)} ton`}</span>
-      <span class="tag ${!err && v.ok ? 'ok' : 'ng'}">${!err && v.ok ? 'OK' : 'NG'}</span></div>`).join('') +
-    `<div class="it"><span class="k">설계 인양하중</span><span class="v">${fmt(R.load)} ton</span></div>`;
-
-  const allOk = !R.crane.error && R.crane.ok && !R.rig.error && R.rig.ok && !R.shackle.error && R.shackle.ok;
-  const b = $('totalBadge');
-  b.textContent = allOk ? '종합 OK · 작업 가능' : '종합 NG · 보완 필요';
-  b.className = 'badge ' + (allOk ? 'ok' : 'ng');
-  R.allOk = allOk;
-  buildDoc();
-}
-
-/* ===== AI 종합검토 ===== */
-async function runAI(){
-  const btn = $('btnAI');
-  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>검토 중…';
-  $('p_ai').textContent = '분석 중'; $('p_ai').className = 'pill';
-  const ctx = {
-    사업장: $('f_site').value, 공종: $('f_type').value, 작업장소: $('f_place').value,
-    화물종류: $('f_cargo').value, 화물규격: $('f_dim').value, 결속방법: $('f_bind').value,
-    무게중심: $('f_cog').value, 아웃리거: $('f_out').value, 이동경로: $('f_route').value,
-    설계인양하중_ton: R.load,
-    장비: R.crane.error ? { 오류: R.crane.error } : { 모델: $('f_model').value, 붐길이_m: $('f_boom').value, 작업반경_m: $('f_rad').value, 정격하중_ton: R.crane.rated, 적용률: $('f_ratio').value, 안전하중_ton: R.crane.safe, 하중률_퍼센트: R.crane.util, 판정: R.crane.ok ? 'OK' : 'NG' },
-    줄걸이: R.rig.error ? { 오류: R.rig.error } : (R.rigType === '슬링벨트'
-      ? { 종류: '슬링벨트', 타입: $('s_type').value, 폭_mm: $('s_w').value, 양중방식: $('s_mode').value, 끼인각: $('s_ang').value, 줄수: $('s_qty').value, 안전계수: $('s_sf').value, 절단하중_ton: R.sling.breaking, 안전하중_ton: R.sling.safe, 판정: R.sling.ok ? 'OK' : 'NG' }
-      : { 종류: '와이어로프', 심: $('w_core').value, 지름_mm: $('w_d').value, 수평각: $('w_ang').value, 단말가공: $('w_term').value, 줄수: $('w_qty').value, 안전계수: $('w_sf').value, 절단하중_ton: R.wire.breaking, 하중계수: R.wire.k, 안전하중_ton: R.wire.safe, 판정: R.wire.ok ? 'OK' : 'NG' }),
-    샤클: R.shackle.error ? { 오류: R.shackle.error } : { 규격_inch: $('h_size').value, 사용하중_ton: R.shackle.wll, 개수: $('h_qty').value, 안전계수: $('h_sf').value, 안전하중_ton: R.shackle.safe, 판정: R.shackle.ok ? 'OK' : 'NG' },
-    종합판정: R.allOk ? 'OK' : 'NG'
+function makeSample() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return {
+    proj: {
+      name: '○○지구 PHC 말뚝 항타 작업 (샘플)',
+      author: '',
+      date: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+    },
+    soil: {
+      gwt: 3.0,
+      layers: [
+        { name: '매립층 (사질토 혼입 점성토)', H: 2.0, gamma: 18.0, c: 5, phi: 25, N: 6 },
+        { name: '퇴적층 (연약 점성토)',        H: 4.0, gamma: 17.0, c: 15, phi: 0, N: 3 },
+        { name: '풍화토 (사질토)',              H: 5.0, gamma: 19.0, c: 0, phi: 32, N: 30 }
+      ]
+    },
+    crane: { model: '크롤러형 항타기 (100t급 크롤러크레인 + 3점식 리더)', B: 0.90, L: 5.20, G: 3.40 },
+    loads: [
+      { name: '본체 (상부선회체 + 하부주행체)', W: 700, y: -0.2, dyn: false },
+      { name: '카운터웨이트',                    W: 300, y: -3.0, dyn: false },
+      { name: '리더 (마스트)',                   W: 200, y: 3.6,  dyn: false },
+      { name: '유압해머',                        W: 80,  y: 4.8,  dyn: true  },
+      { name: '말뚝 (PHC Ø500, L=15m)',          W: 45,  y: 5.0,  dyn: true  },
+      { name: '기타 부속 (와이어·공구 등)',      W: 20,  y: 1.0,  dyn: false }
+    ],
+    plate: { use: true, Bp: 2.20, Lp: 6.00, t: 0.022, gp: 77 },
+    cond: { FsB: 3.0, FsT: 1.5, alpha: 1.2, Df: 0 }
   };
-  const prompt = `당신은 건설안전기술사이며 자동차 공장 내 이동식 크레인 중량물 양중작업의 작업계획서를 검토한다.
-아래 검토 데이터를 근거로 판정하라.
-
-${JSON.stringify(ctx, null, 1)}
-
-적용 법령·기준: 산업안전보건기준에 관한 규칙 제38조(작업계획서), 제39조(작업지휘자), 제98조(제한속도), 제132조(양중기), 제134조(방호장치), 제146조(크레인 사용 제한), 제163조(와이어로프 등 달기구의 안전계수), KOSHA GUIDE M-77(이동식크레인 안전보건작업 지침).
-
-다음 JSON 형식으로만 답하라. 마크다운·설명·코드펜스 금지.
-{
- "opinion": "종합 검토의견 3~4문장. NG 항목이 있으면 구체적 보완방안(예: 슬링 폭 상향, 줄수 증가, 양중방식 변경, 붐길이·작업반경 조정)을 수치로 제시.",
- "risks": [{"work":"작업단계","hazard":"위험요인","measure":"안전대책(법령·기준 근거 포함)","level":"상|중|하"}],
- "checks": ["작업 전 반드시 확인할 사항 5개"]
 }
-risks는 6~8개. 작업단계는 장비 진입·설치 → 아웃리거 설치 → 줄걸이 → 인양 → 선회·이동 → 착지·해체 순으로 구성하라. 한국어로 작성하고 현장 실무 용어를 사용하라.`;
 
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, messages: [{ role: "user", content: prompt }] })
-    });
-    const data = await res.json();
-    const text = data.content.filter(c => c.type === 'text').map(c => c.text).join('\n').replace(/```json|```/g, '').trim();
-    ai = JSON.parse(text);
-    renderAI();
-    $('p_ai').textContent = 'AI 검토완료'; $('p_ai').className = 'pill ok';
-  } catch (e) {
-    $('aiOut').innerHTML = `<div class="note">AI 검토를 불러오지 못했다. 네트워크 상태를 확인하고 다시 실행하라. (${e.message})</div>`;
-    $('p_ai').textContent = '실패'; $('p_ai').className = 'pill ng';
+function bearingFactors(phi) {
+  if (phi < 0.01) return { Nc: 5.14, Nq: 1, Ng: 0, Kp: 1 };
+  const t = Math.tan(rad(phi));
+  const Kp = Math.pow(Math.tan(rad(45 + phi / 2)), 2);
+  const Nq = Math.exp(Math.PI * t) * Kp;
+  const Nc = (Nq - 1) / t;
+  const Ng = (Nq - 1) * Math.tan(rad(1.4 * phi));
+  return { Nc, Nq, Ng, Kp };
+}
+
+function meyerhof(p) {
+  const Bs = Math.min(p.B, p.L), Ls = Math.max(p.B, p.L);
+  const f = bearingFactors(p.phi);
+  const r = Bs / Ls, sk = Math.sqrt(f.Kp);
+  const sc = 1 + 0.2 * f.Kp * r;
+  const sq = p.phi > 10 ? 1 + 0.1 * f.Kp * r : 1;
+  const dc = 1 + 0.2 * sk * p.Df / Bs;
+  const dq = p.phi > 10 ? 1 + 0.1 * sk * p.Df / Bs : 1;
+  const t1 = p.c * f.Nc * sc * dc;
+  const t2 = p.q * f.Nq * sq * dq;
+  const t3 = 0.5 * p.gam * Bs * f.Ng * sq * dq;
+  return { qu: t1 + t2 + t3, t1, t2, t3, Nc: f.Nc, Nq: f.Nq, Ng: f.Ng, Kp: f.Kp,
+           sc, sq, sg: sq, dc, dq, dg: dq, B: Bs, L: Ls };
+}
+
+/* 깊이 z 에서의 유효연직응력 (지하수위 이하 γ' = γ − γw) */
+function sigmaV(z, soil) {
+  let s = 0, top = 0;
+  const seg = (a, b, g) => {
+    if (b <= a) return;
+    const dry = Math.max(0, Math.min(b, soil.gwt) - a);
+    const wet = (b - a) - dry;
+    s += dry * g + wet * (g - GW);
+  };
+  for (const ly of soil.layers) {
+    seg(top, Math.min(top + ly.H, z), ly.gamma);
+    top += ly.H;
+    if (z <= top) return s;
   }
-  btn.disabled = false; btn.textContent = 'AI 안전성 종합검토 · 위험성평가 생성';
-}
-function renderAI(){
-  if (!ai) return;
-  $('aiOut').innerHTML = `
-    <div class="opinion">${ai.opinion || ''}</div>
-    <table class="ra"><thead><tr><th style="width:16%">작업내용</th><th style="width:27%">위험요인</th><th>안전대책</th><th style="width:8%">위험도</th></tr></thead>
-    <tbody>${(ai.risks || []).map(r => `<tr><td>${r.work}</td><td>${r.hazard}</td><td>${r.measure}</td><td class="lv lv-${r.level}">${r.level}</td></tr>`).join('')}</tbody></table>
-    <ul class="chk">${(ai.checks || []).map(c => `<li>${c}</li>`).join('')}</ul>`;
-  buildDoc();
+  seg(top, z, soil.layers[soil.layers.length - 1].gamma);
+  return s;
 }
 
-/* ===== 인쇄용 작업계획서 ===== */
-function buildDoc(){
-  const v = id => $(id).value || '';
-  const rigDetail = R.rigType === '슬링벨트'
-    ? `슬링벨트 ${$('s_type').value} / 폭 ${$('s_w').value}mm / ${$('s_mode').value} / 끼인각 ${$('s_ang').value}˚ / ${$('s_qty').value}줄`
-    : `와이어로프 ${$('w_core').value} / Ø${$('w_d').value}mm / 수평각 ${$('w_ang').value}˚ / 단말 ${$('w_term').value} / ${$('w_qty').value}줄`;
-  const rigCalc = R.rig.error ? R.rig.error
-    : (R.rigType === '슬링벨트' ? `①${R.sling.f1} ②${R.sling.f2} → 안전하중 ${fmt(R.sling.safe)} ton` : R.wire.formula);
-  const craneCalc = R.crane.error ? R.crane.error : R.crane.formula;
-  const OK = x => (x && !x.error && x.ok) ? 'OK' : 'NG';
-
-  $('doc').innerHTML = `
-  <h3>차량계 하역운반기계 작업계획서</h3>
-  <table>
-    <tr><td class="sec" colspan="4">1. 작업개요</td></tr>
-    <tr><th>업체명</th><td>${v('f_co')}</td><th>관리책임자</th><td>${v('f_mgr')}</td></tr>
-    <tr><th>공종</th><td>${v('f_type')}</td><th>사업장</th><td>${v('f_site')}</td></tr>
-    <tr><th>작업기간</th><td>${v('f_period')}</td><th>작업장소</th><td>${v('f_place')}</td></tr>
-    <tr><th>운반·이동경로</th><td>${v('f_route')}</td><th>제한속도/노면</th><td>${v('f_road')}</td></tr>
-    <tr><th>작업지휘자</th><td>${v('f_lead')}</td><th>유도자/신호방법</th><td>${v('f_sig')}</td></tr>
-    <tr><th>줄걸이 작업자</th><td>${v('f_rig')}</td><th>줄걸이 보조자</th><td>${v('f_rig2')}</td></tr>
-    <tr><td class="sec" colspan="4">2. 건설기계 제원</td></tr>
-    <tr><th>장비명/차량번호</th><td>${v('f_eq')}</td><th>제조사·모델</th><td>${v('f_model')}</td></tr>
-    <tr><th>검사유효기간</th><td>${v('f_insp')}</td><th>보험/유효기간</th><td>${v('f_ins')}</td></tr>
-    <tr><th>운전자/자격</th><td>${v('f_op')}</td><th>아웃리거·지반보강</th><td>${v('f_out')}</td></tr>
-    <tr><td class="sec" colspan="4">3. 화물 제원</td></tr>
-    <tr><th>화물종류</th><td>${v('f_cargo')}</td><th>화물규격</th><td>${v('f_dim')}</td></tr>
-    <tr><th>인양하중</th><td>${fmt(R.load)} ton (화물 ${fmt(num('f_w'))} + 보조구 ${fmt(num('f_wa'))})</td><th>결속방법</th><td>${v('f_bind')}</td></tr>
-    <tr><th>작업반경</th><td>${v('f_rad')} m</td><th>붐길이</th><td>${v('f_boom')} m</td></tr>
-    <tr><td class="sec" colspan="4">4. 양중계획 (안전율 ${Math.round(parseFloat(v('f_ratio')) * 100)}% 적용)</td></tr>
-    <tr><th>정격하중</th><td>${R.crane.error ? '-' : R.crane.rated + ' ton'}</td><th>안전하중</th><td>${R.crane.error ? '-' : fmt(R.crane.safe) + ' ton'}</td></tr>
-    <tr><th>검토식</th><td colspan="2">${craneCalc}</td><th style="background:${OK(R.crane) === 'OK' ? '#DFF0EA' : '#F8DDD7'}">${OK(R.crane)}</th></tr>
-    <tr><td class="sec" colspan="4">5. 줄걸이 하중 확인</td></tr>
-    <tr><th>줄걸이 사양</th><td colspan="3">${rigDetail}</td></tr>
-    <tr><th>검토식</th><td colspan="2">${rigCalc}</td><th style="background:${OK(R.rig) === 'OK' ? '#DFF0EA' : '#F8DDD7'}">${OK(R.rig)}</th></tr>
-    <tr><td class="sec" colspan="4">6. 샤클 하중 확인</td></tr>
-    <tr><th>샤클 규격/개수</th><td>${v('h_size')}" × ${v('h_qty')} EA</td><th>안전계수</th><td>${v('h_sf')}</td></tr>
-    <tr><th>검토식</th><td colspan="2">${R.shackle.error ? R.shackle.error : R.shackle.formula}</td><th style="background:${OK(R.shackle) === 'OK' ? '#DFF0EA' : '#F8DDD7'}">${OK(R.shackle)}</th></tr>
-    <tr><td class="sec" colspan="4">7. 종합 검토의견</td></tr>
-    <tr><td colspan="4" style="height:auto">${ai ? (ai.opinion || '') : '종합판정 : ' + (R.allOk ? '적합(OK) — 안전하중 > 인양하중' : '부적합(NG) — 보완 후 재검토')}</td></tr>
-    <tr><td class="sec" colspan="4">8. 위험성평가</td></tr>
-    <tr><th style="width:16%">작업내용</th><th style="width:27%">위험요인</th><th style="width:47%">안전대책</th><th style="width:10%">위험도</th></tr>
-    ${ai && ai.risks ? ai.risks.map(r => `<tr><td>${r.work}</td><td>${r.hazard}</td><td>${r.measure}</td><td style="text-align:center">${r.level}</td></tr>`).join('')
-      : '<tr><td colspan="4" style="height:60px">별도 작업위험성평가 첨부</td></tr>'}
-    ${ai && ai.checks ? `<tr><td class="sec" colspan="4">작업 전 확인사항</td></tr><tr><td colspan="4">${ai.checks.map((c, i) => (i + 1) + '. ' + c).join('<br>')}</td></tr>` : ''}
-  </table>
-  <p style="font-size:9.5px;margin:6px 0 0">※ 첨부 : 건설기계 등록증 · 조종사면허증 · 보험가입증권 · 사업자등록증 · 산재보험 가입증명원 · 기초안전보건교육 이수증 · 크레인 안전검사증 및 하중제원표 · 줄걸이/샤클 제원표</p>
-  <div class="sign">20&nbsp;&nbsp;&nbsp;&nbsp;년&nbsp;&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;작성자 : ________________ (인)</div>`;
+/* 기초 저면 아래 지하수위 영향을 반영한 γ 항 단위중량 */
+function gammaEff(gamma, dw, B) {
+  const gp = gamma - GW;
+  if (dw <= 0) return gp;
+  if (dw >= B) return gamma;
+  return gp + (dw / B) * (gamma - gp);
 }
 
-/* ===== 정격하중표 교체 ===== */
-function applyChart(){
-  const txt = $('f_chart').value.trim();
-  if (!txt){ $('chartMsg').textContent = '입력된 표가 없다.'; return; }
+function stateOf(u) {
+  if (u === null || u === undefined || isNaN(u)) return 'NA';
+  if (u > 1 + 1e-9) return 'NG';
+  if (u > 0.9) return 'WARN';
+  return 'OK';
+}
+
+function analyze(S) {
+  const issues = [];
+  const num = (v, label) => {
+    if (typeof v !== 'number' || !isFinite(v)) {
+      issues.push({ lv: 'err', msg: label + ' 값이 비어 있거나 숫자가 아닙니다.' });
+      return 0;
+    }
+    return v;
+  };
+
+  const soil = {
+    gwt: num(S.soil.gwt, '지하수위'),
+    layers: S.soil.layers.map((l, i) => ({
+      name: l.name || ('지층 ' + (i + 1)),
+      H: num(l.H, (i + 1) + '층 두께'),
+      gamma: num(l.gamma, (i + 1) + '층 단위중량'),
+      c: num(l.c, (i + 1) + '층 점착력'),
+      phi: num(l.phi, (i + 1) + '층 내부마찰각'),
+      N: (typeof l.N === 'number' && isFinite(l.N)) ? l.N : null
+    }))
+  };
+  const crane = {
+    model: S.crane.model || '',
+    B: num(S.crane.B, '궤도 폭'), L: num(S.crane.L, '궤도 접지길이'), G: num(S.crane.G, '궤도 중심간격')
+  };
+  const loads = S.loads.map((l, i) => ({
+    name: l.name || ('하중 ' + (i + 1)), W: num(l.W, (i + 1) + '번 하중 중량'),
+    y: num(l.y, (i + 1) + '번 하중 위치'), dyn: !!l.dyn
+  }));
+  const plate = {
+    use: !!S.plate.use, Bp: num(S.plate.Bp, '깔판 폭'), Lp: num(S.plate.Lp, '깔판 길이'),
+    t: num(S.plate.t, '깔판 두께'), gp: num(S.plate.gp, '깔판 단위중량')
+  };
+  const cond = {
+    FsB: num(S.cond.FsB, '지지력 안전율'), FsT: num(S.cond.FsT, '전도 안전율'),
+    alpha: num(S.cond.alpha, '충격계수'), Df: num(S.cond.Df, '근입깊이')
+  };
+
+  /* 입력 검증 */
+  const err = m => issues.push({ lv: 'err', msg: m });
+  const warn = m => issues.push({ lv: 'warn', msg: m });
+  if (soil.layers.length < 1) err('지층이 1개 이상 필요합니다.');
+  soil.layers.forEach((l, i) => {
+    if (l.H <= 0) err((i + 1) + '층 두께는 0보다 커야 합니다.');
+    if (l.gamma <= GW) err((i + 1) + '층 단위중량이 물의 단위중량(9.81 kN/m³) 이하입니다.');
+    if (l.c < 0) err((i + 1) + '층 점착력은 0 이상이어야 합니다.');
+    if (l.phi < 0 || l.phi > 45) err((i + 1) + '층 내부마찰각은 0~45° 범위로 입력하세요.');
+    else if (l.phi > 40) warn((i + 1) + '층 내부마찰각이 40°를 초과합니다. 값을 다시 확인하세요.');
+  });
+  if (soil.gwt < 0) err('지하수위는 0 이상(지표면 아래 깊이)으로 입력하세요.');
+  if (crane.B <= 0 || crane.L <= 0 || crane.G <= 0) err('궤도 폭·접지길이·중심간격은 0보다 커야 합니다.');
+  if (crane.G > 0 && crane.B > 0 && crane.G < crane.B) err('궤도 중심간격이 궤도 폭보다 작습니다.');
+  if (crane.L > 0 && crane.B > 0 && crane.L < crane.B) warn('궤도 접지길이가 폭보다 짧습니다. 입력값을 확인하세요.');
+  loads.forEach((l, i) => { if (l.W < 0) err((i + 1) + '번 하중 중량은 0 이상이어야 합니다.'); });
+  if (!loads.some(l => l.W > 0)) err('하중이 입력되지 않았습니다.');
+  if (cond.FsB < 1 || cond.FsT < 1) err('허용 안전율은 1.0 이상이어야 합니다.');
+  if (cond.alpha < 1) warn('충격계수가 1.0 미만입니다.');
+  if (cond.Df < 0) err('근입깊이는 0 이상이어야 합니다.');
+  else if (soil.layers[0] && cond.Df > soil.layers[0].H) warn('근입깊이가 1층 두께보다 큽니다.');
+  if (plate.use) {
+    if (plate.Bp <= 0 || plate.Lp <= 0 || plate.t < 0 || plate.gp < 0) err('깔판 제원을 확인하세요.');
+    else if (plate.Bp < crane.B || plate.Lp < crane.L)
+      warn('깔판이 궤도보다 작아 깔판 효과 없이 궤도 접지면(폭·길이 중 큰 값)을 적용했습니다.');
+  }
+  if (issues.some(i => i.lv === 'err')) return { ok: false, issues, soil, crane, loads, plate, cond };
+
+  /* ---- 하중 집계 ---- */
+  const rows = loads.map(l => {
+    const f = l.dyn ? cond.alpha : 1;
+    return { ...l, f, Wd: l.W * f, M: l.W * f * l.y };
+  });
+  const W0 = rows.reduce((s, r) => s + r.W, 0);
+  const Wp = plate.use ? 2 * plate.Bp * plate.Lp * plate.t * plate.gp : 0;
+  const Wsum = rows.reduce((s, r) => s + r.Wd, 0) + Wp;
+  const Msum = rows.reduce((s, r) => s + r.M, 0);
+  const e = Msum / Wsum, ae = Math.abs(e);
+
+  /* ---- 접지면 ---- */
+  const Bg = plate.use ? Math.max(plate.Bp, crane.B) : crane.B;
+  const Lg = plate.use ? Math.max(plate.Lp, crane.L) : crane.L;
+  const A = 2 * Bg * Lg;
+  const qavg = Wsum / A;
+  const full = ae <= Lg / 6 + 1e-9;
+  const qfront = qavg * (1 + 6 * e / Lg);
+  const qrear = qavg * (1 - 6 * e / Lg);
+  let qmax, qmin, xc = Lg;
+  if (full) {
+    qmax = Math.max(qfront, qrear); qmin = Math.min(qfront, qrear);
+  } else {
+    const x = Lg / 2 - ae;
+    if (x <= 0) { qmax = Infinity; qmin = 0; xc = 0; }
+    else { qmax = Wsum / (3 * Bg * x); qmin = 0; xc = 3 * x; }
+  }
+
+  /* ---- 검토 1·2 : 1층 지지력 ---- */
+  const L1 = soil.layers[0];
+  const Df = cond.Df;
+  const q0 = sigmaV(Df, soil);
+  const g1 = gammaEff(L1.gamma, soil.gwt - Df, Bg);
+  const mu = meyerhof({ c: L1.c, phi: L1.phi, gam: g1, q: q0, Df, B: Bg, L: Lg });
+  const qa = mu.qu / cond.FsB;
+  const u1 = qmax / qa;
+
+  const Le = Math.max(Lg - 2 * ae, 0.01);
+  const mu2 = meyerhof({ c: L1.c, phi: L1.phi, gam: g1, q: q0, Df, B: Bg, L: Le });
+  const qeff = (Wsum / 2) / (Bg * Le);
+  const FS2 = mu2.qu / qeff;
+  const u2 = cond.FsB / FS2;
+
+  /* ---- 검토 3 : 하부 지층 (2:1 분산) ---- */
+  const lowers = [];
+  let z = 0;
+  for (let j = 1; j < soil.layers.length; j++) {
+    z += soil.layers[j - 1].H;
+    const ly = soil.layers[j];
+    const overlap = (Bg + z) >= crane.G;
+    const Bv = overlap ? crane.G + Bg + z : Bg + z;
+    const Qv = overlap ? Wsum : Wsum / 2;
+    const Lv = Le + z;
+    const qv = Qv / (Bv * Lv);
+    const sv = sigmaV(z, soil);
+    const gj = gammaEff(ly.gamma, soil.gwt - z, Math.min(Bv, Lv));
+    const m = meyerhof({ c: ly.c, phi: ly.phi, gam: gj, q: sv, Df: z, B: Bv, L: Lv });
+    const qnet = m.qu - sv;
+    lowers.push({ idx: j, name: ly.name, z, overlap, Bv, Lv, Qv, qv, sv, qu: m.qu, qnet,
+                  FS: qnet / qv, Nc: m.Nc, Nq: m.Nq, Ng: m.Ng });
+  }
+  const FS3 = lowers.length ? Math.min(...lowers.map(x => x.FS)) : null;
+  const u3 = lowers.length ? cond.FsB / FS3 : null;
+
+  /* ---- 검토 4 : 전도 (전방, 궤도 전단 지점) ---- */
+  const a0 = crane.L / 2;
+  let Mr = 0, Mo = 0;
+  rows.forEach(r => {
+    const arm = a0 - r.y;
+    r.arm = arm;
+    if (arm >= 0) { r.Mres = r.W * arm; r.Mover = 0; Mr += r.Mres; }
+    else { r.Mres = 0; r.Mover = r.Wd * (-arm); Mo += r.Mover; }
+  });
+  const FSt = Mo > 0 ? Mr / Mo : Infinity;
+  const u4 = Mo > 0 ? cond.FsT / FSt : 0;
+
+  /* ---- 검토 5 : 편심 ---- */
+  const u5 = ae / (Lg / 6);
+
+  const checks = [
+    { id: 1, name: '최대 접지압', short: 'q_max ≤ q_a', value: qmax, unit: 'kPa', rel: '≤', limit: qa, u: u1,
+      note: 'q_a = q_u / Fs = ' + (mu.qu / cond.FsB).toFixed(1) + ' kPa' },
+    { id: 2, name: '지지력 안전율 (유효면적법)', short: 'FS ≥ Fs', value: FS2, unit: '', rel: '≥', limit: cond.FsB, u: u2,
+      note: 'q_u(B×L′) / q_eff, L′ = L − 2e' },
+    { id: 3, name: '하부 지층 안전율', short: lowers.length ? '2:1 분산 · 순지지력' : '하부 지층 없음', value: FS3, unit: '', rel: '≥',
+      limit: cond.FsB, u: u3, note: '2:1 분산 가상기초 · 최소값' },
+    { id: 4, name: '전도 안전율', short: 'M_r / M_o ≥ Fs', value: FSt, unit: '', rel: '≥', limit: cond.FsT, u: u4,
+      note: '전방 작업, 궤도 전단 지점' },
+    { id: 5, name: '편심 한계', short: 'e ≤ L/6', value: ae, unit: 'm', rel: '≤', limit: Lg / 6, u: u5,
+      note: '접지면 전체 접지 유지' }
+  ];
+  checks.forEach(c => { c.st = stateOf(c.u); });
+  const valid = checks.filter(c => c.u !== null);
+  const umax = Math.max(...valid.map(c => c.u));
+  const worst = valid.reduce((a, b) => (b.u > a.u ? b : a));
+  const status = stateOf(umax);
+
+  return { ok: true, issues, soil, crane, loads, plate, cond, rows, W0, Wp, Wsum, Msum, e, ae,
+           Bg, Lg, A, qavg, qfront, qrear, qmax, qmin, full, xc, L1, Df, q0, g1, mu, qa, u1,
+           Le, mu2, qeff, FS2, u2, lowers, FS3, u3, a0, Mr, Mo, FSt, u4, u5, checks, umax, worst, status };
+}
+
+/* ---- 표기 도우미 ---- */
+function fmt(v, d = 2) {
+  if (v === null || v === undefined || (typeof v === 'number' && isNaN(v))) return '–';
+  if (v === Infinity) return '∞';
+  if (v === -Infinity) return '−∞';
+  const s = v.toLocaleString('ko-KR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  return s.replace('-', '−');
+}
+const sgn = (v, d = 2) => (v > 0 ? '+' : '') + fmt(v, d);
+const CIRC = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫'];
+const STLABEL = { OK: '적합', WARN: '주의', NG: '부적합', NA: '해당 없음' };
+
+
+/* =====================================================================
+   2. 도해 모듈 (SVG 문자열 생성)
+   - 팔레트를 인자로 받아 화면용(CSS 변수)과 출력용(고정색)을 동일 코드로 생성
+   ===================================================================== */
+const FONT = "'IBM Plex Sans KR','Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif";
+const PAL_SCREEN = {
+  ink: 'var(--ink)', mute: 'var(--mute)', line: 'var(--line)', paper: 'var(--panel)', accent: 'var(--accent)',
+  ok: 'var(--ok)', warn: 'var(--warn)', bad: 'var(--bad)', crane: 'var(--crane)', craneDk: 'var(--crane-dk)',
+  steel: 'var(--steel)', steelDk: 'var(--steel-dk)', trk: 'var(--trk)', trkIn: 'var(--trk-in)', glass: 'var(--glass)',
+  water: 'var(--water)', soil: ['var(--soil-1)', 'var(--soil-2)', 'var(--soil-3)', 'var(--soil-4)']
+};
+const PAL_PAPER = {
+  ink: '#16252E', mute: '#5B6C77', line: '#B9C4CA', paper: '#FFFFFF', accent: '#1B5E8A',
+  ok: '#1F7A4D', warn: '#8F5E00', bad: '#B3261E', crane: '#EDB100', craneDk: '#9A7300',
+  steel: '#8B98A1', steelDk: '#4E5B64', trk: '#33404A', trkIn: '#4B5A66', glass: '#BFD9EA',
+  water: '#2F7FB5', soil: ['#D8CBB0', '#B9C2B0', '#C9B79F', '#A9AFB4']
+};
+
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const sty = (fill, stroke, sw, extra) =>
+  'style="fill:' + (fill || 'none') + ';stroke:' + (stroke || 'none') + ';stroke-width:' + (sw || 0) + (extra ? ';' + extra : '') + '"';
+const T = (x, y, s, o = {}) =>
+  '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" text-anchor="' + (o.a || 'start') +
+  '" style="fill:' + o.fill + ';font-size:' + (o.size || 12) + 'px;font-weight:' + (o.w || 400) +
+  ';font-family:' + FONT + '">' + esc(s) + '</text>';
+const trunc = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+const f1 = v => v.toFixed(1);
+function niceStep(max, n) {
+  const raw = max / n, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+  return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+}
+
+/* ---------- 측면도 : 크롤러형 항타기 + 지층 + 하중 작용선 ---------- */
+function svgElevation(R, C, o = {}) {
+  const W = 760, H = 404, pad = 34;
+  const { crane, rows, soil, plate } = R;
+  const Lt = crane.L, Lg = R.Lg;
+  const act = rows.map((r, i) => ({ ...r, i })).filter(r => r.W > 0);
+  const ys = act.map(r => r.y);
+  const xmin = Math.min(-Lg / 2, -Lt / 2, ...ys) - 0.9, xmax = Math.max(Lg / 2, Lt / 2, ...ys) + 0.9;
+  const sx = Math.min(95, (W - 2 * pad) / (xmax - xmin));
+  const offs = pad + ((W - 2 * pad) - (xmax - xmin) * sx) / 2;
+  const X = y => offs + (y - xmin) * sx;
+
+  const gY = 284, plT = plate.use ? 8 : 0, tb = gY - plT, tt = tb - 40, ut = tt - 36;
+  const front = ys.length ? Math.max(...ys) : Lt / 2 + 1;
+  const rear = ys.length ? Math.min(...ys) : -Lt / 2;
+  const dynRows = act.filter(r => r.dyn);
+  const hy = dynRows.length ? dynRows.reduce((s, r) => s + r.y, 0) / dynRows.length : front;
+  const s = [];
+  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="항타기 측면도">');
+
+  /* 지층 */
+  const sumH = soil.layers.reduce((a, l) => a + l.H, 0);
+  const ds = Math.min(sx, 96 / sumH);
+  let top = gY;
+  soil.layers.forEach((ly, i) => {
+    const h = ly.H * ds;
+    s.push('<rect x="0" y="' + f1(top) + '" width="' + W + '" height="' + f1(h) + '" ' + sty(C.soil[i % 4], C.line, 1) + '/>');
+    const lab = CIRC[i] + ' ' + trunc(ly.name.replace(/\s*\(.*\)/, ''), 9) + ' · ' + ly.H.toFixed(1) + 'm · c' + ly.c + ' φ' + ly.phi + '°';
+    s.push(T(10, top + Math.min(h / 2 + 4, 26), lab, { fill: C.ink, size: 12 }));
+    top += h;
+  });
+  const secH = top - gY;
+  if (soil.gwt * ds <= secH + 2) {
+    const yw = gY + soil.gwt * ds;
+    s.push('<line x1="0" y1="' + f1(yw) + '" x2="' + W + '" y2="' + f1(yw) + '" style="stroke:' + C.water + ';stroke-width:1.6;stroke-dasharray:7 4"/>');
+    s.push('<polygon points="' + (W / 2 - 100) + ',' + f1(yw - 9) + ' ' + (W / 2 - 108) + ',' + f1(yw - 1) + ' ' + (W / 2 - 92) + ',' + f1(yw - 1) + '" ' + sty(C.water, 'none', 0) + '/>');
+    s.push(T(W / 2 - 84, yw - 5, 'GWL GL-' + soil.gwt.toFixed(1) + ' m', { fill: C.water, size: 11, w: 600 }));
+  }
+  s.push('<line x1="0" y1="' + gY + '" x2="' + W + '" y2="' + gY + '" style="stroke:' + C.ink + ';stroke-width:1.6"/>');
+
+  /* 깔판 */
+  if (plate.use) {
+    s.push('<rect x="' + f1(X(-Lg / 2)) + '" y="' + (gY - plT) + '" width="' + f1(Lg * sx) + '" height="' + plT + '" ' + sty(C.steel, C.steelDk, 1.2) + '/>');
+  }
+  /* 카운터웨이트 */
+  const cwY = rear < -0.5 ? rear : -Lt / 2 + 0.2;
+  const cwW = Math.max(50, 1.3 * sx);
+  s.push('<rect x="' + f1(X(cwY) - cwW / 2) + '" y="' + f1(ut - 8) + '" width="' + f1(cwW) + '" height="46" rx="3" ' + sty(C.steelDk, C.ink, 1.2) + '/>');
+  s.push('<line x1="' + f1(X(cwY) - cwW / 2 + 8) + '" y1="' + f1(ut + 6) + '" x2="' + f1(X(cwY) + cwW / 2 - 8) + '" y2="' + f1(ut + 6) + '" style="stroke:' + C.steel + ';stroke-width:1.2"/>');
+  s.push('<line x1="' + f1(X(cwY) - cwW / 2 + 8) + '" y1="' + f1(ut + 18) + '" x2="' + f1(X(cwY) + cwW / 2 - 8) + '" y2="' + f1(ut + 18) + '" style="stroke:' + C.steel + ';stroke-width:1.2"/>');
+  /* 궤도 */
+  s.push('<rect x="' + f1(X(-Lt / 2)) + '" y="' + f1(tt) + '" width="' + f1(Lt * sx) + '" height="40" rx="20" ' + sty(C.trk, C.ink, 1.2) + '/>');
+  s.push('<rect x="' + f1(X(-Lt / 2) + 5) + '" y="' + f1(tt + 5) + '" width="' + f1(Lt * sx - 10) + '" height="30" rx="15" ' + sty(C.trkIn, 'none', 0) + '/>');
+  const nR = Math.max(2, Math.round(Lt * sx / 70));
+  for (let k = 0; k <= nR; k++) {
+    const cx = X(-Lt / 2) + 20 + k * (Lt * sx - 40) / nR;
+    const big = (k === 0 || k === nR);
+    s.push('<circle cx="' + f1(cx) + '" cy="' + f1(tt + 20) + '" r="' + (big ? 11 : 5) + '" ' + sty(big ? C.trk : C.steel, C.ink, 1) + '/>');
+  }
+  /* 상부선회체 */
+  const bx1 = X(-Lt / 2 + 0.5), bx2 = X(Lt / 2 - 0.5);
+  s.push('<rect x="' + f1(bx1) + '" y="' + f1(ut) + '" width="' + f1(bx2 - bx1) + '" height="36" rx="3" ' + sty(C.crane, C.craneDk, 1.4) + '/>');
+  s.push('<rect x="' + f1(X(-Lt / 2 + 0.7)) + '" y="' + f1(ut - 24) + '" width="' + f1(Math.max(40, (Lt - 3) * sx)) + '" height="24" rx="3" ' + sty(C.crane, C.craneDk, 1.4) + '/>');
+  s.push('<rect x="' + f1(X(Lt / 2 - 1.9)) + '" y="' + f1(ut - 30) + '" width="' + f1(1.2 * sx) + '" height="30" rx="3" ' + sty(C.crane, C.craneDk, 1.4) + '/>');
+  s.push('<rect x="' + f1(X(Lt / 2 - 1.75)) + '" y="' + f1(ut - 25) + '" width="' + f1(0.9 * sx) + '" height="15" rx="2" ' + sty(C.glass, C.craneDk, 1) + '/>');
+  /* 붐 · 리더 · 해머 · 말뚝 */
+  const lx = X(front) - 9;
+  const px = X(Lt / 2 - 1.2), py = ut + 10;
+  s.push('<line x1="' + f1(px) + '" y1="' + f1(py) + '" x2="' + f1(lx) + '" y2="62" style="stroke:' + C.craneDk + ';stroke-width:11;stroke-linecap:round"/>');
+  s.push('<line x1="' + f1(px) + '" y1="' + f1(py) + '" x2="' + f1(lx) + '" y2="62" style="stroke:' + C.crane + ';stroke-width:6.5;stroke-linecap:round"/>');
+  s.push('<line x1="' + f1(X(Lt / 2 - 0.5)) + '" y1="' + f1(tt - 4) + '" x2="' + f1(lx) + '" y2="' + (gY - 26) + '" style="stroke:' + C.steelDk + ';stroke-width:4;stroke-linecap:round"/>');
+  s.push('<rect x="' + f1(lx - 6) + '" y="58" width="12" height="' + (gY - 58 - 12) + '" ' + sty(C.steel, C.steelDk, 1.4) + '/>');
+  for (let yy = 72; yy < gY - 24; yy += 14) {
+    s.push('<line x1="' + f1(lx - 6) + '" y1="' + yy + '" x2="' + f1(lx + 6) + '" y2="' + yy + '" style="stroke:' + C.steelDk + ';stroke-width:1"/>');
+  }
+  const pxx = X(front) + 8;
+  s.push('<rect x="' + f1(pxx - 5) + '" y="108" width="10" height="' + (gY + 46 - 108) + '" ' + sty(C.paper, C.steelDk, 1.4, 'opacity:.92') + '/>');
+  s.push('<rect x="' + f1(X(hy) - 15 + 8) + '" y="76" width="30" height="34" rx="3" ' + sty(C.steelDk, C.ink, 1.4) + '/>');
+  s.push('<rect x="' + f1(X(hy) - 9 + 8) + '" y="110" width="18" height="6" ' + sty(C.steel, C.ink, 1) + '/>');
+
+  /* 중심선 · 하중 작용선 · 합력 */
+  s.push('<line x1="' + f1(X(0)) + '" y1="' + f1(ut - 40) + '" x2="' + f1(X(0)) + '" y2="' + gY + '" style="stroke:' + C.mute + ';stroke-width:1;stroke-dasharray:9 3 2 3"/>');
+  s.push(T(X(0) + 4, ut - 42, 'C.L.', { fill: C.mute, size: 11 }));
+  const sorted = [...act].sort((a, b) => a.y - b.y);
+  sorted.forEach((r, k) => {
+    const cx = X(r.y), cy = 16 + (k % 2) * 21;
+    s.push('<line x1="' + f1(cx) + '" y1="' + (cy + 9) + '" x2="' + f1(cx) + '" y2="' + gY + '" style="stroke:' + C.accent + ';stroke-width:1.1;stroke-dasharray:3 3;opacity:.7"/>');
+    s.push('<polygon points="' + f1(cx) + ',' + (cy + 24) + ' ' + f1(cx - 4) + ',' + (cy + 15) + ' ' + f1(cx + 4) + ',' + (cy + 15) + '" ' + sty(C.accent, 'none', 0) + '/>');
+    s.push('<circle cx="' + f1(cx) + '" cy="' + cy + '" r="9" ' + sty(C.accent, 'none', 0) + '/>');
+    s.push(T(cx, cy + 4.2, String(r.i + 1), { fill: C.paper, size: 11.5, w: 700, a: 'middle' }));
+  });
+  const rx = X(R.e);
+  s.push('<line x1="' + f1(rx) + '" y1="52" x2="' + f1(rx) + '" y2="' + gY + '" style="stroke:' + C.bad + ';stroke-width:2"/>');
+  s.push('<polygon points="' + f1(rx) + ',' + gY + ' ' + f1(rx - 6) + ',' + (gY - 11) + ' ' + f1(rx + 6) + ',' + (gY - 11) + '" ' + sty(C.bad, 'none', 0) + '/>');
+  s.push(T(rx + 8, 50, 'R  ΣW=' + fmt(R.Wsum, 0) + ' kN · e=' + sgn(R.e, 2) + ' m', { fill: C.bad, size: 12, w: 700 }));
+
+  /* 축척 */
+  s.push('<line x1="' + pad + '" y1="' + (H - 14) + '" x2="' + f1(pad + 2 * sx) + '" y2="' + (H - 14) + '" style="stroke:' + C.ink + ';stroke-width:2"/>');
+  s.push('<line x1="' + pad + '" y1="' + (H - 19) + '" x2="' + pad + '" y2="' + (H - 9) + '" style="stroke:' + C.ink + ';stroke-width:1.5"/>');
+  s.push('<line x1="' + f1(pad + 2 * sx) + '" y1="' + (H - 19) + '" x2="' + f1(pad + 2 * sx) + '" y2="' + (H - 9) + '" style="stroke:' + C.ink + ';stroke-width:1.5"/>');
+  s.push(T(pad + 2 * sx + 8, H - 10, '2 m (수평 축척)', { fill: C.mute, size: 11 }));
+  s.push(T(W - 10, H - 10, '작업 방향 →  ※ 수평 위치는 입력값 축척, 높이·지층 깊이는 개략', { fill: C.mute, size: 11, a: 'end' }));
+  s.push('</svg>');
+  return s.join('');
+}
+
+/* ---------- 접지압 분포 (궤도 길이 방향) ---------- */
+function svgPressure(R, C) {
+  const W = 420, H = 280, ml = 50, mr = 16, mt = 30, mb = 56;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const Lg = R.Lg;
+  const xs = y => ml + (y + Lg / 2) / Lg * pw;
+  const qmaxShow = isFinite(R.qmax) ? R.qmax : R.qa * 2;
+  const pmax = Math.max(qmaxShow, R.qa, R.qavg) * 1.2;
+  const ys = p => mt + ph - p / pmax * ph;
+  const s = [];
+  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="접지압 분포">');
+  const st = niceStep(pmax, 4);
+  for (let v = 0; v <= pmax; v += st) {
+    s.push('<line x1="' + ml + '" y1="' + f1(ys(v)) + '" x2="' + (W - mr) + '" y2="' + f1(ys(v)) + '" style="stroke:' + C.line + ';stroke-width:1"/>');
+    s.push(T(ml - 6, ys(v) + 4, String(Math.round(v)), { fill: C.mute, size: 11, a: 'end' }));
+  }
+  s.push(T(ml - 6, mt - 12, 'kPa', { fill: C.mute, size: 11, a: 'end' }));
+  /* 분포 */
+  let pts;
+  if (R.full) {
+    pts = [[xs(-Lg / 2), ys(0)], [xs(-Lg / 2), ys(R.qrear)], [xs(Lg / 2), ys(R.qfront)], [xs(Lg / 2), ys(0)]];
+  } else {
+    const sign = R.e >= 0 ? 1 : -1;
+    const q = isFinite(R.qmax) ? R.qmax : qmaxShow;
+    const xend = sign > 0 ? Lg / 2 : -Lg / 2, xstart = xend - sign * Math.min(R.xc, Lg);
+    pts = [[xs(xstart), ys(0)], [xs(xend), ys(q)], [xs(xend), ys(0)]];
+  }
+  s.push('<polygon points="' + pts.map(p => f1(p[0]) + ',' + f1(p[1])).join(' ') + '" style="fill:' + C.accent + ';fill-opacity:.32;stroke:' + C.accent + ';stroke-width:2"/>');
+  /* 평균·허용 */
+  s.push('<line x1="' + ml + '" y1="' + f1(ys(R.qavg)) + '" x2="' + (W - mr) + '" y2="' + f1(ys(R.qavg)) + '" style="stroke:' + C.mute + ';stroke-width:1.2;stroke-dasharray:2 4"/>');
+  s.push(T(W - mr - 2, ys(R.qavg) + 14, '평균 ' + fmt(R.qavg, 1), { fill: C.mute, size: 11, a: 'end' }));
+  s.push('<line x1="' + ml + '" y1="' + f1(ys(R.qa)) + '" x2="' + (W - mr) + '" y2="' + f1(ys(R.qa)) + '" style="stroke:' + C.bad + ';stroke-width:1.8;stroke-dasharray:7 4"/>');
+  s.push(T(ml + 4, ys(R.qa) - 5, '허용지지력 q_a = ' + fmt(R.qa, 1) + ' kPa', { fill: C.bad, size: 11.5, w: 700 }));
+  /* 단부 값 */
+  const lab = (x, v, a) => T(x, ys(v) - 6, fmt(v, 1), { fill: C.ink, size: 11.5, w: 700, a });
+  if (R.full) { s.push(lab(xs(-Lg / 2) + 3, R.qrear, 'start')); s.push(lab(xs(Lg / 2) - 3, R.qfront, 'end')); }
+  else { s.push(lab(xs(R.e >= 0 ? Lg / 2 : -Lg / 2) + (R.e >= 0 ? -3 : 3), isFinite(R.qmax) ? R.qmax : qmaxShow, R.e >= 0 ? 'end' : 'start')); }
+  /* 축 */
+  s.push('<line x1="' + ml + '" y1="' + f1(ys(0)) + '" x2="' + (W - mr) + '" y2="' + f1(ys(0)) + '" style="stroke:' + C.ink + ';stroke-width:1.6"/>');
+  [-Lg / 2, 0, Lg / 2].forEach(v => {
+    s.push('<line x1="' + f1(xs(v)) + '" y1="' + f1(ys(0)) + '" x2="' + f1(xs(v)) + '" y2="' + f1(ys(0) + 5) + '" style="stroke:' + C.ink + ';stroke-width:1.2"/>');
+    s.push(T(xs(v), ys(0) + 18, v === 0 ? '0' : sgn(v, 2), { fill: C.mute, size: 11, a: 'middle' }));
+  });
+  s.push('<polygon points="' + f1(xs(R.e)) + ',' + f1(ys(0) + 1) + ' ' + f1(xs(R.e) - 5) + ',' + f1(ys(0) + 11) + ' ' + f1(xs(R.e) + 5) + ',' + f1(ys(0) + 11) + '" ' + sty(C.bad, 'none', 0) + '/>');
+  s.push(T(W / 2, H - 8, '궤도 길이 방향 위치 y (m) · 합력 ▲ e = ' + sgn(R.e, 2) + ' m · 접지길이 ' + fmt(Lg, 2) + ' m', { fill: C.mute, size: 11, a: 'middle' }));
+  s.push('</svg>');
+  return s.join('');
+}
+
+/* ---------- 평면도 : 궤도 · 깔판 · 치수 ---------- */
+function svgPlan(R, C) {
+  const W = 420, H = 280;
+  const { crane, plate } = R;
+  const Lg = R.Lg, Bg = R.Bg, L = crane.L, B = crane.B, G = crane.G;
+  const totW = G + Math.max(Bg, B);
+  const sp = Math.min((W - 130) / Math.max(Lg, L), (H - 96) / totW);
+  const cx = W / 2 + 6, cy = 126;
+  const s = [];
+  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="평면도">');
+  [-1, 1].forEach(k => {
+    const yc = cy + k * G / 2 * sp;
+    if (plate.use) {
+      s.push('<rect x="' + f1(cx - Lg / 2 * sp) + '" y="' + f1(yc - Bg / 2 * sp) + '" width="' + f1(Lg * sp) + '" height="' + f1(Bg * sp) + '" ' + sty(C.steel, C.steelDk, 1.4, 'fill-opacity:.55;stroke-dasharray:6 3') + '/>');
+    }
+  });
+  /* 상부 */
+  s.push('<rect x="' + f1(cx - 0.42 * L * sp) + '" y="' + f1(cy - (G / 2 - B / 2) * sp) + '" width="' + f1(0.84 * L * sp) + '" height="' + f1((G - B) * sp) + '" rx="4" ' + sty(C.crane, C.craneDk, 1.4) + '/>');
+  [-1, 1].forEach(k => {
+    const yc = cy + k * G / 2 * sp;
+    s.push('<rect x="' + f1(cx - L / 2 * sp) + '" y="' + f1(yc - B / 2 * sp) + '" width="' + f1(L * sp) + '" height="' + f1(B * sp) + '" rx="' + f1(Math.min(B * sp / 2, 12)) + '" ' + sty(C.trk, C.ink, 1.2) + '/>');
+    s.push('<rect x="' + f1(cx - L / 2 * sp + 6) + '" y="' + f1(yc - B / 2 * sp + 4) + '" width="' + f1(L * sp - 12) + '" height="' + f1(Math.max(2, B * sp - 8)) + '" rx="4" ' + sty(C.trkIn, 'none', 0) + '/>');
+  });
+  s.push('<line x1="' + f1(cx) + '" y1="14" x2="' + f1(cx) + '" y2="' + (H - 40) + '" style="stroke:' + C.mute + ';stroke-width:1;stroke-dasharray:9 3 2 3"/>');
+  /* 합력 위치 */
+  s.push('<circle cx="' + f1(cx + R.e * sp) + '" cy="' + f1(cy) + '" r="5.5" ' + sty(C.bad, C.paper, 1.5) + '/>');
+  s.push(T(cx + R.e * sp + 9, cy - 8, 'R', { fill: C.bad, size: 12, w: 700 }));
+  /* 작업 방향 */
+  s.push('<line x1="' + (W - 118) + '" y1="22" x2="' + (W - 22) + '" y2="22" style="stroke:' + C.ink + ';stroke-width:1.6"/>');
+  s.push('<polygon points="' + (W - 14) + ',22 ' + (W - 25) + ',17 ' + (W - 25) + ',27" ' + sty(C.ink, 'none', 0) + '/>');
+  s.push(T(W - 118, 14, '작업 방향 (전방)', { fill: C.ink, size: 11.5, w: 600 }));
+  /* 치수 : L */
+  const yb = cy + G / 2 * sp + Math.max(Bg, B) / 2 * sp + 16;
+  const dimH = (x1, x2, y, label) => {
+    s.push('<line x1="' + f1(x1) + '" y1="' + f1(y) + '" x2="' + f1(x2) + '" y2="' + f1(y) + '" style="stroke:' + C.ink + ';stroke-width:1.1"/>');
+    [x1, x2].forEach(x => s.push('<line x1="' + f1(x) + '" y1="' + f1(y - 5) + '" x2="' + f1(x) + '" y2="' + f1(y + 5) + '" style="stroke:' + C.ink + ';stroke-width:1.1"/>'));
+    s.push(T((x1 + x2) / 2, y + 16, label, { fill: C.ink, size: 11.5, a: 'middle', w: 600 }));
+  };
+  const dimV = (y1, y2, x, label, anchor) => {
+    s.push('<line x1="' + f1(x) + '" y1="' + f1(y1) + '" x2="' + f1(x) + '" y2="' + f1(y2) + '" style="stroke:' + C.ink + ';stroke-width:1.1"/>');
+    [y1, y2].forEach(y => s.push('<line x1="' + f1(x - 5) + '" y1="' + f1(y) + '" x2="' + f1(x + 5) + '" y2="' + f1(y) + '" style="stroke:' + C.ink + ';stroke-width:1.1"/>'));
+    s.push(T(anchor === 'end' ? x - 8 : x + 8, (y1 + y2) / 2 + 4, label, { fill: C.ink, size: 11.5, a: anchor, w: 600 }));
+  };
+  dimH(cx - L / 2 * sp, cx + L / 2 * sp, yb, 'L = ' + fmt(L, 2) + ' m');
+  const xr = cx + Math.max(Lg, L) / 2 * sp + 14;
+  dimV(cy + G / 2 * sp - B / 2 * sp, cy + G / 2 * sp + B / 2 * sp, xr, 'B = ' + fmt(B, 2), 'start');
+  const xl = cx - Math.max(Lg, L) / 2 * sp - 14;
+  dimV(cy - G / 2 * sp, cy + G / 2 * sp, xl, 'G = ' + fmt(G, 2), 'end');
+  if (plate.use) {
+    s.push(T(W / 2, H - 8, '깔판 ' + fmt(Bg, 2) + ' × ' + fmt(Lg, 2) + ' m (궤도당 1매) · t = ' + Math.round(plate.t * 1000) + ' mm', { fill: C.mute, size: 11, a: 'middle' }));
+  } else {
+    s.push(T(W / 2, H - 8, '깔판 미설치 (궤도 직접 접지)', { fill: C.mute, size: 11, a: 'middle' }));
+  }
+  s.push('</svg>');
+  return s.join('');
+}
+
+
+/* =====================================================================
+   3. 검토서 (A4 · 자동 쪽 나눔) 및 Excel 통합문서 생성
+   ===================================================================== */
+const PAGE_W = 794, PAGE_H = 1123;
+
+function tbl(head, rows, o = {}) {
+  const num = o.num || [];
+  const cell = (v, i, tag) => '<' + tag + (num.includes(i) ? ' class="n"' : '') + '>' + v + '</' + tag + '>';
+  return '<table class="rt' + (o.cls ? ' ' + o.cls : '') + '">' +
+    (head ? '<thead><tr>' + head.map((h, i) => cell(h, i, 'th')).join('') + '</tr></thead>' : '') +
+    '<tbody>' + rows.map(r => '<tr>' + r.map((v, i) => cell(v, i, 'td')).join('') + '</tr>').join('') + '</tbody></table>';
+}
+const pill = st => '<span class="pl pl-' + st + '">' + STLABEL[st] + '</span>';
+
+function checkValueText(c) {
+  if (c.u === null) return '–';
+  return fmt(c.value, c.id === 1 ? 1 : 2) + (c.unit ? ' ' + c.unit : '');
+}
+function checkLimitText(c) {
+  return c.rel + ' ' + fmt(c.limit, c.id === 1 ? 1 : 2) + (c.unit ? ' ' + c.unit : '');
+}
+
+function opinionText(R) {
+  const ng = R.checks.filter(c => c.st === 'NG'), wr = R.checks.filter(c => c.st === 'WARN');
+  if (R.status === 'OK') {
+    return ['검토 결과 전 항목이 허용 기준을 만족함.', '지반 상태(함수비·지하수위 등)가 조사 결과와 다를 경우 재검토할 것.'];
+  }
+  if (R.status === 'WARN') {
+    return ['허용 기준은 만족하나 사용률 90% 초과 항목이 있음: ' + wr.map(c => c.name).join(', ') + '.',
+            '깔판 면적 확대 등으로 여유를 확보할 것을 권장함.'];
+  }
+  return ['허용 기준 초과 항목: ' + ng.map(c => c.name).join(', ') + '.',
+          '대책: ① 깔판 폭·길이 확대 ② 지반 보강(치환·쇄석·매트) ③ 카운터웨이트 조정 및 장비 배치 변경 ④ 작업 반경 축소 후 재검토.'];
+}
+
+function reportBlocks(S, R) {
+  const P = PAL_PAPER;
+  const b = [];
+  const A = R.checks;
+
+  b.push('<div class="blk"><div class="ttl"><div><h1>항타기 지지력 검토서</h1><p>크롤러형 항타기 접지압 · 지지력 · 전도 안전성 검토</p></div>' +
+    '<div class="bdg bdg-' + R.status + '">' + STLABEL[R.status] + '</div></div>' +
+    tbl(null, [
+      ['<b>현장명</b>', esc(S.proj.name || '–'), '<b>검토일</b>', esc(S.proj.date || '–')],
+      ['<b>장비</b>', esc(R.crane.model || '–'), '<b>작성자</b>', esc(S.proj.author || '–')],
+      ['<b>종합판정</b>', STLABEL[R.status] + ' (최대 사용률 ' + fmt(R.umax * 100, 0) + '% · ' + esc(R.worst.name) + ')', '<b>깔판</b>', R.plate.use ? '사용 (' + fmt(R.plate.Bp, 2) + ' × ' + fmt(R.plate.Lp, 2) + ' m)' : '미사용']
+    ], { cls: 'meta' }) + '</div>');
+
+  b.push('<div class="blk"><h2>1. 검토 개요</h2><ul class="bl">' +
+    '<li>목적: 항타 작업 중 항타기 하중에 대한 지반 지지력 및 장비 전도 안전성 확인</li>' +
+    '<li>접지압: 2궤도 직사각형 접지면, 합력 편심 반영 (e ≤ L/6 사다리꼴, e &gt; L/6 삼각형 분포)</li>' +
+    '<li>극한지지력: Meyerhof(1963) 일반식, 형상·근입 계수 적용, 지하수위 이하 γ′ = γ − 9.81 kN/m³</li>' +
+    '<li>하부 지층: 2:1 하중분산 가상기초, 순극한지지력 기준 안전율</li>' +
+    '<li>전도: 전방 작업, 궤도 전단 지점 모멘트 평형 (동하중은 전도 측 하중에만 적용)</li>' +
+    '<li>적용 기준: 지지력 Fs = ' + fmt(R.cond.FsB, 1) + ' · 전도 Fs = ' + fmt(R.cond.FsT, 1) + ' · 충격계수 α = ' + fmt(R.cond.alpha, 2) + '</li></ul></div>');
+
+  b.push('<div class="blk"><h2>2. 입력 조건</h2><h3>2.1 지반조건 (지반조사 보고서)  ·  지하수위 GL-' + fmt(R.soil.gwt, 1) + ' m</h3>' +
+    tbl(['No.', '지층', 'H (m)', 'γ (kN/m³)', 'c (kPa)', 'φ (°)', 'N값'],
+      R.soil.layers.map((l, i) => [CIRC[i], esc(l.name), fmt(l.H, 1), fmt(l.gamma, 1), fmt(l.c, 1), fmt(l.phi, 1), l.N === null ? '–' : fmt(l.N, 0)]),
+      { num: [2, 3, 4, 5, 6] }) + '</div>');
+
+  b.push('<div class="blk"><h3>2.2 항타기 제원 및 깔판</h3>' +
+    tbl(null, [
+      ['궤도 폭 B', fmt(R.crane.B, 2) + ' m', '깔판 (궤도당 1매)', R.plate.use ? fmt(R.plate.Bp, 2) + ' × ' + fmt(R.plate.Lp, 2) + ' × ' + fmt(R.plate.t * 1000, 0) + ' mm' : '미사용'],
+      ['궤도 접지길이 L', fmt(R.crane.L, 2) + ' m', '깔판 단위중량', R.plate.use ? fmt(R.plate.gp, 1) + ' kN/m³' : '–'],
+      ['궤도 중심간격 G', fmt(R.crane.G, 2) + ' m', '깔판 중량 (2매)', fmt(R.Wp, 1) + ' kN'],
+      ['근입깊이 Df', fmt(R.Df, 2) + ' m', '지반 접지면 B_g × L_g', fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' m']
+    ], { cls: 'kv' }) + '</div>');
+
+  b.push('<div class="blk"><h3>2.3 하중 구성 (y : 궤도 접지 중심 기준, 전방 +)</h3>' +
+    tbl(['No.', '구분', 'W (kN)', '동하중', 'W·α (kN)', 'y (m)', 'M = W·α·y (kN·m)'],
+      R.rows.map((r, i) => [CIRC[i], esc(r.name), fmt(r.W, 1), r.dyn ? '○ ×' + fmt(R.cond.alpha, 2) : '–', fmt(r.Wd, 1), sgn(r.y, 2), fmt(r.M, 1)])
+        .concat([['', '<b>합계 (깔판 제외)</b>', '<b>' + fmt(R.W0, 1) + '</b>', '', '<b>' + fmt(R.rows.reduce((a, r) => a + r.Wd, 0), 1) + '</b>', '', '<b>' + fmt(R.Msum, 1) + '</b>']]),
+      { num: [2, 4, 5, 6] }) + '</div>');
+
+  b.push('<div class="blk"><div class="fig">' + svgElevation(R, P) + '</div><div class="cap">그림 1. 항타기 측면도 (번호는 2.3 하중 구성표와 동일, R : 합력)</div></div>');
+
+  b.push('<div class="blk"><h2>3. 검토 결과 요약</h2>' +
+    tbl(['No.', '검토 항목', '산정값', '기준', '사용률', '판정'],
+      A.map(c => [c.id, c.name + '<br><span class="sm">' + esc(c.short) + '</span>', checkValueText(c), c.u === null ? '–' : checkLimitText(c),
+        c.u === null ? '–' : fmt(c.u * 100, 0) + '%', pill(c.st)]),
+      { num: [2, 3, 4] }) +
+    '<p class="sm" style="margin-top:6px">사용률 = 산정값 대비 기준값 비 (안전율 항목은 기준 FS ÷ 산정 FS). 100% 초과 시 부적합, 90% 초과 시 주의.</p></div>');
+
+  const wsum0 = R.rows.reduce((a, r) => a + r.Wd, 0);
+  b.push('<div class="blk"><h2>4. 계산 과정</h2><h3>4.1 하중 집계 및 합력 편심</h3><div class="fm">' +
+    '<div>ΣW = Σ(W<sub>i</sub>·α<sub>i</sub>) + W<sub>깔판</sub> = ' + fmt(wsum0, 1) + ' + ' + fmt(R.Wp, 1) + ' = <b>' + fmt(R.Wsum, 1) + ' kN</b></div>' +
+    '<div>e = ΣM / ΣW = ' + fmt(R.Msum, 1) + ' / ' + fmt(R.Wsum, 1) + ' = <b>' + sgn(R.e, 3) + ' m</b> (+ : 전방)</div></div>' +
+    '<h3>4.2 접지압 (검토 1·5)</h3><div class="fm">' +
+    '<div>접지면적 A = 2·B<sub>g</sub>·L<sub>g</sub> = 2 × ' + fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' = ' + fmt(R.A, 2) + ' m²</div>' +
+    '<div>q<sub>avg</sub> = ΣW / A = ' + fmt(R.Wsum, 1) + ' / ' + fmt(R.A, 2) + ' = ' + fmt(R.qavg, 1) + ' kPa</div>' +
+    '<div>e = ' + fmt(R.ae, 3) + ' m ' + (R.full ? '≤' : '&gt;') + ' L<sub>g</sub>/6 = ' + fmt(R.Lg / 6, 3) + ' m → ' + (R.full ? '전면 접지 (사다리꼴 분포)' : '일부 접지 (삼각형 분포)') + '</div>' +
+    '<div>q<sub>max</sub> = ' + (R.full ? 'q<sub>avg</sub>(1 + 6e/L<sub>g</sub>)' : 'ΣW / (3·B<sub>g</sub>·(L<sub>g</sub>/2 − e))') + ' = <b>' + fmt(R.qmax, 1) + ' kPa</b>,  q<sub>min</sub> = ' + fmt(R.qmin, 1) + ' kPa</div></div></div>');
+
+  const m = R.mu;
+  b.push('<div class="blk"><h3>4.3 극한지지력 (1층 · ' + esc(R.L1.name) + ')</h3>' +
+    tbl(['c (kPa)', 'φ (°)', 'γ<sub>e</sub> (kN/m³)', 'q (kPa)', 'N<sub>c</sub>', 'N<sub>q</sub>', 'N<sub>γ</sub>', 's<sub>c</sub>', 's<sub>q</sub>', 'd<sub>c</sub>', 'd<sub>q</sub>'],
+      [[fmt(R.L1.c, 1), fmt(R.L1.phi, 1), fmt(R.g1, 2), fmt(R.q0, 1), fmt(m.Nc, 2), fmt(m.Nq, 2), fmt(m.Ng, 2), fmt(m.sc, 3), fmt(m.sq, 3), fmt(m.dc, 3), fmt(m.dq, 3)]],
+      { num: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], cls: 'sm-t' }) +
+    '<div class="fm"><div>q<sub>u</sub> = c·N<sub>c</sub>·s<sub>c</sub>·d<sub>c</sub> + q·N<sub>q</sub>·s<sub>q</sub>·d<sub>q</sub> + ½·γ<sub>e</sub>·B·N<sub>γ</sub>·s<sub>γ</sub>·d<sub>γ</sub></div>' +
+    '<div>= ' + fmt(m.t1, 1) + ' + ' + fmt(m.t2, 1) + ' + ' + fmt(m.t3, 1) + ' = <b>' + fmt(m.qu, 1) + ' kPa</b>  (B = ' + fmt(m.B, 2) + ', L = ' + fmt(m.L, 2) + ' m)</div>' +
+    '<div>q<sub>a</sub> = q<sub>u</sub> / Fs = ' + fmt(m.qu, 1) + ' / ' + fmt(R.cond.FsB, 1) + ' = <b>' + fmt(R.qa, 1) + ' kPa</b> → q<sub>max</sub> = ' + fmt(R.qmax, 1) + ' ' + (R.qmax <= R.qa ? '≤' : '&gt;') + ' q<sub>a</sub> ' + pill(A[0].st) + '</div>' +
+    '<div>유효면적법 (검토 2): L′ = L<sub>g</sub> − 2e = ' + fmt(R.Le, 2) + ' m, q<sub>eff</sub> = (ΣW/2) / (B<sub>g</sub>·L′) = ' + fmt(R.qeff, 1) + ' kPa, q<sub>u</sub>′ = ' + fmt(R.mu2.qu, 1) + ' kPa</div>' +
+    '<div>FS = q<sub>u</sub>′ / q<sub>eff</sub> = <b>' + fmt(R.FS2, 2) + '</b> ' + (R.FS2 >= R.cond.FsB ? '≥' : '&lt;') + ' ' + fmt(R.cond.FsB, 1) + ' ' + pill(A[1].st) + '</div></div></div>');
+
+  if (R.lowers.length) {
+    b.push('<div class="blk"><h3>4.4 하부 지층 영향 (검토 3 · 2:1 분산)</h3>' +
+      tbl(['지층', 'z (m)', '가상기초 B<sub>v</sub>×L<sub>v</sub> (m)', 'q<sub>v</sub> (kPa)', 'σ′<sub>v</sub> (kPa)', 'q<sub>u</sub> (kPa)', 'q<sub>net</sub> (kPa)', 'FS'],
+        R.lowers.map(l => [CIRC[l.idx] + ' ' + esc(trunc(l.name.replace(/\s*\(.*\)/, ''), 8)), fmt(l.z, 1),
+          fmt(l.Bv, 2) + ' × ' + fmt(l.Lv, 2) + (l.overlap ? ' *' : ''), fmt(l.qv, 1), fmt(l.sv, 1), fmt(l.qu, 1), fmt(l.qnet, 1), fmt(l.FS, 2)]),
+        { num: [1, 2, 3, 4, 5, 6, 7] }) +
+      '<div class="fm"><div>B<sub>v</sub> = B<sub>g</sub> + z (두 궤도 응력영역이 겹치면 * : G + B<sub>g</sub> + z), L<sub>v</sub> = L′ + z, q<sub>v</sub> = Q / (B<sub>v</sub>·L<sub>v</sub>)</div>' +
+      '<div>FS = (q<sub>u</sub> − σ′<sub>v</sub>) / q<sub>v</sub> → 최소 <b>' + fmt(R.FS3, 2) + '</b> ' + (R.FS3 >= R.cond.FsB ? '≥' : '&lt;') + ' ' + fmt(R.cond.FsB, 1) + ' ' + pill(A[2].st) + '</div></div></div>');
+  }
+
+  b.push('<div class="blk"><h3>4.' + (R.lowers.length ? 5 : 4) + ' 전도 안전율 (검토 4 · 전방 작업)</h3>' +
+    tbl(['No.', '구분', 'W (kN)', '지점까지 거리 (m)', '저항모멘트 M<sub>r</sub>', '전도모멘트 M<sub>o</sub>'],
+      R.rows.map((r, i) => [CIRC[i], esc(r.name), fmt(r.W, 1), sgn(r.arm, 2), r.Mres ? fmt(r.Mres, 1) : '–', r.Mover ? fmt(r.Mover, 1) : '–'])
+        .concat([['', '<b>합계 (kN·m)</b>', '', '', '<b>' + fmt(R.Mr, 1) + '</b>', '<b>' + fmt(R.Mo, 1) + '</b>']]),
+      { num: [2, 3, 4, 5] }) +
+    '<div class="fm"><div>지점 : 궤도 전단 (y = +L/2 = ' + fmt(R.a0, 2) + ' m), 거리 = L/2 − y<sub>i</sub> (+ : 안정측)</div>' +
+    '<div>FS = M<sub>r</sub> / M<sub>o</sub> = ' + fmt(R.Mr, 1) + ' / ' + fmt(R.Mo, 1) + ' = <b>' + fmt(R.FSt, 2) + '</b> ' + (R.FSt >= R.cond.FsT ? '≥' : '&lt;') + ' ' + fmt(R.cond.FsT, 1) + ' ' + pill(A[3].st) + '</div></div></div>');
+
+  b.push('<div class="blk"><div class="fig2"><div>' + svgPressure(R, P) + '<div class="cap">그림 2. 접지압 분포</div></div><div>' + svgPlan(R, P) + '<div class="cap">그림 3. 평면도</div></div></div></div>');
+
+  b.push('<div class="blk"><h2>5. 종합 의견</h2><div class="op"><div class="bdg bdg-' + R.status + ' sm-b">' + STLABEL[R.status] + '</div><ul class="bl">' +
+    opinionText(R).map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' +
+    '<p class="sm">※ 본 검토는 입력된 지반정수·장비 제원·하중 조건에 근거한 약산식 검토이며, 말뚝 타격 시 수평력·지반 이완·경사 지반은 반영하지 않음. 현장 여건에 따라 별도 검토할 것.</p>' +
+    '<table class="rt sign"><tbody><tr><td><b>작성</b></td><td></td><td><b>검토</b></td><td></td><td><b>승인</b></td><td></td></tr></tbody></table></div>');
+  return b;
+}
+
+async function ensureFonts(sample) {
+  if (!document.fonts || !document.fonts.load) return;
   try {
-    const lines = txt.split(/\r?\n/).filter(l => l.trim());
-    const head = lines[0].split(/\t|\s{2,}|,/).map(s => s.trim()).filter(s => s !== '');
-    const booms = head.map(h => isNaN(parseFloat(h)) ? h : parseFloat(h));
-    const radii = [], rows = {};
-    lines.slice(1).forEach(l => {
-      const c = l.split(/\t|,/).map(s => s.trim());
-      const r = parseFloat(c[0]); if (isNaN(r)) return;
-      radii.push(r);
-      rows[r] = booms.map((_, i) => { const v = parseFloat(c[i + 1]); return isNaN(v) ? null : v; });
-    });
-    if (!radii.length) throw new Error('작업반경 행 없음');
-    chart = { maker: '사용자 입력', model: v_model(), booms, radii: radii.sort((a, b) => a - b), rows };
-    fillCraneSelects();
-    $('chartMsg').textContent = `적용 완료 : 붐 ${booms.length}구간 × 반경 ${radii.length}단`;
-    run();
-  } catch (e) { $('chartMsg').textContent = '표 형식을 확인하라. 1행=붐길이, 1열=작업반경, 탭 구분. (' + e.message + ')'; }
-}
-const v_model = () => $('f_model').value || '사용자 장비';
-
-/* ===== 저장 / 불러오기 ===== */
-const FIELDS = ['f_site','f_co','f_type','f_mgr','f_period','f_place','f_route','f_road','f_lead','f_sig','f_rig','f_rig2',
-  'f_cargo','f_dim','f_w','f_wa','f_bind','f_cog','f_eq','f_model','f_insp','f_ins','f_op','f_out','f_boom','f_rad','f_ratio',
-  's_type','s_w','s_mode','s_ang','s_qty','s_sf','w_core','w_d','w_ang','w_term','w_qty','w_sf','h_size','h_qty','h_sf'];
-async function save(){
-  const o = {}; FIELDS.forEach(f => o[f] = $(f).value);
-  const key = 'plan:' + Date.now();
-  const name = ($('f_place').value || $('f_cargo').value || '무제') + ' · ' + new Date().toLocaleDateString('ko-KR');
-  try {
-    await window.storage.set(key, JSON.stringify({ name, data: o }));
-    await loadList(); $('chartMsg').textContent = '';
-    $('btnSave').textContent = '저장 완료'; setTimeout(() => $('btnSave').textContent = '입력 저장', 1600);
-  } catch (e) { $('btnSave').textContent = '저장 실패'; setTimeout(() => $('btnSave').textContent = '입력 저장', 1600); }
-}
-async function loadList(){
-  try {
-    const r = await window.storage.list('plan:');
-    const keys = (r && r.keys) ? r.keys.slice().reverse() : [];
-    const opts = await Promise.all(keys.map(async k => {
-      try { const g = await window.storage.get(k); return `<option value="${k}">${JSON.parse(g.value).name}</option>`; } catch { return ''; }
-    }));
-    $('loadSel').innerHTML = '<option value="">저장 이력 불러오기</option>' + opts.join('');
-  } catch (e) {}
-}
-async function loadPlan(k){
-  if (!k) return;
-  try {
-    const g = await window.storage.get(k);
-    const o = JSON.parse(g.value).data;
-    fillSlingWidths(); coreWidths();
-    FIELDS.forEach(f => { if (o[f] !== undefined) $(f).value = o[f]; });
-    run();
-  } catch (e) {}
+    await Promise.all([400, 500, 600, 700].map(w => document.fonts.load(w + ' 12px "IBM Plex Sans KR"', sample)));
+    await Promise.all([400, 500].map(w => document.fonts.load(w + ' 12px "IBM Plex Mono"', '0123456789.,+-')));
+    await document.fonts.ready;
+  } catch (e) { /* 폰트 로드 실패 시 대체 글꼴 사용 */ }
 }
 
-/* ===== 이벤트 ===== */
-document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
-  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
-  t.classList.add('on');
-  $('pane-sling').style.display = t.dataset.t === 'sling' ? '' : 'none';
-  $('pane-wire').style.display = t.dataset.t === 'wire' ? '' : 'none';
-  run();
-});
-$('s_type').addEventListener('change', () => { fillSlingWidths(); run(); });
-$('w_core').addEventListener('change', () => { coreWidths(); run(); });
-$('btnChart').onclick = applyChart;
-$('btnChartReset').onclick = () => { chart = CRANE; fillCraneSelects(); $('chartMsg').textContent = '현재 적용 : LIEBHERR LTM 1095-5.1'; run(); };
-$('btnAI').onclick = runAI;
-$('btnPrint').onclick = () => { buildDoc(); window.print(); };
-$('btnSave').onclick = save;
-$('loadSel').onchange = e => loadPlan(e.target.value);
-document.addEventListener('input', e => { if (e.target.matches('input,select')) run(); });
-document.addEventListener('change', e => { if (e.target.matches('select')) run(); });
+/* 블록을 A4 쪽에 순서대로 채우고 넘치면 다음 쪽으로 */
+async function buildReportPages(S, R, host) {
+  host.innerHTML = '';
+  const blocks = reportBlocks(S, R);
+  await ensureFonts(blocks.join('').replace(/<[^>]+>/g, ' ') + '0123456789가나다라마바사아자차카타파하');
+  const pages = [];
+  const newPage = () => {
+    const p = document.createElement('section');
+    p.className = 'rpt-page';
+    p.innerHTML = '<header class="rpt-h"><span>항타기 지지력 검토서</span><span></span></header><div class="rpt-b"></div><footer class="rpt-f"><span></span><span></span></footer>';
+    host.appendChild(p);
+    pages.push(p);
+    return p;
+  };
+  let cur = newPage();
+  for (const html of blocks) {
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    const blk = el.firstElementChild;
+    const body = cur.querySelector('.rpt-b');
+    body.appendChild(blk);
+    if (body.scrollHeight > body.clientHeight + 1 && body.children.length > 1) {
+      body.removeChild(blk);
+      cur = newPage();
+      cur.querySelector('.rpt-b').appendChild(blk);
+    }
+  }
+  pages.forEach((p, i) => {
+    p.querySelector('.rpt-h span:last-child').textContent = S.proj.name || '';
+    const fs = p.querySelectorAll('.rpt-f span');
+    fs[0].textContent = '검토일 ' + (S.proj.date || '');
+    fs[1].textContent = (i + 1) + ' / ' + pages.length;
+  });
+  return pages;
+}
 
-initSelects();
-run();
-loadList();
+/* ---------- Excel ---------- */
+function buildWorkbook(XLSX, S, R) {
+  const wb = XLSX.utils.book_new();
+  const rd = (v, d = 3) => (typeof v === 'number' && isFinite(v)) ? Math.round(v * Math.pow(10, d)) / Math.pow(10, d) : (v === Infinity ? '∞' : v);
+  const setCols = (ws, w) => { ws['!cols'] = w.map(x => ({ wch: x })); };
+
+  /* 1) 판정요약 */
+  const s1 = [
+    ['항타기 지지력 검토 결과'],
+    ['현장명', S.proj.name], ['장비', R.crane.model], ['검토일', S.proj.date], ['작성자', S.proj.author || ''], [],
+    ['No.', '검토 항목', '산정값', '단위', '기준', '기준값', '사용률 (%)', '판정']
+  ];
+  R.checks.forEach(c => s1.push([c.id, c.name, rd(c.value, 3), c.unit, c.rel, rd(c.limit, 3), c.u === null ? '' : rd(c.u * 100, 1), STLABEL[c.st]]));
+  s1.push([]);
+  s1.push(['종합판정', STLABEL[R.status], '최대 사용률 (%)', rd(R.umax * 100, 1), '지배 항목', R.worst.name]);
+  s1.push([]);
+  opinionText(R).forEach(t => s1.push([t]));
+  const ws1 = XLSX.utils.aoa_to_sheet(s1);
+  setCols(ws1, [10, 34, 14, 8, 8, 14, 12, 10]);
+  XLSX.utils.book_append_sheet(wb, ws1, '판정요약');
+
+  /* 2) 입력자료 (하중표는 수식 포함) */
+  const a = [];
+  a.push(['항타기 지지력 검토 — 입력자료']);
+  a.push(['현장명', S.proj.name]); a.push(['장비', R.crane.model]); a.push(['검토일', S.proj.date]); a.push([]);
+  a.push(['[1] 지반조건 (지반조사 보고서)']);
+  a.push(['지하수위 GL(-) m', R.soil.gwt]);
+  a.push(['No.', '지층명', '층두께 H (m)', '단위중량 γ (kN/m³)', '점착력 c (kPa)', '내부마찰각 φ (°)', 'N값']);
+  R.soil.layers.forEach((l, i) => a.push([i + 1, l.name, l.H, l.gamma, l.c, l.phi, l.N === null ? '' : l.N]));
+  a.push([]);
+  a.push(['[2] 항타기 제원']);
+  a.push(['기종', R.crane.model]);
+  a.push(['궤도 폭 B (m)', R.crane.B]); a.push(['궤도 접지길이 L (m)', R.crane.L]); a.push(['궤도 중심간격 G (m)', R.crane.G]);
+  a.push([]);
+  a.push(['[3] 검토 조건']);
+  a.push(['지지력 허용 안전율 Fs', R.cond.FsB]); a.push(['전도 허용 안전율', R.cond.FsT]);
+  const rowAlpha = a.length + 1;
+  a.push(['충격계수 α (동하중)', R.cond.alpha]); a.push(['근입깊이 Df (m)', R.cond.Df]);
+  a.push([]);
+  a.push(['[4] 깔판']);
+  a.push(['사용 여부', R.plate.use ? '사용' : '미사용']);
+  a.push(['폭 Bp (m)', R.plate.Bp]); a.push(['길이 Lp (m)', R.plate.Lp]); a.push(['두께 t (m)', R.plate.t]); a.push(['단위중량 (kN/m³)', R.plate.gp]);
+  a.push(['깔판 중량 2매 (kN)', rd(R.Wp, 2)]);
+  a.push([]);
+  a.push(['[5] 하중 구성  (y : 궤도 접지 중심 기준, 전방 +)']);
+  a.push(['No.', '구분', '중량 W (kN)', '위치 y (m)', '동하중', '적용계수', '적용중량 Wd (kN)', '모멘트 Wd·y (kN·m)']);
+  const r0 = a.length + 1;
+  R.rows.forEach((r, i) => a.push([i + 1, r.name, r.W, r.y, r.dyn ? '○' : '', null, null, null]));
+  const r1 = a.length;
+  a.push(['', '합계 (깔판 제외)', null, '', '', '', null, null]);
+  const ws2 = XLSX.utils.aoa_to_sheet(a);
+  R.rows.forEach((r, i) => {
+    const n = r0 + i;
+    ws2['F' + n] = { t: 'n', v: r.f, f: 'IF(E' + n + '="○",$B$' + rowAlpha + ',1)' };
+    ws2['G' + n] = { t: 'n', v: rd(r.Wd, 4), f: 'C' + n + '*F' + n };
+    ws2['H' + n] = { t: 'n', v: rd(r.M, 4), f: 'G' + n + '*D' + n };
+  });
+  const rt = r1 + 1;
+  ws2['C' + rt] = { t: 'n', v: rd(R.W0, 4), f: 'SUM(C' + r0 + ':C' + r1 + ')' };
+  ws2['G' + rt] = { t: 'n', v: rd(R.rows.reduce((x, r) => x + r.Wd, 0), 4), f: 'SUM(G' + r0 + ':G' + r1 + ')' };
+  ws2['H' + rt] = { t: 'n', v: rd(R.Msum, 4), f: 'SUM(H' + r0 + ':H' + r1 + ')' };
+  ws2['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: a.length - 1, c: 7 } });
+  setCols(ws2, [24, 34, 16, 18, 14, 14, 18, 20]);
+  XLSX.utils.book_append_sheet(wb, ws2, '입력자료');
+
+  /* 3) 계산결과 */
+  const c = [['구분', '항목', '값', '단위', '산식 / 비고']];
+  const add = (g, n, v, u, f) => c.push([g, n, rd(v, 4), u || '', f || '']);
+  add('하중', '총 하중 ΣW', R.Wsum, 'kN', 'Σ(W·α) + 깔판 중량');
+  add('하중', '깔판 중량 (2매)', R.Wp, 'kN', '2·Bp·Lp·t·γ');
+  add('하중', '합력 편심 e', R.e, 'm', 'ΣM / ΣW (+ : 전방)');
+  add('접지면', '접지폭 Bg', R.Bg, 'm', '깔판 사용 시 깔판 폭');
+  add('접지면', '접지길이 Lg', R.Lg, 'm', '깔판 사용 시 깔판 길이');
+  add('접지면', '접지면적 A', R.A, 'm²', '2·Bg·Lg');
+  add('접지압', '평균 접지압 q_avg', R.qavg, 'kPa', 'ΣW / A');
+  add('접지압', '전단 접지압', R.qfront, 'kPa', 'q_avg(1 + 6e/Lg)');
+  add('접지압', '후단 접지압', R.qrear, 'kPa', 'q_avg(1 − 6e/Lg)');
+  add('접지압', '최대 접지압 q_max', R.qmax, 'kPa', R.full ? '전면 접지 (e ≤ Lg/6)' : '일부 접지 (삼각형 분포)');
+  add('접지압', '최소 접지압 q_min', R.qmin, 'kPa', '');
+  add('지지력(1층)', 'Nc', R.mu.Nc, '', 'Meyerhof'); add('지지력(1층)', 'Nq', R.mu.Nq, '', 'e^(π·tanφ)·tan²(45+φ/2)');
+  add('지지력(1층)', 'Nγ', R.mu.Ng, '', '(Nq−1)·tan(1.4φ)');
+  add('지지력(1층)', 'sc', R.mu.sc, '', '1 + 0.2·Kp·B/L'); add('지지력(1층)', 'sq = sγ', R.mu.sq, '', '1 + 0.1·Kp·B/L (φ>10°)');
+  add('지지력(1층)', 'dc', R.mu.dc, '', '1 + 0.2·√Kp·Df/B'); add('지지력(1층)', 'dq = dγ', R.mu.dq, '', '1 + 0.1·√Kp·Df/B (φ>10°)');
+  add('지지력(1층)', '유효 단위중량 γe', R.g1, 'kN/m³', '지하수위 반영');
+  add('지지력(1층)', '근입 상재압 q', R.q0, 'kPa', 'σ′v(Df)');
+  add('지지력(1층)', '극한지지력 q_u', R.mu.qu, 'kPa', 'c·Nc·sc·dc + q·Nq·sq·dq + ½γB·Nγ·sγ·dγ');
+  add('지지력(1층)', '허용지지력 q_a', R.qa, 'kPa', 'q_u / Fs');
+  add('유효면적법', "유효길이 L′", R.Le, 'm', 'Lg − 2e');
+  add('유효면적법', 'q_eff', R.qeff, 'kPa', '(ΣW/2) / (Bg·L′)');
+  add('유효면적법', "q_u′", R.mu2.qu, 'kPa', 'B×L′ 기준');
+  add('유효면적법', 'FS', R.FS2, '', "q_u′ / q_eff");
+  R.lowers.forEach(l => {
+    const g = '하부층 ' + (l.idx + 1) + '층';
+    add(g, '상면 깊이 z', l.z, 'm', ''); add(g, '가상기초 Bv', l.Bv, 'm', l.overlap ? 'G + Bg + z (응력영역 중첩)' : 'Bg + z');
+    add(g, '가상기초 Lv', l.Lv, 'm', "L′ + z"); add(g, '분산 하중 q_v', l.qv, 'kPa', 'Q / (Bv·Lv)');
+    add(g, "유효상재압 σ′v", l.sv, 'kPa', ''); add(g, '극한지지력 q_u', l.qu, 'kPa', ''); add(g, '순지지력 q_net', l.qnet, 'kPa', 'q_u − σ′v');
+    add(g, '안전율 FS', l.FS, '', 'q_net / q_v');
+  });
+  add('전도', '저항모멘트 Mr', R.Mr, 'kN·m', '궤도 전단 기준, 안정측 하중');
+  add('전도', '전도모멘트 Mo', R.Mo, 'kN·m', '동하중 계수 적용');
+  add('전도', '전도 안전율 FS', R.FSt, '', 'Mr / Mo');
+  const ws3 = XLSX.utils.aoa_to_sheet(c);
+  setCols(ws3, [14, 24, 14, 8, 46]);
+  XLSX.utils.book_append_sheet(wb, ws3, '계산결과');
+  return wb;
+}
+
+
+/* =====================================================================
+   4. 화면 · 입력 · 저장
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const LS_KEY = 'pdbc:v1';
+let S = makeSample();
+let R = null;
+
+/* ---- 입력값 복원 (보는 사람 브라우저에만 저장되는 편의 기능) ---- */
+(function restore() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    const ok = d && d.soil && Array.isArray(d.soil.layers) && d.soil.layers.length >= 1 && d.soil.layers.length <= 6 &&
+      Array.isArray(d.loads) && d.loads.length >= 1 && d.loads.length <= 12 && d.crane && d.plate && d.cond && d.proj;
+    if (ok) S = d;
+  } catch (e) { /* 저장소 사용 불가 시 샘플값 사용 */ }
+})();
+let saveTimer = 0;
+function persist() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { /* 무시 */ } }, 400);
+}
+
+/* ---- 입력 화면 ---- */
+const vs = (v, sc) => {
+  if (typeof v !== 'number' || !isFinite(v)) return '';
+  if (sc) v = Math.round(v * sc * 1e6) / 1e6;
+  return String(v);
+};
+const fld = (label, path, v, o = {}) =>
+  '<label class="f"><span>' + label + '</span><input type="' + (o.type || 'number') + '" ' +
+  (o.type === 'text' || o.type === 'date' ? '' : 'inputmode="decimal" step="any" ') +
+  'data-k="' + path + '"' + (o.sc ? ' data-sc="' + o.sc + '"' : '') + ' value="' +
+  esc(o.type === 'text' || o.type === 'date' ? (v || '') : vs(v, o.sc)) + '"' + (o.dis ? ' disabled' : '') + '></label>';
+const head = (n, title, hint) =>
+  '<div class="ch">' + (n ? '<span class="stepn">' + n + '</span>' : '') + '<h2>' + title + '</h2>' + (hint ? '<span class="hint">' + hint + '</span>' : '') + '</div>';
+
+function renderInputs() {
+  const p = S.proj, so = S.soil, c = S.crane, pl = S.plate, cd = S.cond;
+  const h = [];
+  h.push('<section class="card">' + head(0, '검토 정보') +
+    '<div class="fgrid w2">' + fld('현장명', 'proj.name', p.name, { type: 'text' }) + fld('작성자', 'proj.author', p.author, { type: 'text' }) + fld('검토일', 'proj.date', p.date, { type: 'date' }) + '</div></section>');
+
+  h.push('<section class="card">' + head(1, '지반조건', '지반조사 보고서 값') +
+    '<div class="fgrid" style="margin-bottom:12px">' + fld('지하수위 GL(-) <em>m</em>', 'soil.gwt', so.gwt) + '</div><div class="list">' +
+    so.layers.map((l, i) =>
+      '<div class="item"><div class="item-h"><span class="no">' + (i + 1) + '</span><input type="text" aria-label="지층명" data-k="soil.layers.' + i + '.name" value="' + esc(l.name) + '">' +
+      '<button class="ico" type="button" data-act="del-layer" data-i="' + i + '" aria-label="지층 삭제"' + (so.layers.length <= 1 ? ' disabled' : '') + '>×</button></div>' +
+      '<div class="fgrid">' + fld('두께 H <em>m</em>', 'soil.layers.' + i + '.H', l.H) + fld('단위중량 γ <em>kN/m³</em>', 'soil.layers.' + i + '.gamma', l.gamma) +
+      fld('점착력 c <em>kPa</em>', 'soil.layers.' + i + '.c', l.c) + fld('마찰각 φ <em>°</em>', 'soil.layers.' + i + '.phi', l.phi) + fld('N값 <em>참고</em>', 'soil.layers.' + i + '.N', l.N) + '</div></div>').join('') +
+    '</div><button class="add" type="button" data-act="add-layer" style="margin-top:10px"' + (so.layers.length >= 6 ? ' disabled' : '') + '>+ 지층 추가</button>' +
+    '<p class="sub">1층 = 접지면 직하 지지층. 지하수위 이하는 γ′ = γ − 9.81 적용 (γ 는 포화단위중량 기준).</p></section>');
+
+  h.push('<section class="card">' + head(2, '항타기 제원', '제원표 기준') +
+    '<div class="fgrid" style="margin-bottom:10px">' + fld('기종', 'crane.model', c.model, { type: 'text' }) + '</div>' +
+    '<div class="fgrid">' + fld('궤도 폭 B <em>m</em>', 'crane.B', c.B) + fld('접지길이 L <em>m</em>', 'crane.L', c.L) + fld('궤도 중심간격 G <em>m</em>', 'crane.G', c.G) + '</div></section>');
+
+  h.push('<section class="card">' + head(3, '하중 구성', '전방(작업측) +, 후방 −') +
+    '<div class="list">' +
+    S.loads.map((l, i) =>
+      '<div class="item"><div class="item-h"><span class="no">' + (i + 1) + '</span><input type="text" aria-label="하중 구분" data-k="loads.' + i + '.name" value="' + esc(l.name) + '">' +
+      '<button class="ico" type="button" data-act="del-load" data-i="' + i + '" aria-label="하중 삭제"' + (S.loads.length <= 1 ? ' disabled' : '') + '>×</button></div>' +
+      '<div class="fgrid">' + fld('중량 W <em>kN</em>', 'loads.' + i + '.W', l.W) + fld('위치 y <em>m</em>', 'loads.' + i + '.y', l.y) +
+      '<label class="chk"><input type="checkbox" data-k="loads.' + i + '.dyn"' + (l.dyn ? ' checked' : '') + '>동하중 (충격계수)</label></div></div>').join('') +
+    '</div><button class="add" type="button" data-act="add-load" style="margin-top:10px"' + (S.loads.length >= 12 ? ' disabled' : '') + '>+ 하중 추가</button>' +
+    '<div class="sumrow" id="loadSum"></div>' +
+    '<p class="sub">y 는 궤도 접지 중심 기준 수평거리입니다. 동하중 항목(해머·말뚝 등)에는 충격계수가 곱해집니다.</p></section>');
+
+  h.push('<section class="card">' + head(4, '깔판 (접지면 확대)') +
+    '<label class="chk" style="margin-bottom:10px"><input type="checkbox" data-k="plate.use"' + (pl.use ? ' checked' : '') + '>깔판 사용 (궤도당 1매, 궤도 중심 설치)</label>' +
+    '<div class="fgrid" id="plateF">' + fld('폭 Bp <em>m</em>', 'plate.Bp', pl.Bp, { dis: !pl.use }) + fld('길이 Lp <em>m</em>', 'plate.Lp', pl.Lp, { dis: !pl.use }) +
+    fld('두께 t <em>mm</em>', 'plate.t', pl.t, { sc: 1000, dis: !pl.use }) + fld('단위중량 <em>kN/m³</em>', 'plate.gp', pl.gp, { dis: !pl.use }) + '</div></section>');
+
+  h.push('<section class="card">' + head(5, '검토 조건') +
+    '<div class="fgrid">' + fld('지지력 안전율 Fs', 'cond.FsB', cd.FsB) + fld('전도 안전율', 'cond.FsT', cd.FsT) + fld('충격계수 α', 'cond.alpha', cd.alpha) + fld('근입깊이 Df <em>m</em>', 'cond.Df', cd.Df) + '</div></section>');
+
+  h.push('<button class="reset" type="button" data-act="reset" id="btnReset">샘플값으로 되돌리기</button>');
+  $('inputs').innerHTML = h.join('');
+}
+
+function setPath(path, val) {
+  const k = path.split('.');
+  let o = S;
+  for (let i = 0; i < k.length - 1; i++) o = o[k[i]];
+  o[k[k.length - 1]] = val;
+}
+function onField(e) {
+  const t = e.target;
+  if (!t.dataset || !t.dataset.k) return;
+  let v;
+  if (t.type === 'checkbox') v = t.checked;
+  else if (t.type === 'number') {
+    v = t.value === '' ? NaN : parseFloat(t.value);
+    if (t.dataset.sc) v = v / parseFloat(t.dataset.sc);
+  } else v = t.value;
+  setPath(t.dataset.k, v);
+  schedule();
+}
+let resetArmed = 0;
+function onClick(e) {
+  const b = e.target.closest('[data-act]');
+  if (!b) return;
+  const act = b.dataset.act, i = parseInt(b.dataset.i, 10);
+  if (act === 'add-layer' && S.soil.layers.length < 6) {
+    S.soil.layers.push({ name: '신규 지층', H: 3, gamma: 18, c: 0, phi: 30, N: 10 }); renderInputs(); schedule();
+  } else if (act === 'del-layer' && S.soil.layers.length > 1) {
+    S.soil.layers.splice(i, 1); renderInputs(); schedule();
+  } else if (act === 'add-load' && S.loads.length < 12) {
+    S.loads.push({ name: '기타 하중', W: 0, y: 0, dyn: false }); renderInputs(); schedule();
+  } else if (act === 'del-load' && S.loads.length > 1) {
+    S.loads.splice(i, 1); renderInputs(); schedule();
+  } else if (act === 'reset') {
+    if (!resetArmed) {
+      resetArmed = setTimeout(() => { resetArmed = 0; const r = $('btnReset'); if (r) r.textContent = '샘플값으로 되돌리기'; }, 3500);
+      b.textContent = '입력값이 모두 사라집니다. 한 번 더 누르면 되돌립니다.';
+    } else {
+      clearTimeout(resetArmed); resetArmed = 0; S = makeSample(); renderInputs(); schedule(); toast('샘플값으로 되돌렸습니다.');
+    }
+  }
+}
+
+/* ---- 결과 표시 ---- */
+let rafPending = false;
+function schedule() {
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => { rafPending = false; update(); });
+}
+
+function valText(c) {
+  if (c.u === null) return '–';
+  if (c.id === 1) return fmt(c.value, 1) + '<small>kPa</small>';
+  if (c.id === 5) return fmt(c.value, 2) + '<small>m</small>';
+  return fmt(c.value, 2);
+}
+function limText(c) {
+  if (c.u === null) return '하부 지층이 없어 생략';
+  return '기준 ' + c.rel + ' ' + fmt(c.limit, c.id === 1 ? 1 : 2) + (c.id === 1 ? ' kPa' : c.id === 5 ? ' m' : '');
+}
+
+function renderTop() {
+  const chip = $('chip');
+  if (!R || !R.ok) {
+    chip.className = 'chip st-NA'; $('chipText').textContent = '입력 확인 필요';
+    return;
+  }
+  chip.className = 'chip st-' + R.status;
+  $('chipText').innerHTML = STLABEL[R.status] + ' <small>최대 ' + fmt(R.umax * 100, 0) + '%</small>';
+}
+
+function renderIssues() {
+  const box = $('issues');
+  if (!R.issues.length) { box.hidden = true; box.innerHTML = ''; return; }
+  const hasErr = R.issues.some(i => i.lv === 'err');
+  box.hidden = false;
+  box.className = 'issues' + (hasErr ? ' err' : '');
+  box.innerHTML = '<ul>' + R.issues.map(i => '<li>' + esc(i.msg) + '</li>').join('') + '</ul>';
+}
+
+function renderChecks() {
+  const banner = '<div class="ck banner st-' + R.status + '"><div class="ck-k">종합판정</div><div class="ck-big">' + STLABEL[R.status] +
+    '</div><div class="ck-s">최대 사용률 ' + fmt(R.umax * 100, 0) + '% · ' + esc(R.worst.name) + '</div></div>';
+  const cards = R.checks.map(c => {
+    const w = c.u === null ? 0 : Math.min(c.u, 1.25) / 1.25 * 100;
+    return '<div class="ck st-' + c.st + '"><div class="ck-top"><span class="ck-n">' + c.id + '</span><span class="ck-t">' + c.name + '</span><span class="pl">' + STLABEL[c.st] + '</span></div>' +
+      '<div class="ck-v">' + valText(c) + '</div><div class="ck-l">' + limText(c) + '</div>' +
+      '<div class="gauge"><i style="width:' + w.toFixed(1) + '%"></i><b></b></div>' +
+      '<div class="ck-f">' + (c.u === null ? '' : '사용률 ' + fmt(c.u * 100, 0) + '% · ') + esc(c.note) + '</div></div>';
+  });
+  $('checks').innerHTML = banner + cards.join('');
+}
+
+function renderFigs() {
+  $('figElev').innerHTML = svgElevation(R, PAL_SCREEN);
+  $('figPress').innerHTML = svgPressure(R, PAL_SCREEN);
+  $('figPlan').innerHTML = svgPlan(R, PAL_SCREEN);
+  $('legend').innerHTML = R.rows.map((r, i) => r.W > 0
+    ? '<span><b>' + (i + 1) + '</b>' + esc(r.name) + ' · ' + fmt(r.W, 0) + ' kN · y ' + sgn(r.y, 2) + '</span>' : '').join('');
+}
+
+function renderDetail() {
+  const g = (t, rows) => '<div><h4>' + t + '</h4><table>' + rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</table></div>';
+  const m = R.mu;
+  const parts = [
+    g('하중 · 편심', [['총 하중 ΣW', fmt(R.Wsum, 1) + ' kN'], ['깔판 중량 (2매)', fmt(R.Wp, 1) + ' kN'], ['편심 e', sgn(R.e, 3) + ' m'], ['동하중 계수 α', fmt(R.cond.alpha, 2)]]),
+    g('접지압', [['접지면 B<sub>g</sub> × L<sub>g</sub>', fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' m'], ['접지면적 A', fmt(R.A, 2) + ' m²'], ['평균 q<sub>avg</sub>', fmt(R.qavg, 1) + ' kPa'],
+      ['최대 q<sub>max</sub>', fmt(R.qmax, 1) + ' kPa'], ['최소 q<sub>min</sub>', fmt(R.qmin, 1) + ' kPa'], ['접지 상태', R.full ? '전면 접지' : '일부 접지']]),
+    g('지지력 (1층)', [['N<sub>c</sub> / N<sub>q</sub> / N<sub>γ</sub>', fmt(m.Nc, 2) + ' / ' + fmt(m.Nq, 2) + ' / ' + fmt(m.Ng, 2)], ['극한지지력 q<sub>u</sub>', fmt(m.qu, 1) + ' kPa'],
+      ['허용지지력 q<sub>a</sub>', fmt(R.qa, 1) + ' kPa'], ['유효길이 L′', fmt(R.Le, 2) + ' m'], ['q<sub>eff</sub>', fmt(R.qeff, 1) + ' kPa'], ['q<sub>u</sub>′', fmt(R.mu2.qu, 1) + ' kPa']]),
+    g('전도 (전방)', [['저항모멘트 M<sub>r</sub>', fmt(R.Mr, 1) + ' kN·m'], ['전도모멘트 M<sub>o</sub>', fmt(R.Mo, 1) + ' kN·m'], ['전도 안전율', fmt(R.FSt, 2)]])
+  ];
+  let low = '';
+  if (R.lowers.length) {
+    low = '<div class="tw"><h4>하부 지층 (2:1 분산 · 순지지력 기준)</h4><table><thead><tr><th>지층</th><th>z (m)</th><th>B<sub>v</sub> × L<sub>v</sub> (m)</th><th>q<sub>v</sub></th><th>σ′<sub>v</sub></th><th>q<sub>u</sub></th><th>q<sub>net</sub></th><th>FS</th></tr></thead><tbody>' +
+      R.lowers.map(l => '<tr><td>' + (l.idx + 1) + '층 ' + esc(trunc(l.name.replace(/\s*\(.*\)/, ''), 8)) + '</td><td>' + fmt(l.z, 1) + '</td><td>' + fmt(l.Bv, 2) + ' × ' + fmt(l.Lv, 2) + (l.overlap ? ' *' : '') +
+        '</td><td>' + fmt(l.qv, 1) + '</td><td>' + fmt(l.sv, 1) + '</td><td>' + fmt(l.qu, 1) + '</td><td>' + fmt(l.qnet, 1) + '</td><td>' + fmt(l.FS, 2) + '</td></tr>').join('') +
+      '</tbody></table><p class="sub">* 두 궤도의 응력영역이 겹쳐 G + B<sub>g</sub> + z 로 산정. 단위 kPa.</p></div>';
+  }
+  $('detailBody').innerHTML = '<div class="dg">' + parts.join('') + '</div>' + low;
+}
+
+function renderLoadSum() {
+  const el = $('loadSum');
+  if (!el) return;
+  if (!R || !R.ok) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div><span>총 하중 ΣW </span>' + fmt(R.Wsum, 1) + ' kN</div><div><span>합력 편심 e </span>' + sgn(R.e, 2) + ' m</div><div><span>평균 접지압 </span>' + fmt(R.qavg, 1) + ' kPa</div>';
+}
+
+function syncPlate() {
+  const on = !!S.plate.use;
+  document.querySelectorAll('#plateF input').forEach(i => { i.disabled = !on; });
+}
+
+let pvTimer = 0, pvToken = 0;
+function schedulePreview() {
+  if (!$('pv').open) return;
+  clearTimeout(pvTimer);
+  pvTimer = setTimeout(refreshPreview, 500);
+}
+async function refreshPreview() {
+  if (!R || !R.ok) { $('pvBody').innerHTML = '<p class="sub">입력값을 확인하면 미리보기가 표시됩니다.</p>'; return; }
+  const my = ++pvToken;
+  const stage = $('pvStage');
+  try {
+    const pages = await buildReportPages(S, R, stage);
+    if (my !== pvToken) return;
+    $('pvBody').innerHTML = '';
+    pages.forEach(p => $('pvBody').appendChild(p));
+    stage.innerHTML = '';
+  } catch (e) { $('pvBody').innerHTML = '<p class="sub">미리보기를 만들지 못했습니다.</p>'; }
+}
+
+function update() {
+  R = analyze(S);
+  renderTop();
+  renderIssues();
+  syncPlate();
+  if (!R.ok) {
+    $('checks').innerHTML = '';
+    ['figElev', 'figPress', 'figPlan', 'legend', 'detailBody'].forEach(id => { $(id).innerHTML = ''; });
+    renderLoadSum();
+    schedulePreview();
+    persist();
+    return;
+  }
+  renderChecks(); renderFigs(); renderDetail(); renderLoadSum();
+  schedulePreview();
+  persist();
+}
+
+/* ---- 저장 (PDF · Excel) ---- */
+let DL = null, dlReady = false, busy = false;
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('on'), 3600);
+}
+function updateSaveUI() {
+  const note = $('saveNote');
+  if (dlReady && !DL) {
+    note.hidden = false;
+    note.textContent = '이 보기에서는 파일 저장을 사용할 수 없습니다. claude.ai 에서 이 페이지를 열면 PDF·Excel 저장이 가능합니다.';
+    $('btnPdf').disabled = true; $('btnXls').disabled = true;
+  } else {
+    note.hidden = true;
+    $('btnPdf').disabled = busy; $('btnXls').disabled = busy;
+  }
+}
+/* claude.ai 밖(일반 브라우저로 직접 연 HTML)에서는 브라우저 기본 다운로드를 사용 */
+function browserSave(req) {
+  return new Promise((resolve, reject) => {
+    try {
+      const blob = req.data instanceof Blob ? req.data : new Blob([req.data]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = req.filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      resolve({ status: 'saved' });
+    } catch (e) { reject(e); }
+  });
+}
+(async function initDL() {
+  const inViewer = !!(window.claude && window.claude.use);
+  try { if (inViewer) DL = await window.claude.use('downloads'); } catch (e) { DL = null; }
+  if (!DL && !inViewer) DL = { save: browserSave };
+  dlReady = true; updateSaveUI();
+})();
+
+function fileStem() {
+  const d = (S.proj.date || '').replace(/[^0-9]/g, '') || 'report';
+  return '항타기_지지력_검토서_' + d;
+}
+function saveError(err) {
+  const code = err && err.code;
+  if (code === 'declined') toast('저장이 취소되었습니다.');
+  else if (code === 'rate_limited') toast('저장 확인창이 이미 열려 있습니다. 잠시 후 다시 시도하세요.');
+  else if (code === 'too_large') toast('파일이 너무 큽니다.');
+  else toast('저장하지 못했습니다. ' + (err && err.message ? err.message : ''));
+}
+async function guard() {
+  if (busy) return false;
+  if (!dlReady) { toast('저장 기능을 준비하는 중입니다. 잠시 후 다시 시도하세요.'); return false; }
+  if (!DL) { updateSaveUI(); return false; }
+  if (!R || !R.ok) { toast('입력값 오류를 먼저 수정하세요.'); return false; }
+  return true;
+}
+
+async function savePDF() {
+  if (!(await guard())) return;
+  if (!window.html2canvas || !window.jspdf) { toast('PDF 라이브러리를 불러오지 못했습니다. 네트워크를 확인하세요.'); return; }
+  busy = true; updateSaveUI();
+  const btn = $('btnPdf'), label = btn.textContent;
+  btn.textContent = 'PDF 생성 중…';
+  const host = $('offscreen');
+  try {
+    const pages = await buildReportPages(S, R, host);
+    const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compression: true });
+    for (let i = 0; i < pages.length; i++) {
+      const canvas = await window.html2canvas(pages[i], { scale: 2, backgroundColor: '#ffffff', logging: false, windowWidth: Math.max(window.innerWidth, 900) });
+      if (i > 0) doc.addPage();
+      doc.addImage(canvas.toDataURL('image/jpeg', 0.93), 'JPEG', 0, 0, 210, 297);
+    }
+    const blob = doc.output('blob');
+    host.innerHTML = '';
+    btn.textContent = label;
+    await DL.save({ filename: fileStem() + '.pdf', data: blob });
+    toast('PDF 를 저장했습니다.');
+  } catch (err) { saveError(err); }
+  finally { host.innerHTML = ''; btn.textContent = label; busy = false; updateSaveUI(); }
+}
+
+async function saveXLS() {
+  if (!(await guard())) return;
+  if (!window.XLSX) { toast('Excel 라이브러리를 불러오지 못했습니다. 네트워크를 확인하세요.'); return; }
+  busy = true; updateSaveUI();
+  try {
+    const wb = buildWorkbook(window.XLSX, S, R);
+    const buf = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    await DL.save({ filename: fileStem().replace('검토서', '검토') + '.xlsx', data: buf });
+    toast('Excel 파일을 저장했습니다.');
+  } catch (err) { saveError(err); }
+  finally { busy = false; updateSaveUI(); }
+}
+
+/* ---- 시작 ---- */
+function init() {
+  renderInputs();
+  const inp = $('inputs');
+  inp.addEventListener('input', onField);
+  inp.addEventListener('change', onField);
+  inp.addEventListener('click', onClick);
+  $('btnPdf').addEventListener('click', savePDF);
+  $('btnXls').addEventListener('click', saveXLS);
+  $('pv').addEventListener('toggle', () => { if ($('pv').open) refreshPreview(); });
+  update();
+}
+init();
+
 </script>
 </body>
 </html>
