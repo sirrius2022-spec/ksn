@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko" class="scroll-smooth">
 <head>
@@ -8,38 +7,50 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome 6 Pro-style Icons -->
+    <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Pretendard Font -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
                     },
                     colors: {
-                        darkBg: '#090d16',
-                        darkCard: 'rgba(15, 23, 42, 0.75)',
-                        cardBorder: 'rgba(255, 255, 255, 0.08)',
-                        brand: {
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            glow: 'rgba(59, 130, 246, 0.25)',
+                        pastel: {
+                            canvas: '#F8FAFC',
+                            card: 'rgba(255, 255, 255, 0.88)',
+                            cardHover: 'rgba(255, 255, 255, 0.98)',
+                            blue: '#60A5FA',
+                            blueSoft: '#EFF6FF',
+                            lavender: '#818CF8',
+                            lavenderSoft: '#EEF2FF',
+                            mint: '#34D399',
+                            mintSoft: '#ECFDF5',
+                            peach: '#FB923C',
+                            peachSoft: '#FFF7ED',
+                            rose: '#F472B6',
+                            roseSoft: '#FDF2F8',
+                            slate: '#475569',
+                            slateDark: '#1E293B',
+                            border: 'rgba(226, 232, 240, 0.9)'
                         }
                     },
                     animation: {
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 6s ease-in-out infinite',
+                        'float': 'float 5s ease-in-out infinite',
+                        'soft-pulse': 'softPulse 3s ease-in-out infinite',
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-6px)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                        softPulse: {
+                            '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+                            '50%': { opacity: '0.85', transform: 'scale(1.04)' },
                         }
                     }
                 }
@@ -50,56 +61,60 @@
     <style>
         body {
             font-family: 'Pretendard', sans-serif;
-            background-color: #080c15;
-            color: #f1f5f9;
+            background-color: #F8FAFC;
+            color: #334155;
             overflow-x: hidden;
-            letter-spacing: -0.015em;
+            letter-spacing: -0.02em;
         }
 
-        /* Subtle grid background */
-        .bg-grid-pattern {
-            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-            background-size: 28px 28px;
+        /* Subtle Pastel Ambient Orbs */
+        .pastel-orb-1 {
+            background: radial-gradient(circle, rgba(199, 210, 254, 0.6) 0%, rgba(240, 244, 255, 0) 70%);
+        }
+        .pastel-orb-2 {
+            background: radial-gradient(circle, rgba(254, 215, 170, 0.45) 0%, rgba(255, 247, 237, 0) 70%);
+        }
+        .pastel-orb-3 {
+            background: radial-gradient(circle, rgba(187, 247, 208, 0.45) 0%, rgba(240, 253, 244, 0) 70%);
         }
 
-        /* Ambient glowing circles */
-        .ambient-glow-1 {
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.22) 0%, rgba(37, 99, 235, 0) 70%);
-        }
-        .ambient-glow-2 {
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0) 70%);
+        /* Dotted Grid Pattern */
+        .bg-pastel-grid {
+            background-image: radial-gradient(rgba(148, 163, 184, 0.18) 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
         }
 
-        /* Glassmorphism Card Style */
-        .tech-card {
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Pastel Soft Card */
+        .pastel-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.12), 0 2px 6px -1px rgba(148, 163, 184, 0.06);
+            transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .tech-card:hover {
+        .pastel-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(96, 165, 250, 0.45);
-            background: rgba(20, 30, 55, 0.8);
-            box-shadow: 0 16px 36px -10px rgba(37, 99, 235, 0.25), 0 0 1px 1px rgba(96, 165, 250, 0.3);
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(147, 197, 253, 0.9);
+            box-shadow: 0 16px 32px -8px rgba(96, 165, 250, 0.22), 0 6px 12px -3px rgba(148, 163, 184, 0.08);
         }
 
-        /* Smooth scrollbar styling */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
         }
         ::-webkit-scrollbar-track {
-            background: #090d16;
+            background: #F1F5F9;
         }
         ::-webkit-scrollbar-thumb {
-            background: #1e293b;
+            background: #CBD5E1;
             border-radius: 9999px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #334155;
+            background: #94A3B8;
         }
 
         .hide-scrollbar::-webkit-scrollbar {
@@ -115,7 +130,6 @@
         function openInExternalBrowser(url) {
             const userAgent = navigator.userAgent.toLowerCase();
             if (userAgent.match(/kakaotalk/i)) {
-                // KakaoTalk in-app browser bypass
                 location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
             } else {
                 window.open(url, '_blank', 'noopener,noreferrer');
@@ -129,7 +143,7 @@
             tempInput.select();
             try {
                 document.execCommand('copy');
-                showToast('홈페이지 주소가 복사되었습니다.');
+                showToast('홈페이지 주소가 클립보드에 복사되었습니다 📋');
             } catch (err) {
                 console.error(err);
             }
@@ -147,142 +161,180 @@
                 toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
             }, 2500);
         }
+
+        function toggleQrModal(show) {
+            const modal = document.getElementById('qrModal');
+            if (show) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.querySelector('.modal-box').classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                modal.querySelector('.modal-box').classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
+        }
     </script>
 </head>
-<body class="min-h-screen flex flex-col relative selection:bg-blue-500/30 selection:text-blue-200">
+<body class="min-h-screen flex flex-col relative selection:bg-blue-100 selection:text-blue-700">
 
-    <!-- Background Ambient Lighting & Grid -->
-    <div class="fixed inset-0 bg-grid-pattern opacity-40 pointer-events-none z-0"></div>
-    <div class="fixed -top-40 left-1/2 -translate-x-1/2 w-[720px] h-[500px] ambient-glow-1 rounded-full pointer-events-none z-0"></div>
-    <div class="fixed top-1/3 -right-40 w-[600px] h-[600px] ambient-glow-2 rounded-full pointer-events-none z-0"></div>
+    <div class="fixed inset-0 bg-pastel-grid pointer-events-none z-0"></div>
+    <div class="fixed -top-32 -left-20 w-[550px] h-[550px] pastel-orb-1 rounded-full pointer-events-none z-0 blur-3xl animate-soft-pulse"></div>
+    <div class="fixed top-1/4 -right-20 w-[500px] h-[500px] pastel-orb-2 rounded-full pointer-events-none z-0 blur-3xl animate-soft-pulse" style="animation-delay: 1.5s;"></div>
+    <div class="fixed bottom-10 left-1/3 w-[600px] h-[600px] pastel-orb-3 rounded-full pointer-events-none z-0 blur-3xl"></div>
 
-    <!-- Top Navigation Bar (고정 해제: sticky 제거 및 일반 스크롤 흐름 적용) -->
-    <header class="relative z-40 border-b border-white/10 bg-[#090d16]/80 backdrop-blur-xl">
+    <header class="relative z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-md shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <!-- Brand Identity -->
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-sky-500 p-[1px] shadow-lg shadow-blue-500/20 flex items-center justify-center">
-                    <div class="w-full h-full bg-slate-950/90 rounded-[11px] flex items-center justify-center">
-                        <i class="fa-solid fa-helmet-safety text-blue-400 text-lg"></i>
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-400 via-indigo-400 to-pink-300 p-0.5 shadow-md shadow-sky-100 flex items-center justify-center">
+                    <div class="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
+                        <i class="fa-solid fa-helmet-safety text-sky-500 text-lg"></i>
                     </div>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-black tracking-tight text-white sm:text-base">김성남</span>
-                        <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 tracking-wide uppercase">Academy</span>
+                        <span class="text-base font-extrabold tracking-tight text-slate-800">김성남 교수</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-600 border border-sky-200 tracking-wider">ACADEMY</span>
                     </div>
-                    <p class="text-[11px] text-slate-400 hidden sm:block">스마트 건설안전 · AI 공학 통합 포털</p>
+                    <p class="text-[11px] text-slate-500 hidden sm:block font-medium">스마트 건설안전 · AI 공학 통합 아카데미</p>
                 </div>
             </div>
 
             <!-- Header Quick Action Buttons -->
             <div class="flex items-center gap-2">
                 <a href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" target="_blank" 
-                   class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 transition-all">
-                    <i class="fa-solid fa-folder-open text-amber-400"></i> 실습자료실
+                   class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 transition-all shadow-sm">
+                    <i class="fa-solid fa-folder-open text-amber-500"></i> 실습자료실
                 </a>
                 <a href="https://padlet.com/sirrius2022/padlet-9cd0j2khbmx7m2ec" target="_blank" 
-                   class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 transition-all">
-                    <i class="fa-solid fa-comments text-indigo-400"></i> 질의응답
+                   class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition-all shadow-sm">
+                    <i class="fa-solid fa-comments text-indigo-500"></i> 질의응답
                 </a>
                 <button onclick="copyCurrentUrl()" 
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-blue-300 bg-blue-950/50 hover:bg-blue-900/60 border border-blue-500/30 transition-all">
+                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition-all shadow-sm">
                     <i class="fa-regular fa-clone"></i> 주소 복사
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <main class="relative z-10 flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 w-full">
+    <main class="relative z-10 flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-16 w-full">
 
-        <!-- Modern Hero Card -->
-        <section class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-slate-900/90 via-slate-900/60 to-slate-950/90 p-6 sm:p-10 mb-10 shadow-2xl backdrop-blur-xl">
-            <div class="absolute -right-16 -bottom-16 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -left-16 -top-16 w-60 h-60 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <!-- Modern Pastel Hero Card with Embedded QR Badge -->
+        <section class="relative overflow-hidden rounded-3xl border border-white/90 bg-white/70 p-6 sm:p-9 mb-9 shadow-lg backdrop-blur-xl">
+            <div class="absolute -right-20 -top-20 w-72 h-72 bg-sky-200/40 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-20 -bottom-20 w-72 h-72 bg-pink-100/50 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
-                <div class="max-w-3xl">
+            <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+                <!-- Text Content -->
+                <div class="max-w-3xl flex-1 text-center lg:text-left">
                     <!-- Status pill -->
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium mb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-bold mb-4 shadow-sm">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        스마트 건설안전기술 & 생성형 AI 교육 에이전트
+                        스마트 건설안전기술 & AI 공학 실습 아카데미
                     </div>
 
-                    <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight sm:leading-tight">
-                        건설안전의 미래를 이끄는<br class="hidden sm:inline" />
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-300">
-                            스마트 AI 공학 실습 플랫폼
+                    <h1 class="text-2xl sm:text-4xl font-black text-slate-800 tracking-tight leading-snug sm:leading-tight">
+                        건설안전의 미래를 여는<br class="hidden sm:inline" />
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-400">
+                            스마트 생성형 AI 공학 실습 포털
                         </span>
                     </h1>
 
-                    <p class="mt-4 text-slate-300 text-sm sm:text-base leading-relaxed">
-                        안녕하세요, <strong>김성남</strong>입니다. 본 포털은 건설안전 현장 실무와 학술적 공학 이론을 융합한 통합 교육 허브입니다. 
-                        현장에서 즉시 활용 가능한 <span class="text-blue-300 font-semibold">AI 위험성 평가 에이전트, 흙막이 탄소성 해석, 실무 유틸리티 도구 및 참여형 강의 컨텐츠</span>를 제공합니다.
+                    <p class="mt-3.5 text-slate-600 text-sm sm:text-base leading-relaxed">
+                        안녕하세요, <strong>김성남 교수</strong>입니다. 현장 실무와 학술적 이론을 융합하여 
+                        <span class="text-sky-700 font-semibold bg-sky-50/80 px-1 py-0.5 rounded border border-sky-100">4M 위험성 평가 AI, 흙막이 해석, 장비 안전성 검토, 참여형 실무 도구</span>를 
+                        브라우저에서 즉시 실행 가능한 형태로 지원합니다.
                     </p>
 
                     <!-- Key Topics Tags -->
-                    <div class="mt-6 flex flex-wrap gap-2 text-xs">
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-hard-hat text-amber-400"></i> 건설안전공학
+                    <div class="mt-5 flex flex-wrap justify-center lg:justify-start gap-2 text-xs font-medium">
+                        <span class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/70 text-amber-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-hard-hat text-amber-500"></i> 건설안전공학
                         </span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-microchip text-sky-400"></i> 4M 위험성 평가
+                        <span class="px-3 py-1.5 rounded-xl bg-sky-50 border border-sky-200/70 text-sky-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-microchip text-sky-500"></i> 4M 위험성 평가
                         </span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-robot text-purple-400"></i> 생성형 AI 실무 도구
+                        <span class="px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200/70 text-purple-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-robot text-purple-500"></i> 생성형 AI 실습
                         </span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-bolt text-emerald-400"></i> 인터랙티브 강의
+                        <span class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200/70 text-emerald-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-bolt text-emerald-500"></i> 스마트 안전 도구
                         </span>
                     </div>
                 </div>
 
-                <!-- Metrics / Summary Box -->
-                <div class="w-full lg:w-72 shrink-0 bg-slate-950/60 border border-white/10 rounded-2xl p-5 backdrop-blur-md">
-                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between">
-                        <span>Platform Overview</span>
-                        <i class="fa-solid fa-chart-simple text-blue-400"></i>
-                    </h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                            <span class="block text-2xl font-bold text-white" id="totalToolsCount">20+</span>
-                            <span class="text-[11px] text-slate-400">등록 실무도구</span>
+                <div class="w-full sm:w-auto lg:w-80 shrink-0 flex flex-col gap-3">
+                    <!-- Front QR Code Compact Card -->
+                    <div class="bg-gradient-to-br from-white to-slate-50 border border-slate-200/80 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleQrModal(true)" title="크게 보기" class="relative group shrink-0 rounded-xl overflow-hidden border border-slate-200 bg-white p-1 hover:border-sky-400 transition-all shadow-sm">
+                                <img src="https://raw.githubusercontent.com/sirrius2022-spec/ksn/main/homepage_qr.jpg" 
+                                     alt="홈페이지 바로가기 QR코드" 
+                                     class="w-14 h-14 object-cover rounded-lg group-hover:scale-105 transition-transform"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/120x120/EFF6FF/2563EB?text=QR+Code';">
+                                <span class="absolute inset-0 bg-sky-600/10 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-[10px] text-sky-700 font-bold">확대</span>
+                            </button>
+                            <div>
+                                <div class="flex items-center gap-1 text-[11px] font-bold text-sky-600 uppercase tracking-wide">
+                                    <i class="fa-solid fa-qrcode"></i> 모바일 간편 스캔
+                                </div>
+                                <p class="text-xs font-bold text-slate-800 mt-0.5">홈페이지 QR 대문</p>
+                                <p class="text-[11px] text-slate-500">스마트폰으로 즉시 접속</p>
+                            </div>
                         </div>
-                        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                            <span class="block text-2xl font-bold text-sky-400">100%</span>
-                            <span class="text-[11px] text-slate-400">웹 기반 즉시실행</span>
-                        </div>
+                        <button onclick="toggleQrModal(true)" 
+                                class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-white text-slate-700 hover:text-sky-600 hover:bg-sky-50 border border-slate-200 transition-all shrink-0">
+                            크게보기
+                        </button>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>최적화 환경</span>
-                        <span class="text-emerald-400 font-medium"><i class="fa-solid fa-check-circle mr-1"></i>모바일 & PC 대응</span>
+
+                    <!-- Metrics / Summary Box -->
+                    <div class="bg-white/80 border border-slate-200/80 rounded-2xl p-4 backdrop-blur-md shadow-sm">
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div class="p-3 rounded-xl bg-sky-50/70 border border-sky-100 text-center">
+                                <span class="block text-2xl font-black text-sky-600" id="totalToolsCount">20+</span>
+                                <span class="text-[11px] font-semibold text-slate-600">등록 실무도구</span>
+                            </div>
+                            <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-100 text-center">
+                                <span class="block text-2xl font-black text-indigo-600">100%</span>
+                                <span class="text-[11px] font-semibold text-slate-600">웹 즉시실행</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                            <span>접속 환경</span>
+                            <span class="text-emerald-600 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check"></i> 모바일 & PC 호환
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Controls: Category Chips & Search Box (고정 해제: sticky 제거) -->
         <section class="relative z-30 py-2 mb-6">
             <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
                 <!-- Category Filter Tabs -->
-                <div class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1 md:pb-0" id="filter-tabs">
+                <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0" id="filter-tabs">
                     <button onclick="filterCategory('all')" data-category="all" 
-                            class="tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/50 flex items-center gap-1.5">
+                            class="tab-btn active px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-sky-500 text-white shadow-md shadow-sky-200 border border-sky-400 flex items-center gap-1.5">
                         <i class="fa-solid fa-layer-group"></i> 전체보기
-                        <span class="tab-count ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">20</span>
+                        <span class="tab-count ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-white/25">20</span>
                     </button>
                     <button onclick="filterCategory('ai')" data-category="ai" 
-                            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-slate-900/70 text-slate-300 hover:text-white hover:bg-slate-800 border border-white/10 flex items-center gap-1.5">
-                        <i class="fa-solid fa-robot text-sky-400"></i> 건설안전 & AI
+                            class="tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-white text-slate-600 hover:text-sky-600 hover:bg-sky-50/50 border border-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-robot text-sky-500"></i> 건설안전 & AI
                     </button>
                     <button onclick="filterCategory('utility')" data-category="utility" 
-                            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-slate-900/70 text-slate-300 hover:text-white hover:bg-slate-800 border border-white/10 flex items-center gap-1.5">
-                        <i class="fa-solid fa-toolbox text-emerald-400"></i> 실무 & 생성도구
+                            class="tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-white text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 border border-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-toolbox text-emerald-500"></i> 실무 & 생성도구
                     </button>
                     <button onclick="filterCategory('game')" data-category="game" 
-                            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-slate-900/70 text-slate-300 hover:text-white hover:bg-slate-800 border border-white/10 flex items-center gap-1.5">
-                        <i class="fa-solid fa-gamepad text-amber-400"></i> 강의용 게임 & 이벤트
+                            class="tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-white text-slate-600 hover:text-amber-600 hover:bg-amber-50/50 border border-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-gamepad text-amber-500"></i> 강의용 게임 & 이벤트
                     </button>
                 </div>
 
@@ -290,662 +342,649 @@
                 <div class="relative w-full md:w-80">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                     <input type="text" id="searchInput" oninput="handleSearch()" placeholder="도구명, 키워드 검색..." 
-                           class="w-full pl-10 pr-9 py-2.5 bg-slate-900/80 border border-white/10 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all backdrop-blur-sm shadow-inner">
-                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
-                        <i class="fa-solid fa-xmark"></i>
+                           class="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all shadow-sm">
+                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                        <i class="fa-solid fa-circle-xmark"></i>
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- Tools & Content Grid -->
         <section class="mb-14">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" id="cardGrid">
 
                 <!-- 1. 4M 위험성 평가 에이전트 -->
-                <a href="/agent/4m/index.html" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="4m 위험성 평가 에이전트 현장 사진 분석 인적 기계적 작업적 관리적 안전진단">
+                <a href="/agent/4m/index.html" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="4m 위험성 평가 에이전트 현장 사진 분석 인적 기계적 작업적 관리적 안전진단">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-600/10 border border-sky-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🤖
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30">위험성평가</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200">위험성평가</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-blue-300 transition-colors">4M 위험성 평가 에이전트</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-sky-600 transition-colors">4M 위험성 평가 에이전트</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             현장 사진을 기반으로 4M(인적, 기계적, 작업적, 관리적) 위험 요인을 정밀 분석하는 전문 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-sky-400 group-hover:text-sky-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 group-hover:text-sky-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
                 <!-- 2. 흙막이 탄소성 해석 에이전트 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/sunex-ai" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="흙막이 탄소성 해석 에이전트 굴착 지반 거동 구조물 상호작용 지반공학 sunex ai">
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/sunex-ai" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="흙막이 탄소성 해석 에이전트 굴착 지반 거동 구조물 상호작용 지반공학 sunex ai">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-600/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🏗️
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">지반공학 AI</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">지반공학 AI</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colors">흙막이 탄소성 해석 에이전트</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 정밀하게 분석하여 안전성을 검토하는 전문 도구
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-amber-600 transition-colors">흙막이 탄소성 해석 에이전트</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 정밀하게 분석하여 안전성을 검토하는 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600 group-hover:text-amber-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
                 <!-- 3. 이동식크레인 안전성검토 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/car1/car1.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="이동식크레인 안전성검토 양중작업 크레인 하중 모멘트 전복 위험도">
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/car1/car1.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="이동식크레인 안전성검토 양중작업 크레인 하중 모멘트 전복 위험도">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-600/10 border border-red-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🚜
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-500/10 text-red-300 border border-red-500/30">장비 안전</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">장비 안전</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-red-300 transition-colors">이동식크레인 안전성검토</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            이동식 크레인 양중 작업 시 정격하중, 작업반경 및 전복 방지 안전율을 체계적으로 산출 및 검토하는 도구
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-rose-600 transition-colors">이동식크레인 안전성검토</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            이동식 크레인 양중 작업 시 정격하중, 작업반경 및 전복 방지 안전율을 체계적으로 산출 및 검토
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-red-400 group-hover:text-red-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600 group-hover:text-rose-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-
-<!-- 3. 항타기 지지럭 검토 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/car2/car2.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="항타기 지지럭 검토">
+                <!-- 4. 항타기 지지력 검토 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/car2/car2.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="항타기 지지력 검토 항타 장비 지지력 전복 안전성">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-600/10 border border-red-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                                🚜
+                            <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
+                                🔨
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-500/10 text-red-300 border border-red-500/30">장비 안전</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">장비 안전</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-red-300 transition-colors"><항타기 지지럭 검토<h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-orange-600 transition-colors">항타기 지지력 검토</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            항타기 시공 시 지반 지지력과 트랙 접지압을 비교 분석하여 장비 전도 사고를 예방하는 검토 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-red-400 group-hover:text-red-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                
-                <!-- 4. 스마트 공학용 계산기 -->
-                <a href="/agent/cal/index.html" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="스마트 공학용 계산기 수식 계산 현장 실무 웹 계산기 삼각함수">
+                <!-- 5. 스마트 공학용 계산기 -->
+                <a href="/agent/cal/index.html" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="스마트 공학용 계산기 수식 계산 현장 실무 웹 계산기 삼각함수">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500/20 to-emerald-600/10 border border-teal-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🔢
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/30">공학 계산</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200">공학 계산</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-teal-300 transition-colors">스마트 공학용 계산기</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-teal-600 transition-colors">스마트 공학용 계산기</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             강의 및 현장 실무에서 복잡한 구조·역학 수식을 즉각 해결할 수 있는 웹 기반 정밀 공학 계산기
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-teal-400 group-hover:text-teal-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-600 group-hover:text-teal-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 5. 홈페이지 제작 가이드 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/guide/homepage/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="홈페이지 제작 가이드 개인 웹사이트 지식 공유 에이전트 구축 매뉴얼">
+                <!-- 6. 홈페이지 제작 가이드 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/guide/homepage/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="홈페이지 제작 가이드 개인 웹사이트 지식 공유 에이전트 구축 매뉴얼">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-600/10 border border-violet-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🌐
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/30">웹 구축 가이드</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">웹 구축 가이드</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-violet-300 transition-colors">홈페이지 제작 가이드</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">홈페이지 제작 가이드</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             건설 기술인을 위한 개인 지식 공유 플랫폼 및 맞춤형 AI 에이전트 웹사이트 구축 가이드
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-violet-400 group-hover:text-violet-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600 group-hover:text-indigo-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 6. QR코드 이미지 생성기 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/qr/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="qr코드 이미지 생성기 큐알 생성 텍스트 주소 변환">
+                <!-- 7. QR코드 이미지 생성기 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/qr/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="qr코드 이미지 생성기 큐알 생성 텍스트 주소 변환">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-green-600/10 border border-emerald-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 📱
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">생성 도구</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">생성 도구</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-emerald-300 transition-colors">QR코드 이미지 생성기</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            원하는 URL 및 교육 텍스트를 고화질 QR코드 이미지로 신속하게 즉시 생성 및 다운로드하는 도구
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">QR코드 이미지 생성기</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            원하는 URL 및 교육 텍스트를 고화질 QR코드 이미지로 신속하게 즉시 생성 및 다운로드
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-emerald-400 group-hover:text-emerald-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600 group-hover:text-emerald-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 7. 무료 웹 메모장 -->
-                <a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/memo/index.html')" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="메모장 무료 웹 메모 필기 실무 노트">
+                <!-- 8. 무료 웹 메모장 -->
+                <a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/memo/index.html')" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="메모장 무료 웹 메모 필기 실무 노트">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/10 border border-cyan-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 📝
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">실무 유틸</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200">실무 유틸</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">무료 웹 메모장</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-cyan-600 transition-colors">무료 웹 메모장</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             강의 필기나 현장 아이디어를 별도 설치 없이 브라우저에서 안전하고 편리하게 기록하는 스마트 메모장
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-cyan-400 group-hover:text-cyan-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-cyan-600 group-hover:text-cyan-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 8. AI 성우 (TTS 변환) -->
-                <a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/aiwav/index.html')" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="ai 성우 tts 텍스트 음성 변환 wav 저장 리딩 안내방송">
+                <!-- 9. AI 성우 (TTS 음성 변환) -->
+                <a href="javascript:void(0);" onclick="openInExternalBrowser('https://sirrius2022-spec.github.io/ksn/agent/aiwav/index.html')" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="ai 성우 tts 텍스트 음성 변환 wav 저장 리딩 안내방송">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500/20 to-rose-600/10 border border-pink-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🎙️
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/30">음성 생성</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-pink-50 text-pink-700 border border-pink-200">음성 생성</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-pink-300 transition-colors">AI 성우 (TTS 음성 변환)</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            안전 안내방송이나 교재 텍스트를 자연스러운 성우 음성으로 변환하고 고음질 파일로 내려받는 도구
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-pink-600 transition-colors">AI 성우 (TTS 음성 변환)</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            안전 안내방송이나 교재 텍스트를 자연스러운 성우 음성으로 변환하고 고음질 파일로 내려받기
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-pink-400 group-hover:text-pink-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-pink-600 group-hover:text-pink-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 9. 8개국어 AI 번역기 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/8lang/8lang.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="8개국어 번역기 외국인 근로자 다국어 안전 번역 글로벌">
+                <!-- 10. 8개국어 AI 번역기 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/8lang/8lang.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="8개국어 번역기 외국인 근로자 다국어 안전 번역 글로벌">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-blue-600/10 border border-indigo-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🌍
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">다국어 통역</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">다국어 통역</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-indigo-300 transition-colors">다국어 AI 번역기 (8개국어)</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-purple-600 transition-colors">다국어 AI 번역기 (8개국어)</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             다국적 현장 근로자 및 안전 교육을 위한 8개국 주요 언어 실시간 안전 수칙 번역 지원 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-600 group-hover:text-purple-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 10. 스마트 텍스트 전달 도구 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/text/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="텍스트 전달 실시간 클립보드 공유 현장 메시지">
+                <!-- 11. 스마트 텍스트 전달 도구 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/text/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="텍스트 전달 실시간 클립보드 공유 현장 메시지">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500/20 to-cyan-600/10 border border-sky-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 💬
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30">데이터 전송</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200">데이터 전송</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-sky-300 transition-colors">스마트 텍스트 전달 도구</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            강의 수강생과 강사 간 또는 기기 간에 텍스트와 코드를 빠르고 손쉽게 주고받는 브라우저 전송 도구
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-sky-600 transition-colors">스마트 텍스트 전달 도구</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            강의 수강생과 강사 간 또는 기기 간에 텍스트와 코드를 빠르고 손쉽게 주고받는 전송 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-sky-400 group-hover:text-sky-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 group-hover:text-sky-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 11. 로또 번호 생성기 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/lotto" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="로또 번호 생성기 행운 번호 추첨 이벤트 휴식">
+                <!-- 12. 로또 번호 생성기 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/lotto" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="로또 번호 생성기 행운 번호 추첨 이벤트 휴식">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-fuchsia-600/10 border border-purple-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🔮
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">이벤트</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200">이벤트</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-purple-300 transition-colors">로또 번호 생성기</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-fuchsia-600 transition-colors">로또 번호 생성기</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             행운의 숫자를 무작위 알고리즘으로 추출하여 최적의 번호 조합을 제시하는 휴식용 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-purple-400 group-hover:text-purple-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-fuchsia-600 group-hover:text-fuchsia-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 12. 마블레이싱 게임 (제미나이) -->
-                <a href="/game/mableroulet/index.html" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="마블레이싱 게임 제미나이 경연 레이싱 조별 아이스브레이킹 구슬">
+                <!-- 13. 마블레이싱 게임 (제미나이) -->
+                <a href="/game/mableroulet/index.html" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="마블레이싱 게임 제미나이 경연 레이싱 조별 아이스브레이킹 구슬">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-600/10 border border-orange-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🏎️
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-300 border border-orange-500/30">레이싱</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">레이싱</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-orange-300 transition-colors">마블레이싱 (제미나이)</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-orange-600 transition-colors">마블레이싱 (제미나이)</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             강의 중 조별 경연 및 분위기 전환을 위한 역동적인 실시간 구슬 레이스 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-orange-400 group-hover:text-orange-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 13. 마블레이싱 게임 (클로드) -->
-                <a href="/game/mablerace/index.html" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="마블레이싱 게임 클로드 경연 레이싱 조별 이벤트">
+                <!-- 14. 마블레이싱 게임 (클로드) -->
+                <a href="/game/mablerace/index.html" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="마블레이싱 게임 클로드 경연 레이싱 조별 이벤트">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-600/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🏁
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">레이싱</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">레이싱</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colors">마블레이싱 (클로드)</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-amber-600 transition-colors">마블레이싱 (클로드)</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             강의 중 집중력 향상과 팀별 아이스브레이킹을 위한 구슬 롤링 시뮬레이션 게임
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600 group-hover:text-amber-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 14. 룰렛 추첨 게임 (한국어) -->
-                <a href="/game/roulet/index.html" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="룰렛 게임 발표자 추첨 랜덤 제비뽑기 질문자">
+                <!-- 15. 발표자 룰렛 추첨 (한국어) -->
+                <a href="/game/roulet/index.html" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="룰렛 게임 발표자 추첨 랜덤 제비뽑기 질문자">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-600/10 border border-red-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🎯
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-500/10 text-red-300 border border-red-500/30">랜덤 추첨</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">랜덤 추첨</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-red-300 transition-colors">발표자 룰렛 추첨 (한국어)</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            교육생 질의응답 및 조별 발표자 지정을 위한 공정하고 긴장감 넘치는 한국어 지원 회전 룰렛
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-rose-600 transition-colors">발표자 룰렛 추첨 (한국어)</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            교육생 질의응답 및 조별 발표자 지정을 위한 공정하고 재미있는 회전 룰렛
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-red-400 group-hover:text-red-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600 group-hover:text-rose-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 15. 룰렛 게임 (English) -->
-                <a href="/game/roulet-eng/index.html" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="룰렛 게임 영어 eng roulette random draw selection">
+                <!-- 16. 룰렛 게임 (English) -->
+                <a href="/game/roulet-eng/index.html" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="룰렛 게임 영어 eng roulette random draw selection">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500/20 to-pink-600/10 border border-rose-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🎡
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/30">Global Edition</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-pink-50 text-pink-700 border border-pink-200">Global</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-rose-300 transition-colors">룰렛 게임 (English)</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-pink-600 transition-colors">룰렛 게임 (English)</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             글로벌 및 외국인 교육생을 위한 영문 인터페이스 지원 무작위 룰렛 추첨 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-rose-400 group-hover:text-rose-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-pink-600 group-hover:text-pink-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 16. 테트리스 게임 -->
-                <a href="/game/tetris/index.html" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="테트리스 게임 블록 미니게임 휴식 퍼즐">
+                <!-- 17. 클래식 테트리스 -->
+                <a href="/game/tetris/index.html" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="테트리스 게임 블록 미니게임 휴식 퍼즐">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500/20 to-amber-600/10 border border-yellow-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🧩
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-300 border border-yellow-500/30">클래식</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200">클래식</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-yellow-300 transition-colors">클래식 테트리스</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-yellow-600 transition-colors">클래식 테트리스</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             강의 쉬는 시간 두뇌 회전 및 가벼운 휴식을 위한 전통적인 블록 퍼즐 미니게임
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-yellow-400 group-hover:text-yellow-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-yellow-600 group-hover:text-yellow-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 17. 퍼즐버블 게임 -->
-                <a href="/game/puzzlebubble/index.html" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="퍼즐버블 게임 버블 슈터 슈팅 휴식 방울">
+                <!-- 18. 퍼즐버블 게임 -->
+                <a href="/game/puzzlebubble/index.html" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="퍼즐버블 게임 버블 슈터 슈팅 휴식 방울">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-lime-500/20 to-emerald-600/10 border border-lime-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-lime-100 text-lime-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🫧
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-lime-500/10 text-lime-300 border border-lime-500/30">버블 퍼즐</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-lime-50 text-lime-700 border border-lime-200">버블 퍼즐</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-lime-300 transition-colors">퍼즐버블 게임</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-lime-600 transition-colors">퍼즐버블 게임</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             동일한 색상의 버블을 조준해 터뜨리는 캐주얼 아케이드 퍼즐 게임
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-lime-400 group-hover:text-lime-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-lime-600 group-hover:text-lime-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 18. 블록깨기 게임 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/block/" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="블록깨기 게임 아케이드 벽돌깨기 브릭 알카노이드">
+                <!-- 19. 벽돌깨기 게임 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/block/" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="블록깨기 게임 아케이드 벽돌깨기 브릭 알카노이드">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500/20 to-teal-600/10 border border-green-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🧱
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-green-500/10 text-green-300 border border-green-500/30">아케이드</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">아케이드</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-green-300 transition-colors">벽돌깨기 게임</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">벽돌깨기 게임</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             패들로 공을 튕겨 화면 내 블록을 제거해 나가는 고전 명작 브릭 브레이커
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-green-400 group-hover:text-green-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600 group-hover:text-emerald-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 19. 스네이크 게임 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/snake" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="스네이크 게임 뱀게임 방향키 먹이 레트로">
+                <!-- 20. 스네이크 게임 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/snake" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="스네이크 게임 뱀게임 방향키 먹이 레트로">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-green-700/10 border border-emerald-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🐍
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">레트로</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200">레트로</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-emerald-300 transition-colors">스네이크 뱀 게임</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-teal-600 transition-colors">스네이크 뱀 게임</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             키보드 방향키를 제어하여 먹이를 먹으며 몸집을 늘려가는 클래식 스네이크
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-emerald-400 group-hover:text-emerald-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-600 group-hover:text-teal-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 20. 플래피 버드 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/bird/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="플래피 버드 장애물 점프 게임 터치">
+                <!-- 21. 플래피 버드 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/bird/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="플래피 버드 장애물 점프 게임 터치">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/10 border border-cyan-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🐦
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">아케이드</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200">순발력</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">플래피 버드</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-sky-600 transition-colors">플래피 버드</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             타이밍에 맞춰 날갯짓하며 장애물 파이프 사이를 통과하는 순발력 게임
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-cyan-400 group-hover:text-cyan-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 group-hover:text-sky-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 21. 스페이스 인베이더 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/space/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="스페이스 인베이더 외계인 슈팅 고전게임">
+                <!-- 22. 스페이스 인베이더 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/space/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="스페이스 인베이더 외계인 슈팅 고전게임">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-600/10 border border-indigo-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 👾
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">슈팅</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">슈팅</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-indigo-300 transition-colors">스페이스 인베이더</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">스페이스 인베이더</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
                             하강하는 외계 함선을 요격하며 기지를 방어하는 전설적인 복고풍 우주 슈팅 게임
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600 group-hover:text-indigo-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-                <!-- 22. 너구리 게임 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/ngr/ngr.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="너구리 게임 폰포코 점프 과일 레트로 고전">
+                <!-- 23. 너구리 (Ponpoko) 게임 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/game/ngr/ngr.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="너구리 게임 폰포코 점프 과일 레트로 고전">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600/20 to-orange-700/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
                                 🦝
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">어드벤처</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">어드벤처</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colors">너구리 (Ponpoko) 게임</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            가시와 몬스터를 피해 점프하며 과일을 획득하는 향수의 클래식 점프 어드벤처
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-amber-600 transition-colors">너구리 (Ponpoko) 게임</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            가시와 장애물을 피해 점프하며 과일을 획득하는 향수의 클래식 점프 어드벤처
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600 group-hover:text-amber-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-<!-- 23. 3D모델링 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/3d/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="3D모델링">
+                <!-- 24. 3D 모델링 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/3d/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="3D모델링 지반 안전 구조물 입체 모델">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600/20 to-orange-700/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                                🦝
+                            <div class="w-12 h-12 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
+                                🧊
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">3D</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200">3D</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colors">3D 모델링</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            3D모델링
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-violet-600 transition-colors">3D 모델링</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            건설 현장 지반 및 구조 형상을 입체적으로 시각화하는 인터랙티브 3D 모델링 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-violet-600 group-hover:text-violet-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-
-                <!-- 23. 3D모델링(챗지피티) -->
-                <a href="https://easy-page-fly.lovable.app" 
-                target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="3D모델링">
+                <!-- 25. 3D 모델링 (챗지피티) -->
+                <a href="https://easy-page-fly.lovable.app" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="3D모델링 챗지피티 AI 프롬프트 생성 모델">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600/20 to-orange-700/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                                🦝
+                            <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
+                                ✨
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">3D</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">AI 3D</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colors">3D 모델링(챗지피티)</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            3D모델링(챗지피티)
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-purple-600 transition-colors">3D 모델링 (챗지피티)</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            ChatGPT 및 생성형 AI 기반으로 3D 공간과 객체를 기획하고 렌더링하는 시연 플랫폼
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-600 group-hover:text-purple-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-
-                <!-- 24. 스님 보이스 -->
-                
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/sunim/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="스님 보이스">
+                <!-- 26. 스님 보이스 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/sunim/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="스님 보이스 명상 목탁 음성 힐링 마음챙김">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600/20 to-orange-700/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                                🦝
+                            <div class="w-12 h-12 rounded-xl bg-stone-100 text-stone-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
+                                🔔
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">3D</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-stone-100 text-stone-700 border border-stone-200">힐링 & 사유</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colobg-c스님 보이스</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            스님 보이스
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-stone-700 transition-colors">스님 보이스</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            강의 전후 마음의 평정과 집중을 돕는 따뜻하고 잔잔한 목소리 & 명상 음성 도구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-stone-600 group-hover:text-stone-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-
-                <!-- 25. 오늘의 명언 -->
-                
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/myung/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="오늘의 명언">
+                <!-- 27. 오늘의 명언 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/myung/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="utility" data-keywords="오늘의 명언 좋은글 영감 안전 철학">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600/20 to-orange-700/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                                🦝
+                            <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
+                                📜
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">3D</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">인스피레이션</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colobg-c오늘의 명언</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            오늘의 명언
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-rose-600 transition-colors">오늘의 명언</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            하루의 시작과 끝에 깊은 통찰과 영감을 전하는 국내외 안전·인생 명언 모음
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600 group-hover:text-rose-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
-                
 
-
-                  <!-- 26. AI 활용 꿀팁 -->           
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/ai1m/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="AI 활용 꿀팁">
+                <!-- 28. AI 활용 꿀팁 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/ai1m/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="AI 활용 꿀팁 프롬프트 생성형 AI 업무 효율화">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600/20 to-orange-700/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                                🦝
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
+                                💡
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">3D</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">AI 노하우</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colobg-cAI 활용 꿀팁</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            AI 활용 꿀팁
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-amber-600 transition-colors">AI 활용 꿀팁</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            건설 실무와 보고서 작성에 즉시 써먹는 1분 생성형 AI 프롬프트 및 활용 가이드
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600 group-hover:text-amber-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-<!-- 27. 스터디 TTL -->    
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/civilpe/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="스터디 TTL">
+                <!-- 29. 스터디 TTL -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/civilpe/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="스터디 TTL 토목시공기술사 건설안전기술사 학습">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600/20 to-orange-700/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                                🦝
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
+                                📚
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">3D</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">전문가 학습</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colobg-c스터디 TTL</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            스터디 TTL
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">스터디 TTL</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            기술사 시험 및 스마트 건설안전 전문가 역량 강화를 위한 핵심 키워드 스터디
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
 
-
-                            <!-- 29. HDC 랩스 -->           
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/hdc/index.html" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="game" data-keywords="HDC 랩스">
+                <!-- 30. HDC 랩스 -->
+                <a href="https://sirrius2022-spec.github.io/ksn/agent/hdc/index.html" target="_blank" class="tool-card pastel-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden" data-category="ai" data-keywords="HDC 랩스 스마트 건설안전 안전 솔루션">
                     <div>
                         <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600/20 to-orange-700/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                                🦝
+                            <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-inner">
+                                🏢
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">3D</span>
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">스마트 솔루션</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colobg-cHDC 랩스</h3>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
-                            HDC 랩스
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 group-hover:text-slate-900 transition-colors">HDC 랩스</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed">
+                            스마트 건설 현장 맞춤형 솔루션 및 안전 자동화 기술 프로젝트 연계 연구
                         </p>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400 group-hover:text-amber-300">
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600 group-hover:text-slate-800">
                         <span>실행하기</span>
                         <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
                     </div>
                 </a>
-                
+
             </div>
 
             <!-- Empty Search State -->
-            <div id="noResults" class="hidden text-center py-16 bg-slate-900/40 rounded-3xl border border-dashed border-white/10 backdrop-blur-sm">
-                <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center text-2xl text-slate-400 mb-4">
+            <div id="noResults" class="hidden text-center py-16 bg-white/70 rounded-3xl border border-dashed border-slate-300 backdrop-blur-sm shadow-sm">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-2xl mb-4">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
-                <p class="text-base font-bold text-slate-300">검색 결과가 없습니다</p>
+                <p class="text-base font-bold text-slate-700">검색 결과가 없습니다</p>
                 <p class="text-xs text-slate-500 mt-1">다른 검색어를 입력하시거나 카테고리 탭을 변경해 보세요.</p>
-                <button onclick="resetSearchAndFilters()" class="mt-4 px-4 py-2 rounded-xl text-xs font-medium bg-blue-600/30 text-blue-300 border border-blue-500/30 hover:bg-blue-600/50 transition-all">
+                <button onclick="resetSearchAndFilters()" class="mt-4 px-4 py-2 rounded-xl text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-all">
                     전체 목록 보기
                 </button>
             </div>
         </section>
 
-        <!-- Interactive Resource Banners (보물창고 & 방명록) -->
         <section class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
             <!-- 보물창고 카드 -->
-            <div class="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-slate-900 via-[#141a29] to-slate-950 p-6 sm:p-8 flex flex-col justify-between shadow-xl">
-                <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative overflow-hidden rounded-3xl border border-amber-200/90 bg-gradient-to-br from-amber-50/90 via-orange-50/60 to-white p-6 sm:p-8 flex flex-col justify-between shadow-sm">
+                <div class="absolute -right-8 -bottom-8 w-44 h-44 bg-amber-200/30 rounded-full blur-2xl pointer-events-none"></div>
                 <div>
-                    <div class="inline-flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
+                    <div class="inline-flex items-center gap-2 text-amber-700 text-xs font-bold uppercase tracking-wider mb-3">
                         <span class="w-2 h-2 rounded-full bg-amber-400"></span>
                         <i class="fa-solid fa-box-archive"></i> Class Materials
                     </div>
-                    <h3 class="text-xl sm:text-2xl font-black text-white mb-2">보물창고 (실습 자료실)</h3>
-                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-2">보물창고 (실습 자료실)</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
                         스마트 안전 강의에 필요한 각종 실습 서식, 시연 예제 데이터 및 핵심 강의 교안 자료를 자유롭게 열람하고 다운로드하세요.
                     </p>
                 </div>
                 <div>
                     <a href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" target="_blank" 
-                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02]">
+                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-amber-200 hover:scale-[1.02]">
                         <span>보물창고 바로가기</span>
                         <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                     </a>
@@ -953,21 +992,21 @@
             </div>
 
             <!-- 방명록 카드 -->
-            <div class="relative overflow-hidden rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-slate-900 via-[#141a29] to-slate-950 p-6 sm:p-8 flex flex-col justify-between shadow-xl">
-                <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative overflow-hidden rounded-3xl border border-indigo-200/90 bg-gradient-to-br from-indigo-50/90 via-sky-50/60 to-white p-6 sm:p-8 flex flex-col justify-between shadow-sm">
+                <div class="absolute -right-8 -bottom-8 w-44 h-44 bg-indigo-200/30 rounded-full blur-2xl pointer-events-none"></div>
                 <div>
-                    <div class="inline-flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-3">
+                    <div class="inline-flex items-center gap-2 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-3">
                         <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
                         <i class="fa-solid fa-comments"></i> Feedback & Q&A
                     </div>
-                    <h3 class="text-xl sm:text-2xl font-black text-white mb-2">방명록 & 질의응답</h3>
-                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-2">방명록 & 질의응답</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
                         강의에 대한 생생한 후기, 교육 소감이나 현장 스마트 안전 적용과 관련된 공학적 질문을 자유롭게 남겨주세요.
                     </p>
                 </div>
                 <div>
                     <a href="https://padlet.com/sirrius2022/padlet-9cd0j2khbmx7m2ec" target="_blank" 
-                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.02]">
+                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-indigo-200 hover:scale-[1.02]">
                         <span>방명록 남기기</span>
                         <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                     </a>
@@ -977,47 +1016,65 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="relative z-10 border-t border-white/10 bg-[#060911]/90 backdrop-blur-xl mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+    <footer class="relative z-10 border-t border-slate-200/80 bg-white/80 backdrop-blur-md mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
             <div class="text-center sm:text-left">
-                <p class="text-slate-300 font-semibold mb-1">
-                    운영 및 개발: <span class="text-white font-bold">김성남 교수</span> (스마트 건설안전 아카데미)
+                <p class="text-slate-700 font-bold mb-0.5">
+                    운영 및 개발: <span class="text-sky-700 font-extrabold">김성남 교수</span> (스마트 건설안전 아카데미)
                 </p>
-                <p class="text-slate-500 text-[11px]">
+                <p class="text-slate-400 text-[11px]">
                     본 포털은 건설안전 기술인의 역량 강화 및 스마트 안전공학 교육을 위해 제작되었습니다.
                 </p>
             </div>
-            <div class="flex items-center gap-4 text-slate-400">
-                <a href="mailto:sirrius@naver.com" class="hover:text-blue-400 transition-colors flex items-center gap-1.5">
-                    <i class="fa-regular fa-envelope"></i> sirrius@naver.com
+            <div class="flex items-center gap-3 text-slate-600 text-xs">
+                <a href="mailto:sirrius@naver.com" class="hover:text-sky-600 transition-colors flex items-center gap-1.5 font-medium">
+                    <i class="fa-regular fa-envelope text-sky-500"></i> sirrius@naver.com
                 </a>
                 <span>•</span>
-                <span>&copy; 2026 Kim Sung-nam</span>
+                <span class="text-slate-400">&copy; 2026 Kim Sung-nam</span>
             </div>
         </div>
     </footer>
 
+    <!-- QR Zoom Modal -->
+    <div id="qrModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity duration-200 opacity-0 p-4" onclick="toggleQrModal(false)">
+        <div class="modal-box bg-white rounded-3xl p-6 max-w-xs w-full shadow-2xl border border-slate-200 text-center transform scale-95 transition-transform duration-200" onclick="event.stopPropagation()">
+            <div class="w-10 h-10 mx-auto rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-lg mb-3">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-800">홈페이지 QR 코드</h4>
+            <p class="text-xs text-slate-500 mt-1 mb-4">카메라 앱으로 비추면 즉시 포털로 연결됩니다</p>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl inline-block shadow-inner">
+                <img src="https://raw.githubusercontent.com/sirrius2022-spec/ksn/main/homepage_qr.jpg" 
+                     alt="홈페이지 QR 상세" 
+                     class="w-48 h-48 object-contain rounded-xl mx-auto"
+                     onerror="this.onerror=null; this.src='https://placehold.co/240x240/EFF6FF/2563EB?text=QR+Code';">
+            </div>
+            <div class="mt-4 flex gap-2">
+                <button onclick="copyCurrentUrl(); toggleQrModal(false);" class="flex-1 py-2 px-3 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold text-xs border border-sky-200 transition-all">
+                    주소 복사
+                </button>
+                <button onclick="toggleQrModal(false)" class="flex-1 py-2 px-3 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs transition-all">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Minimalist Toast Notification -->
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
-        <div class="bg-slate-900/95 text-slate-100 text-xs font-semibold px-5 py-3 rounded-2xl shadow-2xl border border-white/15 flex items-center gap-2.5 backdrop-blur-xl">
-            <i class="fa-solid fa-circle-check text-blue-400 text-sm"></i>
+        <div class="bg-slate-800/90 text-white text-xs font-semibold px-5 py-3 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-check text-sky-400 text-sm"></i>
             <span id="toastMsg">알림 메시지</span>
         </div>
     </div>
 
-    <!-- Application Logic -->
     <script>
         let currentCategory = 'all';
 
-        // Count items and initialize category counts
         function updateCategoryCounts() {
             const cards = document.querySelectorAll('.tool-card');
             const total = cards.length;
-            const aiCount = document.querySelectorAll('.tool-card[data-category="ai"]').length;
-            const utilityCount = document.querySelectorAll('.tool-card[data-category="utility"]').length;
-            const gameCount = document.querySelectorAll('.tool-card[data-category="game"]').length;
-
             const totalEl = document.getElementById('totalToolsCount');
             if (totalEl) totalEl.innerText = `${total}종`;
         }
@@ -1025,13 +1082,12 @@
         function filterCategory(category) {
             currentCategory = category;
 
-            // Update Tab Button Styles
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 const isActive = btn.dataset.category === category;
                 if (isActive) {
-                    btn.className = 'tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/50 flex items-center gap-1.5';
+                    btn.className = 'tab-btn active px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-sky-500 text-white shadow-md shadow-sky-200 border border-sky-400 flex items-center gap-1.5';
                 } else {
-                    btn.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-slate-900/70 text-slate-300 hover:text-white hover:bg-slate-800 border border-white/10 flex items-center gap-1.5';
+                    btn.className = 'tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap bg-white text-slate-600 hover:text-sky-600 hover:bg-sky-50/50 border border-slate-200 flex items-center gap-1.5';
                 }
             });
 
