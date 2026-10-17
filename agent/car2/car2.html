@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>항타기 지지력 검토</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap">
 <style>
 html{color-scheme:light dark}body{margin:0}[hidden]{display:none!important}img{max-width:100%}
 /* 레이아웃: 상단 고정 바(판정·저장) + 좌측 입력 / 우측 결과(도해) 2단, 좁은 화면은 결과 우선 1단 */
 :root {
-  --font-ui: 'IBM Plex Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --font-ui: 'IBM Plex Sans KR', 'IBM Plex Sans JP', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   --font-num: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, 'Malgun Gothic', monospace;
   --bg: #E8ECEE; --panel: #F8FAFB; --panel-2: #EDF1F3; --field: #FFFFFF;
   --ink: #16252E; --mute: #566872; --line: #C6D0D6;
@@ -222,6 +222,15 @@ details.card[open] > summary { margin-bottom: 12px; }
 
 @media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
 @media (max-width: 520px) { .brand h1 { font-size: 16px; } .ck-big { font-size: 26px; } }
+
+/* ---- 언어 전환 ---- */
+:root[lang="ja"] { --font-ui: 'IBM Plex Sans JP', 'IBM Plex Sans KR', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', 'Noto Sans JP', sans-serif; }
+:root[lang="ja"] body { line-break: strict; }
+.seg { display: inline-flex; height: 36px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel); }
+.seg button { border: 0; background: transparent; color: var(--mute); font-weight: 600; font-size: 13px; padding: 0 12px; cursor: pointer; white-space: nowrap; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 </style>
 </head>
 <body>
@@ -235,14 +244,18 @@ details.card[open] > summary { margin-bottom: 12px; }
         <rect x="24.5" y="9" width="5" height="5" fill="currentColor"/>
       </svg>
       <div>
-        <h1>항타기 지지력 검토</h1>
-        <p>크롤러형 항타기 · 접지압 · 지지력 · 전도</p>
+        <h1 data-ko="항타기 지지력 검토" data-ja="杭打機 支持力検討">항타기 지지력 검토</h1>
+        <p data-ko="크롤러형 항타기 · 접지압 · 지지력 · 전도" data-ja="クローラ式杭打機 ・ 接地圧 ・ 支持力 ・ 転倒">크롤러형 항타기 · 접지압 · 지지력 · 전도</p>
       </div>
     </div>
     <div class="top-r">
-      <div id="chip" class="chip st-NA"><span class="dot"></span><span id="chipText">계산 중</span></div>
-      <button id="btnPdf" class="btn primary" type="button">PDF 저장</button>
-      <button id="btnXls" class="btn" type="button">Excel 저장</button>
+      <div class="seg" role="group" aria-label="언어 / 言語">
+        <button type="button" data-lang="ko" aria-pressed="true">한국어</button>
+        <button type="button" data-lang="ja" aria-pressed="false">日本語</button>
+      </div>
+      <div id="chip" class="chip st-NA"><span class="dot"></span><span id="chipText">…</span></div>
+      <button id="btnPdf" class="btn primary" type="button" data-ko="PDF 저장" data-ja="PDF保存">PDF 저장</button>
+      <button id="btnXls" class="btn" type="button" data-ko="Excel 저장" data-ja="Excel保存">Excel 저장</button>
     </div>
   </div>
 </header>
@@ -250,31 +263,31 @@ details.card[open] > summary { margin-bottom: 12px; }
 <main class="wrap">
   <div id="saveNote" class="note" hidden></div>
   <div class="grid">
-    <section class="stack" id="inputs" aria-label="입력"></section>
+    <section class="stack" id="inputs" aria-label="Input"></section>
 
-    <section class="stack res" aria-label="검토 결과">
+    <section class="stack res" aria-label="Result">
       <div id="issues" hidden></div>
       <div class="checks-w"><div class="checks" id="checks"></div></div>
 
       <div class="card">
-        <div class="ch"><h2>측면도</h2><span class="hint">번호는 하중 구성 순서와 동일 · R 은 합력</span></div>
+        <div class="ch"><h2 data-ko="측면도" data-ja="側面図">측면도</h2><span class="hint" data-ko="번호는 하중 구성 순서와 동일 · R 은 합력" data-ja="番号は荷重構成の順 ・ R は合力">번호는 하중 구성 순서와 동일 · R 은 합력</span></div>
         <div class="fig" id="figElev"></div>
         <div class="legend" id="legend"></div>
       </div>
 
       <div class="two">
-        <div class="card"><div class="ch"><h2>접지압 분포</h2></div><div class="fig s" id="figPress"></div></div>
-        <div class="card"><div class="ch"><h2>평면도</h2></div><div class="fig s" id="figPlan"></div></div>
+        <div class="card"><div class="ch"><h2 data-ko="접지압 분포" data-ja="接地圧分布">접지압 분포</h2></div><div class="fig s" id="figPress"></div></div>
+        <div class="card"><div class="ch"><h2 data-ko="평면도" data-ja="平面図">평면도</h2></div><div class="fig s" id="figPlan"></div></div>
       </div>
 
       <details class="card" id="detail">
-        <summary>계산 상세</summary>
+        <summary data-ko="계산 상세" data-ja="計算詳細">계산 상세</summary>
         <div id="detailBody"></div>
       </details>
 
       <details class="card" id="pv">
-        <summary>검토서 미리보기 (PDF 내용)</summary>
-        <p class="pvnote">PDF 와 동일한 A4 검토서입니다. 입력을 바꾸면 자동으로 갱신됩니다.</p>
+        <summary data-ko="검토서 미리보기 (PDF 내용)" data-ja="検討書プレビュー（PDFの内容）">검토서 미리보기 (PDF 내용)</summary>
+        <p class="pvnote" data-ko="PDF 와 동일한 A4 검토서입니다. 입력을 바꾸면 자동으로 갱신됩니다." data-ja="PDFと同じA4の検討書です。入力を変更すると自動で更新されます。">PDF 와 동일한 A4 검토서입니다. 입력을 바꾸면 자동으로 갱신됩니다.</p>
         <div class="rpt-wrap" id="pvBody"></div>
       </details>
     </section>
@@ -290,7 +303,8 @@ details.card[open] > summary { margin-bottom: 12px; }
 <script>
 'use strict';
 /* =====================================================================
-   1. 계산 모듈 (순수 함수)
+   1. 언어 · 계산 모듈 (순수 함수)
+   - L(ko, ja) : 현재 언어(LANG)에 맞는 문자열 반환
    - 접지압: 2궤도 직사각형 접지면, 선형분포 (편심 e ≤ L/6) / 삼각분포 (e > L/6)
    - 극한지지력: Meyerhof(1963) 일반 지지력 공식 (형상·근입깊이 계수)
    - 하부층: 2:1 하중분산 가상기초 + 순극한지지력 기준
@@ -299,31 +313,61 @@ details.card[open] > summary { margin-bottom: 12px; }
 const GW = 9.81;                       // 물의 단위중량 (kN/m³)
 const rad = d => d * Math.PI / 180;
 
+let LANG = 'ko';
+const L = (ko, ja) => (LANG === 'ja' ? ja : ko);
+function setLang(l) { LANG = (l === 'ja') ? 'ja' : 'ko'; }
+const shortName = s => String(s).replace(/\s*[(（].*[)）]/, '');
+const STLABEL = {
+  get OK() { return L('적합', '適合'); },
+  get WARN() { return L('주의', '注意'); },
+  get NG() { return L('부적합', '不適合'); },
+  get NA() { return L('해당 없음', '該当なし'); }
+};
+const CIRC = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫'];
+
+const SAMPLE_NAMES = {
+  ko: {
+    proj: '○○지구 PHC 말뚝 항타 작업 (샘플)',
+    layers: ['매립층 (사질토 혼입 점성토)', '퇴적층 (연약 점성토)', '풍화토 (사질토)'],
+    crane: '크롤러형 항타기 (100t급 크롤러크레인 + 3점식 리더)',
+    loads: ['본체 (상부선회체 + 하부주행체)', '카운터웨이트', '리더 (마스트)', '유압해머', '말뚝 (PHC Ø500, L=15m)', '기타 부속 (와이어·공구 등)'],
+    newLayer: '신규 지층', newLoad: '기타 하중'
+  },
+  ja: {
+    proj: '○○地区 PHC杭 打設作業（サンプル）',
+    layers: ['盛土層（砂質土混じり粘性土）', '沖積層（軟弱粘性土）', '風化土（砂質土）'],
+    crane: 'クローラ式杭打機（100t級クローラクレーン＋3点式リーダー）',
+    loads: ['本体（上部旋回体＋下部走行体）', 'カウンターウェイト', 'リーダー（マスト）', '油圧ハンマー', '杭（PHC Ø500、L=15m）', 'その他付属品（ワイヤ・工具等）'],
+    newLayer: '新規地層', newLoad: 'その他荷重'
+  }
+};
+
 function makeSample() {
   const d = new Date();
   const pad = n => String(n).padStart(2, '0');
+  const nm = SAMPLE_NAMES[LANG];
   return {
     proj: {
-      name: '○○지구 PHC 말뚝 항타 작업 (샘플)',
+      name: nm.proj,
       author: '',
       date: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
     },
     soil: {
       gwt: 3.0,
       layers: [
-        { name: '매립층 (사질토 혼입 점성토)', H: 2.0, gamma: 18.0, c: 5, phi: 25, N: 6 },
-        { name: '퇴적층 (연약 점성토)',        H: 4.0, gamma: 17.0, c: 15, phi: 0, N: 3 },
-        { name: '풍화토 (사질토)',              H: 5.0, gamma: 19.0, c: 0, phi: 32, N: 30 }
+        { name: nm.layers[0], H: 2.0, gamma: 18.0, c: 5, phi: 25, N: 6 },
+        { name: nm.layers[1], H: 4.0, gamma: 17.0, c: 15, phi: 0, N: 3 },
+        { name: nm.layers[2], H: 5.0, gamma: 19.0, c: 0, phi: 32, N: 30 }
       ]
     },
-    crane: { model: '크롤러형 항타기 (100t급 크롤러크레인 + 3점식 리더)', B: 0.90, L: 5.20, G: 3.40 },
+    crane: { model: nm.crane, B: 0.90, L: 5.20, G: 3.40 },
     loads: [
-      { name: '본체 (상부선회체 + 하부주행체)', W: 700, y: -0.2, dyn: false },
-      { name: '카운터웨이트',                    W: 300, y: -3.0, dyn: false },
-      { name: '리더 (마스트)',                   W: 200, y: 3.6,  dyn: false },
-      { name: '유압해머',                        W: 80,  y: 4.8,  dyn: true  },
-      { name: '말뚝 (PHC Ø500, L=15m)',          W: 45,  y: 5.0,  dyn: true  },
-      { name: '기타 부속 (와이어·공구 등)',      W: 20,  y: 1.0,  dyn: false }
+      { name: nm.loads[0], W: 700, y: -0.2, dyn: false },
+      { name: nm.loads[1], W: 300, y: -3.0, dyn: false },
+      { name: nm.loads[2], W: 200, y: 3.6,  dyn: false },
+      { name: nm.loads[3], W: 80,  y: 4.8,  dyn: true  },
+      { name: nm.loads[4], W: 45,  y: 5.0,  dyn: true  },
+      { name: nm.loads[5], W: 20,  y: 1.0,  dyn: false }
     ],
     plate: { use: true, Bp: 2.20, Lp: 6.00, t: 0.022, gp: 77 },
     cond: { FsB: 3.0, FsT: 1.5, alpha: 1.2, Df: 0 }
@@ -392,65 +436,68 @@ function analyze(S) {
   const issues = [];
   const num = (v, label) => {
     if (typeof v !== 'number' || !isFinite(v)) {
-      issues.push({ lv: 'err', msg: label + ' 값이 비어 있거나 숫자가 아닙니다.' });
+      issues.push({ lv: 'err', msg: L(label + ' 값이 비어 있거나 숫자가 아닙니다.', label + 'が未入力、または数値ではありません。') });
       return 0;
     }
     return v;
   };
+  const lyN = i => L((i + 1) + '층', (i + 1) + '層目');
+  const ldN = i => L((i + 1) + '번 하중', '荷重' + (i + 1));
 
   const soil = {
-    gwt: num(S.soil.gwt, '지하수위'),
+    gwt: num(S.soil.gwt, L('지하수위', '地下水位')),
     layers: S.soil.layers.map((l, i) => ({
-      name: l.name || ('지층 ' + (i + 1)),
-      H: num(l.H, (i + 1) + '층 두께'),
-      gamma: num(l.gamma, (i + 1) + '층 단위중량'),
-      c: num(l.c, (i + 1) + '층 점착력'),
-      phi: num(l.phi, (i + 1) + '층 내부마찰각'),
+      name: l.name || (L('지층 ', '地層 ') + (i + 1)),
+      H: num(l.H, lyN(i) + L(' 두께', 'の層厚')),
+      gamma: num(l.gamma, lyN(i) + L(' 단위중량', 'の単位体積重量')),
+      c: num(l.c, lyN(i) + L(' 점착력', 'の粘着力')),
+      phi: num(l.phi, lyN(i) + L(' 내부마찰각', 'の内部摩擦角')),
       N: (typeof l.N === 'number' && isFinite(l.N)) ? l.N : null
     }))
   };
   const crane = {
     model: S.crane.model || '',
-    B: num(S.crane.B, '궤도 폭'), L: num(S.crane.L, '궤도 접지길이'), G: num(S.crane.G, '궤도 중심간격')
+    B: num(S.crane.B, L('궤도 폭', '履帯幅')), L: num(S.crane.L, L('궤도 접지길이', '履帯接地長')), G: num(S.crane.G, L('궤도 중심간격', '履帯中心間隔'))
   };
   const loads = S.loads.map((l, i) => ({
-    name: l.name || ('하중 ' + (i + 1)), W: num(l.W, (i + 1) + '번 하중 중량'),
-    y: num(l.y, (i + 1) + '번 하중 위치'), dyn: !!l.dyn
+    name: l.name || (L('하중 ', '荷重 ') + (i + 1)), W: num(l.W, ldN(i) + L(' 중량', 'の重量')),
+    y: num(l.y, ldN(i) + L(' 위치', 'の位置')), dyn: !!l.dyn
   }));
   const plate = {
-    use: !!S.plate.use, Bp: num(S.plate.Bp, '깔판 폭'), Lp: num(S.plate.Lp, '깔판 길이'),
-    t: num(S.plate.t, '깔판 두께'), gp: num(S.plate.gp, '깔판 단위중량')
+    use: !!S.plate.use, Bp: num(S.plate.Bp, L('깔판 폭', '敷板幅')), Lp: num(S.plate.Lp, L('깔판 길이', '敷板長さ')),
+    t: num(S.plate.t, L('깔판 두께', '敷板厚')), gp: num(S.plate.gp, L('깔판 단위중량', '敷板の単位体積重量'))
   };
   const cond = {
-    FsB: num(S.cond.FsB, '지지력 안전율'), FsT: num(S.cond.FsT, '전도 안전율'),
-    alpha: num(S.cond.alpha, '충격계수'), Df: num(S.cond.Df, '근입깊이')
+    FsB: num(S.cond.FsB, L('지지력 안전율', '支持力安全率')), FsT: num(S.cond.FsT, L('전도 안전율', '転倒安全率')),
+    alpha: num(S.cond.alpha, L('충격계수', '衝撃係数')), Df: num(S.cond.Df, L('근입깊이', '根入れ深さ'))
   };
 
   /* 입력 검증 */
   const err = m => issues.push({ lv: 'err', msg: m });
   const warn = m => issues.push({ lv: 'warn', msg: m });
-  if (soil.layers.length < 1) err('지층이 1개 이상 필요합니다.');
+  if (soil.layers.length < 1) err(L('지층이 1개 이상 필요합니다.', '地層を1層以上入力してください。'));
   soil.layers.forEach((l, i) => {
-    if (l.H <= 0) err((i + 1) + '층 두께는 0보다 커야 합니다.');
-    if (l.gamma <= GW) err((i + 1) + '층 단위중량이 물의 단위중량(9.81 kN/m³) 이하입니다.');
-    if (l.c < 0) err((i + 1) + '층 점착력은 0 이상이어야 합니다.');
-    if (l.phi < 0 || l.phi > 45) err((i + 1) + '층 내부마찰각은 0~45° 범위로 입력하세요.');
-    else if (l.phi > 40) warn((i + 1) + '층 내부마찰각이 40°를 초과합니다. 값을 다시 확인하세요.');
+    if (l.H <= 0) err(L(lyN(i) + ' 두께는 0보다 커야 합니다.', lyN(i) + 'の層厚は0より大きくしてください。'));
+    if (l.gamma <= GW) err(L(lyN(i) + ' 단위중량이 물의 단위중량(9.81 kN/m³) 이하입니다.', lyN(i) + 'の単位体積重量が水の単位体積重量（9.81 kN/m³）以下です。'));
+    if (l.c < 0) err(L(lyN(i) + ' 점착력은 0 이상이어야 합니다.', lyN(i) + 'の粘着力は0以上にしてください。'));
+    if (l.phi < 0 || l.phi > 45) err(L(lyN(i) + ' 내부마찰각은 0~45° 범위로 입력하세요.', lyN(i) + 'の内部摩擦角は0〜45°の範囲で入力してください。'));
+    else if (l.phi > 40) warn(L(lyN(i) + ' 내부마찰각이 40°를 초과합니다. 값을 다시 확인하세요.', lyN(i) + 'の内部摩擦角が40°を超えています。値を再確認してください。'));
   });
-  if (soil.gwt < 0) err('지하수위는 0 이상(지표면 아래 깊이)으로 입력하세요.');
-  if (crane.B <= 0 || crane.L <= 0 || crane.G <= 0) err('궤도 폭·접지길이·중심간격은 0보다 커야 합니다.');
-  if (crane.G > 0 && crane.B > 0 && crane.G < crane.B) err('궤도 중심간격이 궤도 폭보다 작습니다.');
-  if (crane.L > 0 && crane.B > 0 && crane.L < crane.B) warn('궤도 접지길이가 폭보다 짧습니다. 입력값을 확인하세요.');
-  loads.forEach((l, i) => { if (l.W < 0) err((i + 1) + '번 하중 중량은 0 이상이어야 합니다.'); });
-  if (!loads.some(l => l.W > 0)) err('하중이 입력되지 않았습니다.');
-  if (cond.FsB < 1 || cond.FsT < 1) err('허용 안전율은 1.0 이상이어야 합니다.');
-  if (cond.alpha < 1) warn('충격계수가 1.0 미만입니다.');
-  if (cond.Df < 0) err('근입깊이는 0 이상이어야 합니다.');
-  else if (soil.layers[0] && cond.Df > soil.layers[0].H) warn('근입깊이가 1층 두께보다 큽니다.');
+  if (soil.gwt < 0) err(L('지하수위는 0 이상(지표면 아래 깊이)으로 입력하세요.', '地下水位は0以上（地表面からの深さ）で入力してください。'));
+  if (crane.B <= 0 || crane.L <= 0 || crane.G <= 0) err(L('궤도 폭·접지길이·중심간격은 0보다 커야 합니다.', '履帯幅・接地長・中心間隔は0より大きくしてください。'));
+  if (crane.G > 0 && crane.B > 0 && crane.G < crane.B) err(L('궤도 중심간격이 궤도 폭보다 작습니다.', '履帯中心間隔が履帯幅より小さいです。'));
+  if (crane.L > 0 && crane.B > 0 && crane.L < crane.B) warn(L('궤도 접지길이가 폭보다 짧습니다. 입력값을 확인하세요.', '履帯接地長が履帯幅より短いです。入力値を確認してください。'));
+  loads.forEach((l, i) => { if (l.W < 0) err(L(ldN(i) + ' 중량은 0 이상이어야 합니다.', ldN(i) + 'の重量は0以上にしてください。')); });
+  if (!loads.some(l => l.W > 0)) err(L('하중이 입력되지 않았습니다.', '荷重が入力されていません。'));
+  if (cond.FsB < 1 || cond.FsT < 1) err(L('허용 안전율은 1.0 이상이어야 합니다.', '許容安全率は1.0以上にしてください。'));
+  if (cond.alpha < 1) warn(L('충격계수가 1.0 미만입니다.', '衝撃係数が1.0未満です。'));
+  if (cond.Df < 0) err(L('근입깊이는 0 이상이어야 합니다.', '根入れ深さは0以上にしてください。'));
+  else if (soil.layers[0] && cond.Df > soil.layers[0].H) warn(L('근입깊이가 1층 두께보다 큽니다.', '根入れ深さが1層目の層厚より大きいです。'));
   if (plate.use) {
-    if (plate.Bp <= 0 || plate.Lp <= 0 || plate.t < 0 || plate.gp < 0) err('깔판 제원을 확인하세요.');
+    if (plate.Bp <= 0 || plate.Lp <= 0 || plate.t < 0 || plate.gp < 0) err(L('깔판 제원을 확인하세요.', '敷板の諸元を確認してください。'));
     else if (plate.Bp < crane.B || plate.Lp < crane.L)
-      warn('깔판이 궤도보다 작아 깔판 효과 없이 궤도 접지면(폭·길이 중 큰 값)을 적용했습니다.');
+      warn(L('깔판이 궤도보다 작아 깔판 효과 없이 궤도 접지면(폭·길이 중 큰 값)을 적용했습니다.',
+             '敷板が履帯より小さいため、敷板の効果を見込まず履帯接地面（幅・長さの大きい方）を適用しました。'));
   }
   if (issues.some(i => i.lv === 'err')) return { ok: false, issues, soil, crane, loads, plate, cond };
 
@@ -534,16 +581,17 @@ function analyze(S) {
   const u5 = ae / (Lg / 6);
 
   const checks = [
-    { id: 1, name: '최대 접지압', short: 'q_max ≤ q_a', value: qmax, unit: 'kPa', rel: '≤', limit: qa, u: u1,
+    { id: 1, name: L('최대 접지압', '最大接地圧'), short: 'q_max ≤ q_a', value: qmax, unit: 'kPa', rel: '≤', limit: qa, u: u1,
       note: 'q_a = q_u / Fs = ' + (mu.qu / cond.FsB).toFixed(1) + ' kPa' },
-    { id: 2, name: '지지력 안전율 (유효면적법)', short: 'FS ≥ Fs', value: FS2, unit: '', rel: '≥', limit: cond.FsB, u: u2,
+    { id: 2, name: L('지지력 안전율 (유효면적법)', '支持力安全率（有効面積法）'), short: 'FS ≥ Fs', value: FS2, unit: '', rel: '≥', limit: cond.FsB, u: u2,
       note: 'q_u(B×L′) / q_eff, L′ = L − 2e' },
-    { id: 3, name: '하부 지층 안전율', short: lowers.length ? '2:1 분산 · 순지지력' : '하부 지층 없음', value: FS3, unit: '', rel: '≥',
-      limit: cond.FsB, u: u3, note: '2:1 분산 가상기초 · 최소값' },
-    { id: 4, name: '전도 안전율', short: 'M_r / M_o ≥ Fs', value: FSt, unit: '', rel: '≥', limit: cond.FsT, u: u4,
-      note: '전방 작업, 궤도 전단 지점' },
-    { id: 5, name: '편심 한계', short: 'e ≤ L/6', value: ae, unit: 'm', rel: '≤', limit: Lg / 6, u: u5,
-      note: '접지면 전체 접지 유지' }
+    { id: 3, name: L('하부 지층 안전율', '下部地層の安全率'),
+      short: lowers.length ? L('2:1 분산 · 순지지력', '2:1分散・純支持力') : L('하부 지층 없음', '下部地層なし'),
+      value: FS3, unit: '', rel: '≥', limit: cond.FsB, u: u3, note: L('2:1 분산 가상기초 · 최소값', '2:1分散仮想基礎・最小値') },
+    { id: 4, name: L('전도 안전율', '転倒安全率'), short: 'M_r / M_o ≥ Fs', value: FSt, unit: '', rel: '≥', limit: cond.FsT, u: u4,
+      note: L('전방 작업, 궤도 전단 지점', '前方作業、履帯前端を支点') },
+    { id: 5, name: L('편심 한계', '偏心限界'), short: 'e ≤ L/6', value: ae, unit: 'm', rel: '≤', limit: Lg / 6, u: u5,
+      note: L('접지면 전체 접지 유지', '接地面の全面接地を維持') }
   ];
   checks.forEach(c => { c.st = stateOf(c.u); });
   const valid = checks.filter(c => c.u !== null);
@@ -561,19 +609,19 @@ function fmt(v, d = 2) {
   if (v === null || v === undefined || (typeof v === 'number' && isNaN(v))) return '–';
   if (v === Infinity) return '∞';
   if (v === -Infinity) return '−∞';
-  const s = v.toLocaleString('ko-KR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const s = v.toLocaleString(LANG === 'ja' ? 'ja-JP' : 'ko-KR', { minimumFractionDigits: d, maximumFractionDigits: d });
   return s.replace('-', '−');
 }
 const sgn = (v, d = 2) => (v > 0 ? '+' : '') + fmt(v, d);
-const CIRC = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫'];
-const STLABEL = { OK: '적합', WARN: '주의', NG: '부적합', NA: '해당 없음' };
 
 
 /* =====================================================================
    2. 도해 모듈 (SVG 문자열 생성)
    - 팔레트를 인자로 받아 화면용(CSS 변수)과 출력용(고정색)을 동일 코드로 생성
    ===================================================================== */
-const FONT = "'IBM Plex Sans KR','Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif";
+const fontStack = () => (LANG === 'ja'
+  ? "'IBM Plex Sans JP','IBM Plex Sans KR','Hiragino Sans','Yu Gothic','Meiryo','Noto Sans JP',sans-serif"
+  : "'IBM Plex Sans KR','IBM Plex Sans JP','Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif");
 const PAL_SCREEN = {
   ink: 'var(--ink)', mute: 'var(--mute)', line: 'var(--line)', paper: 'var(--panel)', accent: 'var(--accent)',
   ok: 'var(--ok)', warn: 'var(--warn)', bad: 'var(--bad)', crane: 'var(--crane)', craneDk: 'var(--crane-dk)',
@@ -593,7 +641,7 @@ const sty = (fill, stroke, sw, extra) =>
 const T = (x, y, s, o = {}) =>
   '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" text-anchor="' + (o.a || 'start') +
   '" style="fill:' + o.fill + ';font-size:' + (o.size || 12) + 'px;font-weight:' + (o.w || 400) +
-  ';font-family:' + FONT + '">' + esc(s) + '</text>';
+  ';font-family:' + fontStack() + '">' + esc(s) + '</text>';
 const trunc = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 const f1 = v => v.toFixed(1);
 function niceStep(max, n) {
@@ -619,7 +667,7 @@ function svgElevation(R, C, o = {}) {
   const dynRows = act.filter(r => r.dyn);
   const hy = dynRows.length ? dynRows.reduce((s, r) => s + r.y, 0) / dynRows.length : front;
   const s = [];
-  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="항타기 측면도">');
+  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + L('항타기 측면도', '杭打機 側面図') + '">');
 
   /* 지층 */
   const sumH = soil.layers.reduce((a, l) => a + l.H, 0);
@@ -628,7 +676,7 @@ function svgElevation(R, C, o = {}) {
   soil.layers.forEach((ly, i) => {
     const h = ly.H * ds;
     s.push('<rect x="0" y="' + f1(top) + '" width="' + W + '" height="' + f1(h) + '" ' + sty(C.soil[i % 4], C.line, 1) + '/>');
-    const lab = CIRC[i] + ' ' + trunc(ly.name.replace(/\s*\(.*\)/, ''), 9) + ' · ' + ly.H.toFixed(1) + 'm · c' + ly.c + ' φ' + ly.phi + '°';
+    const lab = CIRC[i] + ' ' + trunc(shortName(ly.name), 9) + ' · ' + ly.H.toFixed(1) + 'm · c' + ly.c + ' φ' + ly.phi + '°';
     s.push(T(10, top + Math.min(h / 2 + 4, 26), lab, { fill: C.ink, size: 12 }));
     top += h;
   });
@@ -701,8 +749,8 @@ function svgElevation(R, C, o = {}) {
   s.push('<line x1="' + pad + '" y1="' + (H - 14) + '" x2="' + f1(pad + 2 * sx) + '" y2="' + (H - 14) + '" style="stroke:' + C.ink + ';stroke-width:2"/>');
   s.push('<line x1="' + pad + '" y1="' + (H - 19) + '" x2="' + pad + '" y2="' + (H - 9) + '" style="stroke:' + C.ink + ';stroke-width:1.5"/>');
   s.push('<line x1="' + f1(pad + 2 * sx) + '" y1="' + (H - 19) + '" x2="' + f1(pad + 2 * sx) + '" y2="' + (H - 9) + '" style="stroke:' + C.ink + ';stroke-width:1.5"/>');
-  s.push(T(pad + 2 * sx + 8, H - 10, '2 m (수평 축척)', { fill: C.mute, size: 11 }));
-  s.push(T(W - 10, H - 10, '작업 방향 →  ※ 수평 위치는 입력값 축척, 높이·지층 깊이는 개략', { fill: C.mute, size: 11, a: 'end' }));
+  s.push(T(pad + 2 * sx + 8, H - 10, L('2 m (수평 축척)', '2 m（水平縮尺）'), { fill: C.mute, size: 11 }));
+  s.push(T(W - 10, H - 10, L('작업 방향 →  ※ 수평 위치는 입력값 축척, 높이·지층 깊이는 개략', '作業方向 →  ※ 水平位置は入力値の縮尺、高さ・地層深さは概略'), { fill: C.mute, size: 11, a: 'end' }));
   s.push('</svg>');
   return s.join('');
 }
@@ -717,7 +765,7 @@ function svgPressure(R, C) {
   const pmax = Math.max(qmaxShow, R.qa, R.qavg) * 1.2;
   const ys = p => mt + ph - p / pmax * ph;
   const s = [];
-  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="접지압 분포">');
+  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + L('접지압 분포', '接地圧分布') + '">');
   const st = niceStep(pmax, 4);
   for (let v = 0; v <= pmax; v += st) {
     s.push('<line x1="' + ml + '" y1="' + f1(ys(v)) + '" x2="' + (W - mr) + '" y2="' + f1(ys(v)) + '" style="stroke:' + C.line + ';stroke-width:1"/>');
@@ -737,9 +785,9 @@ function svgPressure(R, C) {
   s.push('<polygon points="' + pts.map(p => f1(p[0]) + ',' + f1(p[1])).join(' ') + '" style="fill:' + C.accent + ';fill-opacity:.32;stroke:' + C.accent + ';stroke-width:2"/>');
   /* 평균·허용 */
   s.push('<line x1="' + ml + '" y1="' + f1(ys(R.qavg)) + '" x2="' + (W - mr) + '" y2="' + f1(ys(R.qavg)) + '" style="stroke:' + C.mute + ';stroke-width:1.2;stroke-dasharray:2 4"/>');
-  s.push(T(W - mr - 2, ys(R.qavg) + 14, '평균 ' + fmt(R.qavg, 1), { fill: C.mute, size: 11, a: 'end' }));
+  s.push(T(W - mr - 2, ys(R.qavg) + 14, L('평균 ', '平均 ') + fmt(R.qavg, 1), { fill: C.mute, size: 11, a: 'end' }));
   s.push('<line x1="' + ml + '" y1="' + f1(ys(R.qa)) + '" x2="' + (W - mr) + '" y2="' + f1(ys(R.qa)) + '" style="stroke:' + C.bad + ';stroke-width:1.8;stroke-dasharray:7 4"/>');
-  s.push(T(ml + 4, ys(R.qa) - 5, '허용지지력 q_a = ' + fmt(R.qa, 1) + ' kPa', { fill: C.bad, size: 11.5, w: 700 }));
+  s.push(T(ml + 4, ys(R.qa) - 5, L('허용지지력 q_a = ', '許容支持力 q_a = ') + fmt(R.qa, 1) + ' kPa', { fill: C.bad, size: 11.5, w: 700 }));
   /* 단부 값 */
   const lab = (x, v, a) => T(x, ys(v) - 6, fmt(v, 1), { fill: C.ink, size: 11.5, w: 700, a });
   if (R.full) { s.push(lab(xs(-Lg / 2) + 3, R.qrear, 'start')); s.push(lab(xs(Lg / 2) - 3, R.qfront, 'end')); }
@@ -751,7 +799,7 @@ function svgPressure(R, C) {
     s.push(T(xs(v), ys(0) + 18, v === 0 ? '0' : sgn(v, 2), { fill: C.mute, size: 11, a: 'middle' }));
   });
   s.push('<polygon points="' + f1(xs(R.e)) + ',' + f1(ys(0) + 1) + ' ' + f1(xs(R.e) - 5) + ',' + f1(ys(0) + 11) + ' ' + f1(xs(R.e) + 5) + ',' + f1(ys(0) + 11) + '" ' + sty(C.bad, 'none', 0) + '/>');
-  s.push(T(W / 2, H - 8, '궤도 길이 방향 위치 y (m) · 합력 ▲ e = ' + sgn(R.e, 2) + ' m · 접지길이 ' + fmt(Lg, 2) + ' m', { fill: C.mute, size: 11, a: 'middle' }));
+  s.push(T(W / 2, H - 8, L('궤도 길이 방향 위치 y (m) · 합력 ▲ e = ', '履帯長手方向の位置 y (m) ・ 合力 ▲ e = ') + sgn(R.e, 2) + L(' m · 접지길이 ', ' m ・ 接地長 ') + fmt(Lg, 2) + ' m', { fill: C.mute, size: 11, a: 'middle' }));
   s.push('</svg>');
   return s.join('');
 }
@@ -760,12 +808,12 @@ function svgPressure(R, C) {
 function svgPlan(R, C) {
   const W = 420, H = 280;
   const { crane, plate } = R;
-  const Lg = R.Lg, Bg = R.Bg, L = crane.L, B = crane.B, G = crane.G;
+  const Lg = R.Lg, Bg = R.Bg, Lc = crane.L, B = crane.B, G = crane.G;
   const totW = G + Math.max(Bg, B);
-  const sp = Math.min((W - 130) / Math.max(Lg, L), (H - 96) / totW);
+  const sp = Math.min((W - 130) / Math.max(Lg, Lc), (H - 96) / totW);
   const cx = W / 2 + 6, cy = 126;
   const s = [];
-  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="평면도">');
+  s.push('<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + L('평면도', '平面図') + '">');
   [-1, 1].forEach(k => {
     const yc = cy + k * G / 2 * sp;
     if (plate.use) {
@@ -773,11 +821,11 @@ function svgPlan(R, C) {
     }
   });
   /* 상부 */
-  s.push('<rect x="' + f1(cx - 0.42 * L * sp) + '" y="' + f1(cy - (G / 2 - B / 2) * sp) + '" width="' + f1(0.84 * L * sp) + '" height="' + f1((G - B) * sp) + '" rx="4" ' + sty(C.crane, C.craneDk, 1.4) + '/>');
+  s.push('<rect x="' + f1(cx - 0.42 * Lc * sp) + '" y="' + f1(cy - (G / 2 - B / 2) * sp) + '" width="' + f1(0.84 * Lc * sp) + '" height="' + f1((G - B) * sp) + '" rx="4" ' + sty(C.crane, C.craneDk, 1.4) + '/>');
   [-1, 1].forEach(k => {
     const yc = cy + k * G / 2 * sp;
-    s.push('<rect x="' + f1(cx - L / 2 * sp) + '" y="' + f1(yc - B / 2 * sp) + '" width="' + f1(L * sp) + '" height="' + f1(B * sp) + '" rx="' + f1(Math.min(B * sp / 2, 12)) + '" ' + sty(C.trk, C.ink, 1.2) + '/>');
-    s.push('<rect x="' + f1(cx - L / 2 * sp + 6) + '" y="' + f1(yc - B / 2 * sp + 4) + '" width="' + f1(L * sp - 12) + '" height="' + f1(Math.max(2, B * sp - 8)) + '" rx="4" ' + sty(C.trkIn, 'none', 0) + '/>');
+    s.push('<rect x="' + f1(cx - Lc / 2 * sp) + '" y="' + f1(yc - B / 2 * sp) + '" width="' + f1(Lc * sp) + '" height="' + f1(B * sp) + '" rx="' + f1(Math.min(B * sp / 2, 12)) + '" ' + sty(C.trk, C.ink, 1.2) + '/>');
+    s.push('<rect x="' + f1(cx - Lc / 2 * sp + 6) + '" y="' + f1(yc - B / 2 * sp + 4) + '" width="' + f1(Lc * sp - 12) + '" height="' + f1(Math.max(2, B * sp - 8)) + '" rx="4" ' + sty(C.trkIn, 'none', 0) + '/>');
   });
   s.push('<line x1="' + f1(cx) + '" y1="14" x2="' + f1(cx) + '" y2="' + (H - 40) + '" style="stroke:' + C.mute + ';stroke-width:1;stroke-dasharray:9 3 2 3"/>');
   /* 합력 위치 */
@@ -786,8 +834,8 @@ function svgPlan(R, C) {
   /* 작업 방향 */
   s.push('<line x1="' + (W - 118) + '" y1="22" x2="' + (W - 22) + '" y2="22" style="stroke:' + C.ink + ';stroke-width:1.6"/>');
   s.push('<polygon points="' + (W - 14) + ',22 ' + (W - 25) + ',17 ' + (W - 25) + ',27" ' + sty(C.ink, 'none', 0) + '/>');
-  s.push(T(W - 118, 14, '작업 방향 (전방)', { fill: C.ink, size: 11.5, w: 600 }));
-  /* 치수 : L */
+  s.push(T(W - 118, 14, L('작업 방향 (전방)', '作業方向（前方）'), { fill: C.ink, size: 11.5, w: 600 }));
+  /* 치수 : Lc */
   const yb = cy + G / 2 * sp + Math.max(Bg, B) / 2 * sp + 16;
   const dimH = (x1, x2, y, label) => {
     s.push('<line x1="' + f1(x1) + '" y1="' + f1(y) + '" x2="' + f1(x2) + '" y2="' + f1(y) + '" style="stroke:' + C.ink + ';stroke-width:1.1"/>');
@@ -799,15 +847,15 @@ function svgPlan(R, C) {
     [y1, y2].forEach(y => s.push('<line x1="' + f1(x - 5) + '" y1="' + f1(y) + '" x2="' + f1(x + 5) + '" y2="' + f1(y) + '" style="stroke:' + C.ink + ';stroke-width:1.1"/>'));
     s.push(T(anchor === 'end' ? x - 8 : x + 8, (y1 + y2) / 2 + 4, label, { fill: C.ink, size: 11.5, a: anchor, w: 600 }));
   };
-  dimH(cx - L / 2 * sp, cx + L / 2 * sp, yb, 'L = ' + fmt(L, 2) + ' m');
-  const xr = cx + Math.max(Lg, L) / 2 * sp + 14;
+  dimH(cx - Lc / 2 * sp, cx + Lc / 2 * sp, yb, 'L = ' + fmt(Lc, 2) + ' m');
+  const xr = cx + Math.max(Lg, Lc) / 2 * sp + 14;
   dimV(cy + G / 2 * sp - B / 2 * sp, cy + G / 2 * sp + B / 2 * sp, xr, 'B = ' + fmt(B, 2), 'start');
-  const xl = cx - Math.max(Lg, L) / 2 * sp - 14;
+  const xl = cx - Math.max(Lg, Lc) / 2 * sp - 14;
   dimV(cy - G / 2 * sp, cy + G / 2 * sp, xl, 'G = ' + fmt(G, 2), 'end');
   if (plate.use) {
-    s.push(T(W / 2, H - 8, '깔판 ' + fmt(Bg, 2) + ' × ' + fmt(Lg, 2) + ' m (궤도당 1매) · t = ' + Math.round(plate.t * 1000) + ' mm', { fill: C.mute, size: 11, a: 'middle' }));
+    s.push(T(W / 2, H - 8, L('깔판 ', '敷板 ') + fmt(Bg, 2) + ' × ' + fmt(Lg, 2) + L(' m (궤도당 1매) · t = ', ' m（履帯1本につき1枚）・ t = ') + Math.round(plate.t * 1000) + ' mm', { fill: C.mute, size: 11, a: 'middle' }));
   } else {
-    s.push(T(W / 2, H - 8, '깔판 미설치 (궤도 직접 접지)', { fill: C.mute, size: 11, a: 'middle' }));
+    s.push(T(W / 2, H - 8, L('깔판 미설치 (궤도 직접 접지)', '敷板なし（履帯が直接接地）'), { fill: C.mute, size: 11, a: 'middle' }));
   }
   s.push('</svg>');
   return s.join('');
@@ -815,7 +863,7 @@ function svgPlan(R, C) {
 
 
 /* =====================================================================
-   3. 검토서 (A4 · 자동 쪽 나눔) 및 Excel 통합문서 생성
+   3. 검토서 (A4 · 자동 쪽 나눔) 및 Excel 통합문서 생성  (한국어 / 日本語)
    ===================================================================== */
 const PAGE_W = 794, PAGE_H = 1123;
 
@@ -838,118 +886,136 @@ function checkLimitText(c) {
 
 function opinionText(R) {
   const ng = R.checks.filter(c => c.st === 'NG'), wr = R.checks.filter(c => c.st === 'WARN');
+  const sep = L(', ', '、');
   if (R.status === 'OK') {
-    return ['검토 결과 전 항목이 허용 기준을 만족함.', '지반 상태(함수비·지하수위 등)가 조사 결과와 다를 경우 재검토할 것.'];
+    return [L('검토 결과 전 항목이 허용 기준을 만족함.', '検討の結果、全項目が許容基準を満足する。'),
+            L('지반 상태(함수비·지하수위 등)가 조사 결과와 다를 경우 재검토할 것.', '地盤状態（含水比・地下水位等）が調査結果と異なる場合は再検討すること。')];
   }
   if (R.status === 'WARN') {
-    return ['허용 기준은 만족하나 사용률 90% 초과 항목이 있음: ' + wr.map(c => c.name).join(', ') + '.',
-            '깔판 면적 확대 등으로 여유를 확보할 것을 권장함.'];
+    return [L('허용 기준은 만족하나 사용률 90% 초과 항목이 있음: ', '許容基準は満足するが、使用率90%超の項目がある：') + wr.map(c => c.name).join(sep) + L('.', '。'),
+            L('깔판 면적 확대 등으로 여유를 확보할 것을 권장함.', '敷板面積の拡大等により余裕を確保することを推奨する。')];
   }
-  return ['허용 기준 초과 항목: ' + ng.map(c => c.name).join(', ') + '.',
-          '대책: ① 깔판 폭·길이 확대 ② 지반 보강(치환·쇄석·매트) ③ 카운터웨이트 조정 및 장비 배치 변경 ④ 작업 반경 축소 후 재검토.'];
+  return [L('허용 기준 초과 항목: ', '許容基準超過項目：') + ng.map(c => c.name).join(sep) + L('.', '。'),
+          L('대책: ① 깔판 폭·길이 확대 ② 지반 보강(치환·쇄석·매트) ③ 카운터웨이트 조정 및 장비 배치 변경 ④ 작업 반경 축소 후 재검토.',
+            '対策：① 敷板の幅・長さの拡大 ② 地盤補強（置換・砕石・マット）③ カウンターウェイトの調整および機械配置の変更 ④ 作業半径の縮小後に再検討。')];
 }
 
 function reportBlocks(S, R) {
   const P = PAL_PAPER;
   const b = [];
   const A = R.checks;
+  const B_ = s => '<b>' + s + '</b>';
 
-  b.push('<div class="blk"><div class="ttl"><div><h1>항타기 지지력 검토서</h1><p>크롤러형 항타기 접지압 · 지지력 · 전도 안전성 검토</p></div>' +
+  b.push('<div class="blk"><div class="ttl"><div><h1>' + L('항타기 지지력 검토서', '杭打機 支持力検討書') + '</h1><p>' +
+    L('크롤러형 항타기 접지압 · 지지력 · 전도 안전성 검토', 'クローラ式杭打機の接地圧・支持力・転倒安全性の検討') + '</p></div>' +
     '<div class="bdg bdg-' + R.status + '">' + STLABEL[R.status] + '</div></div>' +
     tbl(null, [
-      ['<b>현장명</b>', esc(S.proj.name || '–'), '<b>검토일</b>', esc(S.proj.date || '–')],
-      ['<b>장비</b>', esc(R.crane.model || '–'), '<b>작성자</b>', esc(S.proj.author || '–')],
-      ['<b>종합판정</b>', STLABEL[R.status] + ' (최대 사용률 ' + fmt(R.umax * 100, 0) + '% · ' + esc(R.worst.name) + ')', '<b>깔판</b>', R.plate.use ? '사용 (' + fmt(R.plate.Bp, 2) + ' × ' + fmt(R.plate.Lp, 2) + ' m)' : '미사용']
+      [B_(L('현장명', '現場名')), esc(S.proj.name || '–'), B_(L('검토일', '検討日')), esc(S.proj.date || '–')],
+      [B_(L('장비', '機種')), esc(R.crane.model || '–'), B_(L('작성자', '作成者')), esc(S.proj.author || '–')],
+      [B_(L('종합판정', '総合判定')), STLABEL[R.status] + L(' (최대 사용률 ', '（最大使用率 ') + fmt(R.umax * 100, 0) + '% · ' + esc(R.worst.name) + L(')', '）'),
+       B_(L('깔판', '敷板')), R.plate.use ? L('사용', '使用') + ' (' + fmt(R.plate.Bp, 2) + ' × ' + fmt(R.plate.Lp, 2) + ' m)' : L('미사용', '未使用')]
     ], { cls: 'meta' }) + '</div>');
 
-  b.push('<div class="blk"><h2>1. 검토 개요</h2><ul class="bl">' +
-    '<li>목적: 항타 작업 중 항타기 하중에 대한 지반 지지력 및 장비 전도 안전성 확인</li>' +
-    '<li>접지압: 2궤도 직사각형 접지면, 합력 편심 반영 (e ≤ L/6 사다리꼴, e &gt; L/6 삼각형 분포)</li>' +
-    '<li>극한지지력: Meyerhof(1963) 일반식, 형상·근입 계수 적용, 지하수위 이하 γ′ = γ − 9.81 kN/m³</li>' +
-    '<li>하부 지층: 2:1 하중분산 가상기초, 순극한지지력 기준 안전율</li>' +
-    '<li>전도: 전방 작업, 궤도 전단 지점 모멘트 평형 (동하중은 전도 측 하중에만 적용)</li>' +
-    '<li>적용 기준: 지지력 Fs = ' + fmt(R.cond.FsB, 1) + ' · 전도 Fs = ' + fmt(R.cond.FsT, 1) + ' · 충격계수 α = ' + fmt(R.cond.alpha, 2) + '</li></ul></div>');
+  b.push('<div class="blk"><h2>' + L('1. 검토 개요', '1. 検討概要') + '</h2><ul class="bl">' +
+    '<li>' + L('목적: 항타 작업 중 항타기 하중에 대한 지반 지지력 및 장비 전도 안전성 확인', '目的：杭打ち作業中の杭打機荷重に対する地盤支持力および機械の転倒安全性の確認') + '</li>' +
+    '<li>' + L('접지압: 2궤도 직사각형 접지면, 합력 편심 반영 (e ≤ L/6 사다리꼴, e &gt; L/6 삼각형 분포)',
+              '接地圧：2本の履帯による矩形接地面、合力の偏心を考慮（e ≤ L/6 は台形分布、e &gt; L/6 は三角形分布）') + '</li>' +
+    '<li>' + L('극한지지력: Meyerhof(1963) 일반식, 형상·근입 계수 적용, 지하수위 이하 γ′ = γ − 9.81 kN/m³',
+              '極限支持力：Meyerhof（1963）一般式、形状・根入れ係数を適用、地下水位以下は γ′ = γ − 9.81 kN/m³') + '</li>' +
+    '<li>' + L('하부 지층: 2:1 하중분산 가상기초, 순극한지지력 기준 안전율', '下部地層：2:1荷重分散の仮想基礎、純極限支持力基準の安全率') + '</li>' +
+    '<li>' + L('전도: 전방 작업, 궤도 전단 지점 모멘트 평형 (동하중은 전도 측 하중에만 적용)',
+              '転倒：前方作業、履帯前端を支点としたモーメントの釣合い（動荷重は転倒側の荷重にのみ適用）') + '</li>' +
+    '<li>' + L('적용 기준: 지지력 Fs = ', '適用基準：支持力 Fs = ') + fmt(R.cond.FsB, 1) + L(' · 전도 Fs = ', ' ・ 転倒 Fs = ') + fmt(R.cond.FsT, 1) +
+    L(' · 충격계수 α = ', ' ・ 衝撃係数 α = ') + fmt(R.cond.alpha, 2) + '</li></ul></div>');
 
-  b.push('<div class="blk"><h2>2. 입력 조건</h2><h3>2.1 지반조건 (지반조사 보고서)  ·  지하수위 GL-' + fmt(R.soil.gwt, 1) + ' m</h3>' +
-    tbl(['No.', '지층', 'H (m)', 'γ (kN/m³)', 'c (kPa)', 'φ (°)', 'N값'],
+  b.push('<div class="blk"><h2>' + L('2. 입력 조건', '2. 入力条件') + '</h2><h3>' +
+    L('2.1 지반조건 (지반조사 보고서)  ·  지하수위 GL-', '2.1 地盤条件（地盤調査報告書） ・ 地下水位 GL-') + fmt(R.soil.gwt, 1) + ' m</h3>' +
+    tbl(['No.', L('지층', '地層'), 'H (m)', 'γ (kN/m³)', 'c (kPa)', 'φ (°)', L('N값', 'N値')],
       R.soil.layers.map((l, i) => [CIRC[i], esc(l.name), fmt(l.H, 1), fmt(l.gamma, 1), fmt(l.c, 1), fmt(l.phi, 1), l.N === null ? '–' : fmt(l.N, 0)]),
       { num: [2, 3, 4, 5, 6] }) + '</div>');
 
-  b.push('<div class="blk"><h3>2.2 항타기 제원 및 깔판</h3>' +
+  b.push('<div class="blk"><h3>' + L('2.2 항타기 제원 및 깔판', '2.2 杭打機諸元および敷板') + '</h3>' +
     tbl(null, [
-      ['궤도 폭 B', fmt(R.crane.B, 2) + ' m', '깔판 (궤도당 1매)', R.plate.use ? fmt(R.plate.Bp, 2) + ' × ' + fmt(R.plate.Lp, 2) + ' × ' + fmt(R.plate.t * 1000, 0) + ' mm' : '미사용'],
-      ['궤도 접지길이 L', fmt(R.crane.L, 2) + ' m', '깔판 단위중량', R.plate.use ? fmt(R.plate.gp, 1) + ' kN/m³' : '–'],
-      ['궤도 중심간격 G', fmt(R.crane.G, 2) + ' m', '깔판 중량 (2매)', fmt(R.Wp, 1) + ' kN'],
-      ['근입깊이 Df', fmt(R.Df, 2) + ' m', '지반 접지면 B_g × L_g', fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' m']
+      [L('궤도 폭 B', '履帯幅 B'), fmt(R.crane.B, 2) + ' m', L('깔판 (궤도당 1매)', '敷板（履帯1本につき1枚）'),
+       R.plate.use ? fmt(R.plate.Bp, 2) + ' × ' + fmt(R.plate.Lp, 2) + ' × ' + fmt(R.plate.t * 1000, 0) + ' mm' : L('미사용', '未使用')],
+      [L('궤도 접지길이 L', '履帯接地長 L'), fmt(R.crane.L, 2) + ' m', L('깔판 단위중량', '敷板の単位体積重量'), R.plate.use ? fmt(R.plate.gp, 1) + ' kN/m³' : '–'],
+      [L('궤도 중심간격 G', '履帯中心間隔 G'), fmt(R.crane.G, 2) + ' m', L('깔판 중량 (2매)', '敷板重量（2枚）'), fmt(R.Wp, 1) + ' kN'],
+      [L('근입깊이 Df', '根入れ深さ Df'), fmt(R.Df, 2) + ' m', L('지반 접지면 B_g × L_g', '地盤接地面 B_g × L_g'), fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' m']
     ], { cls: 'kv' }) + '</div>');
 
-  b.push('<div class="blk"><h3>2.3 하중 구성 (y : 궤도 접지 중심 기준, 전방 +)</h3>' +
-    tbl(['No.', '구분', 'W (kN)', '동하중', 'W·α (kN)', 'y (m)', 'M = W·α·y (kN·m)'],
+  b.push('<div class="blk"><h3>' + L('2.3 하중 구성 (y : 궤도 접지 중심 기준, 전방 +)', '2.3 荷重構成（y：履帯接地中心基準、前方 +）') + '</h3>' +
+    tbl(['No.', L('구분', '区分'), 'W (kN)', L('동하중', '動荷重'), 'W·α (kN)', 'y (m)', 'M = W·α·y (kN·m)'],
       R.rows.map((r, i) => [CIRC[i], esc(r.name), fmt(r.W, 1), r.dyn ? '○ ×' + fmt(R.cond.alpha, 2) : '–', fmt(r.Wd, 1), sgn(r.y, 2), fmt(r.M, 1)])
-        .concat([['', '<b>합계 (깔판 제외)</b>', '<b>' + fmt(R.W0, 1) + '</b>', '', '<b>' + fmt(R.rows.reduce((a, r) => a + r.Wd, 0), 1) + '</b>', '', '<b>' + fmt(R.Msum, 1) + '</b>']]),
+        .concat([['', B_(L('합계 (깔판 제외)', '合計（敷板を除く）')), B_(fmt(R.W0, 1)), '', B_(fmt(R.rows.reduce((a, r) => a + r.Wd, 0), 1)), '', B_(fmt(R.Msum, 1))]]),
       { num: [2, 4, 5, 6] }) + '</div>');
 
-  b.push('<div class="blk"><div class="fig">' + svgElevation(R, P) + '</div><div class="cap">그림 1. 항타기 측면도 (번호는 2.3 하중 구성표와 동일, R : 합력)</div></div>');
+  b.push('<div class="blk"><div class="fig">' + svgElevation(R, P) + '</div><div class="cap">' +
+    L('그림 1. 항타기 측면도 (번호는 2.3 하중 구성표와 동일, R : 합력)', '図1. 杭打機側面図（番号は2.3荷重構成表と同じ、R：合力）') + '</div></div>');
 
-  b.push('<div class="blk"><h2>3. 검토 결과 요약</h2>' +
-    tbl(['No.', '검토 항목', '산정값', '기준', '사용률', '판정'],
+  b.push('<div class="blk"><h2>' + L('3. 검토 결과 요약', '3. 検討結果の要約') + '</h2>' +
+    tbl(['No.', L('검토 항목', '検討項目'), L('산정값', '算定値'), L('기준', '基準'), L('사용률', '使用率'), L('판정', '判定')],
       A.map(c => [c.id, c.name + '<br><span class="sm">' + esc(c.short) + '</span>', checkValueText(c), c.u === null ? '–' : checkLimitText(c),
         c.u === null ? '–' : fmt(c.u * 100, 0) + '%', pill(c.st)]),
       { num: [2, 3, 4] }) +
-    '<p class="sm" style="margin-top:6px">사용률 = 산정값 대비 기준값 비 (안전율 항목은 기준 FS ÷ 산정 FS). 100% 초과 시 부적합, 90% 초과 시 주의.</p></div>');
+    '<p class="sm" style="margin-top:6px">' + L('사용률 = 산정값 ÷ 기준값 (안전율 항목은 기준 FS ÷ 산정 FS). 100% 초과 시 부적합, 90% 초과 시 주의.',
+      '使用率 = 算定値 ÷ 基準値（安全率の項目は 基準FS ÷ 算定FS）。100%超で不適合、90%超で注意。') + '</p></div>');
 
   const wsum0 = R.rows.reduce((a, r) => a + r.Wd, 0);
-  b.push('<div class="blk"><h2>4. 계산 과정</h2><h3>4.1 하중 집계 및 합력 편심</h3><div class="fm">' +
-    '<div>ΣW = Σ(W<sub>i</sub>·α<sub>i</sub>) + W<sub>깔판</sub> = ' + fmt(wsum0, 1) + ' + ' + fmt(R.Wp, 1) + ' = <b>' + fmt(R.Wsum, 1) + ' kN</b></div>' +
-    '<div>e = ΣM / ΣW = ' + fmt(R.Msum, 1) + ' / ' + fmt(R.Wsum, 1) + ' = <b>' + sgn(R.e, 3) + ' m</b> (+ : 전방)</div></div>' +
-    '<h3>4.2 접지압 (검토 1·5)</h3><div class="fm">' +
-    '<div>접지면적 A = 2·B<sub>g</sub>·L<sub>g</sub> = 2 × ' + fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' = ' + fmt(R.A, 2) + ' m²</div>' +
+  b.push('<div class="blk"><h2>' + L('4. 계산 과정', '4. 計算過程') + '</h2><h3>' + L('4.1 하중 집계 및 합력 편심', '4.1 荷重集計と合力の偏心') + '</h3><div class="fm">' +
+    '<div>ΣW = Σ(W<sub>i</sub>·α<sub>i</sub>) + W<sub>' + L('깔판', '敷板') + '</sub> = ' + fmt(wsum0, 1) + ' + ' + fmt(R.Wp, 1) + ' = <b>' + fmt(R.Wsum, 1) + ' kN</b></div>' +
+    '<div>e = ΣM / ΣW = ' + fmt(R.Msum, 1) + ' / ' + fmt(R.Wsum, 1) + ' = <b>' + sgn(R.e, 3) + ' m</b> ' + L('(+ : 전방)', '（+：前方）') + '</div></div>' +
+    '<h3>' + L('4.2 접지압 (검토 1·5)', '4.2 接地圧（検討1・5）') + '</h3><div class="fm">' +
+    '<div>' + L('접지면적', '接地面積') + ' A = 2·B<sub>g</sub>·L<sub>g</sub> = 2 × ' + fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' = ' + fmt(R.A, 2) + ' m²</div>' +
     '<div>q<sub>avg</sub> = ΣW / A = ' + fmt(R.Wsum, 1) + ' / ' + fmt(R.A, 2) + ' = ' + fmt(R.qavg, 1) + ' kPa</div>' +
-    '<div>e = ' + fmt(R.ae, 3) + ' m ' + (R.full ? '≤' : '&gt;') + ' L<sub>g</sub>/6 = ' + fmt(R.Lg / 6, 3) + ' m → ' + (R.full ? '전면 접지 (사다리꼴 분포)' : '일부 접지 (삼각형 분포)') + '</div>' +
+    '<div>e = ' + fmt(R.ae, 3) + ' m ' + (R.full ? '≤' : '&gt;') + ' L<sub>g</sub>/6 = ' + fmt(R.Lg / 6, 3) + ' m → ' +
+    (R.full ? L('전면 접지 (사다리꼴 분포)', '全面接地（台形分布）') : L('일부 접지 (삼각형 분포)', '部分接地（三角形分布）')) + '</div>' +
     '<div>q<sub>max</sub> = ' + (R.full ? 'q<sub>avg</sub>(1 + 6e/L<sub>g</sub>)' : 'ΣW / (3·B<sub>g</sub>·(L<sub>g</sub>/2 − e))') + ' = <b>' + fmt(R.qmax, 1) + ' kPa</b>,  q<sub>min</sub> = ' + fmt(R.qmin, 1) + ' kPa</div></div></div>');
 
   const m = R.mu;
-  b.push('<div class="blk"><h3>4.3 극한지지력 (1층 · ' + esc(R.L1.name) + ')</h3>' +
+  b.push('<div class="blk"><h3>' + L('4.3 극한지지력 (1층 · ', '4.3 極限支持力（1層目・') + esc(R.L1.name) + L(')', '）') + '</h3>' +
     tbl(['c (kPa)', 'φ (°)', 'γ<sub>e</sub> (kN/m³)', 'q (kPa)', 'N<sub>c</sub>', 'N<sub>q</sub>', 'N<sub>γ</sub>', 's<sub>c</sub>', 's<sub>q</sub>', 'd<sub>c</sub>', 'd<sub>q</sub>'],
       [[fmt(R.L1.c, 1), fmt(R.L1.phi, 1), fmt(R.g1, 2), fmt(R.q0, 1), fmt(m.Nc, 2), fmt(m.Nq, 2), fmt(m.Ng, 2), fmt(m.sc, 3), fmt(m.sq, 3), fmt(m.dc, 3), fmt(m.dq, 3)]],
       { num: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], cls: 'sm-t' }) +
     '<div class="fm"><div>q<sub>u</sub> = c·N<sub>c</sub>·s<sub>c</sub>·d<sub>c</sub> + q·N<sub>q</sub>·s<sub>q</sub>·d<sub>q</sub> + ½·γ<sub>e</sub>·B·N<sub>γ</sub>·s<sub>γ</sub>·d<sub>γ</sub></div>' +
     '<div>= ' + fmt(m.t1, 1) + ' + ' + fmt(m.t2, 1) + ' + ' + fmt(m.t3, 1) + ' = <b>' + fmt(m.qu, 1) + ' kPa</b>  (B = ' + fmt(m.B, 2) + ', L = ' + fmt(m.L, 2) + ' m)</div>' +
     '<div>q<sub>a</sub> = q<sub>u</sub> / Fs = ' + fmt(m.qu, 1) + ' / ' + fmt(R.cond.FsB, 1) + ' = <b>' + fmt(R.qa, 1) + ' kPa</b> → q<sub>max</sub> = ' + fmt(R.qmax, 1) + ' ' + (R.qmax <= R.qa ? '≤' : '&gt;') + ' q<sub>a</sub> ' + pill(A[0].st) + '</div>' +
-    '<div>유효면적법 (검토 2): L′ = L<sub>g</sub> − 2e = ' + fmt(R.Le, 2) + ' m, q<sub>eff</sub> = (ΣW/2) / (B<sub>g</sub>·L′) = ' + fmt(R.qeff, 1) + ' kPa, q<sub>u</sub>′ = ' + fmt(R.mu2.qu, 1) + ' kPa</div>' +
+    '<div>' + L('유효면적법 (검토 2): ', '有効面積法（検討2）：') + 'L′ = L<sub>g</sub> − 2e = ' + fmt(R.Le, 2) + ' m, q<sub>eff</sub> = (ΣW/2) / (B<sub>g</sub>·L′) = ' + fmt(R.qeff, 1) + ' kPa, q<sub>u</sub>′ = ' + fmt(R.mu2.qu, 1) + ' kPa</div>' +
     '<div>FS = q<sub>u</sub>′ / q<sub>eff</sub> = <b>' + fmt(R.FS2, 2) + '</b> ' + (R.FS2 >= R.cond.FsB ? '≥' : '&lt;') + ' ' + fmt(R.cond.FsB, 1) + ' ' + pill(A[1].st) + '</div></div></div>');
 
   if (R.lowers.length) {
-    b.push('<div class="blk"><h3>4.4 하부 지층 영향 (검토 3 · 2:1 분산)</h3>' +
-      tbl(['지층', 'z (m)', '가상기초 B<sub>v</sub>×L<sub>v</sub> (m)', 'q<sub>v</sub> (kPa)', 'σ′<sub>v</sub> (kPa)', 'q<sub>u</sub> (kPa)', 'q<sub>net</sub> (kPa)', 'FS'],
-        R.lowers.map(l => [CIRC[l.idx] + ' ' + esc(trunc(l.name.replace(/\s*\(.*\)/, ''), 8)), fmt(l.z, 1),
+    b.push('<div class="blk"><h3>' + L('4.4 하부 지층 영향 (검토 3 · 2:1 분산)', '4.4 下部地層の影響（検討3・2:1分散）') + '</h3>' +
+      tbl([L('지층', '地層'), 'z (m)', L('가상기초 B<sub>v</sub>×L<sub>v</sub> (m)', '仮想基礎 B<sub>v</sub>×L<sub>v</sub> (m)'), 'q<sub>v</sub> (kPa)', 'σ′<sub>v</sub> (kPa)', 'q<sub>u</sub> (kPa)', 'q<sub>net</sub> (kPa)', 'FS'],
+        R.lowers.map(l => [CIRC[l.idx] + ' ' + esc(trunc(shortName(l.name), 8)), fmt(l.z, 1),
           fmt(l.Bv, 2) + ' × ' + fmt(l.Lv, 2) + (l.overlap ? ' *' : ''), fmt(l.qv, 1), fmt(l.sv, 1), fmt(l.qu, 1), fmt(l.qnet, 1), fmt(l.FS, 2)]),
         { num: [1, 2, 3, 4, 5, 6, 7] }) +
-      '<div class="fm"><div>B<sub>v</sub> = B<sub>g</sub> + z (두 궤도 응력영역이 겹치면 * : G + B<sub>g</sub> + z), L<sub>v</sub> = L′ + z, q<sub>v</sub> = Q / (B<sub>v</sub>·L<sub>v</sub>)</div>' +
-      '<div>FS = (q<sub>u</sub> − σ′<sub>v</sub>) / q<sub>v</sub> → 최소 <b>' + fmt(R.FS3, 2) + '</b> ' + (R.FS3 >= R.cond.FsB ? '≥' : '&lt;') + ' ' + fmt(R.cond.FsB, 1) + ' ' + pill(A[2].st) + '</div></div></div>');
+      '<div class="fm"><div>' + L('B<sub>v</sub> = B<sub>g</sub> + z (두 궤도 응력영역이 겹치면 * : G + B<sub>g</sub> + z), L<sub>v</sub> = L′ + z, q<sub>v</sub> = Q / (B<sub>v</sub>·L<sub>v</sub>)',
+        'B<sub>v</sub> = B<sub>g</sub> + z（両履帯の応力範囲が重なる場合は * ：G + B<sub>g</sub> + z）、L<sub>v</sub> = L′ + z、q<sub>v</sub> = Q / (B<sub>v</sub>·L<sub>v</sub>)') + '</div>' +
+      '<div>FS = (q<sub>u</sub> − σ′<sub>v</sub>) / q<sub>v</sub> → ' + L('최소', '最小') + ' <b>' + fmt(R.FS3, 2) + '</b> ' + (R.FS3 >= R.cond.FsB ? '≥' : '&lt;') + ' ' + fmt(R.cond.FsB, 1) + ' ' + pill(A[2].st) + '</div></div></div>');
   }
 
-  b.push('<div class="blk"><h3>4.' + (R.lowers.length ? 5 : 4) + ' 전도 안전율 (검토 4 · 전방 작업)</h3>' +
-    tbl(['No.', '구분', 'W (kN)', '지점까지 거리 (m)', '저항모멘트 M<sub>r</sub>', '전도모멘트 M<sub>o</sub>'],
+  b.push('<div class="blk"><h3>4.' + (R.lowers.length ? 5 : 4) + ' ' + L('전도 안전율 (검토 4 · 전방 작업)', '転倒安全率（検討4・前方作業）') + '</h3>' +
+    tbl(['No.', L('구분', '区分'), 'W (kN)', L('지점까지 거리 (m)', '支点までの距離 (m)'), L('저항모멘트 M<sub>r</sub>', '抵抗モーメント M<sub>r</sub>'), L('전도모멘트 M<sub>o</sub>', '転倒モーメント M<sub>o</sub>')],
       R.rows.map((r, i) => [CIRC[i], esc(r.name), fmt(r.W, 1), sgn(r.arm, 2), r.Mres ? fmt(r.Mres, 1) : '–', r.Mover ? fmt(r.Mover, 1) : '–'])
-        .concat([['', '<b>합계 (kN·m)</b>', '', '', '<b>' + fmt(R.Mr, 1) + '</b>', '<b>' + fmt(R.Mo, 1) + '</b>']]),
+        .concat([['', B_(L('합계 (kN·m)', '合計（kN·m）')), '', '', B_(fmt(R.Mr, 1)), B_(fmt(R.Mo, 1))]]),
       { num: [2, 3, 4, 5] }) +
-    '<div class="fm"><div>지점 : 궤도 전단 (y = +L/2 = ' + fmt(R.a0, 2) + ' m), 거리 = L/2 − y<sub>i</sub> (+ : 안정측)</div>' +
+    '<div class="fm"><div>' + L('지점 : 궤도 전단 (y = +L/2 = ', '支点：履帯前端（y = +L/2 = ') + fmt(R.a0, 2) + L(' m), 거리 = L/2 − y<sub>i</sub> (+ : 안정측)', ' m）、距離 = L/2 − y<sub>i</sub>（+：安定側）') + '</div>' +
     '<div>FS = M<sub>r</sub> / M<sub>o</sub> = ' + fmt(R.Mr, 1) + ' / ' + fmt(R.Mo, 1) + ' = <b>' + fmt(R.FSt, 2) + '</b> ' + (R.FSt >= R.cond.FsT ? '≥' : '&lt;') + ' ' + fmt(R.cond.FsT, 1) + ' ' + pill(A[3].st) + '</div></div></div>');
 
-  b.push('<div class="blk"><div class="fig2"><div>' + svgPressure(R, P) + '<div class="cap">그림 2. 접지압 분포</div></div><div>' + svgPlan(R, P) + '<div class="cap">그림 3. 평면도</div></div></div></div>');
+  b.push('<div class="blk"><div class="fig2"><div>' + svgPressure(R, P) + '<div class="cap">' + L('그림 2. 접지압 분포', '図2. 接地圧分布') + '</div></div><div>' + svgPlan(R, P) + '<div class="cap">' + L('그림 3. 평면도', '図3. 平面図') + '</div></div></div></div>');
 
-  b.push('<div class="blk"><h2>5. 종합 의견</h2><div class="op"><div class="bdg bdg-' + R.status + ' sm-b">' + STLABEL[R.status] + '</div><ul class="bl">' +
+  b.push('<div class="blk"><h2>' + L('5. 종합 의견', '5. 総合所見') + '</h2><div class="op"><div class="bdg bdg-' + R.status + ' sm-b">' + STLABEL[R.status] + '</div><ul class="bl">' +
     opinionText(R).map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' +
-    '<p class="sm">※ 본 검토는 입력된 지반정수·장비 제원·하중 조건에 근거한 약산식 검토이며, 말뚝 타격 시 수평력·지반 이완·경사 지반은 반영하지 않음. 현장 여건에 따라 별도 검토할 것.</p>' +
-    '<table class="rt sign"><tbody><tr><td><b>작성</b></td><td></td><td><b>검토</b></td><td></td><td><b>승인</b></td><td></td></tr></tbody></table></div>');
+    '<p class="sm">' + L('※ 본 검토는 입력된 지반정수·장비 제원·하중 조건에 근거한 약산식 검토이며, 말뚝 타격 시 수평력·지반 이완·경사 지반은 반영하지 않음. 현장 여건에 따라 별도 검토할 것.',
+      '※ 本検討は入力された地盤定数・機械諸元・荷重条件に基づく略算式による検討であり、杭打撃時の水平力・地盤の緩み・傾斜地盤は考慮していない。現場条件に応じて別途検討すること。') + '</p>' +
+    '<table class="rt sign"><tbody><tr><td>' + B_(L('작성', '作成')) + '</td><td></td><td>' + B_(L('검토', '検討')) + '</td><td></td><td>' + B_(L('승인', '承認')) + '</td><td></td></tr></tbody></table></div>');
   return b;
 }
 
 async function ensureFonts(sample) {
   if (!document.fonts || !document.fonts.load) return;
+  const fam = LANG === 'ja' ? 'IBM Plex Sans JP' : 'IBM Plex Sans KR';
   try {
-    await Promise.all([400, 500, 600, 700].map(w => document.fonts.load(w + ' 12px "IBM Plex Sans KR"', sample)));
+    await Promise.all([400, 500, 600, 700].map(w => document.fonts.load(w + ' 12px "' + fam + '"', sample)));
     await Promise.all([400, 500].map(w => document.fonts.load(w + ' 12px "IBM Plex Mono"', '0123456789.,+-')));
     await document.fonts.ready;
   } catch (e) { /* 폰트 로드 실패 시 대체 글꼴 사용 */ }
@@ -959,12 +1025,12 @@ async function ensureFonts(sample) {
 async function buildReportPages(S, R, host) {
   host.innerHTML = '';
   const blocks = reportBlocks(S, R);
-  await ensureFonts(blocks.join('').replace(/<[^>]+>/g, ' ') + '0123456789가나다라마바사아자차카타파하');
+  await ensureFonts(blocks.join('').replace(/<[^>]+>/g, ' ') + '0123456789' + L('가나다라마바사아자차카타파하', ''));
   const pages = [];
   const newPage = () => {
     const p = document.createElement('section');
     p.className = 'rpt-page';
-    p.innerHTML = '<header class="rpt-h"><span>항타기 지지력 검토서</span><span></span></header><div class="rpt-b"></div><footer class="rpt-f"><span></span><span></span></footer>';
+    p.innerHTML = '<header class="rpt-h"><span>' + L('항타기 지지력 검토서', '杭打機 支持力検討書') + '</span><span></span></header><div class="rpt-b"></div><footer class="rpt-f"><span></span><span></span></footer>';
     host.appendChild(p);
     pages.push(p);
     return p;
@@ -985,7 +1051,7 @@ async function buildReportPages(S, R, host) {
   pages.forEach((p, i) => {
     p.querySelector('.rpt-h span:last-child').textContent = S.proj.name || '';
     const fs = p.querySelectorAll('.rpt-f span');
-    fs[0].textContent = '검토일 ' + (S.proj.date || '');
+    fs[0].textContent = L('검토일 ', '検討日 ') + (S.proj.date || '');
     fs[1].textContent = (i + 1) + ' / ' + pages.length;
   });
   return pages;
@@ -999,48 +1065,48 @@ function buildWorkbook(XLSX, S, R) {
 
   /* 1) 판정요약 */
   const s1 = [
-    ['항타기 지지력 검토 결과'],
-    ['현장명', S.proj.name], ['장비', R.crane.model], ['검토일', S.proj.date], ['작성자', S.proj.author || ''], [],
-    ['No.', '검토 항목', '산정값', '단위', '기준', '기준값', '사용률 (%)', '판정']
+    [L('항타기 지지력 검토 결과', '杭打機 支持力検討結果')],
+    [L('현장명', '現場名'), S.proj.name], [L('장비', '機種'), R.crane.model], [L('검토일', '検討日'), S.proj.date], [L('작성자', '作成者'), S.proj.author || ''], [],
+    ['No.', L('검토 항목', '検討項目'), L('산정값', '算定値'), L('단위', '単位'), L('기준', '基準'), L('기준값', '基準値'), L('사용률 (%)', '使用率 (%)'), L('판정', '判定')]
   ];
   R.checks.forEach(c => s1.push([c.id, c.name, rd(c.value, 3), c.unit, c.rel, rd(c.limit, 3), c.u === null ? '' : rd(c.u * 100, 1), STLABEL[c.st]]));
   s1.push([]);
-  s1.push(['종합판정', STLABEL[R.status], '최대 사용률 (%)', rd(R.umax * 100, 1), '지배 항목', R.worst.name]);
+  s1.push([L('종합판정', '総合判定'), STLABEL[R.status], L('최대 사용률 (%)', '最大使用率 (%)'), rd(R.umax * 100, 1), L('지배 항목', '支配項目'), R.worst.name]);
   s1.push([]);
   opinionText(R).forEach(t => s1.push([t]));
   const ws1 = XLSX.utils.aoa_to_sheet(s1);
   setCols(ws1, [10, 34, 14, 8, 8, 14, 12, 10]);
-  XLSX.utils.book_append_sheet(wb, ws1, '판정요약');
+  XLSX.utils.book_append_sheet(wb, ws1, L('판정요약', '判定要約'));
 
   /* 2) 입력자료 (하중표는 수식 포함) */
   const a = [];
-  a.push(['항타기 지지력 검토 — 입력자료']);
-  a.push(['현장명', S.proj.name]); a.push(['장비', R.crane.model]); a.push(['검토일', S.proj.date]); a.push([]);
-  a.push(['[1] 지반조건 (지반조사 보고서)']);
-  a.push(['지하수위 GL(-) m', R.soil.gwt]);
-  a.push(['No.', '지층명', '층두께 H (m)', '단위중량 γ (kN/m³)', '점착력 c (kPa)', '내부마찰각 φ (°)', 'N값']);
+  a.push([L('항타기 지지력 검토 — 입력자료', '杭打機 支持力検討 — 入力資料')]);
+  a.push([L('현장명', '現場名'), S.proj.name]); a.push([L('장비', '機種'), R.crane.model]); a.push([L('검토일', '検討日'), S.proj.date]); a.push([]);
+  a.push([L('[1] 지반조건 (지반조사 보고서)', '[1] 地盤条件（地盤調査報告書）')]);
+  a.push([L('지하수위 GL(-) m', '地下水位 GL(-) m'), R.soil.gwt]);
+  a.push(['No.', L('지층명', '地層名'), L('층두께 H (m)', '層厚 H (m)'), L('단위중량 γ (kN/m³)', '単位体積重量 γ (kN/m³)'), L('점착력 c (kPa)', '粘着力 c (kPa)'), L('내부마찰각 φ (°)', '内部摩擦角 φ (°)'), L('N값', 'N値')]);
   R.soil.layers.forEach((l, i) => a.push([i + 1, l.name, l.H, l.gamma, l.c, l.phi, l.N === null ? '' : l.N]));
   a.push([]);
-  a.push(['[2] 항타기 제원']);
-  a.push(['기종', R.crane.model]);
-  a.push(['궤도 폭 B (m)', R.crane.B]); a.push(['궤도 접지길이 L (m)', R.crane.L]); a.push(['궤도 중심간격 G (m)', R.crane.G]);
+  a.push([L('[2] 항타기 제원', '[2] 杭打機諸元')]);
+  a.push([L('기종', '機種'), R.crane.model]);
+  a.push([L('궤도 폭 B (m)', '履帯幅 B (m)'), R.crane.B]); a.push([L('궤도 접지길이 L (m)', '履帯接地長 L (m)'), R.crane.L]); a.push([L('궤도 중심간격 G (m)', '履帯中心間隔 G (m)'), R.crane.G]);
   a.push([]);
-  a.push(['[3] 검토 조건']);
-  a.push(['지지력 허용 안전율 Fs', R.cond.FsB]); a.push(['전도 허용 안전율', R.cond.FsT]);
+  a.push([L('[3] 검토 조건', '[3] 検討条件')]);
+  a.push([L('지지력 허용 안전율 Fs', '支持力 許容安全率 Fs'), R.cond.FsB]); a.push([L('전도 허용 안전율', '転倒 許容安全率'), R.cond.FsT]);
   const rowAlpha = a.length + 1;
-  a.push(['충격계수 α (동하중)', R.cond.alpha]); a.push(['근입깊이 Df (m)', R.cond.Df]);
+  a.push([L('충격계수 α (동하중)', '衝撃係数 α（動荷重）'), R.cond.alpha]); a.push([L('근입깊이 Df (m)', '根入れ深さ Df (m)'), R.cond.Df]);
   a.push([]);
-  a.push(['[4] 깔판']);
-  a.push(['사용 여부', R.plate.use ? '사용' : '미사용']);
-  a.push(['폭 Bp (m)', R.plate.Bp]); a.push(['길이 Lp (m)', R.plate.Lp]); a.push(['두께 t (m)', R.plate.t]); a.push(['단위중량 (kN/m³)', R.plate.gp]);
-  a.push(['깔판 중량 2매 (kN)', rd(R.Wp, 2)]);
+  a.push([L('[4] 깔판', '[4] 敷板')]);
+  a.push([L('사용 여부', '使用有無'), R.plate.use ? L('사용', '使用') : L('미사용', '未使用')]);
+  a.push([L('폭 Bp (m)', '幅 Bp (m)'), R.plate.Bp]); a.push([L('길이 Lp (m)', '長さ Lp (m)'), R.plate.Lp]); a.push([L('두께 t (m)', '厚さ t (m)'), R.plate.t]); a.push([L('단위중량 (kN/m³)', '単位体積重量 (kN/m³)'), R.plate.gp]);
+  a.push([L('깔판 중량 2매 (kN)', '敷板重量 2枚 (kN)'), rd(R.Wp, 2)]);
   a.push([]);
-  a.push(['[5] 하중 구성  (y : 궤도 접지 중심 기준, 전방 +)']);
-  a.push(['No.', '구분', '중량 W (kN)', '위치 y (m)', '동하중', '적용계수', '적용중량 Wd (kN)', '모멘트 Wd·y (kN·m)']);
+  a.push([L('[5] 하중 구성  (y : 궤도 접지 중심 기준, 전방 +)', '[5] 荷重構成（y：履帯接地中心基準、前方 +）')]);
+  a.push(['No.', L('구분', '区分'), L('중량 W (kN)', '重量 W (kN)'), L('위치 y (m)', '位置 y (m)'), L('동하중', '動荷重'), L('적용계수', '適用係数'), L('적용중량 Wd (kN)', '適用重量 Wd (kN)'), L('모멘트 Wd·y (kN·m)', 'モーメント Wd·y (kN·m)')]);
   const r0 = a.length + 1;
   R.rows.forEach((r, i) => a.push([i + 1, r.name, r.W, r.y, r.dyn ? '○' : '', null, null, null]));
   const r1 = a.length;
-  a.push(['', '합계 (깔판 제외)', null, '', '', '', null, null]);
+  a.push(['', L('합계 (깔판 제외)', '合計（敷板を除く）'), null, '', '', '', null, null]);
   const ws2 = XLSX.utils.aoa_to_sheet(a);
   R.rows.forEach((r, i) => {
     const n = r0 + i;
@@ -1054,56 +1120,60 @@ function buildWorkbook(XLSX, S, R) {
   ws2['H' + rt] = { t: 'n', v: rd(R.Msum, 4), f: 'SUM(H' + r0 + ':H' + r1 + ')' };
   ws2['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: a.length - 1, c: 7 } });
   setCols(ws2, [24, 34, 16, 18, 14, 14, 18, 20]);
-  XLSX.utils.book_append_sheet(wb, ws2, '입력자료');
+  XLSX.utils.book_append_sheet(wb, ws2, L('입력자료', '入力資料'));
 
   /* 3) 계산결과 */
-  const c = [['구분', '항목', '값', '단위', '산식 / 비고']];
+  const c = [[L('구분', '区分'), L('항목', '項目'), L('값', '値'), L('단위', '単位'), L('산식 / 비고', '算式 / 備考')]];
   const add = (g, n, v, u, f) => c.push([g, n, rd(v, 4), u || '', f || '']);
-  add('하중', '총 하중 ΣW', R.Wsum, 'kN', 'Σ(W·α) + 깔판 중량');
-  add('하중', '깔판 중량 (2매)', R.Wp, 'kN', '2·Bp·Lp·t·γ');
-  add('하중', '합력 편심 e', R.e, 'm', 'ΣM / ΣW (+ : 전방)');
-  add('접지면', '접지폭 Bg', R.Bg, 'm', '깔판 사용 시 깔판 폭');
-  add('접지면', '접지길이 Lg', R.Lg, 'm', '깔판 사용 시 깔판 길이');
-  add('접지면', '접지면적 A', R.A, 'm²', '2·Bg·Lg');
-  add('접지압', '평균 접지압 q_avg', R.qavg, 'kPa', 'ΣW / A');
-  add('접지압', '전단 접지압', R.qfront, 'kPa', 'q_avg(1 + 6e/Lg)');
-  add('접지압', '후단 접지압', R.qrear, 'kPa', 'q_avg(1 − 6e/Lg)');
-  add('접지압', '최대 접지압 q_max', R.qmax, 'kPa', R.full ? '전면 접지 (e ≤ Lg/6)' : '일부 접지 (삼각형 분포)');
-  add('접지압', '최소 접지압 q_min', R.qmin, 'kPa', '');
-  add('지지력(1층)', 'Nc', R.mu.Nc, '', 'Meyerhof'); add('지지력(1층)', 'Nq', R.mu.Nq, '', 'e^(π·tanφ)·tan²(45+φ/2)');
-  add('지지력(1층)', 'Nγ', R.mu.Ng, '', '(Nq−1)·tan(1.4φ)');
-  add('지지력(1층)', 'sc', R.mu.sc, '', '1 + 0.2·Kp·B/L'); add('지지력(1층)', 'sq = sγ', R.mu.sq, '', '1 + 0.1·Kp·B/L (φ>10°)');
-  add('지지력(1층)', 'dc', R.mu.dc, '', '1 + 0.2·√Kp·Df/B'); add('지지력(1층)', 'dq = dγ', R.mu.dq, '', '1 + 0.1·√Kp·Df/B (φ>10°)');
-  add('지지력(1층)', '유효 단위중량 γe', R.g1, 'kN/m³', '지하수위 반영');
-  add('지지력(1층)', '근입 상재압 q', R.q0, 'kPa', 'σ′v(Df)');
-  add('지지력(1층)', '극한지지력 q_u', R.mu.qu, 'kPa', 'c·Nc·sc·dc + q·Nq·sq·dq + ½γB·Nγ·sγ·dγ');
-  add('지지력(1층)', '허용지지력 q_a', R.qa, 'kPa', 'q_u / Fs');
-  add('유효면적법', "유효길이 L′", R.Le, 'm', 'Lg − 2e');
-  add('유효면적법', 'q_eff', R.qeff, 'kPa', '(ΣW/2) / (Bg·L′)');
-  add('유효면적법', "q_u′", R.mu2.qu, 'kPa', 'B×L′ 기준');
-  add('유효면적법', 'FS', R.FS2, '', "q_u′ / q_eff");
+  const gLoad = L('하중', '荷重'), gPlane = L('접지면', '接地面'), gPress = L('접지압', '接地圧'), g1 = L('지지력(1층)', '支持力（1層目）'), gEff = L('유효면적법', '有効面積法');
+  add(gLoad, L('총 하중 ΣW', '総荷重 ΣW'), R.Wsum, 'kN', L('Σ(W·α) + 깔판 중량', 'Σ(W·α) + 敷板重量'));
+  add(gLoad, L('깔판 중량 (2매)', '敷板重量（2枚）'), R.Wp, 'kN', '2·Bp·Lp·t·γ');
+  add(gLoad, L('합력 편심 e', '合力の偏心 e'), R.e, 'm', L('ΣM / ΣW (+ : 전방)', 'ΣM / ΣW（+：前方）'));
+  add(gPlane, L('접지폭 Bg', '接地幅 Bg'), R.Bg, 'm', L('깔판 사용 시 깔판 폭', '敷板使用時は敷板幅'));
+  add(gPlane, L('접지길이 Lg', '接地長 Lg'), R.Lg, 'm', L('깔판 사용 시 깔판 길이', '敷板使用時は敷板長さ'));
+  add(gPlane, L('접지면적 A', '接地面積 A'), R.A, 'm²', '2·Bg·Lg');
+  add(gPress, L('평균 접지압 q_avg', '平均接地圧 q_avg'), R.qavg, 'kPa', 'ΣW / A');
+  add(gPress, L('전단 접지압', '前端接地圧'), R.qfront, 'kPa', 'q_avg(1 + 6e/Lg)');
+  add(gPress, L('후단 접지압', '後端接地圧'), R.qrear, 'kPa', 'q_avg(1 − 6e/Lg)');
+  add(gPress, L('최대 접지압 q_max', '最大接地圧 q_max'), R.qmax, 'kPa', R.full ? L('전면 접지 (e ≤ Lg/6)', '全面接地（e ≤ Lg/6）') : L('일부 접지 (삼각형 분포)', '部分接地（三角形分布）'));
+  add(gPress, L('최소 접지압 q_min', '最小接地圧 q_min'), R.qmin, 'kPa', '');
+  add(g1, 'Nc', R.mu.Nc, '', 'Meyerhof'); add(g1, 'Nq', R.mu.Nq, '', 'e^(π·tanφ)·tan²(45+φ/2)');
+  add(g1, 'Nγ', R.mu.Ng, '', '(Nq−1)·tan(1.4φ)');
+  add(g1, 'sc', R.mu.sc, '', '1 + 0.2·Kp·B/L'); add(g1, 'sq = sγ', R.mu.sq, '', L('1 + 0.1·Kp·B/L (φ>10°)', '1 + 0.1·Kp·B/L（φ>10°）'));
+  add(g1, 'dc', R.mu.dc, '', '1 + 0.2·√Kp·Df/B'); add(g1, 'dq = dγ', R.mu.dq, '', L('1 + 0.1·√Kp·Df/B (φ>10°)', '1 + 0.1·√Kp·Df/B（φ>10°）'));
+  add(g1, L('유효 단위중량 γe', '有効単位体積重量 γe'), R.g1, 'kN/m³', L('지하수위 반영', '地下水位を考慮'));
+  add(g1, L('근입 상재압 q', '根入れ上載圧 q'), R.q0, 'kPa', 'σ′v(Df)');
+  add(g1, L('극한지지력 q_u', '極限支持力 q_u'), R.mu.qu, 'kPa', 'c·Nc·sc·dc + q·Nq·sq·dq + ½γB·Nγ·sγ·dγ');
+  add(g1, L('허용지지력 q_a', '許容支持力 q_a'), R.qa, 'kPa', 'q_u / Fs');
+  add(gEff, L('유효길이 L′', '有効長 L′'), R.Le, 'm', 'Lg − 2e');
+  add(gEff, 'q_eff', R.qeff, 'kPa', '(ΣW/2) / (Bg·L′)');
+  add(gEff, "q_u′", R.mu2.qu, 'kPa', L('B×L′ 기준', 'B×L′ 基準'));
+  add(gEff, 'FS', R.FS2, '', "q_u′ / q_eff");
   R.lowers.forEach(l => {
-    const g = '하부층 ' + (l.idx + 1) + '층';
-    add(g, '상면 깊이 z', l.z, 'm', ''); add(g, '가상기초 Bv', l.Bv, 'm', l.overlap ? 'G + Bg + z (응력영역 중첩)' : 'Bg + z');
-    add(g, '가상기초 Lv', l.Lv, 'm', "L′ + z"); add(g, '분산 하중 q_v', l.qv, 'kPa', 'Q / (Bv·Lv)');
-    add(g, "유효상재압 σ′v", l.sv, 'kPa', ''); add(g, '극한지지력 q_u', l.qu, 'kPa', ''); add(g, '순지지력 q_net', l.qnet, 'kPa', 'q_u − σ′v');
-    add(g, '안전율 FS', l.FS, '', 'q_net / q_v');
+    const g = L('하부층 ' + (l.idx + 1) + '층', '下部層 ' + (l.idx + 1) + '層目');
+    add(g, L('상면 깊이 z', '上面深さ z'), l.z, 'm', ''); add(g, L('가상기초 Bv', '仮想基礎 Bv'), l.Bv, 'm', l.overlap ? L('G + Bg + z (응력영역 중첩)', 'G + Bg + z（応力範囲が重複）') : 'Bg + z');
+    add(g, L('가상기초 Lv', '仮想基礎 Lv'), l.Lv, 'm', "L′ + z"); add(g, L('분산 하중 q_v', '分散荷重 q_v'), l.qv, 'kPa', 'Q / (Bv·Lv)');
+    add(g, L('유효상재압 σ′v', '有効上載圧 σ′v'), l.sv, 'kPa', ''); add(g, L('극한지지력 q_u', '極限支持力 q_u'), l.qu, 'kPa', ''); add(g, L('순지지력 q_net', '純支持力 q_net'), l.qnet, 'kPa', 'q_u − σ′v');
+    add(g, L('안전율 FS', '安全率 FS'), l.FS, '', 'q_net / q_v');
   });
-  add('전도', '저항모멘트 Mr', R.Mr, 'kN·m', '궤도 전단 기준, 안정측 하중');
-  add('전도', '전도모멘트 Mo', R.Mo, 'kN·m', '동하중 계수 적용');
-  add('전도', '전도 안전율 FS', R.FSt, '', 'Mr / Mo');
+  const gT = L('전도', '転倒');
+  add(gT, L('저항모멘트 Mr', '抵抗モーメント Mr'), R.Mr, 'kN·m', L('궤도 전단 기준, 안정측 하중', '履帯前端基準、安定側荷重'));
+  add(gT, L('전도모멘트 Mo', '転倒モーメント Mo'), R.Mo, 'kN·m', L('동하중 계수 적용', '動荷重係数を適用'));
+  add(gT, L('전도 안전율 FS', '転倒安全率 FS'), R.FSt, '', 'Mr / Mo');
   const ws3 = XLSX.utils.aoa_to_sheet(c);
   setCols(ws3, [14, 24, 14, 8, 46]);
-  XLSX.utils.book_append_sheet(wb, ws3, '계산결과');
+  XLSX.utils.book_append_sheet(wb, ws3, L('계산결과', '計算結果'));
   return wb;
 }
 
 
 /* =====================================================================
-   4. 화면 · 입력 · 저장
+   4. 화면 · 입력 · 저장 · 언어 전환 (한국어 / 日本語)
    ===================================================================== */
 const $ = id => document.getElementById(id);
 const LS_KEY = 'pdbc:v1';
+const LS_LANG = 'pdbc:lang';
+(function () { try { if (localStorage.getItem(LS_LANG) === 'ja') setLang('ja'); } catch (e) { /* 저장소 사용 불가 */ } })();
 let S = makeSample();
 let R = null;
 
@@ -1124,6 +1194,38 @@ function persist() {
   saveTimer = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { /* 무시 */ } }, 400);
 }
 
+/* ---- 언어 전환 ---- */
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-ko]').forEach(el => { el.textContent = LANG === 'ja' ? el.dataset.ja : el.dataset.ko; });
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+  $('inputs').setAttribute('aria-label', L('입력', '入力'));
+}
+/* 샘플 명칭을 그대로 쓰고 있는 항목만 새 언어의 샘플 명칭으로 교체 (사용자가 고친 이름은 유지) */
+function translateSampleTexts(from, to) {
+  const a = SAMPLE_NAMES[from], b = SAMPLE_NAMES[to];
+  if (S.proj.name === a.proj) S.proj.name = b.proj;
+  if (S.crane.model === a.crane) S.crane.model = b.crane;
+  S.soil.layers.forEach((l, i) => {
+    if (l.name === a.newLayer) l.name = b.newLayer;
+    else if (a.layers[i] !== undefined && l.name === a.layers[i]) l.name = b.layers[i];
+  });
+  S.loads.forEach((l, i) => {
+    if (l.name === a.newLoad) l.name = b.newLoad;
+    else if (a.loads[i] !== undefined && l.name === a.loads[i]) l.name = b.loads[i];
+  });
+}
+function switchLang(l) {
+  if (l === LANG) return;
+  translateSampleTexts(LANG, l);
+  setLang(l);
+  try { localStorage.setItem(LS_LANG, l); } catch (e) { /* 무시 */ }
+  clearTimeout(resetArmed); resetArmed = 0;
+  applyStatic();
+  renderInputs();
+  update();
+}
+
 /* ---- 입력 화면 ---- */
 const vs = (v, sc) => {
   if (typeof v !== 'number' || !isFinite(v)) return '';
@@ -1141,43 +1243,53 @@ const head = (n, title, hint) =>
 function renderInputs() {
   const p = S.proj, so = S.soil, c = S.crane, pl = S.plate, cd = S.cond;
   const h = [];
-  h.push('<section class="card">' + head(0, '검토 정보') +
-    '<div class="fgrid w2">' + fld('현장명', 'proj.name', p.name, { type: 'text' }) + fld('작성자', 'proj.author', p.author, { type: 'text' }) + fld('검토일', 'proj.date', p.date, { type: 'date' }) + '</div></section>');
+  h.push('<section class="card">' + head(0, L('검토 정보', '検討情報')) +
+    '<div class="fgrid w2">' + fld(L('현장명', '現場名'), 'proj.name', p.name, { type: 'text' }) + fld(L('작성자', '作成者'), 'proj.author', p.author, { type: 'text' }) +
+    fld(L('검토일', '検討日'), 'proj.date', p.date, { type: 'date' }) + '</div></section>');
 
-  h.push('<section class="card">' + head(1, '지반조건', '지반조사 보고서 값') +
-    '<div class="fgrid" style="margin-bottom:12px">' + fld('지하수위 GL(-) <em>m</em>', 'soil.gwt', so.gwt) + '</div><div class="list">' +
+  h.push('<section class="card">' + head(1, L('지반조건', '地盤条件'), L('지반조사 보고서 값', '地盤調査報告書の値')) +
+    '<div class="fgrid" style="margin-bottom:12px">' + fld(L('지하수위 GL(-) <em>m</em>', '地下水位 GL(-) <em>m</em>'), 'soil.gwt', so.gwt) + '</div><div class="list">' +
     so.layers.map((l, i) =>
-      '<div class="item"><div class="item-h"><span class="no">' + (i + 1) + '</span><input type="text" aria-label="지층명" data-k="soil.layers.' + i + '.name" value="' + esc(l.name) + '">' +
-      '<button class="ico" type="button" data-act="del-layer" data-i="' + i + '" aria-label="지층 삭제"' + (so.layers.length <= 1 ? ' disabled' : '') + '>×</button></div>' +
-      '<div class="fgrid">' + fld('두께 H <em>m</em>', 'soil.layers.' + i + '.H', l.H) + fld('단위중량 γ <em>kN/m³</em>', 'soil.layers.' + i + '.gamma', l.gamma) +
-      fld('점착력 c <em>kPa</em>', 'soil.layers.' + i + '.c', l.c) + fld('마찰각 φ <em>°</em>', 'soil.layers.' + i + '.phi', l.phi) + fld('N값 <em>참고</em>', 'soil.layers.' + i + '.N', l.N) + '</div></div>').join('') +
-    '</div><button class="add" type="button" data-act="add-layer" style="margin-top:10px"' + (so.layers.length >= 6 ? ' disabled' : '') + '>+ 지층 추가</button>' +
-    '<p class="sub">1층 = 접지면 직하 지지층. 지하수위 이하는 γ′ = γ − 9.81 적용 (γ 는 포화단위중량 기준).</p></section>');
+      '<div class="item"><div class="item-h"><span class="no">' + (i + 1) + '</span><input type="text" aria-label="' + L('지층명', '地層名') + '" data-k="soil.layers.' + i + '.name" value="' + esc(l.name) + '">' +
+      '<button class="ico" type="button" data-act="del-layer" data-i="' + i + '" aria-label="' + L('지층 삭제', '地層を削除') + '"' + (so.layers.length <= 1 ? ' disabled' : '') + '>×</button></div>' +
+      '<div class="fgrid">' + fld(L('두께 H <em>m</em>', '層厚 H <em>m</em>'), 'soil.layers.' + i + '.H', l.H) +
+      fld(L('단위중량 γ <em>kN/m³</em>', '単位体積重量 γ <em>kN/m³</em>'), 'soil.layers.' + i + '.gamma', l.gamma) +
+      fld(L('점착력 c <em>kPa</em>', '粘着力 c <em>kPa</em>'), 'soil.layers.' + i + '.c', l.c) +
+      fld(L('마찰각 φ <em>°</em>', '内部摩擦角 φ <em>°</em>'), 'soil.layers.' + i + '.phi', l.phi) +
+      fld(L('N값 <em>참고</em>', 'N値 <em>参考</em>'), 'soil.layers.' + i + '.N', l.N) + '</div></div>').join('') +
+    '</div><button class="add" type="button" data-act="add-layer" style="margin-top:10px"' + (so.layers.length >= 6 ? ' disabled' : '') + '>' + L('+ 지층 추가', '＋ 地層を追加') + '</button>' +
+    '<p class="sub">' + L('1층 = 접지면 직하 지지층. 지하수위 이하는 γ′ = γ − 9.81 적용 (γ 는 포화단위중량 기준).',
+      '1層目＝接地面直下の支持層。地下水位以下は γ′ = γ − 9.81 を適用（γ は飽和単位体積重量）。') + '</p></section>');
 
-  h.push('<section class="card">' + head(2, '항타기 제원', '제원표 기준') +
-    '<div class="fgrid" style="margin-bottom:10px">' + fld('기종', 'crane.model', c.model, { type: 'text' }) + '</div>' +
-    '<div class="fgrid">' + fld('궤도 폭 B <em>m</em>', 'crane.B', c.B) + fld('접지길이 L <em>m</em>', 'crane.L', c.L) + fld('궤도 중심간격 G <em>m</em>', 'crane.G', c.G) + '</div></section>');
+  h.push('<section class="card">' + head(2, L('항타기 제원', '杭打機諸元'), L('제원표 기준', '諸元表の値')) +
+    '<div class="fgrid" style="margin-bottom:10px">' + fld(L('기종', '機種'), 'crane.model', c.model, { type: 'text' }) + '</div>' +
+    '<div class="fgrid">' + fld(L('궤도 폭 B <em>m</em>', '履帯幅 B <em>m</em>'), 'crane.B', c.B) + fld(L('접지길이 L <em>m</em>', '接地長 L <em>m</em>'), 'crane.L', c.L) +
+    fld(L('궤도 중심간격 G <em>m</em>', '履帯中心間隔 G <em>m</em>'), 'crane.G', c.G) + '</div></section>');
 
-  h.push('<section class="card">' + head(3, '하중 구성', '전방(작업측) +, 후방 −') +
+  h.push('<section class="card">' + head(3, L('하중 구성', '荷重構成'), L('전방(작업측) +, 후방 −', '前方（作業側）+、後方 −')) +
     '<div class="list">' +
     S.loads.map((l, i) =>
-      '<div class="item"><div class="item-h"><span class="no">' + (i + 1) + '</span><input type="text" aria-label="하중 구분" data-k="loads.' + i + '.name" value="' + esc(l.name) + '">' +
-      '<button class="ico" type="button" data-act="del-load" data-i="' + i + '" aria-label="하중 삭제"' + (S.loads.length <= 1 ? ' disabled' : '') + '>×</button></div>' +
-      '<div class="fgrid">' + fld('중량 W <em>kN</em>', 'loads.' + i + '.W', l.W) + fld('위치 y <em>m</em>', 'loads.' + i + '.y', l.y) +
-      '<label class="chk"><input type="checkbox" data-k="loads.' + i + '.dyn"' + (l.dyn ? ' checked' : '') + '>동하중 (충격계수)</label></div></div>').join('') +
-    '</div><button class="add" type="button" data-act="add-load" style="margin-top:10px"' + (S.loads.length >= 12 ? ' disabled' : '') + '>+ 하중 추가</button>' +
+      '<div class="item"><div class="item-h"><span class="no">' + (i + 1) + '</span><input type="text" aria-label="' + L('하중 구분', '荷重区分') + '" data-k="loads.' + i + '.name" value="' + esc(l.name) + '">' +
+      '<button class="ico" type="button" data-act="del-load" data-i="' + i + '" aria-label="' + L('하중 삭제', '荷重を削除') + '"' + (S.loads.length <= 1 ? ' disabled' : '') + '>×</button></div>' +
+      '<div class="fgrid">' + fld(L('중량 W <em>kN</em>', '重量 W <em>kN</em>'), 'loads.' + i + '.W', l.W) + fld(L('위치 y <em>m</em>', '位置 y <em>m</em>'), 'loads.' + i + '.y', l.y) +
+      '<label class="chk"><input type="checkbox" data-k="loads.' + i + '.dyn"' + (l.dyn ? ' checked' : '') + '>' + L('동하중 (충격계수)', '動荷重（衝撃係数）') + '</label></div></div>').join('') +
+    '</div><button class="add" type="button" data-act="add-load" style="margin-top:10px"' + (S.loads.length >= 12 ? ' disabled' : '') + '>' + L('+ 하중 추가', '＋ 荷重を追加') + '</button>' +
     '<div class="sumrow" id="loadSum"></div>' +
-    '<p class="sub">y 는 궤도 접지 중심 기준 수평거리입니다. 동하중 항목(해머·말뚝 등)에는 충격계수가 곱해집니다.</p></section>');
+    '<p class="sub">' + L('y 는 궤도 접지 중심 기준 수평거리입니다. 동하중 항목(해머·말뚝 등)에는 충격계수가 곱해집니다.',
+      'y は履帯接地中心を基準とした水平距離。動荷重の項目（ハンマー・杭など）には衝撃係数を乗じる。') + '</p></section>');
 
-  h.push('<section class="card">' + head(4, '깔판 (접지면 확대)') +
-    '<label class="chk" style="margin-bottom:10px"><input type="checkbox" data-k="plate.use"' + (pl.use ? ' checked' : '') + '>깔판 사용 (궤도당 1매, 궤도 중심 설치)</label>' +
-    '<div class="fgrid" id="plateF">' + fld('폭 Bp <em>m</em>', 'plate.Bp', pl.Bp, { dis: !pl.use }) + fld('길이 Lp <em>m</em>', 'plate.Lp', pl.Lp, { dis: !pl.use }) +
-    fld('두께 t <em>mm</em>', 'plate.t', pl.t, { sc: 1000, dis: !pl.use }) + fld('단위중량 <em>kN/m³</em>', 'plate.gp', pl.gp, { dis: !pl.use }) + '</div></section>');
+  h.push('<section class="card">' + head(4, L('깔판 (접지면 확대)', '敷板（接地面の拡大）')) +
+    '<label class="chk" style="margin-bottom:10px"><input type="checkbox" data-k="plate.use"' + (pl.use ? ' checked' : '') + '>' +
+    L('깔판 사용 (궤도당 1매, 궤도 중심 설치)', '敷板を使用（履帯1本につき1枚、履帯中心に設置）') + '</label>' +
+    '<div class="fgrid" id="plateF">' + fld(L('폭 Bp <em>m</em>', '幅 Bp <em>m</em>'), 'plate.Bp', pl.Bp, { dis: !pl.use }) + fld(L('길이 Lp <em>m</em>', '長さ Lp <em>m</em>'), 'plate.Lp', pl.Lp, { dis: !pl.use }) +
+    fld(L('두께 t <em>mm</em>', '厚さ t <em>mm</em>'), 'plate.t', pl.t, { sc: 1000, dis: !pl.use }) +
+    fld(L('단위중량 <em>kN/m³</em>', '単位体積重量 <em>kN/m³</em>'), 'plate.gp', pl.gp, { dis: !pl.use }) + '</div></section>');
 
-  h.push('<section class="card">' + head(5, '검토 조건') +
-    '<div class="fgrid">' + fld('지지력 안전율 Fs', 'cond.FsB', cd.FsB) + fld('전도 안전율', 'cond.FsT', cd.FsT) + fld('충격계수 α', 'cond.alpha', cd.alpha) + fld('근입깊이 Df <em>m</em>', 'cond.Df', cd.Df) + '</div></section>');
+  h.push('<section class="card">' + head(5, L('검토 조건', '検討条件')) +
+    '<div class="fgrid">' + fld(L('지지력 안전율 Fs', '支持力安全率 Fs'), 'cond.FsB', cd.FsB) + fld(L('전도 안전율', '転倒安全率'), 'cond.FsT', cd.FsT) +
+    fld(L('충격계수 α', '衝撃係数 α'), 'cond.alpha', cd.alpha) + fld(L('근입깊이 Df <em>m</em>', '根入れ深さ Df <em>m</em>'), 'cond.Df', cd.Df) + '</div></section>');
 
-  h.push('<button class="reset" type="button" data-act="reset" id="btnReset">샘플값으로 되돌리기</button>');
+  h.push('<button class="reset" type="button" data-act="reset" id="btnReset">' + L('샘플값으로 되돌리기', 'サンプル値に戻す') + '</button>');
   $('inputs').innerHTML = h.join('');
 }
 
@@ -1205,19 +1317,19 @@ function onClick(e) {
   if (!b) return;
   const act = b.dataset.act, i = parseInt(b.dataset.i, 10);
   if (act === 'add-layer' && S.soil.layers.length < 6) {
-    S.soil.layers.push({ name: '신규 지층', H: 3, gamma: 18, c: 0, phi: 30, N: 10 }); renderInputs(); schedule();
+    S.soil.layers.push({ name: SAMPLE_NAMES[LANG].newLayer, H: 3, gamma: 18, c: 0, phi: 30, N: 10 }); renderInputs(); schedule();
   } else if (act === 'del-layer' && S.soil.layers.length > 1) {
     S.soil.layers.splice(i, 1); renderInputs(); schedule();
   } else if (act === 'add-load' && S.loads.length < 12) {
-    S.loads.push({ name: '기타 하중', W: 0, y: 0, dyn: false }); renderInputs(); schedule();
+    S.loads.push({ name: SAMPLE_NAMES[LANG].newLoad, W: 0, y: 0, dyn: false }); renderInputs(); schedule();
   } else if (act === 'del-load' && S.loads.length > 1) {
     S.loads.splice(i, 1); renderInputs(); schedule();
   } else if (act === 'reset') {
     if (!resetArmed) {
-      resetArmed = setTimeout(() => { resetArmed = 0; const r = $('btnReset'); if (r) r.textContent = '샘플값으로 되돌리기'; }, 3500);
-      b.textContent = '입력값이 모두 사라집니다. 한 번 더 누르면 되돌립니다.';
+      resetArmed = setTimeout(() => { resetArmed = 0; const r = $('btnReset'); if (r) r.textContent = L('샘플값으로 되돌리기', 'サンプル値に戻す'); }, 3500);
+      b.textContent = L('입력값이 모두 사라집니다. 한 번 더 누르면 되돌립니다.', '入力値がすべて消えます。もう一度押すと元に戻します。');
     } else {
-      clearTimeout(resetArmed); resetArmed = 0; S = makeSample(); renderInputs(); schedule(); toast('샘플값으로 되돌렸습니다.');
+      clearTimeout(resetArmed); resetArmed = 0; S = makeSample(); renderInputs(); schedule(); toast(L('샘플값으로 되돌렸습니다.', 'サンプル値に戻しました。'));
     }
   }
 }
@@ -1237,18 +1349,18 @@ function valText(c) {
   return fmt(c.value, 2);
 }
 function limText(c) {
-  if (c.u === null) return '하부 지층이 없어 생략';
-  return '기준 ' + c.rel + ' ' + fmt(c.limit, c.id === 1 ? 1 : 2) + (c.id === 1 ? ' kPa' : c.id === 5 ? ' m' : '');
+  if (c.u === null) return L('하부 지층이 없어 생략', '下部地層がないため省略');
+  return L('기준 ', '基準 ') + c.rel + ' ' + fmt(c.limit, c.id === 1 ? 1 : 2) + (c.id === 1 ? ' kPa' : c.id === 5 ? ' m' : '');
 }
 
 function renderTop() {
   const chip = $('chip');
   if (!R || !R.ok) {
-    chip.className = 'chip st-NA'; $('chipText').textContent = '입력 확인 필요';
+    chip.className = 'chip st-NA'; $('chipText').textContent = L('입력 확인 필요', '入力の確認が必要');
     return;
   }
   chip.className = 'chip st-' + R.status;
-  $('chipText').innerHTML = STLABEL[R.status] + ' <small>최대 ' + fmt(R.umax * 100, 0) + '%</small>';
+  $('chipText').innerHTML = STLABEL[R.status] + ' <small>' + L('최대', '最大') + ' ' + fmt(R.umax * 100, 0) + '%</small>';
 }
 
 function renderIssues() {
@@ -1261,14 +1373,14 @@ function renderIssues() {
 }
 
 function renderChecks() {
-  const banner = '<div class="ck banner st-' + R.status + '"><div class="ck-k">종합판정</div><div class="ck-big">' + STLABEL[R.status] +
-    '</div><div class="ck-s">최대 사용률 ' + fmt(R.umax * 100, 0) + '% · ' + esc(R.worst.name) + '</div></div>';
+  const banner = '<div class="ck banner st-' + R.status + '"><div class="ck-k">' + L('종합판정', '総合判定') + '</div><div class="ck-big">' + STLABEL[R.status] +
+    '</div><div class="ck-s">' + L('최대 사용률 ', '最大使用率 ') + fmt(R.umax * 100, 0) + '% · ' + esc(R.worst.name) + '</div></div>';
   const cards = R.checks.map(c => {
     const w = c.u === null ? 0 : Math.min(c.u, 1.25) / 1.25 * 100;
     return '<div class="ck st-' + c.st + '"><div class="ck-top"><span class="ck-n">' + c.id + '</span><span class="ck-t">' + c.name + '</span><span class="pl">' + STLABEL[c.st] + '</span></div>' +
       '<div class="ck-v">' + valText(c) + '</div><div class="ck-l">' + limText(c) + '</div>' +
       '<div class="gauge"><i style="width:' + w.toFixed(1) + '%"></i><b></b></div>' +
-      '<div class="ck-f">' + (c.u === null ? '' : '사용률 ' + fmt(c.u * 100, 0) + '% · ') + esc(c.note) + '</div></div>';
+      '<div class="ck-f">' + (c.u === null ? '' : L('사용률 ', '使用率 ') + fmt(c.u * 100, 0) + '% · ') + esc(c.note) + '</div></div>';
   });
   $('checks').innerHTML = banner + cards.join('');
 }
@@ -1285,19 +1397,23 @@ function renderDetail() {
   const g = (t, rows) => '<div><h4>' + t + '</h4><table>' + rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</table></div>';
   const m = R.mu;
   const parts = [
-    g('하중 · 편심', [['총 하중 ΣW', fmt(R.Wsum, 1) + ' kN'], ['깔판 중량 (2매)', fmt(R.Wp, 1) + ' kN'], ['편심 e', sgn(R.e, 3) + ' m'], ['동하중 계수 α', fmt(R.cond.alpha, 2)]]),
-    g('접지압', [['접지면 B<sub>g</sub> × L<sub>g</sub>', fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' m'], ['접지면적 A', fmt(R.A, 2) + ' m²'], ['평균 q<sub>avg</sub>', fmt(R.qavg, 1) + ' kPa'],
-      ['최대 q<sub>max</sub>', fmt(R.qmax, 1) + ' kPa'], ['최소 q<sub>min</sub>', fmt(R.qmin, 1) + ' kPa'], ['접지 상태', R.full ? '전면 접지' : '일부 접지']]),
-    g('지지력 (1층)', [['N<sub>c</sub> / N<sub>q</sub> / N<sub>γ</sub>', fmt(m.Nc, 2) + ' / ' + fmt(m.Nq, 2) + ' / ' + fmt(m.Ng, 2)], ['극한지지력 q<sub>u</sub>', fmt(m.qu, 1) + ' kPa'],
-      ['허용지지력 q<sub>a</sub>', fmt(R.qa, 1) + ' kPa'], ['유효길이 L′', fmt(R.Le, 2) + ' m'], ['q<sub>eff</sub>', fmt(R.qeff, 1) + ' kPa'], ['q<sub>u</sub>′', fmt(R.mu2.qu, 1) + ' kPa']]),
-    g('전도 (전방)', [['저항모멘트 M<sub>r</sub>', fmt(R.Mr, 1) + ' kN·m'], ['전도모멘트 M<sub>o</sub>', fmt(R.Mo, 1) + ' kN·m'], ['전도 안전율', fmt(R.FSt, 2)]])
+    g(L('하중 · 편심', '荷重・偏心'), [[L('총 하중 ΣW', '総荷重 ΣW'), fmt(R.Wsum, 1) + ' kN'], [L('깔판 중량 (2매)', '敷板重量（2枚）'), fmt(R.Wp, 1) + ' kN'],
+      [L('편심 e', '偏心 e'), sgn(R.e, 3) + ' m'], [L('동하중 계수 α', '動荷重係数 α'), fmt(R.cond.alpha, 2)]]),
+    g(L('접지압', '接地圧'), [['B<sub>g</sub> × L<sub>g</sub>', fmt(R.Bg, 2) + ' × ' + fmt(R.Lg, 2) + ' m'], [L('접지면적 A', '接地面積 A'), fmt(R.A, 2) + ' m²'], [L('평균 q<sub>avg</sub>', '平均 q<sub>avg</sub>'), fmt(R.qavg, 1) + ' kPa'],
+      [L('최대 q<sub>max</sub>', '最大 q<sub>max</sub>'), fmt(R.qmax, 1) + ' kPa'], [L('최소 q<sub>min</sub>', '最小 q<sub>min</sub>'), fmt(R.qmin, 1) + ' kPa'],
+      [L('접지 상태', '接地状態'), R.full ? L('전면 접지', '全面接地') : L('일부 접지', '部分接地')]]),
+    g(L('지지력 (1층)', '支持力（1層目）'), [['N<sub>c</sub> / N<sub>q</sub> / N<sub>γ</sub>', fmt(m.Nc, 2) + ' / ' + fmt(m.Nq, 2) + ' / ' + fmt(m.Ng, 2)],
+      [L('극한지지력 q<sub>u</sub>', '極限支持力 q<sub>u</sub>'), fmt(m.qu, 1) + ' kPa'], [L('허용지지력 q<sub>a</sub>', '許容支持力 q<sub>a</sub>'), fmt(R.qa, 1) + ' kPa'],
+      [L('유효길이 L′', '有効長 L′'), fmt(R.Le, 2) + ' m'], ['q<sub>eff</sub>', fmt(R.qeff, 1) + ' kPa'], ['q<sub>u</sub>′', fmt(R.mu2.qu, 1) + ' kPa']]),
+    g(L('전도 (전방)', '転倒（前方）'), [[L('저항모멘트 M<sub>r</sub>', '抵抗モーメント M<sub>r</sub>'), fmt(R.Mr, 1) + ' kN·m'],
+      [L('전도모멘트 M<sub>o</sub>', '転倒モーメント M<sub>o</sub>'), fmt(R.Mo, 1) + ' kN·m'], [L('전도 안전율', '転倒安全率'), fmt(R.FSt, 2)]])
   ];
   let low = '';
   if (R.lowers.length) {
-    low = '<div class="tw"><h4>하부 지층 (2:1 분산 · 순지지력 기준)</h4><table><thead><tr><th>지층</th><th>z (m)</th><th>B<sub>v</sub> × L<sub>v</sub> (m)</th><th>q<sub>v</sub></th><th>σ′<sub>v</sub></th><th>q<sub>u</sub></th><th>q<sub>net</sub></th><th>FS</th></tr></thead><tbody>' +
-      R.lowers.map(l => '<tr><td>' + (l.idx + 1) + '층 ' + esc(trunc(l.name.replace(/\s*\(.*\)/, ''), 8)) + '</td><td>' + fmt(l.z, 1) + '</td><td>' + fmt(l.Bv, 2) + ' × ' + fmt(l.Lv, 2) + (l.overlap ? ' *' : '') +
+    low = '<div class="tw"><h4>' + L('하부 지층 (2:1 분산 · 순지지력 기준)', '下部地層（2:1分散・純支持力基準）') + '</h4><table><thead><tr><th>' + L('지층', '地層') + '</th><th>z (m)</th><th>B<sub>v</sub> × L<sub>v</sub> (m)</th><th>q<sub>v</sub></th><th>σ′<sub>v</sub></th><th>q<sub>u</sub></th><th>q<sub>net</sub></th><th>FS</th></tr></thead><tbody>' +
+      R.lowers.map(l => '<tr><td>' + L((l.idx + 1) + '층 ', (l.idx + 1) + '層目 ') + esc(trunc(shortName(l.name), 8)) + '</td><td>' + fmt(l.z, 1) + '</td><td>' + fmt(l.Bv, 2) + ' × ' + fmt(l.Lv, 2) + (l.overlap ? ' *' : '') +
         '</td><td>' + fmt(l.qv, 1) + '</td><td>' + fmt(l.sv, 1) + '</td><td>' + fmt(l.qu, 1) + '</td><td>' + fmt(l.qnet, 1) + '</td><td>' + fmt(l.FS, 2) + '</td></tr>').join('') +
-      '</tbody></table><p class="sub">* 두 궤도의 응력영역이 겹쳐 G + B<sub>g</sub> + z 로 산정. 단위 kPa.</p></div>';
+      '</tbody></table><p class="sub">' + L('* 두 궤도의 응력영역이 겹쳐 G + B<sub>g</sub> + z 로 산정. 단위 kPa.', '* 両履帯の応力範囲が重なるため G + B<sub>g</sub> + z で算定。単位 kPa。') + '</p></div>';
   }
   $('detailBody').innerHTML = '<div class="dg">' + parts.join('') + '</div>' + low;
 }
@@ -1306,7 +1422,8 @@ function renderLoadSum() {
   const el = $('loadSum');
   if (!el) return;
   if (!R || !R.ok) { el.innerHTML = ''; return; }
-  el.innerHTML = '<div><span>총 하중 ΣW </span>' + fmt(R.Wsum, 1) + ' kN</div><div><span>합력 편심 e </span>' + sgn(R.e, 2) + ' m</div><div><span>평균 접지압 </span>' + fmt(R.qavg, 1) + ' kPa</div>';
+  el.innerHTML = '<div><span>' + L('총 하중 ΣW ', '総荷重 ΣW ') + '</span>' + fmt(R.Wsum, 1) + ' kN</div><div><span>' + L('합력 편심 e ', '合力の偏心 e ') + '</span>' + sgn(R.e, 2) +
+    ' m</div><div><span>' + L('평균 접지압 ', '平均接地圧 ') + '</span>' + fmt(R.qavg, 1) + ' kPa</div>';
 }
 
 function syncPlate() {
@@ -1321,7 +1438,7 @@ function schedulePreview() {
   pvTimer = setTimeout(refreshPreview, 500);
 }
 async function refreshPreview() {
-  if (!R || !R.ok) { $('pvBody').innerHTML = '<p class="sub">입력값을 확인하면 미리보기가 표시됩니다.</p>'; return; }
+  if (!R || !R.ok) { $('pvBody').innerHTML = '<p class="sub">' + L('입력값을 확인하면 미리보기가 표시됩니다.', '入力値を確認するとプレビューが表示されます。') + '</p>'; return; }
   const my = ++pvToken;
   const stage = $('pvStage');
   try {
@@ -1330,7 +1447,7 @@ async function refreshPreview() {
     $('pvBody').innerHTML = '';
     pages.forEach(p => $('pvBody').appendChild(p));
     stage.innerHTML = '';
-  } catch (e) { $('pvBody').innerHTML = '<p class="sub">미리보기를 만들지 못했습니다.</p>'; }
+  } catch (e) { $('pvBody').innerHTML = '<p class="sub">' + L('미리보기를 만들지 못했습니다.', 'プレビューを作成できませんでした。') + '</p>'; }
 }
 
 function update() {
@@ -1364,7 +1481,8 @@ function updateSaveUI() {
   const note = $('saveNote');
   if (dlReady && !DL) {
     note.hidden = false;
-    note.textContent = '이 보기에서는 파일 저장을 사용할 수 없습니다. claude.ai 에서 이 페이지를 열면 PDF·Excel 저장이 가능합니다.';
+    note.textContent = L('이 보기에서는 파일 저장을 사용할 수 없습니다. claude.ai 에서 이 페이지를 열면 PDF·Excel 저장이 가능합니다.',
+      'この表示ではファイル保存を利用できません。claude.ai でこのページを開くと PDF・Excel の保存が可能です。');
     $('btnPdf').disabled = true; $('btnXls').disabled = true;
   } else {
     note.hidden = true;
@@ -1392,31 +1510,32 @@ function browserSave(req) {
   dlReady = true; updateSaveUI();
 })();
 
-function fileStem() {
+function fileStem(kind) {
   const d = (S.proj.date || '').replace(/[^0-9]/g, '') || 'report';
-  return '항타기_지지력_검토서_' + d;
+  if (kind === 'xls') return L('항타기_지지력_검토_', '杭打機_支持力検討_') + d;
+  return L('항타기_지지력_검토서_', '杭打機_支持力検討書_') + d;
 }
 function saveError(err) {
   const code = err && err.code;
-  if (code === 'declined') toast('저장이 취소되었습니다.');
-  else if (code === 'rate_limited') toast('저장 확인창이 이미 열려 있습니다. 잠시 후 다시 시도하세요.');
-  else if (code === 'too_large') toast('파일이 너무 큽니다.');
-  else toast('저장하지 못했습니다. ' + (err && err.message ? err.message : ''));
+  if (code === 'declined') toast(L('저장이 취소되었습니다.', '保存をキャンセルしました。'));
+  else if (code === 'rate_limited') toast(L('저장 확인창이 이미 열려 있습니다. 잠시 후 다시 시도하세요.', '保存の確認ダイアログがすでに開いています。しばらくしてからお試しください。'));
+  else if (code === 'too_large') toast(L('파일이 너무 큽니다.', 'ファイルが大きすぎます。'));
+  else toast(L('저장하지 못했습니다. ', '保存できませんでした。') + (err && err.message ? err.message : ''));
 }
 async function guard() {
   if (busy) return false;
-  if (!dlReady) { toast('저장 기능을 준비하는 중입니다. 잠시 후 다시 시도하세요.'); return false; }
+  if (!dlReady) { toast(L('저장 기능을 준비하는 중입니다. 잠시 후 다시 시도하세요.', '保存機能を準備中です。しばらくしてからもう一度お試しください。')); return false; }
   if (!DL) { updateSaveUI(); return false; }
-  if (!R || !R.ok) { toast('입력값 오류를 먼저 수정하세요.'); return false; }
+  if (!R || !R.ok) { toast(L('입력값 오류를 먼저 수정하세요.', '先に入力値の誤りを修正してください。')); return false; }
   return true;
 }
 
 async function savePDF() {
   if (!(await guard())) return;
-  if (!window.html2canvas || !window.jspdf) { toast('PDF 라이브러리를 불러오지 못했습니다. 네트워크를 확인하세요.'); return; }
+  if (!window.html2canvas || !window.jspdf) { toast(L('PDF 라이브러리를 불러오지 못했습니다. 네트워크를 확인하세요.', 'PDFライブラリを読み込めませんでした。ネットワークを確認してください。')); return; }
   busy = true; updateSaveUI();
   const btn = $('btnPdf'), label = btn.textContent;
-  btn.textContent = 'PDF 생성 중…';
+  btn.textContent = L('PDF 생성 중…', 'PDF作成中…');
   const host = $('offscreen');
   try {
     const pages = await buildReportPages(S, R, host);
@@ -1429,32 +1548,37 @@ async function savePDF() {
     const blob = doc.output('blob');
     host.innerHTML = '';
     btn.textContent = label;
-    await DL.save({ filename: fileStem() + '.pdf', data: blob });
-    toast('PDF 를 저장했습니다.');
+    await DL.save({ filename: fileStem('pdf') + '.pdf', data: blob });
+    toast(L('PDF 를 저장했습니다.', 'PDFを保存しました。'));
   } catch (err) { saveError(err); }
   finally { host.innerHTML = ''; btn.textContent = label; busy = false; updateSaveUI(); }
 }
 
 async function saveXLS() {
   if (!(await guard())) return;
-  if (!window.XLSX) { toast('Excel 라이브러리를 불러오지 못했습니다. 네트워크를 확인하세요.'); return; }
+  if (!window.XLSX) { toast(L('Excel 라이브러리를 불러오지 못했습니다. 네트워크를 확인하세요.', 'Excelライブラリを読み込めませんでした。ネットワークを確認してください。')); return; }
   busy = true; updateSaveUI();
   try {
     const wb = buildWorkbook(window.XLSX, S, R);
     const buf = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    await DL.save({ filename: fileStem().replace('검토서', '검토') + '.xlsx', data: buf });
-    toast('Excel 파일을 저장했습니다.');
+    await DL.save({ filename: fileStem('xls') + '.xlsx', data: buf });
+    toast(L('Excel 파일을 저장했습니다.', 'Excelファイルを保存しました。'));
   } catch (err) { saveError(err); }
   finally { busy = false; updateSaveUI(); }
 }
 
 /* ---- 시작 ---- */
 function init() {
+  applyStatic();
   renderInputs();
   const inp = $('inputs');
   inp.addEventListener('input', onField);
   inp.addEventListener('change', onField);
   inp.addEventListener('click', onClick);
+  document.querySelector('.seg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-lang]');
+    if (b) switchLang(b.dataset.lang);
+  });
   $('btnPdf').addEventListener('click', savePDF);
   $('btnXls').addEventListener('click', saveXLS);
   $('pv').addEventListener('toggle', () => { if ($('pv').open) refreshPreview(); });
