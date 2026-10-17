@@ -2,7 +2,7 @@
 <title>흙막이 구조계산기</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
 <style>
 /* Layout: 좌측 입력 패널 + 우측 도해·결과. 모바일은 입력/결과 전환. */
 :root{
@@ -19,6 +19,7 @@
   --bg:#0E151C; --surf:#16202A; --surf2:#1B2733; --fg:#E6EDF3; --mu:#92A3B3; --line:#2B3946;
   --acc:#5AA2E8; --acc-fg:#0B1520; --acc-soft:#1B2B3E; --ok:#4FC08A; --ok-soft:#173026;
   --ng:#F0867D; --ng-soft:#3A1F1D; --warn:#E3B25A; --warn-soft:#37290F; --wall:#8EA0B2; --sup:#E58A4F; color-scheme:dark}
+  :root[lang="ja"]{--font:'Yu Gothic UI','Yu Gothic','Meiryo','Hiragino Kaku Gothic ProN','Noto Sans JP','Noto Sans CJK JP',sans-serif}
 *{box-sizing:border-box}
 html,body{min-height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.5;padding-inline:16px;padding-block:0 24px}
@@ -34,6 +35,9 @@ button,input,select{font:inherit;color:inherit}
 .btn.pri{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
 .btn.pri:hover{filter:brightness(1.08)}
 .btn[disabled]{opacity:.55;cursor:wait}
+.lang{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--surf)}
+.lang button{border:0;background:none;padding:7px 12px;cursor:pointer;font-size:13px;font-weight:500}
+.lang button[aria-pressed="true"]{background:var(--acc);color:var(--acc-fg)}
 .seg{display:none;max-width:1500px;margin:0 auto 10px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .seg button{flex:1;border:0;background:var(--surf);padding:9px;cursor:pointer;font-weight:500}
 .seg button[aria-pressed="true"]{background:var(--acc);color:var(--acc-fg)}
@@ -102,36 +106,37 @@ td.note2{white-space:normal;color:var(--mu);font-size:12px;min-width:170px}
 </style>
 
 <header class="top">
-  <div class="brand"><h1>흙막이 구조계산기</h1><p>탄소성 보-스프링 해석 · 단계별 굴착 · Rankine 토압</p></div>
+  <div class="brand"><h1 data-ko="흙막이 구조계산기" data-ja="山留め構造計算ツール">흙막이 구조계산기</h1><p data-ko="탄소성 보-스프링 해석 · 단계별 굴착 · Rankine 토압" data-ja="弾塑性はり−ばね解析 · 段階掘削 · Rankine土圧">탄소성 보-스프링 해석 · 단계별 굴착 · Rankine 토압</p></div>
   <div class="acts">
-    <button class="btn" id="bReset" type="button">기본값 초기화</button>
-    <button class="btn" id="bSave" type="button">입력 저장</button>
-    <button class="btn" id="bLoad" type="button">입력 불러오기</button>
-    <button class="btn pri" id="bPdf" type="button">PDF 계산서</button>
-    <button class="btn pri" id="bXls" type="button">엑셀 저장</button>
+    <div class="lang" role="group" aria-label="Language / 言語"><button type="button" data-lang="ko" aria-pressed="true">한국어</button><button type="button" data-lang="ja" aria-pressed="false">日本語</button></div>
+    <button class="btn" id="bReset" type="button" data-ko="기본값 초기화" data-ja="初期値に戻す">기본값 초기화</button>
+    <button class="btn" id="bSave" type="button" data-ko="입력 저장" data-ja="入力を保存">입력 저장</button>
+    <button class="btn" id="bLoad" type="button" data-ko="입력 불러오기" data-ja="入力を読込">입력 불러오기</button>
+    <button class="btn pri" id="bPdf" type="button" data-ko="PDF 계산서" data-ja="PDF計算書">PDF 계산서</button>
+    <button class="btn pri" id="bXls" type="button" data-ko="엑셀 저장" data-ja="Excel保存">엑셀 저장</button>
     <input type="file" id="fLoad" accept=".json,application/json" hidden>
   </div>
 </header>
-<div class="seg" role="group" aria-label="화면 전환"><button type="button" id="vIn" aria-pressed="true">입력</button><button type="button" id="vOut" aria-pressed="false">도해·결과</button></div>
+<div class="seg" role="group" aria-label="View"><button type="button" id="vIn" aria-pressed="true" data-ko="입력" data-ja="入力">입력</button><button type="button" id="vOut" aria-pressed="false" data-ko="도해·결과" data-ja="図・結果">도해·결과</button></div>
 <main class="wrap">
-  <section class="panel in" aria-label="입력">
+  <section class="panel in">
     <div class="tabs" role="tablist" id="inTabs">
-      <button role="tab" data-t="t1" aria-selected="true">공법·치수</button>
-      <button role="tab" data-t="t2" aria-selected="false">지반</button>
-      <button role="tab" data-t="t3" aria-selected="false">지보재</button>
-      <button role="tab" data-t="t4" aria-selected="false">기준</button>
+      <button role="tab" data-t="t1" aria-selected="true" data-ko="공법·치수" data-ja="工法・寸法">공법·치수</button>
+      <button role="tab" data-t="t2" aria-selected="false" data-ko="지반" data-ja="地盤">지반</button>
+      <button role="tab" data-t="t3" aria-selected="false" data-ko="지보재" data-ja="支保工">지보재</button>
+      <button role="tab" data-t="t4" aria-selected="false" data-ko="기준" data-ja="基準">기준</button>
     </div>
     <div class="body" id="inBody"></div>
   </section>
-  <section class="out" aria-label="결과">
+  <section class="out">
     <div id="msgs"></div>
     <div class="sum" id="sum"></div>
     <div class="panel">
       <div class="tabs" role="tablist" id="outTabs">
-        <button role="tab" data-t="o1" aria-selected="true">단면도</button>
-        <button role="tab" data-t="o2" aria-selected="false">토압</button>
-        <button role="tab" data-t="o3" aria-selected="false">해석결과</button>
-        <button role="tab" data-t="o4" aria-selected="false">검토표</button>
+        <button role="tab" data-t="o1" aria-selected="true" data-ko="단면도" data-ja="断面図">단면도</button>
+        <button role="tab" data-t="o2" aria-selected="false" data-ko="토압" data-ja="土圧">토압</button>
+        <button role="tab" data-t="o3" aria-selected="false" data-ko="해석결과" data-ja="解析結果">해석결과</button>
+        <button role="tab" data-t="o4" aria-selected="false" data-ko="검토표" data-ja="照査表">검토표</button>
       </div>
       <div class="body" id="oBody">
         <div data-p="o1" id="o1"></div><div data-p="o2" id="o2" hidden></div>
@@ -148,6 +153,11 @@ td.note2{white-space:normal;color:var(--mu);font-size:12px;min-width:170px}
 
 <script>
 /* ===== 엔진: 탄소성 보-스프링 단계별 굴착 해석 (Rankine 토압) ===== */
+/* i18n */
+let LANG = 'ko';
+const T = (ko, ja) => LANG === 'ja' ? ja : ko;
+const GJ = {'벽체':'壁体','변위':'変位','근입':'根入れ','히빙':'ヒービング','토류판':'土留め板','띠장':'腹起し','버팀보':'切梁','앵커':'アンカー'};
+const gname = k => LANG === 'ja' ? GJ[k] : k;
 const GW = 9.81;
 const rad = d => d * Math.PI / 180;
 const HSEC = {
@@ -178,13 +188,13 @@ function memberProps(inp){
     const bf = sec.bf || 300;
     const Wa = p.s;
     const Wp = wt === 'hpile' ? Math.min(p.s, p.kpass * bf / 1000) : p.s;
-    return {kind:'steel', label: (wt==='hpile'?'H-Pile+토류판 ':'SCW(H-Pile 삽입) ') + (p.sec==='custom'?'사용자단면':p.sec) + ' @' + p.s.toFixed(2) + 'm',
+    return {kind:'steel', label: (wt==='hpile'?T('H-Pile+토류판 ','H形鋼杭+土留め板 '):T('SCW(H-Pile 삽입) ','SCW(H形鋼挿入) ')) + (p.sec==='custom'?T('사용자단면','ユーザー断面'):p.sec) + ' @' + p.s.toFixed(2) + 'm',
       EI: E * 1000 * sec.I * 1e-8, Z: sec.Z, A: sec.A, Aw, bf, Wa, Wp, s: p.s, sec, lagging: wt === 'hpile'};
   }
   if (wt === 'sheet'){
     const sp = inp.sheet;
     const sec = sp.sec === 'custom' ? sp.custom : SSEC[sp.sec];
-    return {kind:'steel', label:'강널말뚝 ' + (sp.sec==='custom'?'사용자단면':sp.sec) + ' (1m당)',
+    return {kind:'steel', label:T('강널말뚝 ','鋼矢板 ') + (sp.sec==='custom'?T('사용자단면','ユーザー断面'):sp.sec) + T(' (1m당)',' (1mあたり)'),
       EI: E * 1000 * sec.I * 1e-8, Z: sec.Z, A: sec.A, Aw: sec.Aw, bf: 0, Wa: 1, Wp: 1, s: 1, sec, lagging: false};
   }
   const c = inp.cip;
@@ -391,19 +401,19 @@ function runChecks(inp, res){
   const fb = mat.fb0 * mat.alpha, fv = mat.fv0 * mat.alpha;
   const add = (g, name, val, lim, unit, mode, note) => {
     const ratio = mode === 'min' ? (val > 0 ? lim / val : 0) : val / lim;
-    out.push({g, name, val, lim, unit, mode: mode || 'max', ratio, ok: mode === 'min' ? val >= lim : val <= lim, note: note || ''});
+    out.push({gk: g, g: gname(g), name, val, lim, unit, mode: mode || 'max', ratio, ok: mode === 'min' ? val >= lim : val <= lim, note: note || ''});
   };
   // 1) 벽체 휨/전단
   if (m.kind === 'steel'){
     const sb = res.Mx.v * 1000 / m.Z, tv = res.Vx.v * 1000 / (m.Aw * 100);
-    add('벽체', '휨응력 σb', sb, fb, 'MPa', 'max', 'Mmax=' + res.Mx.v.toFixed(1) + ' kN·m @GL-' + res.Mx.z.toFixed(2));
-    add('벽체', '전단응력 τ', tv, fv, 'MPa', 'max', 'Vmax=' + res.Vx.v.toFixed(1) + ' kN @GL-' + res.Vx.z.toFixed(2));
+    add('벽체', T('휨응력 σb','曲げ応力 σb'), sb, fb, 'MPa', 'max', 'Mmax=' + res.Mx.v.toFixed(1) + ' kN·m @GL-' + res.Mx.z.toFixed(2));
+    add('벽체', T('전단응력 τ','せん断応力 τ'), tv, fv, 'MPa', 'max', 'Vmax=' + res.Vx.v.toFixed(1) + ' kN @GL-' + res.Vx.z.toFixed(2));
   } else {
-    add('벽체', '휨모멘트 M (본당)', res.Mx.v, m.Mcap, 'kN·m', 'max', '허용휨모멘트는 배근에 따라 사용자 입력');
+    add('벽체', T('휨모멘트 M (본당)','曲げモーメント M (1本あたり)'), res.Mx.v, m.Mcap, 'kN·m', 'max', T('허용휨모멘트는 배근에 따라 사용자 입력','許容曲げモーメントは配筋に応じてユーザー入力'));
   }
   // 2) 변위
   const dl = H * inp.limits.dispPct / 100 * 1000;
-  add('변위', '최대 수평변위 δmax', Math.abs(res.Wx.v) * 1000, dl, 'mm', 'max', 'δmax @GL-' + res.Wx.z.toFixed(2) + ', 허용=H×' + inp.limits.dispPct + '%');
+  add('변위', T('최대 수평변위 δmax','最大水平変位 δmax'), Math.abs(res.Wx.v) * 1000, dl, 'mm', 'max', 'δmax @GL-' + res.Wx.z.toFixed(2) + T(', 허용=H×',', 許容=H×') + inp.limits.dispPct + '%');
   // 3) 근입 안정 (모멘트 평형)
   {
     const d = H, L = res.L, zs = res.sup.length ? res.sup[res.sup.length - 1].z : L;
@@ -419,10 +429,10 @@ function runChecks(inp, res){
       }
       if (f.hasF[i]) Mp += f.ppF[i] * m.Wp * t * arm;
     }
-    const piv = res.sup.length ? '최하단 지보(GL-' + zs.toFixed(1) + 'm)' : '선단(자립식)';
-    out.push({g:'근입', name:'근입 안정 Fs=Mp/Ma', val: Ma > 0 ? Mp / Ma : 99, lim: inp.limits.FsEmb, unit:'-', mode:'min',
+    const piv = res.sup.length ? T('최하단 지보(GL-','最下段支保工(GL-') + zs.toFixed(1) + 'm)' : T('선단(자립식)','先端(自立式)');
+    out.push({gk:'근입', g:gname('근입'), name:T('근입 안정 Fs=Mp/Ma','根入れ安定 Fs=Mp/Ma'), val: Ma > 0 ? Mp / Ma : 99, lim: inp.limits.FsEmb, unit:'-', mode:'min',
       ratio: Ma > 0 ? inp.limits.FsEmb / (Mp / Ma) : 0, ok: Ma <= 0 || Mp / Ma >= inp.limits.FsEmb,
-      note: piv + ' 중심, Ma=' + Ma.toFixed(0) + ', Mp=' + Mp.toFixed(0) + ' kN·m'});
+      note: piv + T(' 중심, Ma=',' 中心, Ma=') + Ma.toFixed(0) + ', Mp=' + Mp.toFixed(0) + ' kN·m'});
     res.emb = {Ma, Mp};
   }
   // 4) 히빙
@@ -432,8 +442,8 @@ function runChecks(inp, res){
       const Bw = inp.strut.B, B1 = 0.7 * Bw;
       let gH = 0; { const N = Math.ceil(H / 0.05); for (let i = 0; i < N; i++){ const zz = (i + .5) * H / N; gH += layerAt(inp.layers, zz).gt * H / N; } }
       const FsC = 5.7 * l.c / (gH + inp.q - l.c * H / B1);
-      out.push({g:'히빙', name:'히빙 Fs (Terzaghi)', val: FsC, lim: inp.limits.FsHeave, unit:'-', mode:'min', ratio: inp.limits.FsHeave / FsC, ok: FsC >= inp.limits.FsHeave, note:'굴착저면 점성토 c=' + l.c + ' kN/m²'});
-    } else out.push({g:'히빙', name:'히빙 검토', na:true, note:'굴착저면 지반이 사질토/φ>5° → 해당없음', ok:true});
+      out.push({gk:'히빙', g:gname('히빙'), name:T('히빙 Fs (Terzaghi)','ヒービング Fs (Terzaghi)'), val: FsC, lim: inp.limits.FsHeave, unit:'-', mode:'min', ratio: inp.limits.FsHeave / FsC, ok: FsC >= inp.limits.FsHeave, note:T('굴착저면 점성토 c=','掘削底面 粘性土 c=') + l.c + ' kN/m²'});
+    } else out.push({gk:'히빙', g:gname('히빙'), name:T('히빙 검토','ヒービング検討'), na:true, note:T('굴착저면 지반이 사질토/φ>5° → 해당없음','掘削底面が砂質土/φ>5° → 該当なし'), ok:true});
   }
   // 5) 토류판
   if (m.lagging){
@@ -442,7 +452,7 @@ function runChecks(inp, res){
     const Lc = Math.max(0.05, m.s - m.bf / 1000);
     const Mw = pmax * Lc * Lc / 8;
     const sw = Mw * 1e6 / (1000 * lg.t * lg.t / 6);
-    add('토류판', '토류판 휨응력', sw, lg.fb * mat.alpha, 'MPa', 'max', 't=' + lg.t + 'mm, 순경간 ' + Lc.toFixed(2) + 'm, pmax=' + pmax.toFixed(1) + ' kN/m²');
+    add('토류판', T('토류판 휨응력','土留め板 曲げ応力'), sw, lg.fb * mat.alpha, 'MPa', 'max', 't=' + lg.t + 'mm' + T(', 순경간 ',', 純スパン ') + Lc.toFixed(2) + 'm, pmax=' + pmax.toFixed(1) + ' kN/m²');
   }
   // 6) 지보재
   if (res.sup.length){
@@ -452,20 +462,20 @@ function runChecks(inp, res){
     // 띠장
     const ws = HSEC[inp.wale.sec], Zw = ws.Z * inp.wale.n;
     const Mw = maxRh * maxSh / 10, Vw = 0.6 * maxRh;
-    add('띠장', '띠장 휨응력', Mw * 1000 / Zw, fb, 'MPa', 'max', inp.wale.sec + ' ×' + inp.wale.n + ', M=' + Mw.toFixed(1) + ' kN·m (wL²/10)');
-    add('띠장', '띠장 전단응력', Vw * 1000 / (ws.d * ws.tw / 100 * inp.wale.n * 100), fv, 'MPa', 'max', 'V=' + Vw.toFixed(1) + ' kN (0.6wL)');
+    add('띠장', T('띠장 휨응력','腹起し 曲げ応力'), Mw * 1000 / Zw, fb, 'MPa', 'max', inp.wale.sec + ' ×' + inp.wale.n + ', M=' + Mw.toFixed(1) + ' kN·m (wL²/10)');
+    add('띠장', T('띠장 전단응력','腹起し せん断応力'), Vw * 1000 / (ws.d * ws.tw / 100 * inp.wale.n * 100), fv, 'MPa', 'max', 'V=' + Vw.toFixed(1) + ' kN (0.6wL)');
     if (inp.supportType === 'strut'){
       const ss = HSEC[inp.strut.sec];
       const lam = inp.strut.Lk * 100 / ss.ry;
       let fca0 = lam <= 20 ? mat.fb0 : (lam <= 93 ? mat.fb0 - 0.84 * (lam - 20) : 1200000 / (6700 + lam * lam));
       const fca = fca0 * mat.alpha;
-      add('버팀보', '버팀보 압축응력(좌굴)', maxN * 1000 / (ss.A * 100), fca, 'MPa', 'max', inp.strut.sec + ', Nmax=' + maxN.toFixed(0) + ' kN, λ=' + lam.toFixed(0) + ', fca=' + fca.toFixed(1));
+      add('버팀보', T('버팀보 압축응력(좌굴)','切梁 圧縮応力(座屈)'), maxN * 1000 / (ss.A * 100), fca, 'MPa', 'max', inp.strut.sec + ', Nmax=' + maxN.toFixed(0) + ' kN, λ=' + lam.toFixed(0) + ', fca=' + fca.toFixed(1));
     } else {
       const a = inp.anchor;
       const Ta = a.ratio * a.fpu * a.A / 1000;
-      add('앵커', '앵커 인장력 T', maxN, Ta, 'kN', 'max', 'Tmax(설계)=' + maxN.toFixed(0) + ' kN, Ta=' + a.ratio + '·fpu·A');
+      add('앵커', T('앵커 인장력 T','アンカー 引張力 T'), maxN, Ta, 'kN', 'max', T('Tmax(설계)=','Tmax(設計)=') + maxN.toFixed(0) + ' kN, Ta=' + a.ratio + '·fpu·A');
       const La = maxN / (Math.PI * a.dia / 1000 * a.tau);
-      add('앵커', '필요 정착장', La, a.Lb, 'm', 'max', 'La=T/(π·d·τba), τba=' + a.tau + ' kN/m²');
+      add('앵커', T('필요 정착장','必要定着長'), La, a.Lb, 'm', 'max', 'La=T/(π·d·τba), τba=' + a.tau + ' kN/m²');
     }
   }
   return out;
@@ -473,19 +483,25 @@ function runChecks(inp, res){
 
 
 /* ===== 앱: 입력·도해·출력 ===== */
+try {
+  const sv = localStorage.getItem('sh_lang');
+  if (sv === 'ja' || sv === 'ko') LANG = sv;
+  else if ((navigator.language || '').toLowerCase().indexOf('ja') === 0) LANG = 'ja';
+} catch (e) { if ((navigator.language || '').toLowerCase().indexOf('ja') === 0) LANG = 'ja'; }
+const NEWL = {ko:'신규지층', ja:'新規地層'};
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fm = (v, d = 1) => (v == null || !isFinite(v)) ? '-' : Number(v).toFixed(d);
-const WALL_NAMES = {hpile:'H-Pile + 토류판', scw:'SCW (H-Pile 삽입)', sheet:'강널말뚝 (Sheet Pile)', cip:'CIP (현장타설말뚝)'};
+const WALL_NAMES = () => ({hpile:T('H-Pile + 토류판','H形鋼杭 + 土留め板'), scw:T('SCW (H-Pile 삽입)','SCW (H形鋼挿入)'), sheet:T('강널말뚝 (Sheet Pile)','鋼矢板 (Sheet Pile)'), cip:T('CIP (현장타설말뚝)','CIP (場所打ち杭)')});
 function today(){ const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 const DEF = () => ({
-  meta:{project:'(예시) 지하 3층 굴착 흙막이 가시설', author:'', date: today()},
+  meta:{project:T('(예시) 지하 3층 굴착 흙막이 가시설','(例) 地下3階掘削 山留め仮設'), author:'', date: today()},
   wallType:'hpile', H:10, D:4, dz:0.25, clr:0.5, q:10, hw:6, useWater:false,
   layers:[
-    {name:'매립층', t:3, gt:18, gs:19, c:0,  phi:28, kh:8000},
-    {name:'퇴적층', t:4, gt:18, gs:19, c:0,  phi:30, kh:15000},
-    {name:'풍화토', t:6, gt:19, gs:20, c:10, phi:32, kh:30000},
-    {name:'풍화암', t:10,gt:22, gs:23, c:30, phi:35, kh:80000}],
+    {name:T('매립층','埋立層'), t:3, gt:18, gs:19, c:0,  phi:28, kh:8000},
+    {name:T('퇴적층','堆積層'), t:4, gt:18, gs:19, c:0,  phi:30, kh:15000},
+    {name:T('풍화토','風化土'), t:6, gt:19, gs:20, c:10, phi:32, kh:30000},
+    {name:T('풍화암','風化岩'), t:10,gt:22, gs:23, c:30, phi:35, kh:80000}],
   pile:{sec:'H-300x300x10x15', s:1.5, kpass:3, custom:{d:300,bf:300,tw:10,tf:15,A:119.8,I:20400,Z:1360}},
   sheet:{sec:'SP-III', custom:{I:16800,Z:1340,A:191,Aw:40.6}},
   cip:{D:0.45, s:0.6, Ec:25000, red:0.5, Ma:250},
@@ -513,51 +529,51 @@ function renderInputs(){
   const wt = S.wallType, el = $('#inBody');
   let h = '';
   if (inTab === 't1'){
-    h += `<div class="grp"><h3>과업 정보</h3><div class="grid2">${TXT('meta.project', '과업명', {w2:1})}${TXT('meta.author', '작성자')}${TXT('meta.date', '작성일')}</div></div>`;
-    h += `<div class="grp"><h3>공법</h3><div class="grid2">${SEL('wallType', '흙막이 공법', Object.entries(WALL_NAMES), {w2:1, struct:1})}`;
-    h += `${F('H', '굴착깊이 H', 'm', {step:0.5})}${F('D', '근입깊이 D', 'm', {step:0.5})}${F('q', '상재하중 q', 'kN/m²')}${F('hw', '지하수위 GL-', 'm')}`;
-    h += `<label class="chk f w2"><input type="checkbox" data-k="useWater" id="i_useWater"${S.useWater ? ' checked' : ''}> 수압 고려 (지하수위 이하 γ′ 적용, 굴착측 수위=굴착면)</label></div></div>`;
+    h += `<div class="grp"><h3>${T('과업 정보','業務情報')}</h3><div class="grid2">${TXT('meta.project', T('과업명','業務名'), {w2:1})}${TXT('meta.author', T('작성자','作成者'))}${TXT('meta.date', T('작성일','作成日'))}</div></div>`;
+    h += `<div class="grp"><h3>${T('공법','工法')}</h3><div class="grid2">${SEL('wallType', T('흙막이 공법','山留め工法'), Object.entries(WALL_NAMES()), {w2:1, struct:1})}`;
+    h += `${F('H', T('굴착깊이 H','掘削深さ H'), 'm', {step:0.5})}${F('D', T('근입깊이 D','根入れ深さ D'), 'm', {step:0.5})}${F('q', T('상재하중 q','上載荷重 q'), 'kN/m²')}${F('hw', T('지하수위 GL-','地下水位 GL-'), 'm')}`;
+    h += `<label class="chk f w2"><input type="checkbox" data-k="useWater" id="i_useWater"${S.useWater ? ' checked' : ''}>${T(' 수압 고려 (지하수위 이하 γ′ 적용, 굴착측 수위=굴착면)',' 水圧を考慮 (地下水位以下はγ′を適用, 掘削側水位=掘削面)')}</label></div></div>`;
     if (wt === 'hpile' || wt === 'scw'){
-      h += `<div class="grp"><h3>${wt === 'hpile' ? '엄지말뚝 · 토류판' : 'H-Pile 삽입재'}</h3><div class="grid2">${SEL('pile.sec', 'H형강 단면', hOpts.concat([['custom', '직접입력']]), {w2:1, struct:1})}`;
-      h += `${F('pile.s', wt === 'hpile' ? '말뚝 간격 s (c/c)' : '삽입 간격 s', 'm', {step:0.05})}`;
-      if (wt === 'hpile') h += `${F('pile.kpass', '수동폭 계수 (×플랜지폭)', '배', {step:0.5})}`;
-      if (S.pile.sec === 'custom') h += `${F('pile.custom.d', '높이 d', 'mm')}${F('pile.custom.bf', '플랜지폭 bf', 'mm')}${F('pile.custom.tw', '웨브두께 tw', 'mm')}${F('pile.custom.A', '단면적 A', 'cm²')}${F('pile.custom.I', '단면2차모멘트 Ix', 'cm⁴')}${F('pile.custom.Z', '단면계수 Zx', 'cm³')}`;
+      h += `<div class="grp"><h3>${wt === 'hpile' ? T('엄지말뚝 · 토류판','親杭 · 土留め板') : T('H-Pile 삽입재','H形鋼挿入材')}</h3><div class="grid2">${SEL('pile.sec', T('H형강 단면','H形鋼断面'), hOpts.concat([['custom', T('직접입력','直接入力')]]), {w2:1, struct:1})}`;
+      h += `${F('pile.s', wt === 'hpile' ? T('말뚝 간격 s (c/c)','杭間隔 s (c/c)') : T('삽입 간격 s','挿入間隔 s'), 'm', {step:0.05})}`;
+      if (wt === 'hpile') h += `${F('pile.kpass', T('수동폭 계수 (×플랜지폭)','受働幅係数 (×フランジ幅)'), T('배','倍'), {step:0.5})}`;
+      if (S.pile.sec === 'custom') h += `${F('pile.custom.d', T('높이 d','高さ d'), 'mm')}${F('pile.custom.bf', T('플랜지폭 bf','フランジ幅 bf'), 'mm')}${F('pile.custom.tw', T('웨브두께 tw','ウェブ厚 tw'), 'mm')}${F('pile.custom.A', T('단면적 A','断面積 A'), 'cm²')}${F('pile.custom.I', T('단면2차모멘트 Ix','断面二次モーメント Ix'), 'cm⁴')}${F('pile.custom.Z', T('단면계수 Zx','断面係数 Zx'), 'cm³')}`;
       h += `</div>`;
-      if (wt === 'hpile') h += `<div class="grid2" style="margin-top:8px">${F('lag.t', '토류판 두께', 'mm')}${F('lag.fb', '목재 허용휨(기본)', 'MPa')}</div>`;
+      if (wt === 'hpile') h += `<div class="grid2" style="margin-top:8px">${F('lag.t', T('토류판 두께','土留め板厚'), 'mm')}${F('lag.fb', T('목재 허용휨(기본)','木材 許容曲げ(基本)'), 'MPa')}</div>`;
       h += `</div>`;
     } else if (wt === 'sheet'){
-      h += `<div class="grp"><h3>강널말뚝 (1m당)</h3><div class="grid2">${SEL('sheet.sec', '단면', [['SP-III', 'SP-III (400×125)'], ['SP-IV', 'SP-IV (400×170)'], ['custom', '직접입력']], {w2:1, struct:1})}`;
-      if (S.sheet.sec === 'custom') h += `${F('sheet.custom.I', 'I (1m당)', 'cm⁴/m')}${F('sheet.custom.Z', 'Z (1m당)', 'cm³/m')}${F('sheet.custom.A', 'A (1m당)', 'cm²/m')}${F('sheet.custom.Aw', 'Aw (1m당)', 'cm²/m')}`;
+      h += `<div class="grp"><h3>${T('강널말뚝 (1m당)','鋼矢板 (1mあたり)')}</h3><div class="grid2">${SEL('sheet.sec', T('단면','断面'), [['SP-III', 'SP-III (400×125)'], ['SP-IV', 'SP-IV (400×170)'], ['custom', T('직접입력','直接入力')]], {w2:1, struct:1})}`;
+      if (S.sheet.sec === 'custom') h += `${F('sheet.custom.I', T('I (1m당)','I (1mあたり)'), 'cm⁴/m')}${F('sheet.custom.Z', T('Z (1m당)','Z (1mあたり)'), 'cm³/m')}${F('sheet.custom.A', T('A (1m당)','A (1mあたり)'), 'cm²/m')}${F('sheet.custom.Aw', T('Aw (1m당)','Aw (1mあたり)'), 'cm²/m')}`;
       h += `</div></div>`;
     } else {
-      h += `<div class="grp"><h3>CIP 말뚝</h3><div class="grid2">${F('cip.D', '말뚝 직경 D', 'm', {step:0.05})}${F('cip.s', '말뚝 간격 s (c/c)', 'm', {step:0.05})}${F('cip.Ec', '콘크리트 Ec', 'MPa')}${F('cip.red', '유효강성비 (균열)', '-', {step:0.05})}${F('cip.Ma', '허용 휨모멘트 Ma', 'kN·m/본', {w2:1})}</div><p class="note">허용 휨모멘트는 배근 설계 결과를 입력합니다.</p></div>`;
+      h += `<div class="grp"><h3>${T('CIP 말뚝','CIP杭')}</h3><div class="grid2">${F('cip.D', T('말뚝 직경 D','杭径 D'), 'm', {step:0.05})}${F('cip.s', T('말뚝 간격 s (c/c)','杭間隔 s (c/c)'), 'm', {step:0.05})}${F('cip.Ec', T('콘크리트 Ec','コンクリート Ec'), 'MPa')}${F('cip.red', T('유효강성비 (균열)','有効剛性比 (ひび割れ)'), '-', {step:0.05})}${F('cip.Ma', T('허용 휨모멘트 Ma','許容曲げモーメント Ma'), T('kN·m/본','kN·m/本'), {w2:1})}</div><p class="note">${T('허용 휨모멘트는 배근 설계 결과를 입력합니다.','許容曲げモーメントは配筋設計の結果を入力します。')}</p></div>`;
     }
   } else if (inTab === 't2'){
-    h += `<div class="grp"><h3>지층 및 토질정수 (지반조사보고서)</h3><div class="tw"><table class="lt"><thead><tr><th>지층</th><th>두께 m</th><th>γt</th><th>γsat</th><th>c</th><th>φ°</th><th>kh</th><th></th></tr></thead><tbody>`;
+    h += `<div class="grp"><h3>${T('지층 및 토질정수 (지반조사보고서)','地層および土質定数 (地盤調査報告書)')}</h3><div class="tw"><table class="lt"><thead><tr><th>${T('지층','地層')}</th><th>${T('두께 m','厚さ m')}</th><th>γt</th><th>γsat</th><th>c</th><th>φ°</th><th>kh</th><th></th></tr></thead><tbody>`;
     S.layers.forEach((l, i) => {
       h += `<tr><td><input class="nm" data-k="layers.${i}.name" type="text" value="${esc(l.name)}"></td>` +
-        ['t', 'gt', 'gs', 'c', 'phi', 'kh'].map(k => `<td><input type="number" inputmode="decimal" step="any" data-k="layers.${i}.${k}" value="${l[k]}"${k === 't' && i === S.layers.length - 1 ? ' title="최하층은 하단 무한"' : ''}></td>`).join('') +
-        `<td><button class="rm" type="button" data-rm="layers.${i}" aria-label="지층 삭제"${S.layers.length < 2 ? ' disabled' : ''}>✕</button></td></tr>`;
+        ['t', 'gt', 'gs', 'c', 'phi', 'kh'].map(k => `<td><input type="number" inputmode="decimal" step="any" data-k="layers.${i}.${k}" value="${l[k]}"${k === 't' && i === S.layers.length - 1 ? (' title="' + T('최하층은 하단 무한','最下層は下端無限') + '"') : ''}></td>`).join('') +
+        `<td><button class="rm" type="button" data-rm="layers.${i}" aria-label="${T('지층 삭제','地層を削除')}"${S.layers.length < 2 ? ' disabled' : ''}>✕</button></td></tr>`;
     });
-    h += `</tbody></table></div><button class="btn add" type="button" data-add="layer">+ 지층 추가</button>`;
-    h += `<p class="note">단위 γ: kN/m³ · c: kN/m² · kh(수평지반반력계수): kN/m³. 최하층 두께는 무한으로 취급합니다.<br>kh 참고: 매립·느슨한 사질토 5,000~15,000 · 보통 사질토 15,000~40,000 · 풍화토 30,000~80,000 · 풍화암 80,000~150,000.</p></div>`;
+    h += `</tbody></table></div><button class="btn add" type="button" data-add="layer">${T('+ 지층 추가','+ 地層を追加')}</button>`;
+    h += `<p class="note">${T('단위 γ: kN/m³ · c: kN/m² · kh(수평지반반력계수): kN/m³. 최하층 두께는 무한으로 취급합니다.<br>kh 참고: 매립·느슨한 사질토 5,000~15,000 · 보통 사질토 15,000~40,000 · 풍화토 30,000~80,000 · 풍화암 80,000~150,000.','単位 γ: kN/m³ · c: kN/m² · kh(水平地盤反力係数): kN/m³。最下層の厚さは無限として扱います。<br>kh参考値: 埋立・緩い砂質土 5,000~15,000 · 普通の砂質土 15,000~40,000 · 風化土 30,000~80,000 · 風化岩 80,000~150,000。')}</p></div>`;
   } else if (inTab === 't3'){
-    h += `<div class="grp"><h3>지보 방식</h3><div class="grid2">${SEL('supportType', '지보재', [['strut', '버팀보 (Strut)'], ['anchor', '어스앵커']], {w2:1, struct:1})}${F('clr', '굴착 여유 (지보면 아래)', 'm', {step:0.1, w2:1})}</div></div>`;
-    h += `<div class="grp"><h3>지보 배치 (위에서 아래로)</h3><div class="tw"><table class="lt"><thead><tr><th>단</th><th>설치깊이 m</th><th>수평간격 m</th><th>${S.supportType === 'strut' ? '선행 kN/개' : '긴장 kN/개'}</th><th></th></tr></thead><tbody>`;
+    h += `<div class="grp"><h3>${T('지보 방식','支保工方式')}</h3><div class="grid2">${SEL('supportType', T('지보재','支保工'), [['strut', T('버팀보 (Strut)','切梁 (Strut)')], ['anchor', T('어스앵커','アースアンカー')]], {w2:1, struct:1})}${F('clr', T('굴착 여유 (지보면 아래)','掘削余裕 (支保工面の下)'), 'm', {step:0.1, w2:1})}</div></div>`;
+    h += `<div class="grp"><h3>${T('지보 배치 (위에서 아래로)','支保工配置 (上から下へ)')}</h3><div class="tw"><table class="lt"><thead><tr><th>${T('단','段')}</th><th>${T('설치깊이 m','設置深さ m')}</th><th>${T('수평간격 m','水平間隔 m')}</th><th>${S.supportType === 'strut' ? T('선행 kN/개','プレロード kN/個') : T('긴장 kN/개','緊張力 kN/個')}</th><th></th></tr></thead><tbody>`;
     S.supports.forEach((s, i) => {
-      h += `<tr><td>${i + 1}단</td>` + ['z', 'sh', 'P'].map(k => `<td><input type="number" inputmode="decimal" step="any" data-k="supports.${i}.${k}" value="${s[k]}"></td>`).join('') + `<td><button class="rm" type="button" data-rm="supports.${i}" aria-label="지보 삭제">✕</button></td></tr>`;
+      h += `<tr><td>${i + 1}${T('단','段')}</td>` + ['z', 'sh', 'P'].map(k => `<td><input type="number" inputmode="decimal" step="any" data-k="supports.${i}.${k}" value="${s[k]}"></td>`).join('') + `<td><button class="rm" type="button" data-rm="supports.${i}" aria-label="${T('지보 삭제','支保工を削除')}">✕</button></td></tr>`;
     });
-    h += `</tbody></table></div><button class="btn add" type="button" data-add="support">+ 지보 추가</button><p class="note">지보 0단이면 자립식(캔틸레버)으로 해석합니다.</p></div>`;
+    h += `</tbody></table></div><button class="btn add" type="button" data-add="support">${T('+ 지보 추가','+ 支保工を追加')}</button><p class="note">${T('지보 0단이면 자립식(캔틸레버)으로 해석합니다.','支保工が0段の場合は自立式(片持ち)として解析します。')}</p></div>`;
     if (S.supportType === 'strut'){
-      h += `<div class="grp"><h3>버팀보</h3><div class="grid2">${SEL('strut.sec', 'H형강 단면', hOpts, {w2:1})}${F('strut.B', '굴착폭 B', 'm')}${F('strut.Lk', '좌굴길이 Lk', 'm')}</div></div>`;
+      h += `<div class="grp"><h3>${T('버팀보','切梁')}</h3><div class="grid2">${SEL('strut.sec', T('H형강 단면','H形鋼断面'), hOpts, {w2:1})}${F('strut.B', T('굴착폭 B','掘削幅 B'), 'm')}${F('strut.Lk', T('좌굴길이 Lk','座屈長 Lk'), 'm')}</div></div>`;
     } else {
-      h += `<div class="grp"><h3>어스앵커</h3><div class="grid2">${F('anchor.A', '텐던 단면적 A', 'mm²')}${F('anchor.E', '탄성계수 E', 'MPa')}${F('anchor.Lf', '자유장 Lf', 'm')}${F('anchor.Lb', '정착장 Lb', 'm')}${F('anchor.ang', '설치각', '°')}${F('anchor.dia', '천공경', 'mm')}${F('anchor.tau', '주면마찰저항 τba', 'kN/m²')}${F('anchor.fpu', '인장강도 fpu', 'MPa')}${F('anchor.ratio', '허용응력비', '×fpu', {step:0.05})}</div></div>`;
+      h += `<div class="grp"><h3>${T('어스앵커','アースアンカー')}</h3><div class="grid2">${F('anchor.A', T('텐던 단면적 A','テンドン断面積 A'), 'mm²')}${F('anchor.E', T('탄성계수 E','弾性係数 E'), 'MPa')}${F('anchor.Lf', T('자유장 Lf','自由長 Lf'), 'm')}${F('anchor.Lb', T('정착장 Lb','定着長 Lb'), 'm')}${F('anchor.ang', T('설치각','設置角'), '°')}${F('anchor.dia', T('천공경','削孔径'), 'mm')}${F('anchor.tau', T('주면마찰저항 τba','周面摩擦抵抗 τba'), 'kN/m²')}${F('anchor.fpu', T('인장강도 fpu','引張強度 fpu'), 'MPa')}${F('anchor.ratio', T('허용응력비','許容応力比'), '×fpu', {step:0.05})}</div></div>`;
     }
-    h += `<div class="grp"><h3>띠장</h3><div class="grid2">${SEL('wale.sec', 'H형강 단면', hOpts)}${SEL('wale.n', '조 수', [[1, '1열'], [2, '2열(겹)']])}</div></div>`;
+    h += `<div class="grp"><h3>${T('띠장','腹起し')}</h3><div class="grid2">${SEL('wale.sec', T('H형강 단면','H形鋼断面'), hOpts)}${SEL('wale.n', T('조 수','組数'), [[1, T('1열','1列')], [2, T('2열(겹)','2列(重ね)')]])}</div></div>`;
   } else {
-    h += `<div class="grp"><h3>재료 · 허용응력</h3><div class="grid2">${F('mat.Es', '강재 탄성계수 Es', 'MPa')}${F('mat.alpha', '가설 할증계수', '배', {step:0.05})}${F('mat.fb0', '기본 허용휨응력', 'MPa')}${F('mat.fv0', '기본 허용전단응력', 'MPa')}</div><p class="note">적용 허용값 = 기본값 × 할증계수. 적용 기준(KDS 등)에 맞추어 수정하십시오.</p></div>`;
-    h += `<div class="grp"><h3>검토 기준</h3><div class="grid2">${F('limits.dispPct', '허용 수평변위 (H 대비)', '%', {step:0.05})}${F('limits.FsEmb', '근입 안정 Fs', '이상', {step:0.05})}${F('limits.FsHeave', '히빙 Fs', '이상', {step:0.05})}${SEL('dz', '해석 절점간격', [[0.25, '0.25 m (정밀)'], [0.5, '0.5 m (빠름)']])}</div></div>`;
-    h += `<div class="grp"><h3>해석 가정</h3><p class="note">Rankine 주동·수동토압을 한계값으로 하는 탄소성 지반스프링(kh)과 Euler 보 요소로 굴착 단계별 누적 해석합니다. 초기토압은 정지토압(K₀=1−sinφ)이며, 굴착면 측 토압은 굴착 시 제거됩니다. 지보재는 설치 단계 이후 선형 스프링으로 모델링하고 해체 단계는 고려하지 않습니다.</p></div>`;
+    h += `<div class="grp"><h3>${T('재료 · 허용응력','材料 · 許容応力')}</h3><div class="grid2">${F('mat.Es', T('강재 탄성계수 Es','鋼材 弾性係数 Es'), 'MPa')}${F('mat.alpha', T('가설 할증계수','仮設割増係数'), T('배','倍'), {step:0.05})}${F('mat.fb0', T('기본 허용휨응력','基本許容曲げ応力'), 'MPa')}${F('mat.fv0', T('기본 허용전단응력','基本許容せん断応力'), 'MPa')}</div><p class="note">${T('적용 허용값 = 기본값 × 할증계수. 적용 기준(KDS 등)에 맞추어 수정하십시오.','適用許容値 = 基本値 × 割増係数。適用基準に合わせて修正してください。')}</p></div>`;
+    h += `<div class="grp"><h3>${T('검토 기준','照査基準')}</h3><div class="grid2">${F('limits.dispPct', T('허용 수평변위 (H 대비)','許容水平変位 (H比)'), '%', {step:0.05})}${F('limits.FsEmb', T('근입 안정 Fs','根入れ安定 Fs'), T('이상','以上'), {step:0.05})}${F('limits.FsHeave', T('히빙 Fs','ヒービング Fs'), T('이상','以上'), {step:0.05})}${SEL('dz', T('해석 절점간격','解析節点間隔'), [[0.25, T('0.25 m (정밀)','0.25 m (精密)')], [0.5, T('0.5 m (빠름)','0.5 m (高速)')]])}</div></div>`;
+    h += `<div class="grp"><h3>${T('해석 가정','解析の仮定')}</h3><p class="note">${T('Rankine 주동·수동토압을 한계값으로 하는 탄소성 지반스프링(kh)과 Euler 보 요소로 굴착 단계별 누적 해석합니다. 초기토압은 정지토압(K₀=1−sinφ)이며, 굴착면 측 토압은 굴착 시 제거됩니다. 지보재는 설치 단계 이후 선형 스프링으로 모델링하고 해체 단계는 고려하지 않습니다.','Rankine主働・受働土圧を限界値とする弾塑性地盤ばね(kh)とEulerはり要素で、掘削ステップごとに累積解析します。初期土圧は静止土圧(K₀=1−sinφ)とし、掘削側の土圧は掘削時に除去されます。支保工は設置ステップ以降に線形ばねとしてモデル化し、撤去ステップは考慮しません。')}</p></div>`;
   }
   el.innerHTML = h;
 }
@@ -583,7 +599,7 @@ $('#inBody').addEventListener('click', e => {
   const rm = e.target.closest('[data-rm]'), ad = e.target.closest('[data-add]');
   if (rm){ const [arr, i] = rm.dataset.rm.split('.'); S[arr].splice(+i, 1); renderInputs(); schedule(); }
   if (ad){
-    if (ad.dataset.add === 'layer'){ const l = S.layers[S.layers.length - 1]; S.layers.push({name:'신규지층', t:5, gt:l.gt, gs:l.gs, c:l.c, phi:l.phi, kh:l.kh}); }
+    if (ad.dataset.add === 'layer'){ const l = S.layers[S.layers.length - 1]; S.layers.push({name:NEWL[LANG], t:5, gt:l.gt, gs:l.gs, c:l.c, phi:l.phi, kh:l.kh}); }
     else { const l = S.supports[S.supports.length - 1]; S.supports.push({z: l ? Math.min(+(l.z + 3).toFixed(1), Math.max(S.H - 1, 1)) : 1.5, sh: l ? l.sh : 3, P: 0}); }
     renderInputs(); schedule();
   }
@@ -602,35 +618,36 @@ $('#vIn').onclick = () => setView('in'); $('#vOut').onclick = () => setView('out
 
 /* ---------- 검증 ---------- */
 function validate(s){
-  const e = [], nf = (v, name, min = 0, strict = true) => { if (!isFinite(v) || (strict ? v <= min : v < min)) e.push(name + ' 값을 확인하십시오.'); };
-  nf(s.H, '굴착깊이'); nf(s.D, '근입깊이'); nf(s.q, '상재하중', 0, false); nf(s.hw, '지하수위', 0, false); nf(s.clr, '굴착 여유', 0, false);
-  if (s.layers.length < 1) e.push('지층이 없습니다.');
+  const e = [], nf = (v, name, min = 0, strict = true) => { if (!isFinite(v) || (strict ? v <= min : v < min)) e.push(name + T(' 값을 확인하십시오.',' の値を確認してください。')); };
+  const LY = i => T((i + 1) + '번 지층', '地層' + (i + 1)), LS = i => T((i + 1) + '단', '第' + (i + 1) + '段');
+  nf(s.H, T('굴착깊이','掘削深さ')); nf(s.D, T('근입깊이','根入れ深さ')); nf(s.q, T('상재하중','上載荷重'), 0, false); nf(s.hw, T('지하수위','地下水位'), 0, false); nf(s.clr, T('굴착 여유','掘削余裕'), 0, false);
+  if (s.layers.length < 1) e.push(T('지층이 없습니다.','地層がありません。'));
   s.layers.forEach((l, i) => {
-    nf(l.t, (i + 1) + '번 지층 두께'); nf(l.gt, (i + 1) + '번 지층 γt'); nf(l.gs, (i + 1) + '번 지층 γsat'); nf(l.c, (i + 1) + '번 지층 c', 0, false);
-    nf(l.kh, (i + 1) + '번 지층 kh');
-    if (!isFinite(l.phi) || l.phi < 0 || l.phi > 50) e.push((i + 1) + '번 지층 φ는 0~50° 범위로 입력하십시오.');
+    nf(l.t, LY(i) + T(' 두께',' 厚さ')); nf(l.gt, LY(i) + ' γt'); nf(l.gs, LY(i) + ' γsat'); nf(l.c, LY(i) + ' c', 0, false);
+    nf(l.kh, LY(i) + ' kh');
+    if (!isFinite(l.phi) || l.phi < 0 || l.phi > 50) e.push(LY(i) + T(' φ는 0~50° 범위로 입력하십시오.',' のφは0~50°の範囲で入力してください。'));
   });
-  nf(s.mat.Es, 'Es'); nf(s.mat.fb0, '허용휨'); nf(s.mat.fv0, '허용전단'); nf(s.mat.alpha, '할증계수');
-  nf(s.limits.dispPct, '허용변위'); nf(s.limits.FsEmb, '근입 Fs'); nf(s.limits.FsHeave, '히빙 Fs');
+  nf(s.mat.Es, 'Es'); nf(s.mat.fb0, T('허용휨','許容曲げ')); nf(s.mat.fv0, T('허용전단','許容せん断')); nf(s.mat.alpha, T('할증계수','割増係数'));
+  nf(s.limits.dispPct, T('허용변위','許容変位')); nf(s.limits.FsEmb, T('근입 Fs','根入れ Fs')); nf(s.limits.FsHeave, T('히빙 Fs','ヒービング Fs'));
   if (s.wallType === 'hpile' || s.wallType === 'scw'){
-    nf(s.pile.s, '말뚝 간격'); if (s.wallType === 'hpile'){ nf(s.pile.kpass, '수동폭 계수'); nf(s.lag.t, '토류판 두께'); nf(s.lag.fb, '목재 허용휨'); }
-    if (s.pile.sec === 'custom') ['d', 'bf', 'tw', 'A', 'I', 'Z'].forEach(k => nf(s.pile.custom[k], '사용자 H형강 ' + k));
+    nf(s.pile.s, T('말뚝 간격','杭間隔')); if (s.wallType === 'hpile'){ nf(s.pile.kpass, T('수동폭 계수','受働幅係数')); nf(s.lag.t, T('토류판 두께','土留め板厚')); nf(s.lag.fb, T('목재 허용휨','木材許容曲げ')); }
+    if (s.pile.sec === 'custom') ['d', 'bf', 'tw', 'A', 'I', 'Z'].forEach(k => nf(s.pile.custom[k], T('사용자 H형강 ','ユーザーH形鋼 ') + k));
   } else if (s.wallType === 'sheet'){
-    if (s.sheet.sec === 'custom') ['I', 'Z', 'A', 'Aw'].forEach(k => nf(s.sheet.custom[k], '사용자 강널말뚝 ' + k));
-  } else { nf(s.cip.D, 'CIP 직경'); nf(s.cip.s, 'CIP 간격'); nf(s.cip.Ec, 'Ec'); nf(s.cip.red, '유효강성비'); nf(s.cip.Ma, '허용휨모멘트'); }
+    if (s.sheet.sec === 'custom') ['I', 'Z', 'A', 'Aw'].forEach(k => nf(s.sheet.custom[k], T('사용자 강널말뚝 ','ユーザー鋼矢板 ') + k));
+  } else { nf(s.cip.D, T('CIP 직경','CIP杭径')); nf(s.cip.s, T('CIP 간격','CIP杭間隔')); nf(s.cip.Ec, 'Ec'); nf(s.cip.red, T('유효강성비','有効剛性比')); nf(s.cip.Ma, T('허용휨모멘트','許容曲げモーメント')); }
   s.supports.forEach((p, i) => {
-    nf(p.z, (i + 1) + '단 설치깊이'); nf(p.sh, (i + 1) + '단 수평간격'); nf(p.P, (i + 1) + '단 선행하중', 0, false);
-    if (isFinite(p.z) && isFinite(s.H) && p.z > s.H - s.clr + 1e-6) e.push((i + 1) + '단 설치깊이는 굴착깊이−굴착여유(' + (s.H - s.clr).toFixed(2) + 'm) 이하여야 합니다.');
+    nf(p.z, LS(i) + T(' 설치깊이',' 設置深さ')); nf(p.sh, LS(i) + T(' 수평간격',' 水平間隔')); nf(p.P, LS(i) + T(' 선행하중',' プレロード'), 0, false);
+    if (isFinite(p.z) && isFinite(s.H) && p.z > s.H - s.clr + 1e-6) e.push(LS(i) + T(' 설치깊이는 굴착깊이−굴착여유(',' 設置深さは掘削深さ−掘削余裕(') + (s.H - s.clr).toFixed(2) + T('m) 이하여야 합니다.','m)以下としてください。'));
   });
-  if (s.supportType === 'strut'){ nf(s.strut.B, '굴착폭'); nf(s.strut.Lk, '좌굴길이'); }
-  else ['A', 'E', 'Lf', 'Lb', 'dia', 'tau', 'fpu', 'ratio'].forEach(k => nf(s.anchor[k], '앵커 ' + k));
-  if (s.supportType === 'anchor' && (!isFinite(s.anchor.ang) || s.anchor.ang < 0 || s.anchor.ang > 60)) e.push('앵커 설치각은 0~60° 범위로 입력하십시오.');
-  if (isFinite(s.H) && isFinite(s.D) && (s.H + s.D) / s.dz > 220) e.push('벽체 길이가 과대합니다. 절점간격을 0.5m로 선택하십시오.');
+  if (s.supportType === 'strut'){ nf(s.strut.B, T('굴착폭','掘削幅')); nf(s.strut.Lk, T('좌굴길이','座屈長')); }
+  else ['A', 'E', 'Lf', 'Lb', 'dia', 'tau', 'fpu', 'ratio'].forEach(k => nf(s.anchor[k], T('앵커 ','アンカー ') + k));
+  if (s.supportType === 'anchor' && (!isFinite(s.anchor.ang) || s.anchor.ang < 0 || s.anchor.ang > 60)) e.push(T('앵커 설치각은 0~60° 범위로 입력하십시오.','アンカー設置角は0~60°の範囲で入力してください。'));
+  if (isFinite(s.H) && isFinite(s.D) && (s.H + s.D) / s.dz > 220) e.push(T('벽체 길이가 과대합니다. 절점간격을 0.5m로 선택하십시오.','壁体が長すぎます。節点間隔を0.5mにしてください。'));
   return e;
 }
 
 /* ---------- 도해 공통 ---------- */
-const FONT = "'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif";
+const FONT = () => LANG === 'ja' ? "'Yu Gothic','Meiryo','Hiragino Kaku Gothic ProN','Noto Sans JP','Noto Sans CJK JP',sans-serif" : "'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif";
 function pal(lit){
   return lit ? {fg:'#14202B', mu:'#566676', line:'#C9D1D9', acc:'#1B5CA6', wall:'#4D5C6B', sup:'#C25E1E', bg:'#FFFFFF', ok:'#1C7C4D', ng:'#B83227', wat:'#2B7BB9'}
              : {fg:'var(--fg)', mu:'var(--mu)', line:'var(--line)', acc:'var(--acc)', wall:'var(--wall)', sup:'var(--sup)', bg:'var(--surf)', ok:'var(--ok)', ng:'var(--ng)', wat:'#3C8FD0'};
@@ -643,7 +660,7 @@ function kit(P){
     pl:(pts, o = {}) => `<polyline points="${pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ')}" style="fill:${o.f || 'none'};stroke:${o.c || P.fg};stroke-width:${o.w || 1.5};${o.d ? 'stroke-dasharray:' + o.d + ';' : ''}opacity:${o.o == null ? 1 : o.o};stroke-linejoin:round"/>`
   };
 }
-function svgOpen(W, H, lit, w){ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"${lit ? ` width="${w || W}" height="${Math.round(H * (w || W) / W)}"` : ''} class="fig" font-family="${FONT}" role="img">`; }
+function svgOpen(W, H, lit, w){ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"${lit ? ` width="${w || W}" height="${Math.round(H * (w || W) / W)}"` : ''} class="fig" font-family="${FONT()}" role="img">`; }
 function nice(a, b, n = 4){
   const span = Math.max(b - a, 1e-9), raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
   const st = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p, lo = Math.floor(a / st + 1e-9) * st, hi = Math.ceil(b / st - 1e-9) * st, t = [];
@@ -674,18 +691,18 @@ function secSVG(lit){
   s += K.tx(xl - 14, Y(0) + 4, 'GL', {a:'end', s:11, w:700});
   for (let i = 0; i < 8; i++){ const x = xl + 22 + i * (xw - xl - 44) / 7; s += K.ln(x, Y(0) - 30, x, Y(0) - 4, {c:P.acc, w:1.4}) + `<polygon points="${x - 3},${Y(0) - 8} ${x + 3},${Y(0) - 8} ${x},${Y(0) - 2}" style="fill:${P.acc}"/>`; }
   s += K.ln(xl + 22, Y(0) - 30, xw - 22, Y(0) - 30, {c:P.acc, w:1.4});
-  s += K.tx((xl + xw) / 2, Y(0) - 38, `상재하중 q = ${fm(S.q, 1)} kN/m²`, {a:'middle', c:P.acc, w:700, s:11});
+  s += K.tx((xl + xw) / 2, Y(0) - 38, T(`상재하중 q = ${fm(S.q, 1)} kN/m²`, `上載荷重 q = ${fm(S.q, 1)} kN/m²`), {a:'middle', c:P.acc, w:700, s:11});
   if (S.hw < Ltot){
     s += K.ln(xl, Y(S.hw), xw, Y(S.hw), {c:P.wat, w:1.4, d:'6 3'});
     s += `<polygon points="${xl + 8},${Y(S.hw) - 7} ${xl + 20},${Y(S.hw) - 7} ${xl + 14},${Y(S.hw)}" style="fill:${P.wat}"/>`;
     s += K.tx(xl - 14, Y(S.hw) + 4, `GWL −${fm(S.hw, 1)}`, {a:'end', c:P.wat, s:10, w:700});
-    s += K.tx(xl + 26, Y(S.hw) - 5, S.useWater ? '수압 고려' : '수압 미고려', {s:10, c:'#1d2630'});
+    s += K.tx(xw - 6, Y(S.hw) - 4, S.useWater ? T('수압 고려','水圧考慮') : T('수압 미고려','水圧非考慮'), {a:'end', s:10, c:'#1d2630'});
   }
   s += K.rc(xw, Y(0), tw, Y(L) - Y(0), {f:P.wall});
   s += K.rc(xr, Y(0), tw, Y(L) - Y(0), {f:P.wall, o:.22});
-  s += K.tx(xr + tw / 2, Y(0) - 8, '대칭 벽체', {a:'middle', s:10, c:P.mu});
+  s += K.tx(xr + tw / 2, Y(0) - 8, T('대칭 벽체','対称壁体'), {a:'middle', s:10, c:P.mu});
   s += K.ln(xw + tw, Y(S.H), xr, Y(S.H), {c:P.fg, w:1.6});
-  s += K.tx(xw + tw + 8, Y(S.H) - 5, '굴착저면', {s:10, c:P.mu});
+  s += K.tx(xw + tw + 8, Y(S.H) - 5, T('굴착저면','掘削底面'), {s:10, c:P.mu});
   S.supports.slice().sort((a, b) => a.z - b.z).forEach((sp, j) => {
     if (sp.z >= S.H) return;
     const y = Y(sp.z);
@@ -706,9 +723,9 @@ function secSVG(lit){
   s += K.tx(dx + 14, (Y(0) + Y(S.H)) / 2, `H = ${fm(S.H, 2)} m`, {a:'middle', rot:90, w:700, s:11});
   s += K.ln(dx, Y(S.H), dx, Y(L), {c:P.acc, w:1}) + K.ln(dx - 5, Y(L), dx + 5, Y(L), {c:P.acc});
   s += K.tx(dx + 14, (Y(S.H) + Y(L)) / 2, `D = ${fm(L - S.H, 2)} m`, {a:'middle', rot:90, w:700, s:11, c:P.acc});
-  s += K.tx(xw + tw / 2, Y(L) + 16, `벽체 L = ${fm(L, 2)} m`, {a:'middle', s:10.5, c:P.mu});
+  s += K.tx(xw + tw / 2, Y(L) + 16, T(`벽체 L = ${fm(L, 2)} m`, `壁体 L = ${fm(L, 2)} m`), {a:'middle', s:10.5, c:P.mu});
   s += K.tx(10, 16, m.label, {w:700, s:12});
-  s += K.tx(10, 33, S.supportType === 'strut' ? `버팀보 ${S.supports.length}단 · 굴착폭 B=${fm(S.strut.B, 1)} m` : `어스앵커 ${S.supports.length}단`, {s:10.5, c:P.mu});
+  s += K.tx(10, 33, S.supportType === 'strut' ? T(`버팀보 ${S.supports.length}단 · 굴착폭 B=${fm(S.strut.B, 1)} m`, `切梁 ${S.supports.length}段 · 掘削幅 B=${fm(S.strut.B, 1)} m`) : T(`어스앵커 ${S.supports.length}단`, `アースアンカー ${S.supports.length}段`), {s:10.5, c:P.mu});
   return s + '</svg>';
 }
 
@@ -734,11 +751,11 @@ function pressSVG(lit){
   s += K.pl(z.map((zv, i) => f.hasF[i] ? [XR(Math.min(f.ppF[i], ax.hi)), Y(zv)] : null).filter(Boolean), {c:P.acc, w:1.2, d:'5 3'});
   s += K.rc(cx - 8, top, 16, ph, {f:P.wall, o:.9});
   s += K.ln(cx - 8, Y(S.H), W - 20, Y(S.H), {c:P.fg, w:1, d:'6 3'});
-  s += K.tx(W - 22, Y(S.H) - 4, '굴착저면', {a:'end', s:10, c:P.mu});
+  s += K.tx(W - 22, Y(S.H) - 4, T('굴착저면','掘削底面'), {a:'end', s:10, c:P.mu});
   RES.sup.forEach((sp, j) => { s += `<polygon points="${cx - 14},${Y(sp.z)} ${cx - 26},${Y(sp.z) - 5} ${cx - 26},${Y(sp.z) + 5}" style="fill:${P.sup}"/>` + K.tx(cx - 30, Y(sp.z) - 7, `${S.supportType === 'strut' ? 'S' : 'A'}${j + 1}`, {a:'end', s:10, w:700, c:P.sup}); });
-  s += K.tx(cx - 8 - half / 2, top - 22, '배면측 (주동)', {a:'middle', w:700, s:12, c:P.sup});
-  s += K.tx(cx + 8 + half / 2, top - 22, '굴착측 (수동)', {a:'middle', w:700, s:12, c:P.acc});
-  s += K.tx(cx, top + ph + 32, `최종단계 작용토압 (kN/m²) · 실선: 작용토압 · 점선: Rankine ${''}한계(Pa / Pp)`, {a:'middle', s:11, c:P.mu});
+  s += K.tx(cx - 8 - half / 2, top - 22, T('배면측 (주동)','背面側 (主働)'), {a:'middle', w:700, s:12, c:P.sup});
+  s += K.tx(cx + 8 + half / 2, top - 22, T('굴착측 (수동)','掘削側 (受働)'), {a:'middle', w:700, s:12, c:P.acc});
+  s += K.tx(cx, top + ph + 32, T('최종단계 작용토압 (kN/m²) · 실선: 작용토압 · 점선: Rankine 한계(Pa / Pp)', '最終ステップ作用土圧 (kN/m²) · 実線: 作用土圧 · 点線: Rankine限界(Pa / Pp)'), {a:'middle', s:11, c:P.mu});
   return s + '</svg>';
 }
 
@@ -753,7 +770,7 @@ function resSVG(kind, lit, w){
   let mn = 0, mx = 0; RES.stages.forEach(s => arr(s).forEach(v => { mn = Math.min(mn, v); mx = Math.max(mx, v); }));
   if (mx - mn < 1e-6){ mx = 1; mn = -1; }
   const ax = nice(mn, mx, 4), X = v => ml + (v - ax.lo) / (ax.hi - ax.lo) * pw, Y = zv => mt + zv / L * ph;
-  const title = kind === 'w' ? '수평변위 (mm)' : kind === 'M' ? '휨모멘트 (kN·m/본)' : '전단력 (kN/본)';
+  const title = kind === 'w' ? T('수평변위 (mm)','水平変位 (mm)') : kind === 'M' ? T('휨모멘트 (kN·m/본)','曲げモーメント (kN·m/本)') : T('전단력 (kN/본)','せん断力 (kN/本)');
   let s = svgOpen(W, Hh, lit, w || 250);
   s += K.tx(W / 2, 16, title, {a:'middle', w:700, s:12});
   ax.t.forEach(t => { s += K.ln(X(t), mt, X(t), mt + ph, {c:P.line, w:t === 0 ? 1.2 : .5}) + K.tx(X(t), mt + ph + 13, fmtTick(t), {a:'middle', s:9.5, c:P.mu}); });
@@ -780,46 +797,46 @@ function renderResults(){
   const allOk = CHK.every(c => c.ok) && RES.stages.every(s => s.conv);
   const ng = CHK.filter(c => !c.ok).length;
   const ms = []; 
-  if (!RES.stages.every(s => s.conv)) ms.push('<div class="ban err">해석이 수렴하지 않았습니다. 근입깊이·지보 배치·지반 정수를 재검토하십시오. 결과는 참고용입니다.</div>');
+  if (!RES.stages.every(s => s.conv)) ms.push('<div class="ban err">' + T('해석이 수렴하지 않았습니다. 근입깊이·지보 배치·지반 정수를 재검토하십시오. 결과는 참고용입니다.','解析が収束しませんでした。根入れ深さ・支保工配置・地盤定数を再検討してください。結果は参考値です。') + '</div>');
   $('#msgs').innerHTML = ERR.length ? '' : ms.join('');
-  const sb = CHK.find(c => c.name.indexOf('휨') >= 0 && c.g === '벽체');
-  const dp = CHK.find(c => c.g === '변위'), em = CHK.find(c => c.g === '근입');
+  const sb = CHK.find(c => c.gk === '벽체');
+  const dp = CHK.find(c => c.gk === '변위'), em = CHK.find(c => c.gk === '근입');
   const sp = RES.sup.length ? Math.max.apply(null, RES.sup.map(x => x.N)) : null;
   $('#sum').innerHTML =
-    `<div class="kpi ${allOk ? 'ok' : 'ng'}"><small>종합 판정</small><b>${allOk ? 'O.K' : 'N.G'}</b><span>${ng ? 'N.G ' + ng + '항목' : '전 항목 만족'}</span></div>` +
-    `<div class="kpi"><small>${RES.m.kind === 'steel' ? '벽체 휨응력' : '벽체 휨모멘트'}</small><b>${sb ? fm(sb.val, 1) : '-'}</b><span>${sb ? '허용 ' + fm(sb.lim, 1) + ' ' + sb.unit + ' · ' + fm(sb.ratio * 100, 0) + '%' : ''}</span></div>` +
-    `<div class="kpi"><small>최대 수평변위</small><b>${fm(dp.val, 1)} mm</b><span>허용 ${fm(dp.lim, 1)} mm · ${fm(dp.ratio * 100, 0)}%</span></div>` +
-    `<div class="kpi"><small>근입 안정 Fs</small><b>${fm(em.val, 2)}</b><span>요구 ${fm(em.lim, 2)} 이상</span></div>` +
-    `<div class="kpi"><small>${S.supportType === 'strut' ? '최대 버팀보 축력' : '최대 앵커 인장력'}</small><b>${sp == null ? '-' : fm(sp, 0) + ' kN'}</b><span>${RES.sup.length}단 지보</span></div>`;
-  $('#o1').innerHTML = secSVG(false) + `<p class="cap">${esc(RES.m.label)} · 지층별 토질정수는 입력값, 굴착측 지반은 굴착저면 이하만 표시됩니다. 대칭 굴착 가정.</p>`;
-  $('#o2').innerHTML = pressSVG(false) + `<p class="cap">배면측 K₀ 초기토압에서 출발하여 단계별 변위에 따라 Rankine 한계(Pa·Pp) 범위 내에서 변화한 최종단계 토압입니다. 말뚝(본) 간격에 따른 폭 환산 후의 단위면적 토압입니다.</p>`;
-  let r = `<div class="figs">${resSVG('w', false)}${resSVG('V', false)}${resSVG('M', false)}</div><p class="cap">연한 곡선→진한 곡선: 굴착 단계 진행 · 굵은 곡선: 최종 단계 · 점선: 포락선 · 주황 삼각형: 지보 위치 · 수평 점선: 굴착저면.</p>`;
-  r += `<h2>단계별 해석 요약</h2><div class="tw"><table><thead><tr><th>단계</th><th>굴착깊이 GL−m</th><th>활성 지보</th><th>δmax mm</th><th>Mmax kN·m</th><th>Vmax kN</th><th>수렴</th></tr></thead><tbody>`;
+    `<div class="kpi ${allOk ? 'ok' : 'ng'}"><small>${T('종합 판정','総合判定')}</small><b>${allOk ? 'O.K' : 'N.G'}</b><span>${ng ? 'N.G ' + ng + T('항목','項目') : T('전 항목 만족','全項目OK')}</span></div>` +
+    `<div class="kpi"><small>${RES.m.kind === 'steel' ? T('벽체 휨응력','壁体 曲げ応力') : T('벽체 휨모멘트','壁体 曲げモーメント')}</small><b>${sb ? fm(sb.val, 1) : '-'}</b><span>${sb ? T('허용 ','許容 ') + fm(sb.lim, 1) + ' ' + sb.unit + ' · ' + fm(sb.ratio * 100, 0) + '%' : ''}</span></div>` +
+    `<div class="kpi"><small>${T('최대 수평변위','最大水平変位')}</small><b>${fm(dp.val, 1)} mm</b><span>${T('허용','許容')} ${fm(dp.lim, 1)} mm · ${fm(dp.ratio * 100, 0)}%</span></div>` +
+    `<div class="kpi"><small>${T('근입 안정 Fs','根入れ安定 Fs')}</small><b>${fm(em.val, 2)}</b><span>${T('요구 ','要求 ')}${fm(em.lim, 2)}${T(' 이상',' 以上')}</span></div>` +
+    `<div class="kpi"><small>${S.supportType === 'strut' ? T('최대 버팀보 축력','最大切梁軸力') : T('최대 앵커 인장력','最大アンカー引張力')}</small><b>${sp == null ? '-' : fm(sp, 0) + ' kN'}</b><span>${RES.sup.length}${T('단 지보','段支保工')}</span></div>`;
+  $('#o1').innerHTML = secSVG(false) + `<p class="cap">${esc(RES.m.label)} ${T(' · 지층별 토질정수는 입력값, 굴착측 지반은 굴착저면 이하만 표시됩니다. 대칭 굴착 가정.',' · 地層ごとの土質定数は入力値、掘削側地盤は掘削底面以下のみ表示します。対称掘削を仮定。')}</p>`;
+  $('#o2').innerHTML = pressSVG(false) + `<p class="cap">${T('배면측 K₀ 초기토압에서 출발하여 단계별 변위에 따라 Rankine 한계(Pa·Pp) 범위 내에서 변화한 최종단계 토압입니다. 말뚝(본) 간격에 따른 폭 환산 후의 단위면적 토압입니다.','背面側のK₀初期土圧から出発し、ステップごとの変位に応じてRankine限界(Pa·Pp)の範囲内で変化した最終ステップの土圧です。杭(本)間隔による幅換算後の単位面積あたり土圧です。')}</p>`;
+  let r = `<div class="figs">${resSVG('w', false)}${resSVG('V', false)}${resSVG('M', false)}</div><p class="cap">${T('연한 곡선→진한 곡선: 굴착 단계 진행 · 굵은 곡선: 최종 단계 · 점선: 포락선 · 주황 삼각형: 지보 위치 · 수평 점선: 굴착저면.','薄い曲線→濃い曲線: 掘削ステップの進行 · 太い曲線: 最終ステップ · 点線: 包絡線 · オレンジ三角: 支保工位置 · 水平点線: 掘削底面。')}</p>`;
+  r += `<h2>${T('단계별 해석 요약','ステップ別解析サマリー')}</h2><div class="tw"><table><thead><tr><th>${T('단계','ステップ')}</th><th>${T('굴착깊이 GL−m','掘削深さ GL−m')}</th><th>${T('활성 지보','有効支保工')}</th><th>δmax mm</th><th>Mmax kN·m</th><th>Vmax kN</th><th>${T('수렴','収束')}</th></tr></thead><tbody>`;
   RES.stages.forEach((st, j) => {
     const mM = Math.max.apply(null, st.M.map(Math.abs)), mV = Math.max.apply(null, st.V.map(Math.abs)), mW = Math.max.apply(null, st.w.map(Math.abs)) * 1000;
-    r += `<tr><td>${st.k}단계</td><td>${fm(st.d, 2)}</td><td>${j}</td><td>${fm(mW, 1)}</td><td>${fm(mM, 1)}</td><td>${fm(mV, 1)}</td><td>${st.conv ? '○' : '✕'}</td></tr>`;
+    r += `<tr><td>${T(st.k + '단계', 'ステップ' + st.k)}</td><td>${fm(st.d, 2)}</td><td>${j}</td><td>${fm(mW, 1)}</td><td>${fm(mM, 1)}</td><td>${fm(mV, 1)}</td><td>${st.conv ? '○' : '✕'}</td></tr>`;
   });
   r += `</tbody></table></div>`;
   if (RES.sup.length){
-    r += `<h2>지보재 반력 (최대)</h2><div class="tw"><table><thead><tr><th>지보</th><th>깊이 GL−m</th><th>간격 m</th><th>본당 반력 kN</th><th>${S.supportType === 'strut' ? '축력 N kN' : '인장력 T kN'}</th></tr></thead><tbody>`;
+    r += `<h2>${T('지보재 반력 (최대)','支保工反力 (最大)')}</h2><div class="tw"><table><thead><tr><th>${T('지보','支保工')}</th><th>${T('깊이 GL−m','深さ GL−m')}</th><th>${T('간격 m','間隔 m')}</th><th>${T('본당 반력 kN','反力 1本あたり kN')}</th><th>${S.supportType === 'strut' ? T('축력 N kN','軸力 N kN') : T('인장력 T kN','引張力 T kN')}</th></tr></thead><tbody>`;
     RES.sup.forEach((x, j) => { r += `<tr><td>${S.supportType === 'strut' ? 'S' : 'A'}${j + 1}</td><td>${fm(x.z, 2)}</td><td>${fm(x.sh, 1)}</td><td>${fm(x.Rm, 1)}</td><td>${fm(x.N, 1)}</td></tr>`; });
     r += `</tbody></table></div>`;
   }
   $('#o3').innerHTML = r;
-  let c = `<div class="tw"><table><thead><tr><th class="l">구분</th><th class="l">검토항목</th><th>계산값</th><th>허용값</th><th>이용률</th><th>판정</th><th class="l">비고</th></tr></thead><tbody>`;
+  let c = `<div class="tw"><table><thead><tr><th class="l">${T('구분','区分')}</th><th class="l">${T('검토항목','照査項目')}</th><th>${T('계산값','計算値')}</th><th>${T('허용값','許容値')}</th><th>${T('이용률','利用率')}</th><th>${T('판정','判定')}</th><th class="l">${T('비고','備考')}</th></tr></thead><tbody>`;
   CHK.forEach(x => {
-    if (x.na){ c += `<tr><td class="l">${x.g}</td><td class="l">${x.name}</td><td colspan="3">-</td><td><span class="pill na">해당없음</span></td><td class="l note2">${esc(x.note)}</td></tr>`; return; }
+    if (x.na){ c += `<tr><td class="l">${x.g}</td><td class="l">${x.name}</td><td colspan="3">-</td><td><span class="pill na">${T('해당없음','該当なし')}</span></td><td class="l note2">${esc(x.note)}</td></tr>`; return; }
     c += `<tr><td class="l">${x.g}</td><td class="l">${x.name}</td><td>${fm(x.val, 2)} ${x.unit}</td><td>${x.mode === 'min' ? '≥ ' : '≤ '}${fm(x.lim, 2)} ${x.unit}</td><td>${ratioBar(x.ratio, x.ok)}</td><td><span class="pill ${x.ok ? 'ok' : 'ng'}">${x.ok ? 'O.K' : 'N.G'}</span></td><td class="l note2">${esc(x.note)}</td></tr>`;
   });
-  $('#o4').innerHTML = c + `</tbody></table></div><p class="cap">이용률 = 계산값/허용값 (Fs 항목은 요구값/계산값). 이용률 90% 초과 시 주황색으로 표시합니다.</p>`;
+  $('#o4').innerHTML = c + `</tbody></table></div><p class="cap">${T('이용률 = 계산값/허용값 (Fs 항목은 요구값/계산값). 이용률 90% 초과 시 주황색으로 표시합니다.','利用率 = 計算値/許容値 (Fs項目は要求値/計算値)。利用率が90%を超える場合はオレンジ色で表示します。')}</p>`;
 }
 function run(){
   ERR = validate(S);
   if (ERR.length){
-    $('#msgs').innerHTML = `<div class="ban err"><b>입력 오류</b><ul>${ERR.slice(0, 6).map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>`; return;
+    $('#msgs').innerHTML = `<div class="ban err"><b>${T('입력 오류','入力エラー')}</b><ul>${ERR.slice(0, 6).map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>`; return;
   }
   try { RES = analyze(S); CHK = runChecks(S, RES); renderResults(); }
-  catch (e){ $('#msgs').innerHTML = `<div class="ban err">해석 중 오류가 발생했습니다: ${esc(e.message)}</div>`; }
+  catch (e){ $('#msgs').innerHTML = `<div class="ban err">${T('해석 중 오류가 발생했습니다: ','解析中にエラーが発生しました: ')}${esc(e.message)}</div>`; }
 }
 
 /* ---------- 파일 저장 ---------- */
@@ -828,64 +845,64 @@ async function saveFile(name, data){
   let dl = null;
   try { if (window.claude && window.claude.use) dl = await window.claude.use('downloads'); } catch (e) {}
   if (dl){
-    try { await dl.save({filename: name, data}); toast('저장 확인창에서 승인하면 ' + name + ' 파일이 저장됩니다.'); }
-    catch (e){ toast(e && e.code === 'declined' ? '저장을 취소했습니다.' : '저장하지 못했습니다. (' + ((e && e.code) || e.message) + ')'); }
+    try { await dl.save({filename: name, data}); toast(T('저장 확인창에서 승인하면 ' + name + ' 파일이 저장됩니다.', '保存確認ダイアログで承認すると ' + name + ' が保存されます。')); }
+    catch (e){ toast(e && e.code === 'declined' ? T('저장을 취소했습니다.','保存をキャンセルしました。') : T('저장하지 못했습니다. (','保存できませんでした。(') + ((e && e.code) || e.message) + ')'); }
     return;
   }
   const blob = data instanceof Blob ? data : new Blob([data]); const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast(name + ' 저장');
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast(name + T(' 저장',' を保存'));
 }
-const fname = ext => ((S.meta.project || '흙막이').replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40)) + '_구조계산서.' + ext;
-function guard(){ if (ERR.length || !RES){ toast('입력 오류를 먼저 수정하십시오.'); return false; } return true; }
+const fname = (ext, kind) => ((S.meta.project || T('흙막이','山留め')).replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40)) + (kind === 'in' ? T('_입력값','_入力値') : T('_구조계산서','_構造計算書')) + '.' + ext;
+function guard(){ if (ERR.length || !RES){ toast(T('입력 오류를 먼저 수정하십시오.','入力エラーを先に修正してください。')); return false; } return true; }
 
 /* ---------- 엑셀 ---------- */
 function buildXLSX(){
   const wb = XLSX.utils.book_new(), m = RES.m, mat = S.mat;
   const sheet = (rows, cols) => { const ws = XLSX.utils.aoa_to_sheet(rows); if (cols) ws['!cols'] = cols.map(w => ({wch: w})); return ws; };
-  const A = [['흙막이 구조계산서 — 입력조건'], [], ['과업명', S.meta.project], ['작성자', S.meta.author], ['작성일', S.meta.date], [],
-    ['공법', m.label], ['최종 굴착깊이 H (m)', S.H], ['근입깊이 D (m)', S.D], ['벽체 길이 L (m)', RES.L], ['상재하중 q (kN/m²)', S.q],
-    ['지하수위 GL− (m)', S.hw], ['수압 고려', S.useWater ? '예' : '아니오'], ['굴착 여유 (m)', S.clr], ['해석 절점간격 (m)', RES.dz], [],
-    ['부재 특성(1본 기준)'], ['휨강성 EI (kN·m²)', m.EI], ['단면계수 Z (cm³)', m.Z], ['전단면적 Aw (cm²)', m.Aw], ['하중폭 Wa (m)', m.Wa], ['수동폭 Wp (m)', m.Wp], [],
-    ['재료·기준'], ['Es (MPa)', mat.Es], ['기본 허용휨 (MPa)', mat.fb0], ['기본 허용전단 (MPa)', mat.fv0], ['가설 할증계수', mat.alpha], ['적용 허용휨 (MPa)', mat.fb0 * mat.alpha], ['적용 허용전단 (MPa)', mat.fv0 * mat.alpha],
-    ['허용 수평변위 (H 대비 %)', S.limits.dispPct], ['근입 안정 요구 Fs', S.limits.FsEmb], ['히빙 요구 Fs', S.limits.FsHeave]];
-  XLSX.utils.book_append_sheet(wb, sheet(A, [30, 40]), '입력조건');
-  const B = [['No', '지층', '두께(m)', '상단 GL−(m)', '하단 GL−(m)', 'γt(kN/m³)', 'γsat(kN/m³)', 'c(kN/m²)', 'φ(°)', 'kh(kN/m³)', 'Ka', 'Kp', 'K0']];
+  const A = [[T('흙막이 구조계산서 — 입력조건','山留め構造計算書 — 入力条件')], [], [T('과업명','業務名'), S.meta.project], [T('작성자','作成者'), S.meta.author], [T('작성일','作成日'), S.meta.date], [],
+    [T('공법','工法'), m.label], [T('최종 굴착깊이 H (m)','最終掘削深さ H (m)'), S.H], [T('근입깊이 D (m)','根入れ深さ D (m)'), S.D], [T('벽체 길이 L (m)','壁体長 L (m)'), RES.L], [T('상재하중 q (kN/m²)','上載荷重 q (kN/m²)'), S.q],
+    [T('지하수위 GL− (m)','地下水位 GL− (m)'), S.hw], [T('수압 고려','水圧考慮'), S.useWater ? T('예','はい') : T('아니오','いいえ')], [T('굴착 여유 (m)','掘削余裕 (m)'), S.clr], [T('해석 절점간격 (m)','解析節点間隔 (m)'), RES.dz], [],
+    [T('부재 특성(1본 기준)','部材特性(1本あたり)')], [T('휨강성 EI (kN·m²)','曲げ剛性 EI (kN·m²)'), m.EI], [T('단면계수 Z (cm³)','断面係数 Z (cm³)'), m.Z], [T('전단면적 Aw (cm²)','せん断断面積 Aw (cm²)'), m.Aw], [T('하중폭 Wa (m)','荷重幅 Wa (m)'), m.Wa], [T('수동폭 Wp (m)','受働幅 Wp (m)'), m.Wp], [],
+    [T('재료·기준','材料・基準')], ['Es (MPa)', mat.Es], [T('기본 허용휨 (MPa)','基本許容曲げ (MPa)'), mat.fb0], [T('기본 허용전단 (MPa)','基本許容せん断 (MPa)'), mat.fv0], [T('가설 할증계수','仮設割増係数'), mat.alpha], [T('적용 허용휨 (MPa)','適用許容曲げ (MPa)'), mat.fb0 * mat.alpha], [T('적용 허용전단 (MPa)','適用許容せん断 (MPa)'), mat.fv0 * mat.alpha],
+    [T('허용 수평변위 (H 대비 %)','許容水平変位 (H比 %)'), S.limits.dispPct], [T('근입 안정 요구 Fs','根入れ安定 要求Fs'), S.limits.FsEmb], [T('히빙 요구 Fs','ヒービング 要求Fs'), S.limits.FsHeave]];
+  XLSX.utils.book_append_sheet(wb, sheet(A, [30, 40]), T('입력조건','入力条件'));
+  const B = [['No', T('지층','地層'), T('두께(m)','厚さ(m)'), T('상단 GL−(m)','上端 GL−(m)'), T('하단 GL−(m)','下端 GL−(m)'), 'γt(kN/m³)', 'γsat(kN/m³)', 'c(kN/m²)', 'φ(°)', 'kh(kN/m³)', 'Ka', 'Kp', 'K0']];
   let acc = 0;
   S.layers.forEach((l, i) => {
     const ka = Math.pow(Math.tan((45 - l.phi / 2) * Math.PI / 180), 2), kp = Math.pow(Math.tan((45 + l.phi / 2) * Math.PI / 180), 2);
     B.push([i + 1, l.name, l.t, acc, i === S.layers.length - 1 ? '∞' : acc + l.t, l.gt, l.gs, l.c, l.phi, l.kh, +ka.toFixed(4), +kp.toFixed(4), +(1 - Math.sin(l.phi * Math.PI / 180)).toFixed(4)]); acc += l.t;
   });
-  XLSX.utils.book_append_sheet(wb, sheet(B, [6, 14, 9, 11, 11, 11, 12, 10, 8, 12, 8, 8, 8]), '지층');
-  const C = [['단', '설치깊이 GL−(m)', '수평간격(m)', '선행하중(kN/개)', '최대 본당 반력(kN)', S.supportType === 'strut' ? '축력 N(kN)' : '인장력 T(kN)']];
+  XLSX.utils.book_append_sheet(wb, sheet(B, [6, 14, 9, 11, 11, 11, 12, 10, 8, 12, 8, 8, 8]), T('지층','地層'));
+  const C = [[T('단','段'), T('설치깊이 GL−(m)','設置深さ GL−(m)'), T('수평간격(m)','水平間隔(m)'), T('선행하중(kN/개)','プレロード(kN/個)'), T('최대 본당 반력(kN)','最大反力 1本あたり(kN)'), S.supportType === 'strut' ? T('축력 N(kN)','軸力 N(kN)') : T('인장력 T(kN)','引張力 T(kN)')]];
   RES.sup.forEach((x, j) => C.push([j + 1, x.z, x.sh, x.P, +x.Rm.toFixed(2), +x.N.toFixed(2)]));
-  if (!RES.sup.length) C.push(['지보 없음(자립식)']);
-  XLSX.utils.book_append_sheet(wb, sheet(C, [6, 16, 12, 16, 18, 16]), '지보재');
-  const D = [['GL−(m)']]; RES.stages.forEach(st => { D[0].push(`${st.k}단계 변위(mm)`, `${st.k}단계 M(kN·m)`, `${st.k}단계 V(kN)`); });
+  if (!RES.sup.length) C.push([T('지보 없음(자립식)','支保工なし(自立式)')]);
+  XLSX.utils.book_append_sheet(wb, sheet(C, [6, 16, 12, 16, 18, 16]), T('지보재','支保工'));
+  const D = [['GL−(m)']]; RES.stages.forEach(st => { D[0].push(T(`${st.k}단계 변위(mm)`,`ステップ${st.k} 変位(mm)`), T(`${st.k}단계 M(kN·m)`,`ステップ${st.k} M(kN·m)`), T(`${st.k}단계 V(kN)`,`ステップ${st.k} V(kN)`)); });
   RES.z.forEach((zv, i) => { const r = [zv]; RES.stages.forEach(st => r.push(+(st.w[i] * 1000).toFixed(3), +st.M[i].toFixed(3), +st.V[i].toFixed(3))); D.push(r); });
-  XLSX.utils.book_append_sheet(wb, sheet(D, [9].concat(RES.stages.flatMap(() => [14, 15, 12]))), '단계별결과');
-  const E = [['GL−(m)', '변위 최대(mm)', '변위 최소(mm)', 'M 최대(kN·m)', 'M 최소(kN·m)', 'V 최대(kN)', 'V 최소(kN)']];
+  XLSX.utils.book_append_sheet(wb, sheet(D, [9].concat(RES.stages.flatMap(() => [14, 15, 12]))), T('단계별결과','ステップ別結果'));
+  const E = [['GL−(m)', T('변위 최대(mm)','変位 最大(mm)'), T('변위 최소(mm)','変位 最小(mm)'), T('M 최대(kN·m)','M 最大(kN·m)'), T('M 최소(kN·m)','M 最小(kN·m)'), T('V 최대(kN)','V 最大(kN)'), T('V 최소(kN)','V 最小(kN)')]];
   RES.z.forEach((zv, i) => E.push([zv, +(RES.env.wMax[i] * 1000).toFixed(3), +(RES.env.wMin[i] * 1000).toFixed(3), +RES.env.Mmax[i].toFixed(3), +RES.env.Mmin[i].toFixed(3), +RES.env.Vmax[i].toFixed(3), +RES.env.Vmin[i].toFixed(3)]));
-  XLSX.utils.book_append_sheet(wb, sheet(E, [9, 14, 14, 14, 14, 12, 12]), '포락선');
-  const G = [['구분', '검토항목', '계산값', '허용값', '단위', '이용률', '판정', '비고']];
+  XLSX.utils.book_append_sheet(wb, sheet(E, [9, 14, 14, 14, 14, 12, 12]), T('포락선','包絡線'));
+  const G = [[T('구분','区分'), T('검토항목','照査項目'), T('계산값','計算値'), T('허용값','許容値'), T('단위','単位'), T('이용률','利用率'), T('판정','判定'), T('비고','備考')]];
   CHK.forEach((x, i) => {
     const r = i + 2;
-    if (x.na){ G.push([x.g, x.name, '-', '-', '', '-', '해당없음', x.note]); return; }
+    if (x.na){ G.push([x.g, x.name, '-', '-', '', '-', T('해당없음','該当なし'), x.note]); return; }
     // 이용률: max형 = 계산/허용, min형 = 요구/계산  → 열 C=계산값, D=허용값
     const f1 = x.mode === 'min' ? `IFERROR(D${r}/C${r},0)` : `IFERROR(C${r}/D${r},0)`;
     G.push([x.g, x.name, +x.val.toFixed(4), +x.lim.toFixed(4), x.unit, {t:'n', f:f1, v:+x.ratio.toFixed(4), z:'0.0%'}, {t:'s', f:`IF(F${r}<=1,"O.K","N.G")`, v:x.ok ? 'O.K' : 'N.G'}, x.note]);
   });
   const base = CHK.length + 3;
-  G.push([], ['산정식 검증(벽체 휨)']);
+  G.push([], [T('산정식 검증(벽체 휨)','算定式の検証(壁体曲げ)')]);
   if (m.kind === 'steel'){
     G.push(['Mmax (kN·m)', RES.Mx.v], ['Z (cm³)', m.Z], ['σb = Mmax×10³/Z (MPa)', {t:'n', f:`B${base + 2}*1000/B${base + 3}`, v:RES.Mx.v * 1000 / m.Z}]);
   }
-  XLSX.utils.book_append_sheet(wb, sheet(G, [9, 26, 12, 12, 8, 10, 10, 60]), '검토요약');
+  XLSX.utils.book_append_sheet(wb, sheet(G, [9, 26, 12, 12, 8, 10, 10, 60]), T('검토요약','照査まとめ'));
   return XLSX.write(wb, {bookType:'xlsx', type:'array'});
 }
 $('#bXls').onclick = async () => {
   if (!guard()) return;
-  try { if (!window.XLSX) throw new Error('엑셀 라이브러리를 불러오지 못했습니다.'); await saveFile(fname('xlsx'), buildXLSX()); }
-  catch (e){ toast('엑셀 생성 실패: ' + e.message); }
+  try { if (!window.XLSX) throw new Error(T('엑셀 라이브러리를 불러오지 못했습니다.','Excelライブラリを読み込めませんでした。')); await saveFile(fname('xlsx'), buildXLSX()); }
+  catch (e){ toast(T('엑셀 생성 실패: ','Excel生成に失敗: ') + e.message); }
 };
 
 /* ---------- PDF 계산서 ---------- */
@@ -894,38 +911,38 @@ function buildReport(){
   const head = (n, t) => `<div class="rh"><span>${esc(S.meta.project)}</span><span>${t}</span></div>`;
   const foot = n => `<div class="rf">${esc(S.meta.author ? S.meta.author + ' · ' : '')}${esc(S.meta.date)}<span>- ${n} -</span></div>`;
   const kv = rows => `<table class="t kv"><tbody>${rows.map(r => `<tr><th>${r[0]}</th><td>${r[1]}</td><th>${r[2] || ''}</th><td>${r[3] || ''}</td></tr>`).join('')}</tbody></table>`;
-  let p1 = `<div class="page">${head(1, '흙막이 구조계산서')}<h1>흙막이 가시설 구조계산서</h1><p class="sub">탄소성 보-스프링 해석(단계별 굴착) · Rankine 토압</p>`;
-  p1 += kv([['과업명', esc(S.meta.project), '작성일', esc(S.meta.date)], ['작성자', esc(S.meta.author || '-'), '해석 모델', 'Euler 보 + 탄소성 지반스프링']]);
-  p1 += `<h2>1. 설계 개요</h2>` + kv([
-    ['공법', esc(m.label), '굴착깊이 H', fm(S.H, 2) + ' m'],
-    ['근입깊이 D', fm(RES.L - S.H, 2) + ' m', '벽체 길이 L', fm(RES.L, 2) + ' m'],
-    ['상재하중 q', fm(S.q, 1) + ' kN/m²', '지하수위', 'GL−' + fm(S.hw, 1) + ' m (' + (S.useWater ? '수압 고려' : '수압 미고려') + ')'],
-    ['지보 방식', S.supportType === 'strut' ? '버팀보 ' + S.supports.length + '단 (' + S.strut.sec + ')' : '어스앵커 ' + S.supports.length + '단', '굴착 여유', fm(S.clr, 2) + ' m'],
-    ['휨강성 EI', fm(m.EI, 0) + ' kN·m²', '하중폭 / 수동폭', fm(m.Wa, 2) + ' / ' + fm(m.Wp, 2) + ' m']]);
-  p1 += `<h2>2. 단면도</h2>${secSVG(true)}${foot(1)}</div>`;
-  let p2 = `<div class="page">${head(2, '지반 및 토압')}<h2>3. 지반 조건</h2><table class="t"><thead><tr><th>지층</th><th>두께 m</th><th>γt</th><th>γsat</th><th>c</th><th>φ°</th><th>kh</th><th>Ka</th><th>Kp</th><th>K₀</th></tr></thead><tbody>`;
+  let p1 = `<div class="page">${head(1, T('흙막이 구조계산서','山留め構造計算書'))}<h1>${T('흙막이 가시설 구조계산서','山留め仮設構造計算書')}</h1><p class="sub">${T('탄소성 보-스프링 해석(단계별 굴착) · Rankine 토압','弾塑性はり−ばね解析(段階掘削) · Rankine土圧')}</p>`;
+  p1 += kv([[T('과업명','業務名'), esc(S.meta.project), T('작성일','作成日'), esc(S.meta.date)], [T('작성자','作成者'), esc(S.meta.author || '-'), T('해석 모델','解析モデル'), T('Euler 보 + 탄소성 지반스프링','Eulerはり + 弾塑性地盤ばね')]]);
+  p1 += `<h2>${T('1. 설계 개요','1. 設計概要')}</h2>` + kv([
+    [T('공법','工法'), esc(m.label), T('굴착깊이 H','掘削深さ H'), fm(S.H, 2) + ' m'],
+    [T('근입깊이 D','根入れ深さ D'), fm(RES.L - S.H, 2) + ' m', T('벽체 길이 L','壁体長 L'), fm(RES.L, 2) + ' m'],
+    [T('상재하중 q','上載荷重 q'), fm(S.q, 1) + ' kN/m²', T('지하수위','地下水位'), 'GL−' + fm(S.hw, 1) + ' m (' + (S.useWater ? T('수압 고려','水圧考慮') : T('수압 미고려','水圧非考慮')) + ')'],
+    [T('지보 방식','支保工方式'), S.supportType === 'strut' ? T('버팀보 ','切梁 ') + S.supports.length + T('단 (','段 (') + S.strut.sec + ')' : T('어스앵커 ','アースアンカー ') + S.supports.length + T('단','段'), T('굴착 여유','掘削余裕'), fm(S.clr, 2) + ' m'],
+    [T('휨강성 EI','曲げ剛性 EI'), fm(m.EI, 0) + ' kN·m²', T('하중폭 / 수동폭','荷重幅 / 受働幅'), fm(m.Wa, 2) + ' / ' + fm(m.Wp, 2) + ' m']]);
+  p1 += `<h2>${T('2. 단면도','2. 断面図')}</h2>${secSVG(true)}${foot(1)}</div>`;
+  let p2 = `<div class="page">${head(2, T('지반 및 토압','地盤および土圧'))}<h2>${T('3. 지반 조건','3. 地盤条件')}</h2><table class="t"><thead><tr><th>${T('지층','地層')}</th><th>${T('두께 m','厚さ m')}</th><th>γt</th><th>γsat</th><th>c</th><th>φ°</th><th>kh</th><th>Ka</th><th>Kp</th><th>K₀</th></tr></thead><tbody>`;
   S.layers.forEach((l, i) => { p2 += `<tr><td>${esc(l.name)}</td><td>${i === S.layers.length - 1 ? '∞' : fm(l.t, 2)}</td><td>${l.gt}</td><td>${l.gs}</td><td>${l.c}</td><td>${l.phi}</td><td>${l.kh}</td><td>${fm(Math.pow(Math.tan((45 - l.phi / 2) * Math.PI / 180), 2), 3)}</td><td>${fm(Math.pow(Math.tan((45 + l.phi / 2) * Math.PI / 180), 2), 3)}</td><td>${fm(1 - Math.sin(l.phi * Math.PI / 180), 3)}</td></tr>`; });
-  p2 += `</tbody></table><p class="cap">γ: kN/m³ · c: kN/m² · kh: kN/m³</p><h2>4. 적용 기준 및 가정</h2><ul class="ls"><li>토압: Rankine 주동·수동토압을 한계값으로 하고, 초기토압은 정지토압(K₀=1−sinφ)으로 한다.</li><li>지반: 수평지반반력계수 kh에 의한 탄소성 스프링으로 모델링하고 굴착 단계별 변위를 누적한다.</li><li>벽체: Euler 보(절점간격 ${fm(RES.dz, 2)} m), 지보재는 설치 이후 선형 스프링, 해체 단계는 고려하지 않는다.</li><li>허용응력: 기본 허용휨 ${mat.fb0} MPa · 허용전단 ${mat.fv0} MPa에 가설 할증 ${mat.alpha}배 적용 (휨 ${fm(mat.fb0 * mat.alpha, 0)} / 전단 ${fm(mat.fv0 * mat.alpha, 0)} MPa).</li></ul>`;
-  p2 += `<h2>5. 토압 분포도</h2>${pressSVG(true)}${foot(2)}</div>`;
-  let p3 = `<div class="page">${head(3, '해석 결과')}<h2>6. 단계별 해석 결과</h2><table class="t"><thead><tr><th>단계</th><th>굴착깊이 GL−m</th><th>활성 지보</th><th>δmax mm</th><th>Mmax kN·m</th><th>Vmax kN</th><th>수렴</th></tr></thead><tbody>`;
-  RES.stages.forEach((st, j) => { p3 += `<tr><td>${st.k}단계</td><td>${fm(st.d, 2)}</td><td>${j}</td><td>${fm(Math.max.apply(null, st.w.map(Math.abs)) * 1000, 1)}</td><td>${fm(Math.max.apply(null, st.M.map(Math.abs)), 1)}</td><td>${fm(Math.max.apply(null, st.V.map(Math.abs)), 1)}</td><td>${st.conv ? '○' : '✕'}</td></tr>`; });
-  p3 += `</tbody></table><div class="trio">${resSVG('w', true, 224)}${resSVG('V', true, 224)}${resSVG('M', true, 224)}</div><p class="cap">연한→진한 곡선: 굴착 단계 · 굵은 곡선: 최종 단계 · 점선: 포락선 · 삼각형: 지보 위치</p>`;
+  p2 += `</tbody></table><p class="cap">γ: kN/m³ · c: kN/m² · kh: kN/m³</p><h2>${T('4. 적용 기준 및 가정','4. 適用基準および仮定')}</h2><ul class="ls"><li>${T('토압: Rankine 주동·수동토압을 한계값으로 하고, 초기토압은 정지토압(K₀=1−sinφ)으로 한다.','土圧: Rankine主働・受働土圧を限界値とし、初期土圧は静止土圧(K₀=1−sinφ)とする。')}</li><li>${T('지반: 수평지반반력계수 kh에 의한 탄소성 스프링으로 모델링하고 굴착 단계별 변위를 누적한다.','地盤: 水平地盤反力係数khによる弾塑性ばねとしてモデル化し、掘削ステップごとの変位を累積する。')}</li><li>${T(`벽체: Euler 보(절점간격 ${fm(RES.dz, 2)} m), 지보재는 설치 이후 선형 스프링, 해체 단계는 고려하지 않는다.`,`壁体: Eulerはり(節点間隔 ${fm(RES.dz, 2)} m)、支保工は設置後に線形ばね、撤去ステップは考慮しない。`)}</li><li>${T(`허용응력: 기본 허용휨 ${mat.fb0} MPa · 허용전단 ${mat.fv0} MPa에 가설 할증 ${mat.alpha}배 적용 (휨 ${fm(mat.fb0 * mat.alpha, 0)} / 전단 ${fm(mat.fv0 * mat.alpha, 0)} MPa).`,`許容応力: 基本許容曲げ ${mat.fb0} MPa · 許容せん断 ${mat.fv0} MPa に仮設割増 ${mat.alpha}倍を適用 (曲げ ${fm(mat.fb0 * mat.alpha, 0)} / せん断 ${fm(mat.fv0 * mat.alpha, 0)} MPa)。`)}</li></ul>`;
+  p2 += `<h2>${T('5. 토압 분포도','5. 土圧分布図')}</h2>${pressSVG(true)}${foot(2)}</div>`;
+  let p3 = `<div class="page">${head(3, T('해석 결과','解析結果'))}<h2>${T('6. 단계별 해석 결과','6. ステップ別解析結果')}</h2><table class="t"><thead><tr><th>${T('단계','ステップ')}</th><th>${T('굴착깊이 GL−m','掘削深さ GL−m')}</th><th>${T('활성 지보','有効支保工')}</th><th>δmax mm</th><th>Mmax kN·m</th><th>Vmax kN</th><th>${T('수렴','収束')}</th></tr></thead><tbody>`;
+  RES.stages.forEach((st, j) => { p3 += `<tr><td>${T(st.k + '단계', 'ステップ' + st.k)}</td><td>${fm(st.d, 2)}</td><td>${j}</td><td>${fm(Math.max.apply(null, st.w.map(Math.abs)) * 1000, 1)}</td><td>${fm(Math.max.apply(null, st.M.map(Math.abs)), 1)}</td><td>${fm(Math.max.apply(null, st.V.map(Math.abs)), 1)}</td><td>${st.conv ? '○' : '✕'}</td></tr>`; });
+  p3 += `</tbody></table><div class="trio">${resSVG('w', true, 224)}${resSVG('V', true, 224)}${resSVG('M', true, 224)}</div><p class="cap">${T('연한→진한 곡선: 굴착 단계 · 굵은 곡선: 최종 단계 · 점선: 포락선 · 삼각형: 지보 위치','薄い→濃い曲線: 掘削ステップ · 太い曲線: 最終ステップ · 点線: 包絡線 · 三角: 支保工位置')}</p>`;
   if (RES.sup.length){
-    p3 += `<h2>7. 지보재 반력</h2><table class="t"><thead><tr><th>지보</th><th>깊이 GL−m</th><th>간격 m</th><th>본당 반력 kN</th><th>${S.supportType === 'strut' ? '축력 N kN' : '인장력 T kN'}</th></tr></thead><tbody>`;
+    p3 += `<h2>${T('7. 지보재 반력','7. 支保工反力')}</h2><table class="t"><thead><tr><th>${T('지보','支保工')}</th><th>${T('깊이 GL−m','深さ GL−m')}</th><th>${T('간격 m','間隔 m')}</th><th>${T('본당 반력 kN','反力 1本あたり kN')}</th><th>${S.supportType === 'strut' ? T('축력 N kN','軸力 N kN') : T('인장력 T kN','引張力 T kN')}</th></tr></thead><tbody>`;
     RES.sup.forEach((x, j) => { p3 += `<tr><td>${S.supportType === 'strut' ? 'S' : 'A'}${j + 1}</td><td>${fm(x.z, 2)}</td><td>${fm(x.sh, 1)}</td><td>${fm(x.Rm, 1)}</td><td>${fm(x.N, 1)}</td></tr>`; });
     p3 += `</tbody></table>`;
   }
   p3 += `${foot(3)}</div>`;
   const allOk = CHK.every(c => c.ok) && RES.stages.every(s => s.conv);
-  let p4 = `<div class="page">${head(4, '부재 검토')}<h2>8. 부재 및 안정 검토</h2><table class="t"><thead><tr><th class="l">구분</th><th class="l">검토항목</th><th>계산값</th><th>허용값</th><th>이용률</th><th>판정</th></tr></thead><tbody>`;
+  let p4 = `<div class="page">${head(4, T('부재 검토','部材照査'))}<h2>${T('8. 부재 및 안정 검토','8. 部材および安定照査')}</h2><table class="t"><thead><tr><th class="l">${T('구분','区分')}</th><th class="l">${T('검토항목','照査項目')}</th><th>${T('계산값','計算値')}</th><th>${T('허용값','許容値')}</th><th>${T('이용률','利用率')}</th><th>${T('판정','判定')}</th></tr></thead><tbody>`;
   CHK.forEach(x => {
-    if (x.na) p4 += `<tr><td class="l">${x.g}</td><td class="l">${x.name}</td><td colspan="3">${esc(x.note)}</td><td>해당없음</td></tr>`;
+    if (x.na) p4 += `<tr><td class="l">${x.g}</td><td class="l">${x.name}</td><td colspan="3">${esc(x.note)}</td><td>${T('해당없음','該当なし')}</td></tr>`;
     else p4 += `<tr><td class="l">${x.g}</td><td class="l">${x.name}<br><span class="sm">${esc(x.note)}</span></td><td>${fm(x.val, 2)} ${x.unit}</td><td>${x.mode === 'min' ? '≥ ' : '≤ '}${fm(x.lim, 2)} ${x.unit}</td><td>${fm(x.ratio * 100, 0)}%</td><td class="${x.ok ? 'ok' : 'ng'}">${x.ok ? 'O.K' : 'N.G'}</td></tr>`;
   });
-  p4 += `</tbody></table><div class="verdict ${allOk ? 'ok' : 'ng'}">종합 판정: ${allOk ? 'O.K — 전 검토항목 만족' : 'N.G — ' + CHK.filter(c => !c.ok).length + '개 항목 불만족, 단면·근입·지보 재검토 필요'}</div>`;
-  p4 += `<p class="cap">본 계산서는 입력된 토질정수와 해석 가정에 따른 결과이며, 최종 설계는 관련 기준 및 책임기술자의 검토를 거쳐야 한다.</p>${foot(4)}</div>`;
+  p4 += `</tbody></table><div class="verdict ${allOk ? 'ok' : 'ng'}">${T('종합 판정: ','総合判定: ')}${allOk ? T('O.K — 전 검토항목 만족','O.K — 全照査項目を満足') : 'N.G — ' + T(CHK.filter(c => !c.ok).length + '개 항목 불만족, 단면·근입·지보 재검토 필요', CHK.filter(c => !c.ok).length + '項目が不満足、断面・根入れ・支保工の再検討が必要')}</div>`;
+  p4 += `<p class="cap">${T('본 계산서는 입력된 토질정수와 해석 가정에 따른 결과이며, 최종 설계는 관련 기준 및 책임기술자의 검토를 거쳐야 한다.','本計算書は入力された土質定数および解析上の仮定に基づく結果であり、最終設計は関連基準および責任技術者の照査を経なければならない。')}</p>${foot(4)}</div>`;
   const css = `<style>
-    .rpt{font-family:'Malgun Gothic','맑은 고딕','Noto Sans KR','Apple SD Gothic Neo',sans-serif;color:#14202B}
+    .rpt{font-family:${LANG === 'ja' ? "'Yu Gothic','Meiryo','Hiragino Kaku Gothic ProN','Noto Sans JP','Noto Sans CJK JP',sans-serif" : "'Malgun Gothic','맑은 고딕','Noto Sans KR','Apple SD Gothic Neo',sans-serif"};color:#14202B}
     .rpt .page{width:794px;height:1123px;padding:44px 52px 40px;box-sizing:border-box;background:#fff;position:relative;overflow:hidden;font-size:11.5px;line-height:1.5}
     .rpt .rh{display:flex;justify-content:space-between;border-bottom:1.5px solid #14202B;padding-bottom:5px;margin-bottom:14px;font-size:10.5px;color:#566676}
     .rpt .rf{position:absolute;left:52px;right:52px;bottom:26px;display:flex;justify-content:space-between;border-top:1px solid #C9D1D9;padding-top:5px;font-size:10px;color:#566676}
@@ -948,12 +965,13 @@ function buildReport(){
 }
 $('#bPdf').onclick = async () => {
   if (!guard()) return;
-  const b = $('#bPdf'); b.disabled = true; const t0 = b.textContent; b.textContent = 'PDF 생성 중…';
+  const b = $('#bPdf'); b.disabled = true; const t0 = b.textContent; b.textContent = T('PDF 생성 중…','PDF生成中…');
   try {
-    if (!window.html2canvas || !window.jspdf) throw new Error('PDF 라이브러리를 불러오지 못했습니다.');
+    if (!window.html2canvas || !window.jspdf) throw new Error(T('PDF 라이브러리를 불러오지 못했습니다.','PDFライブラリを読み込めませんでした。'));
     const host = $('#rptHost'); host.innerHTML = buildReport();
+    void host.offsetHeight;
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
-    await new Promise(r => setTimeout(r, 60));
+    await new Promise(r => setTimeout(r, 200));
     const pages = [...host.querySelectorAll('.page')], pdf = new window.jspdf.jsPDF({unit:'mm', format:'a4', orientation:'portrait', compress:true});
     for (let i = 0; i < pages.length; i++){
       const cv = await html2canvas(pages[i], {scale:2, backgroundColor:'#ffffff', logging:false, useCORS:true});
@@ -962,13 +980,13 @@ $('#bPdf').onclick = async () => {
     }
     host.innerHTML = '';
     await saveFile(fname('pdf'), pdf.output('blob'));
-  } catch (e){ toast('PDF 생성 실패: ' + e.message); }
-  b.disabled = false; b.textContent = t0;
+  } catch (e){ toast(T('PDF 생성 실패: ','PDF生成に失敗: ') + e.message); }
+  b.disabled = false; applyStatic();
 };
 
 /* ---------- 초기화·입력 저장/불러오기 ---------- */
-$('#bReset').onclick = () => { S = DEF(); renderInputs(); run(); toast('기본값으로 초기화했습니다.'); };
-$('#bSave').onclick = async () => { await saveFile(fname('json').replace('_구조계산서', '_입력값'), JSON.stringify(S, null, 2)); };
+$('#bReset').onclick = () => { S = DEF(); renderInputs(); run(); toast(T('기본값으로 초기화했습니다.','初期値に戻しました。')); };
+$('#bSave').onclick = async () => { await saveFile(fname('json', 'in'), JSON.stringify(S, null, 2)); };
 $('#bLoad').onclick = () => $('#fLoad').click();
 $('#fLoad').onchange = e => {
   const f = e.target.files[0]; if (!f) return;
@@ -977,13 +995,33 @@ $('#fLoad').onchange = e => {
     try {
       const o = JSON.parse(r.result), d = DEF();
       const merge = (a, b) => { Object.keys(b).forEach(k => { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a[k] && typeof a[k] === 'object' && !Array.isArray(a[k])) merge(a[k], b[k]); else a[k] = b[k]; }); return a; };
-      S = merge(d, o); renderInputs(); run(); toast('입력값을 불러왔습니다.');
-    } catch (err){ toast('불러오기 실패: 올바른 입력 파일이 아닙니다.'); }
+      S = merge(d, o); renderInputs(); run(); toast(T('입력값을 불러왔습니다.','入力値を読み込みました。'));
+    } catch (err){ toast(T('불러오기 실패: 올바른 입력 파일이 아닙니다.','読込失敗: 正しい入力ファイルではありません。')); }
     e.target.value = '';
   };
   r.readAsText(f);
 };
-renderInputs(); run();
+/* ---------- 언어 전환 ---------- */
+function applyStatic(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-ko]').forEach(el => { el.textContent = el.dataset[LANG]; });
+  document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === LANG ? 'true' : 'false'));
+}
+function defOf(l){ const o = LANG; LANG = l; const d = DEF(); LANG = o; return d; }
+function setLang(l){
+  if (l === LANG || (l !== 'ko' && l !== 'ja')) return;
+  const a = defOf(LANG), b = defOf(l);
+  if (S.meta.project === a.meta.project) S.meta.project = b.meta.project;
+  S.layers.forEach((x, i) => {
+    if (a.layers[i] && x.name === a.layers[i].name && b.layers[i]) x.name = b.layers[i].name;
+    else if (x.name === NEWL[LANG]) x.name = NEWL[l];
+  });
+  LANG = l;
+  try { localStorage.setItem('sh_lang', l); } catch (e) {}
+  applyStatic(); renderInputs(); run();
+}
+document.querySelector('.lang').addEventListener('click', e => { const b = e.target.closest('button[data-lang]'); if (b) setLang(b.dataset.lang); });
+applyStatic(); renderInputs(); run();
 
 </script>
 
