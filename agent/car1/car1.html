@@ -8,19 +8,27 @@
   --bg:#f1f3f5; --surface:#ffffff; --surface2:#f6f7f9; --ink:#121c26; --muted:#5d6b78; --line:#d6dce2; --line2:#b9c3cc;
   --brand:#18486f; --brand-ink:#ffffff; --brand-soft:#e3edf5;
   --ok:#0e7a44; --ok-bg:#dff3e7; --ng:#c0302b; --ng-bg:#fde7e5; --warn:#a15f00; --warn-bg:#fcefcf;
-  --paper:#ffffff; --paper-ink:#111111; --paper-line:#444444; --paper-soft:#eef1f4;
+  --paper:#ffffff; --paper-ink:#111111; --paper-line:#444444; --paper-soft:#eef1f4; --crane:#e2a500;
   --font:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
   --mono:Consolas,"D2Coding",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0e141a; --surface:#16202a; --surface2:#1c2833; --ink:#e8eef3; --muted:#9aa8b5; --line:#2c3a47; --line2:#41525f;
   --brand:#7fb4e0; --brand-ink:#0b1822; --brand-soft:#1a2c3b;
-  --ok:#4cc38a; --ok-bg:#10301f; --ng:#ff7f73; --ng-bg:#3b1b19; --warn:#f0b64a; --warn-bg:#3a2d10; color-scheme:dark}}
+  --ok:#4cc38a; --ok-bg:#10301f; --ng:#ff7f73; --ng-bg:#3b1b19; --warn:#f0b64a; --warn-bg:#3a2d10; --crane:#f2b600; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0e141a; --surface:#16202a; --surface2:#1c2833; --ink:#e8eef3; --muted:#9aa8b5; --line:#2c3a47; --line2:#41525f;
   --brand:#7fb4e0; --brand-ink:#0b1822; --brand-soft:#1a2c3b;
-  --ok:#4cc38a; --ok-bg:#10301f; --ng:#ff7f73; --ng-bg:#3b1b19; --warn:#f0b64a; --warn-bg:#3a2d10; color-scheme:dark}
+  --ok:#4cc38a; --ok-bg:#10301f; --ng:#ff7f73; --ng-bg:#3b1b19; --warn:#f0b64a; --warn-bg:#3a2d10; --crane:#f2b600; color-scheme:dark}
 *{box-sizing:border-box}
+:root[lang="ja"]{--font:"Yu Gothic UI","Yu Gothic","Meiryo","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif}
+.top-r{display:flex;gap:8px;align-items:center}
+.lang{display:inline-grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--line2);border-radius:9px;overflow:hidden}
+.lang button{border:0;background:var(--surface);color:var(--muted);padding:6px 12px;min-height:40px;font-weight:700;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
+.fig{display:block;width:100%;height:auto;max-width:560px;margin:0 auto}
+.figcap{font-size:12px;color:var(--muted);text-align:center;margin:6px 0 0}
+.doc .fig-d{text-align:center;margin:0 0 12px}.doc .fig-d svg{width:100%;max-width:480px;height:auto;border:1px solid #bbb;background:#fff}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:0 96px;-webkit-text-size-adjust:100%}
 .wrap{max-width:1120px;margin:0 auto}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -162,7 +170,7 @@ table{border-collapse:collapse;width:100%}
 <div class="wrap">
 <div class="bar-top">
   <div><h1>이동식 크레인 안전성검토</h1><p class="sub">산업안전보건기준에 관한 규칙 제163조 · 장비 / 줄걸이 / 샤클</p></div>
-  <button class="btn sec" id="reset" style="flex:none;min-height:40px;padding:6px 14px">입력 초기화</button>
+  <div class="top-r"><div class="lang" role="group" aria-label="Language"><button id="lang-ko" aria-pressed="true" type="button">한국어</button><button id="lang-ja" aria-pressed="false" type="button">日本語</button></div><button class="btn sec" id="reset" style="flex:none;min-height:40px;padding:6px 14px">입력 초기화</button></div>
 </div>
 <nav class="tabs" role="tablist">
   <button role="tab" id="tab-calc" aria-selected="true" data-tab="calc">검토</button>
@@ -173,6 +181,7 @@ table{border-collapse:collapse;width:100%}
 <!-- ===== 검토 ===== -->
 <div id="p-calc" class="layout">
   <div class="steps">
+    <section class="card"><h2>작업 개요도</h2><svg id="fig" class="fig" viewBox="0 0 520 270" role="img" aria-label="작업 개요도"></svg><p class="figcap">입력값에 따라 붐 각도·줄걸이 각도가 실시간으로 반영된다 (개략도, 축척 없음).</p></section>
 
     <section class="card">
       <h2><span class="no">1</span>인양물</h2>
@@ -203,7 +212,7 @@ table{border-collapse:collapse;width:100%}
       </div>
       <div id="box-wire"><div class="rig"><div>
         <div class="grid">
-          <div class="f"><label for="w-core">심(core)</label><select id="w-core"><option>철심</option><option>마심</option></select></div>
+          <div class="f"><label for="w-core">심(core)</label><select id="w-core"><option value="철심">철심</option><option value="마심">마심</option></select></div>
           <div class="f"><label for="w-dia">지름</label><select id="w-dia"></select></div>
           <div class="f"><label for="w-n">줄 수</label><div class="stp"><button type="button" data-d="-1" aria-label="줄 수 감소">−</button><input id="w-n" type="number" inputmode="numeric" min="1" step="1" value="2"><button type="button" data-d="1" aria-label="줄 수 증가">+</button></div></div>
           <div class="f"><label for="w-ang">수평각 <small>(°)</small></label><div class="stp"><button type="button" data-d="-1" aria-label="각도 감소">−</button><input id="w-ang" type="number" inputmode="numeric" min="20" max="90" step="5" value="60"><button type="button" data-d="1" aria-label="각도 증가">+</button></div></div>
@@ -316,6 +325,145 @@ const fmt=(x,d=2)=>Number.isFinite(x)?x.toLocaleString('ko-KR',{minimumFractionD
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const num=id=>{const v=parseFloat($(id).value);return Number.isFinite(v)?v:NaN};
 const optnum=id=>{const v=parseFloat($(id).value);return Number.isFinite(v)&&v>0?v:null};
+/* ---------- 다국어 (ko 원문 → ja) ---------- */
+let lang='ko';
+const DICT=[
+['이동식 크레인 안전성검토','移動式クレーン 安全性検討'],
+['산업안전보건기준에 관한 규칙 제163조 · 장비 / 줄걸이 / 샤클','産業安全保健基準に関する規則 第163条 ・ クレーン / 玉掛け / シャックル'],
+['입력 초기화','入力リセット'],['검토서 기재사항','検討書 記載事項'],['검토서','検討書'],['검토자:','検討者:'],['검토자','検討者'],['검토일 미기재','検討日 未記入'],['검토일','検討日'],['검토결과','検討結果'],['검토','検討'],['제원표 값 또는 직접 입력','諸元表の値または直接入力'],['제원표','諸元表'],
+['작업 개요도','作業概要図'],
+['입력값에 따라 붐 각도·줄걸이 각도가 실시간으로 반영된다 (개략도, 축척 없음).','入力値に応じてブーム角度・玉掛け角度がリアルタイムで反映される(概略図、縮尺なし)。'],
+['붐각도','ブーム角度'],
+['작업반경이 붐길이를 초과한다','作業半径がブーム長さを超えている'],
+['1. 인양물','1. 吊り荷'],['인양물 중량','吊り荷の重量'],['인양물','吊り荷'],
+['(ton, 장비에만 가산)','(ton、クレーン検討のみ加算)'],['훅블록·달기기구 중량','フックブロック・吊具 重量'],['훅블록·달기기구','フックブロック・吊具'],['달기기구','吊具'],
+['크레인 (정격하중표)','クレーン(定格荷重表)'],['크레인 정격하중표','クレーン定格荷重表'],['크레인 제원표','クレーン諸元表'],['크레인 최대인양하중(표 최대)','クレーン最大吊上荷重(表の最大)'],['크레인 최대인양하중','クレーン最大吊上荷重'],['크레인 추가','クレーン追加'],['선택한 크레인 삭제','選択したクレーンを削除'],
+['크레인안전성검토_','クレーン安全性検討_'],['크레인','クレーン'],
+['붐길이','ブーム長さ'],['붐구간 최대하중능력','ブーム長さ別 最大荷重能力'],['작업반경 (입력)','作業半径(入力)'],['작업반경(첫 열)','作業半径(1列目)'],['작업반경','作業半径'],['적용 반경','適用半径'],['반경','半径'],['붐','ブーム'],
+['적용률 (정격하중 ×)','適用率(定格荷重 ×)'],['(정격하중 × )','(定格荷重 × )'],['적용률은 1 이하로 입력한다.','適用率は1以下で入力する。'],['적용률','適用率'],
+['작업계획서 기준 0.85 (정격하중의 85% 이내). 반경이 표 값 사이이면 큰 반경(안전 측)을 적용한다.','作業計画書の基準は0.85(定格荷重の85%以内)。半径が表の値の間にある場合は、大きい方の半径(安全側)を適用する。'],
+['작업계획서 기준 0.85','作業計画書の基準 0.85'],
+['계산 과정','計算過程'],
+['줄걸이 종류 / 규격','玉掛けの種類 / 規格'],['줄걸이 종류','玉掛けの種類'],['줄걸이 각도 (수평각)','玉掛け角度(水平角)'],['줄걸이 각도','玉掛け角度'],['줄걸이 하중계수','玉掛け荷重係数'],['줄걸이 판정','玉掛け判定'],['줄걸이','玉掛け'],
+['와이어로프 단말가공 효율','ワイヤロープ 端末加工効率'],['와이어로프 — 마심 (6×24 FC)','ワイヤロープ — 繊維心(6×24 FC)'],['와이어로프 — 철심 (6×25 IWRC)','ワイヤロープ — 鋼心(6×25 IWRC)'],['와이어로프','ワイヤロープ'],
+['슬링벨트 사용하중 · 절단하중 (EYE&EYE, ENDLESS는 ×2)','ベルトスリング 使用荷重・切断荷重(EYE&EYE、ENDLESSは×2)'],['슬링벨트 각도별 안전하중율','ベルトスリング 角度別 安全荷重率'],['슬링벨트','ベルトスリング'],
+['심(core) 종류','心(コア)の種類'],['심(core)','心(コア)'],['철심 6×25 IWRC','鋼心 6×25 IWRC'],['마심 6×24 FC','繊維心 6×24 FC'],['철심','鋼心'],['마심','繊維心'],
+['지름(mm)','径(mm)'],['지름','径'],['줄 수','本数'],['줄수','本数'],['줄 사이각','つり角'],['줄','本'],['수평각','水平角'],
+['안전율 적용기준','安全係数 適用基準'],['안전율','安全係数'],['안전계수','安全係数'],
+['(화물 5↑, 탑승 10↑)','(荷重支持5以上・搭乗10以上)'],['화물 5 이상 / 탑승 10 이상 (제163조)','荷重支持5以上 / 搭乗10以上(第163条)'],['3 이상 (제163조)','3以上(第163条)'],['(3 이상)','(3以上)'],
+['단말가공 / 효율','端末加工 / 効率'],['단말가공 방법','端末加工方法'],['단말가공','端末加工'],['단말 효율','端末効率'],['단말효율 미반영','端末効率は未反映'],['단말효율','端末効率'],['효율','効率'],
+['제조사 절단하중 직접 입력','メーカー切断荷重を直接入力'],['제조사 라벨 값 직접 입력','メーカー表示値を直接入力'],['(ton, 비우면 표 값)','(ton、空欄で表の値)'],['(ton, 0° 기준)','(ton、0°基準)'],['표 값 사용','表の値を使用'],
+['절단하중 · 사용하중','切断荷重・使用荷重'],['절단하중','切断荷重'],['절단(t)','切断(t)'],['사용하중 직접 입력','使用荷重を直接入力'],['사용하중 / 안전계수','使用荷重 / 安全係数'],['사용하중(t)','使用荷重(t)'],['사용하중','使用荷重'],
+['폭(mm)','幅(mm)'],['폭','幅'],['타입 / 양중방식','タイプ / 吊り方'],['타입','タイプ'],['양중방식별 사용하중 (0°)','吊り方別 使用荷重(0°)'],['양중방식','吊り方'],
+['4. 샤클 하중 확인','4. シャックル荷重確認'],['4. 샤클 검토','4. シャックル検討'],['샤클 규격 및 사용하중','シャックル規格と使用荷重'],['샤클 규격 / 개수','シャックル規格 / 個数'],['샤클 · 슬링벨트 · 와이어로프 제원','シャックル・ベルトスリング・ワイヤロープ 諸元'],['샤클 판정','シャックル判定'],['샤클 규격','シャックル規格'],['샤클','シャックル'],
+['규격(in)','規格(in)'],['규격','規格'],['개수','個数'],
+['PDF 저장 실패: ','PDF保存に失敗: '],['엑셀 저장 실패: ','Excel保存に失敗: '],['PDF 저장','PDF保存'],['엑셀 저장','Excel保存'],['엑셀','Excel'],['텍스트 복사','テキストコピー'],
+['전 항목 OK — 작업 가능','全項目OK — 作業可能'],['건 — 작업 불가','件 — 作業不可'],['· NG 항목을 조정한다','・NG項目を調整する'],['OK·여유 적음','OK・余裕小'],['한계 100%','限界 100%'],['사용률','使用率'],
+['안전하중1(파단) = 절단하중 × 줄수 / 안전율','安全荷重1(破断) = 切断荷重 × 本数 / 安全係数'],['안전하중2(사용방법) = 사용하중 × 각도계수 × 줄수','安全荷重2(使用方法) = 使用荷重 × 角度係数 × 本数'],['안전하중 1 · 2','安全荷重 1・2'],['각도 계수','角度係数'],['각도계수','角度係数'],
+['안전하중 > 인양하중 이면 OK','安全荷重 > 吊り荷重 ならOK'],['인양하중 = 인양물 + 달기기구','吊り荷重 = 吊り荷 + 吊具'],['안전하중','安全荷重'],['인양하중','吊り荷重'],['정격하중 (표 조회값)','定格荷重(表参照値)'],['정격하중표 붙여넣기','定格荷重表を貼り付け'],['정격하중표 시트 참조','定格荷重表シート参照'],['정격하중표 공란 · 범위 초과','定格荷重表が空欄・範囲超過'],['정격하중표','定格荷重表'],['정격하중','定格荷重'],['정격표','定格表'],['정격','定格'],
+['하중계수','荷重係数'],['장비 판정','クレーン判定'],['장비 검토에만 가산','クレーン検討のみ加算'],['샤클·줄걸이 검토에 사용','シャックル・玉掛け検討に使用'],
+['2. 크레인 검토','2. クレーン検討'],['3. 줄걸이 검토 —','3. 玉掛け検討 —'],['2. 양중계획 (크레인)','2. 揚重計画(クレーン)'],['3. 줄걸이 하중 확인','3. 玉掛け荷重確認'],['1. 장비 · 화물 제원','1. クレーン・荷 諸元'],
+['중량물 인양작업 안전성 검토서','重量物 吊り上げ作業 安全性検討書'],['업체명 미기재','会社名 未記入'],['업체명 / 공사명','会社名 / 工事名'],['장비명 / 차량번호','機械名 / 車両番号'],['화물 규격 (가×세×높이)','荷の寸法(幅×奥行×高さ)'],['화물 종류','荷の種類'],['화물 규격','荷の寸法'],['화물 인양하중','荷の吊り荷重'],['결속방법','結束方法'],
+['종합 판정: 전 항목 OK — 인양작업 가능','総合判定: 全項目OK — 吊り上げ作業可能'],['종합 판정: NG 항목 있음 — 계획 변경 필요','総合判定: NG項目あり — 計画変更が必要'],
+['OK (사용 가능)','OK(使用可)'],['NG (사용 불가)','NG(使用不可)'],['공란','空欄'],
+['근거: 산업안전보건기준에 관한 규칙 제163조(달기구 안전계수 — 화물 지지 와이어로프·달기체인 5 이상, 훅·샤클 3 이상, 근로자 탑승 10 이상). 판정은 안전하중이 인양하중보다 큰 경우 OK.','根拠: 産業安全保健基準に関する規則 第163条(吊具の安全係数 — 荷重支持ワイヤロープ・吊りチェーン5以上、フック・シャックル3以上、作業者搭乗10以上)。判定は安全荷重が吊り荷重より大きい場合にOK。'],
+['[중량물 인양작업 안전성 검토서]','[重量物 吊り上げ作業 安全性検討書]'],['장비:','クレーン:'],['화물:','荷:'],['1) 크레인: 정격','1) クレーン: 定格'],['종합:','総合:'],['전 항목 OK','全項目OK'],['NG 항목 있음','NG項目あり'],
+['입력값을 확인한다.','入力値を確認する。'],['샤클 안전계수는 3 이상이어야 한다 (제163조).','シャックルの安全係数は3以上でなければならない(第163条)。'],['사용하중을 직접 입력한 값으로 계산했다.','使用荷重は直接入力値で計算した。'],
+['화물 지지 와이어로프 안전계수는 5 이상이어야 한다 (탑승 시 10 이상).','荷重を支持するワイヤロープの安全係数は5以上でなければならない(搭乗時は10以上)。'],['수평각은 20°~90° 범위로 입력한다.','水平角は20°〜90°の範囲で入力する。'],['수평각 60° 미만이면 장력이 급증한다. 60° 이상을 권장한다.','水平角が60°未満になると張力が急増する。60°以上を推奨する。'],['절단하중을 직접 입력한 값으로 계산했다.','切断荷重は直接入力値で計算した。'],
+['화물 지지 슬링벨트 안전계수는 5 이상이어야 한다 (탑승 시 10 이상).','荷重を支持するベルトスリングの安全係数は5以上でなければならない(搭乗時は10以上)。'],['제조사 라벨 값을 직접 입력한 값으로 계산했다.','メーカー表示値は直接入力値で計算した。'],
+['파단 검토','破断検討'],['사용방법 검토','使用方法検討'],['파단','破断'],['사용방법','使用方法'],
+['ENDLESS는 EYE&EYE의 2배','ENDLESSはEYE&EYEの2倍'],['노란 칸은 입력값이다. 수정하면 안전하중과 판정이 자동 재계산된다. 근거: 산업안전보건기준에 관한 규칙 제163조. 판정 기준: 안전하중 > 인양하중.','黄色のセルは入力値である。修正すると安全荷重と判定が自動で再計算される。根拠: 産業安全保健基準に関する規則 第163条。判定基準: 安全荷重 > 吊り荷重。'],
+['정격하중표 (ton) — 굵은 칸이 이번 검토에 사용된 값','定格荷重表 (ton) — 太字のセルが今回の検討で使用した値'],['안전성검토','安全性検討'],
+['진한 칸이 현재 검토에 쓰이는 정격하중이다. 점(·)은 해당 붐길이로 작업할 수 없는 반경이다.','濃いセルが現在の検討で使用している定格荷重である。点(·)はそのブーム長さでは作業できない半径である。'],
+['장비업체의 정격하중표를 엑셀에서 복사해 붙여 넣는다. 첫 행은 붐길이, 첫 열은 작업반경이다. 이 브라우저에 저장된다.','機械業者の定格荷重表をExcelからコピーして貼り付ける。1行目はブーム長さ、1列目は作業半径である。このブラウザに保存される。'],
+['통용되는 일반 제원이다. 제조사 값이 다르면 각 단계의 직접 입력을 사용한다. 와이어로프 형태별 사용하중은 절대적 수치가 아니다.','一般に通用する諸元である。メーカー値が異なる場合は各段階の直接入力を使う。ワイヤロープの形態別使用荷重は絶対的な数値ではない。'],
+['· 사용하중 = 절단하중/5 × 모멘트계수 (안전율 5, 단말효율 미반영)','・使用荷重 = 切断荷重/5 × モーメント係数(安全係数5、端末効率は未反映)'],
+['제조사 / 모델명','メーカー / 型式'],['예) TADANO GR-1000XL','例) TADANO GR-1000XL'],['추가','追加'],['(기본)','(標準)'],['색상','色'],
+['보라색','紫'],['녹색','緑'],['노랑색','黄'],['회색','グレー'],['빨간색','赤'],['갈색','茶'],['파랑색','青'],['주황색','オレンジ'],
+['반경＼붐(m)','半径＼ブーム(m)'],['수직','垂直'],['원형 초크','円形チョーク'],['사각 초크','角形チョーク'],['바구니','バスケット'],['기타','その他'],
+['소켓','ソケット'],['스웨이징','スウェージング'],['락크','ロック(スリーブ)'],['웨지','ウェッジ'],['클립','クリップ'],['슬링(10mm≥)','スプライス(10mm≥)'],['슬링(20mm≥)','スプライス(20mm≥)'],['슬링(20mm＜)','スプライス(20mm＜)'],
+['PDF 생성 중…','PDFを生成中…'],['엑셀 생성 중…','Excelを生成中…'],['PDF를 저장했다.','PDFを保存した。'],['엑셀을 저장했다.','Excelを保存した。'],['저장을 취소했다.','保存を取り消した。'],['라이브러리를 불러오지 못했다. 네트워크를 확인한다.','ライブラリを読み込めなかった。ネットワークを確認する。'],['저장하지 못했다.','保存できなかった。'],
+['입력을 초기화했다.','入力をリセットした。'],['삭제했다.','削除した。'],['복사했다.','コピーした。'],['복사하지 못했다.','コピーできなかった。'],['제조사/모델명을 입력한다.','メーカー/型式を入力する。'],
+['행이 부족하다. 첫 행은 붐길이, 이후는 반경별 정격하중이다.','行が不足している。1行目はブーム長さ、以降は半径別の定格荷重である。'],['작업반경(첫 열)이 숫자가 아닌 행이 있다.','作業半径(1列目)が数値でない行がある。'],
+['각도','角度'],['(백)','(バック)'],['감소','減らす'],['증가','増やす'],['개와 데이터 열','個とデータ列'],
+['배','倍'],['건','件']
+];
+const DSORT=DICT.slice().sort((a,b)=>b[0].length-a[0].length);
+const TT=(ko,ja)=>lang==='ja'?ja:ko;
+let USER=[];const P=v=>{USER.push(v);return ''+(USER.length-1)+''};
+const HAN=/[가-힣]/;
+function tr(s){
+  s=String(s);
+  if(lang==='ja'&&HAN.test(s)){for(const [k,v] of DSORT){if(s.indexOf(k)>=0)s=s.split(k).join(v)}}
+  if(s.indexOf('')>=0)s=s.replace(/(\d+)/g,(m,i)=>USER[+i]??'');
+  return s;
+}
+const STATIC_SKIP='#banner,#gauges,.chip,.msgs,.fm,#paper,#ctable,#refs,.diag,#fig,#toast,.js-toast,#n-msg,#dockv,#crane,#crane2,#w-end,#b-w,script,style';
+const origText=new WeakMap();
+function applyStatic(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement&&n.parentElement.closest(STATIC_SKIP)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  let n;while((n=w.nextNode())){if(!origText.has(n))origText.set(n,n.nodeValue);n.nodeValue=tr(origText.get(n))}
+  root.querySelectorAll('[placeholder],[aria-label],[title]').forEach(el=>{
+    for(const a of ['placeholder','aria-label','title']){if(el.hasAttribute(a)){const k='_o_'+a;if(!(k in el))el[k]=el.getAttribute(a);el.setAttribute(a,tr(el[k]))}}});
+}
+/* 동적 영역: innerHTML/textContent 대입 시 자동 번역 */
+function hookHTML(el){if(!el)return;const d=Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML');Object.defineProperty(el,'innerHTML',{set(v){d.set.call(this,tr(v))},get(){return d.get.call(this)},configurable:true})}
+function hookText(el){if(!el)return;const d=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');Object.defineProperty(el,'textContent',{set(v){d.set.call(this,tr(v))},get(){return d.get.call(this)},configurable:true})}
+function initHooks(){
+  ['banner','gauges','paper','ctable','refs','pdfhost','f-eq','f-sh','f-wire','f-belt','c-eq','c-wire','c-belt','c-sh','m-eq','m-wire','m-belt','m-sh','dg-wire','dg-belt','fig','crane','crane2','b-w'].forEach(i=>hookHTML($(i)));
+  ['dockv','toast','n-msg'].forEach(i=>hookText($(i)));document.querySelectorAll('.js-toast').forEach(hookText);
+}
+
+/* ---------- 크레인 작업 개요도 ---------- */
+function craneInner(S,paper){
+  const C=paper?{ink:'#1b2530',mut:'#5d6b78',boom:'#e2a500',ok:'#0e7a44',ng:'#c0302b',gr:'#9aa5b1',fill:'#eef1f4',brand:'#18486f',sling:'#18486f',font:'"Malgun Gothic","Yu Gothic",sans-serif'}
+    :{ink:'var(--ink)',mut:'var(--muted)',boom:'var(--crane)',ok:'var(--ok)',ng:'var(--ng)',gr:'var(--line2)',fill:'var(--surface2)',brand:'var(--brand)',sling:'var(--brand)',font:'var(--font)'};
+  const eq=S.eq,rg=S.rig,rm=S.rm,all=[eq,rg,S.sh].every(x=>x.ok),st=all?C.ok:C.ng;
+  const Lb=parseFloat(String(eq.boom))||10,R=num('radius')||0,load=num('load')||0;
+  const G=232,Fx=118,Fy=G-54;let bad=false,cosA=R/Lb;if(!(cosA<=1)){bad=true;cosA=1}if(cosA<.14)cosA=.14;
+  const al=Math.acos(cosA),sinA=Math.sin(al),deg=Math.round(al*180/Math.PI);
+  let s=Math.min(14,(480-Fx)/Math.max(R,Lb*cosA,1),(Fy-30)/Math.max(Lb*sinA,1));
+  const Tx=Fx+Lb*cosA*s,Ty=Fy-Lb*sinA*s;
+  const w=64,h=44,half=22;let slingH;
+  if(rm==='wire'){const th=Math.min(90,Math.max(20,rg.th||60))*Math.PI/180;slingH=Math.min(78,Math.max(14,half*Math.tan(th)))}
+  else{const a=(rg.ang||0)*Math.PI/180;slingH=a<.05?44:Math.min(80,Math.max(14,half/Math.tan(a/2)))}
+  let hookY=Math.max(G-h-slingH,Ty+26);const top=hookY+slingH,hx=Tx;
+  const lx=hx-w/2;
+  const sw=rm==='wire'?2.2:5;
+  const mx=(Fx+Tx)/2,my=(Fy+Ty)/2,nx=-sinA*14,ny=-cosA*14;
+  const rad=34;
+  let o='';
+  o+=`<line x1="8" y1="${G}" x2="512" y2="${G}" stroke="${C.gr}" stroke-width="2"/>`;
+  for(let x=14;x<510;x+=16)o+=`<line x1="${x}" y1="${G}" x2="${x-7}" y2="${G+8}" stroke="${C.gr}" stroke-width="1"/>`;
+  // outriggers, carrier
+  o+=`<path d="M${Fx-84} ${G-20} L${Fx-96} ${G} M${Fx+68} ${G-20} L${Fx+82} ${G}" stroke="${C.ink}" stroke-width="4" fill="none"/>`;
+  o+=`<rect x="${Fx-100}" y="${G-34}" width="188" height="16" rx="3" fill="${C.brand}"/>`;
+  o+=`<path d="M${Fx-100} ${G-34} v-26 h30 l10 14 v12z" fill="${C.brand}"/><rect x="${Fx-94}" y="${G-56}" width="18" height="11" fill="${C.fill}"/>`;
+  [-78,-46,52,72].forEach(dx=>o+=`<circle cx="${Fx+dx}" cy="${G-11}" r="11" fill="${C.ink}"/><circle cx="${Fx+dx}" cy="${G-11}" r="4" fill="${C.gr}"/>`);
+  o+=`<rect x="${Fx-34}" y="${G-62}" width="64" height="30" rx="3" fill="${C.brand}"/>`;
+  // boom
+  o+=`<line x1="${Fx}" y1="${Fy}" x2="${Tx}" y2="${Ty}" stroke="${C.ink}" stroke-width="11" stroke-linecap="round"/><line x1="${Fx}" y1="${Fy}" x2="${Tx}" y2="${Ty}" stroke="${C.boom}" stroke-width="7" stroke-linecap="round"/>`;
+  o+=`<circle cx="${Fx}" cy="${Fy}" r="6" fill="${C.fill}" stroke="${C.ink}" stroke-width="2"/>`;
+  // angle arc
+  o+=`<path d="M${Fx+rad} ${Fy} A ${rad} ${rad} 0 0 0 ${Fx+rad*cosA} ${Fy-rad*sinA}" fill="none" stroke="${C.mut}" stroke-width="1.5"/><text x="${Fx+rad+6}" y="${Fy-6}" font-size="12" fill="${C.mut}">α ${deg}°</text>`;
+  o+=`<text x="${mx+nx}" y="${my+ny}" font-size="12" font-weight="700" fill="${C.ink}" text-anchor="middle" transform="rotate(${-deg} ${mx+nx} ${my+ny})">L ${Lb} m</text>`;
+  // rope, sling, load
+  o+=`<line x1="${Tx}" y1="${Ty}" x2="${hx}" y2="${hookY-8}" stroke="${C.ink}" stroke-width="1.6"/><circle cx="${Tx}" cy="${Ty}" r="4" fill="${C.ink}"/>`;
+  o+=`<path d="M${hx-4} ${hookY-8} h8 v8 a6 6 0 1 1 -12 0" fill="none" stroke="${C.ink}" stroke-width="2.4"/>`;
+  o+=`<line x1="${hx}" y1="${hookY+2}" x2="${lx+w/2-half}" y2="${top}" stroke="${C.sling}" stroke-width="${sw}"/><line x1="${hx}" y1="${hookY+2}" x2="${lx+w/2+half}" y2="${top}" stroke="${C.sling}" stroke-width="${sw}"/>`;
+  o+=`<circle cx="${lx+w/2-half}" cy="${top}" r="3.5" fill="${C.ink}"/><circle cx="${lx+w/2+half}" cy="${top}" r="3.5" fill="${C.ink}"/>`;
+  o+=`<rect x="${lx}" y="${top}" width="${w}" height="${h}" rx="3" fill="${C.fill}" stroke="${st}" stroke-width="3"/><text x="${hx}" y="${top+h/2+5}" font-size="15" font-weight="700" fill="${C.ink}" text-anchor="middle">${fmt(load,1)} t</text>`;
+  // radius dimension
+  const dy=G+20;
+  o+=`<line x1="${Fx}" y1="${G+4}" x2="${Fx}" y2="${dy+5}" stroke="${C.mut}"/><line x1="${hx}" y1="${G+4}" x2="${hx}" y2="${dy+5}" stroke="${C.mut}"/><line x1="${Fx}" y1="${dy}" x2="${hx}" y2="${dy}" stroke="${C.ink}" stroke-width="1.5"/>`;
+  o+=`<path d="M${Fx+8} ${dy-4} L${Fx} ${dy} L${Fx+8} ${dy+4} M${hx-8} ${dy-4} L${hx} ${dy} L${hx-8} ${dy+4}" fill="none" stroke="${C.ink}" stroke-width="1.5"/>`;
+  o+=`<text x="${(Fx+hx)/2}" y="${dy+16}" font-size="12" font-weight="700" fill="${C.ink}" text-anchor="middle">R ${R} m</text>`;
+  if(bad)o+=`<text x="12" y="22" font-size="12.5" font-weight="700" fill="${C.ng}">작업반경이 붐길이를 초과한다</text>`;
+  return o;
+}
+function craneFull(S,paper){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 270" width="520" height="270" style="font-family:${paper?'\'Malgun Gothic\',\'Yu Gothic\',sans-serif':'var(--font)'}">${craneInner(S,paper)}</svg>`}
+function svgToPNG(svg,w,h){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=w*2;c.height=h*2;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/png'))};img.onerror=()=>rej(new Error('img'));img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)})}
+
 const ENDS=[['소켓',1],['스웨이징',.95],['락크',.95],['웨지',.75],['클립',.5],['슬링(10mm≥)',.85],['슬링(20mm≥)',.75],['슬링(20mm＜)',.7]];
 const BELT_MODE=['','Straight','Choker','Basket (Single ply)','Basket (Two ply)'];
 const COEF=[['수직',1],['원형 초크',.75],['사각 초크',.5],['바구니 0°',2],['바구니 60°>',1.73],['바구니 90°>',1.41],['바구니 120°>',1],['기타 0°',1],['60°>',.87],['90°>',.71],['120°>',.5]];
@@ -344,11 +492,11 @@ function calcEq(){
   const out={name:'크레인',maxRated:all.length?Math.max(...all):NaN,load:load+rig,sf,R,msgs,boom:c.booms[bi],ok:false,safe:NaN,rated:NaN,Reff:NaN};
   if(!(load>=0)||!(sf>0)||!(R>0)||bi<0){msgs.push(['ng','입력값을 확인한다.']);return out}
   const row=c.rows.find(r=>r[0]>=R-1e-9);
-  if(!row){msgs.push(['ng',`작업반경 ${R} m가 정격하중표 범위(최대 ${c.rows[c.rows.length-1][0]} m)를 초과한다.`]);return out}
+  if(!row){msgs.push(['ng',TT(`작업반경 ${R} m가 정격하중표 범위(최대 ${c.rows[c.rows.length-1][0]} m)를 초과한다.`,`作業半径 ${R} m が定格荷重表の範囲(最大 ${c.rows[c.rows.length-1][0]} m)を超えている。`)]);return out}
   out.Reff=row[0];const v=row[1+bi];
-  if(typeof v!=='number'){msgs.push(['ng',`붐 ${c.booms[bi]} m · 반경 ${row[0]} m는 정격표 공란(작업 불가)이다.`]);return out}
+  if(typeof v!=='number'){msgs.push(['ng',TT(`붐 ${c.booms[bi]} m · 반경 ${row[0]} m는 정격표 공란(작업 불가)이다.`,`ブーム ${c.booms[bi]} m・半径 ${row[0]} m は定格表が空欄(作業不可)である。`)]);return out}
   out.rated=v;out.safe=v*sf;out.ok=out.safe>out.load;out.rowIdx=c.rows.indexOf(row);out.colIdx=bi;
-  if(R!==row[0])msgs.push(['warn',`표에 ${R} m가 없어 안전 측으로 ${row[0]} m 값을 적용했다.`]);
+  if(R!==row[0])msgs.push(['warn',TT(`표에 ${R} m가 없어 안전 측으로 ${row[0]} m 값을 적용했다.`,`表に ${R} m が無いため、安全側として ${row[0]} m の値を適用した。`)]);
   if(sf>1)msgs.push(['warn','적용률은 1 이하로 입력한다.']);
   return out;
 }
@@ -413,7 +561,7 @@ function renderSummary(S){
   $('banner').className='banner'+(bad?' ng':'');
   $('banner').innerHTML=`<div class="ico">${bad?'✕':'✓'}</div><div><div class="t">${bad?`NG ${bad}건 — 작업 불가`:'전 항목 OK — 작업 가능'}</div><div class="s">인양물 ${fmt(num('load'),1)} t ${bad?'· NG 항목을 조정한다':''}</div></div>`;
   $('gauges').innerHTML=items.map(i=>gaugeCard(i[1],i[2],i[0])).join('');
-  $('dockv').className='dv '+(bad?'ng':'ok'); $('dockv').textContent=bad?`NG ${bad}건`:'전 항목 OK';
+  $('dockv').className='dv '+(bad?'ng':'ok'); $('dockv').textContent=bad?'NG '+bad+TT('건','件'):'전 항목 OK';
 }
 function renderDetails(S){
   const e=S.eq,s=S.sh,r=S.rig;
@@ -432,7 +580,7 @@ function renderDetails(S){
 /* ---------- 검토서 ---------- */
 let lastText='';
 function reportHTML(S){
-  const g=id=>esc($(id).value||''), eq=S.eq, rg=S.rig, sh=S.sh, rw=S.rm==='wire', rigw=num('rigw')||0;
+  const g=id=>P(esc($(id).value||'')), eq=S.eq, rg=S.rig, sh=S.sh, rw=S.rm==='wire', rigw=num('rigw')||0;
   const all=[eq,rg,sh].every(x=>x.ok);
   const R=r=>`<span class="${r.ok?'o':'x'}">${r.ok?'OK (사용 가능)':'NG (사용 불가)'}</span>`;
   const bind=(rw?`와이어로프 ${rg.core} ${rg.dia}mm × ${rg.n}줄`:`슬링벨트 ${rg.w}mm ${rg.type==='endless'?'ENDLESS':'EYE&EYE'} × ${rg.n}줄`)+` / 샤클 ${esc(sh.size)}" × ${sh.n}EA`;
@@ -448,10 +596,11 @@ function reportHTML(S){
     <tr><th>안전하중</th><td colspan="3">min(${fmt(rg.s1)}, ${fmt(rg.s2)}) = <b>${fmt(rg.safe)} t</b> ${gt(rg.safe,rg.load)} 인양하중 ${fmt(rg.load)} t</td></tr>`;
   return `<div class="doc"><h3>중량물 인양작업 안전성 검토서</h3>
   <div class="cap">${g('m-co')||'업체명 미기재'} · ${g('m-date')||'검토일 미기재'} · 검토자 ${g('m-who')||'-'}</div>
+  <div class="fig-d">${craneFull(S,true)}</div>
   <div class="vd ${all?'':'ng'}">${all?'종합 판정: 전 항목 OK — 인양작업 가능':'종합 판정: NG 항목 있음 — 계획 변경 필요'}</div>
   <table>
     <tr><th colspan="4" class="sec">1. 장비 · 화물 제원</th></tr>
-    <tr><th>장비명 / 차량번호</th><td>${g('m-veh')||'-'}</td><th>크레인 제원표</th><td>${esc(cranes[curCrane].name)}</td></tr>
+    <tr><th>장비명 / 차량번호</th><td>${g('m-veh')||'-'}</td><th>크레인 제원표</th><td>${P(esc(cranes[curCrane].name))}</td></tr>
     <tr><th>화물 종류</th><td>${g('m-cargo')||'-'}</td><th>화물 규격</th><td>${g('m-size')||'-'}</td></tr>
     <tr><th>화물 인양하중</th><td class="num">${fmt(num('load'))} t${rigw?` (+달기기구 ${fmt(rigw)} t)`:''}</td><th>결속방법</th><td>${bind}</td></tr>
     <tr><th>작업반경</th><td class="num">${num('radius')} m</td><th>붐길이</th><td class="num">${esc(eq.boom)} m</td></tr>
@@ -467,15 +616,15 @@ function reportHTML(S){
   <div class="foot">근거: 산업안전보건기준에 관한 규칙 제163조(달기구 안전계수 — 화물 지지 와이어로프·달기체인 5 이상, 훅·샤클 3 이상, 근로자 탑승 10 이상). 판정은 안전하중이 인양하중보다 큰 경우 OK.</div></div>`;
 }
 function renderReport(S){
-  $('paper').innerHTML=reportHTML(S);
+  USER=[];$('paper').innerHTML=reportHTML(S);
   const eq=S.eq,rg=S.rig,sh=S.sh,L=[];
-  L.push('[중량물 인양작업 안전성 검토서]',`${$('m-co').value||''} ${$('m-date').value||''} 검토자:${$('m-who').value||''}`,
-   `장비: ${$('m-veh').value||'-'} / ${cranes[curCrane].name}`,`화물: ${$('m-cargo').value||'-'} ${$('m-size').value||''} ${fmt(num('load'))}t, 반경 ${num('radius')}m, 붐 ${eq.boom}m`,
+  L.push('[중량물 인양작업 안전성 검토서]',`${P($('m-co').value||'')} ${$('m-date').value||''} 검토자:${P($('m-who').value||'')}`,
+   `장비: ${P($('m-veh').value||'-')} / ${P(cranes[curCrane].name)}`,`화물: ${P($('m-cargo').value||'-')} ${P($('m-size').value||'')} ${fmt(num('load'))}t, 반경 ${num('radius')}m, 붐 ${eq.boom}m`,
    `1) 크레인: 정격 ${fmt(eq.rated)}t × ${eq.sf} = ${fmt(eq.safe)}t ${eq.safe>eq.load?'>':'<='} ${fmt(eq.load)}t → ${eq.ok?'OK':'NG'}`);
   L.push(S.rm==='wire'?`2) 와이어로프 ${rg.core} ${rg.dia}mm ${rg.n}줄 θ${rg.th}°: ${fmt(rg.cut)}×${rg.n}×${rg.eff}/${rg.sf}/${fmt(rg.lf,3)} = ${fmt(rg.safe)}t → ${rg.ok?'OK':'NG'}`
     :`2) 슬링벨트 ${rg.w}mm ${BELT_MODE[rg.m]} ${rg.ang}° ${rg.n}줄: min(${fmt(rg.s1)}, ${fmt(rg.s2)}) = ${fmt(rg.safe)}t → ${rg.ok?'OK':'NG'}`);
   L.push(`3) 샤클 ${sh.size}" ${sh.n}EA: ${fmt(sh.wll)}×${sh.n}/${sh.sf} = ${fmt(sh.safe)}t → ${sh.ok?'OK':'NG'}`,`종합: ${[eq,rg,sh].every(x=>x.ok)?'전 항목 OK':'NG 항목 있음'}`);
-  lastText=L.join('\n');
+  lastText=tr(L.join('\n'));
 }
 
 /* ---------- 제원표 탭 ---------- */
@@ -509,7 +658,7 @@ async function saveFile(filename,data){
   if(dl){try{await dl.save({filename,data});return 'saved'}catch(e){if(e&&e.code==='declined')return 'declined';throw new Error(e&&e.message||'저장하지 못했다.')}}
   const blob=data instanceof Blob?data:new Blob([data]);const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);return 'saved';
 }
-const fname=ext=>{const co=($('m-co').value||'').trim().replace(/[\\/:*?"<>|]/g,'');return `크레인안전성검토_${co?co+'_':''}${($('m-date').value||'').replace(/-/g,'')}.${ext}`};
+const fname=ext=>{const co=($('m-co').value||'').trim().replace(/[\\/:*?"<>|]/g,'');return `${tr('크레인안전성검토_')}${co?co+'_':''}${($('m-date').value||'').replace(/-/g,'')}.${ext}`};
 function busy(on,msg){document.querySelectorAll('.js-pdf,.js-xlsx').forEach(b=>b.disabled=on);toast(msg||'')}
 
 async function exportPDF(){
@@ -521,7 +670,8 @@ async function exportPDF(){
     const cv=await html2canvas(host.firstElementChild,{scale:2,backgroundColor:'#ffffff',useCORS:true});
     host.innerHTML='';
     const {jsPDF}=window.jspdf,pdf=new jsPDF('p','mm','a4'),mx=10,my=10,pw=210-2*mx,ph=297-2*my;
-    const pagePx=Math.floor(cv.width*ph/pw);let y=0,first=true;
+    const fullH=cv.height*pw/cv.width;let y=0,first=true;if(fullH<=ph*1.4){const k=Math.min(1,ph/fullH);pdf.addImage(cv.toDataURL('image/jpeg',.95),'JPEG',mx+(pw-pw*k)/2,my,pw*k,fullH*k);y=cv.height;first=false}
+    const pagePx=Math.floor(cv.width*ph/pw);
     while(y<cv.height){
       const h=Math.min(pagePx,cv.height-y),sl=document.createElement('canvas');sl.width=cv.width;sl.height=h;
       const cx=sl.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,sl.width,h);cx.drawImage(cv,0,y,cv.width,h,0,0,cv.width,h);
@@ -539,17 +689,17 @@ async function exportXLSX(){
     await loadLib('exceljs');
     const S=calcAll(),eq=S.eq,rg=S.rig,sh=S.sh,rw=S.rm==='wire';
     const wb=new ExcelJS.Workbook();wb.creator='이동식 크레인 안전성검토';
-    const ws=wb.addWorksheet('안전성검토',{views:[{showGridLines:false}],pageSetup:{paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0}});
+    const ws=wb.addWorksheet(tr('안전성검토'),{views:[{showGridLines:false}],pageSetup:{paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0}});
     ws.columns=[{width:4},{width:30},{width:20},{width:12},{width:44}];
-    const F='맑은 고딕',thin={style:'thin',color:{argb:'FF9AA5B1'}},BD={top:thin,left:thin,bottom:thin,right:thin};
+    const F=lang==='ja'?'Yu Gothic':'맑은 고딕',thin={style:'thin',color:{argb:'FF9AA5B1'}},BD={top:thin,left:thin,bottom:thin,right:thin};
     const NAVY='FF18486F',INP='FFFFF6C8';
     let r=1;
-    const title=(t)=>{ws.mergeCells(r,1,r,5);const c=ws.getCell(r,1);c.value=t;c.font={name:F,size:16,bold:true};c.alignment={horizontal:'center',vertical:'middle'};ws.getRow(r).height=30;r++};
-    const sec=(t)=>{ws.mergeCells(r,1,r,5);const c=ws.getCell(r,1);c.value=t;c.font={name:F,size:11,bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:NAVY}};c.alignment={vertical:'middle'};ws.getRow(r).height=22;r++};
+    const title=(t)=>{ws.mergeCells(r,1,r,5);const c=ws.getCell(r,1);c.value=tr(t);c.font={name:F,size:16,bold:true};c.alignment={horizontal:'center',vertical:'middle'};ws.getRow(r).height=30;r++};
+    const sec=(t)=>{ws.mergeCells(r,1,r,5);const c=ws.getCell(r,1);c.value=tr(t);c.font={name:F,size:11,bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:NAVY}};c.alignment={vertical:'middle'};ws.getRow(r).height=22;r++};
     // row: label, value(or {f,v}), unit, note, isInput
     const row=(label,val,unit,note,inp,nf)=>{
-      ws.getCell(r,2).value=label;ws.getCell(r,4).value=unit||'';ws.getCell(r,5).value=note||'';
-      const c=ws.getCell(r,3);c.value=(val&&typeof val==='object'&&'f' in val)?{formula:val.f,result:val.v}:val;
+      ws.getCell(r,2).value=tr(label);ws.getCell(r,4).value=tr(unit||'');ws.getCell(r,5).value=tr(note||'');
+      const c=ws.getCell(r,3);c.value=(val&&typeof val==='object'&&'f' in val)?{formula:val.f,result:val.v}:(typeof val==='string'?tr(val):val);
       if(nf)c.numFmt=nf;
       for(let i=1;i<=5;i++){const x=ws.getCell(r,i);x.font={name:F,size:10.5};x.border=BD;x.alignment={vertical:'middle',wrapText:i===5}}
       ws.getCell(r,1).border=BD;ws.getCell(r,2).font={name:F,size:10.5,bold:true};ws.getCell(r,2).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEEF1F4'}};
@@ -565,7 +715,7 @@ async function exportXLSX(){
     const judge=[];
     title('중량물 인양작업 안전성 검토서');
     const meta=[['업체명 / 공사명','m-co'],['검토일','m-date'],['검토자','m-who'],['장비명 / 차량번호','m-veh'],['화물 종류','m-cargo'],['화물 규격','m-size']];
-    meta.forEach(([l,id])=>row(l,$(id).value||'','','',true));
+    meta.forEach(([l,id])=>{const rr=row(l,'','','',true);ws.getCell(rr,3).value=$(id).value||''});
     r++;
     const sumRow=r;r++; // 종합판정 자리
     r++;
@@ -573,7 +723,7 @@ async function exportXLSX(){
     const rLoad=row('인양물 중량',num('load'),'ton','샤클·줄걸이 검토에 사용',true,'0.00');
     const rRig=row('훅블록·달기기구 중량',num('rigw')||0,'ton','장비 검토에만 가산',true,'0.00');
     r++;sec('2. 크레인 검토');
-    row('크레인 제원표',cranes[curCrane].name,'','');
+    {const rr=row('크레인 제원표','','','');ws.getCell(rr,3).value=cranes[curCrane].name;}
     row('붐길이',String(eq.boom),'m','',true);
     row('작업반경 (입력)',num('radius'),'m','',true,'0.0');
     const rRated=row('정격하중 (표 조회값)',Number.isFinite(eq.rated)?eq.rated:'공란','ton',`적용 반경 ${Number.isFinite(eq.Reff)?eq.Reff:'-'} m · 정격하중표 시트 참조`,false,'0.0');
@@ -618,6 +768,7 @@ async function exportXLSX(){
     const all=[eq,rg,sh].every(x=>x.ok);
     ws.mergeCells(sumRow,1,sumRow,5);
     const sc=ws.getCell(sumRow,1);sc.value={formula:`IF(AND(C${eqV}="OK",C${rigV}="OK",C${shV}="OK"),"종합 판정: 전 항목 OK — 인양작업 가능","종합 판정: NG 항목 있음 — 계획 변경 필요")`,result:all?'종합 판정: 전 항목 OK — 인양작업 가능':'종합 판정: NG 항목 있음 — 계획 변경 필요'};
+    sc.value={formula:tr(sc.value.formula),result:tr(sc.value.result)};
     sc.font={name:F,size:14,bold:true};sc.alignment={horizontal:'center',vertical:'middle'};ws.getRow(sumRow).height=32;
     for(let i=1;i<=5;i++)ws.getCell(sumRow,i).border={top:{style:'medium'},bottom:{style:'medium'},left:{style:'medium'},right:{style:'medium'}};
     const okS={font:{color:{argb:'FF0E7A44'},bold:true},fill:{type:'pattern',pattern:'solid',bgColor:{argb:'FFDFF3E7'}}},ngS={font:{color:{argb:'FFC0302B'},bold:true},fill:{type:'pattern',pattern:'solid',bgColor:{argb:'FFFDE7E5'}}};
@@ -625,16 +776,18 @@ async function exportXLSX(){
     ws.addConditionalFormatting({ref:`A${sumRow}`,rules:[{type:'expression',formulae:[`ISNUMBER(SEARCH("NG",$A$${sumRow}))`],style:ngS},{type:'expression',formulae:[`ISNUMBER(SEARCH("전 항목 OK",$A$${sumRow}))`],style:okS}]});
     r++;ws.mergeCells(r,1,r,5);
     const fc=ws.getCell(r,1);fc.value='노란 칸은 입력값이다. 수정하면 안전하중과 판정이 자동 재계산된다. 근거: 산업안전보건기준에 관한 규칙 제163조. 판정 기준: 안전하중 > 인양하중.';
-    fc.font={name:F,size:9,color:{argb:'FF5D6B78'}};fc.alignment={wrapText:true,vertical:'top'};ws.getRow(r).height=28;
+    fc.value=tr(fc.value);fc.font={name:F,size:9,color:{argb:'FF5D6B78'}};fc.alignment={wrapText:true,vertical:'top'};ws.getRow(r).height=28;
     // 정격하중표
-    const c=cranes[curCrane],w2=wb.addWorksheet('정격하중표',{views:[{state:'frozen',xSplit:1,ySplit:2}]});
-    w2.getCell(1,1).value=c.name+' 정격하중표 (ton) — 굵은 칸이 이번 검토에 사용된 값';w2.getCell(1,1).font={name:F,size:12,bold:true};
-    w2.getCell(2,1).value='반경＼붐(m)';
+    const c=cranes[curCrane],w2=wb.addWorksheet(tr('정격하중표'),{views:[{state:'frozen',xSplit:1,ySplit:2}]});
+    w2.getCell(1,1).value=c.name+' '+tr('정격하중표 (ton) — 굵은 칸이 이번 검토에 사용된 값');w2.getCell(1,1).font={name:F,size:12,bold:true};
+    w2.getCell(2,1).value=tr('반경＼붐(m)');
     c.booms.forEach((b,i)=>w2.getCell(2,2+i).value=b);
     c.rows.forEach((rw_,ri)=>{w2.getCell(3+ri,1).value=rw_[0];c.booms.forEach((_,ci)=>{const v=rw_[1+ci];const cell=w2.getCell(3+ri,2+ci);cell.value=typeof v==='number'?v:null;
       if(S.eq.rowIdx===ri&&S.eq.colIdx===ci){cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2B600'}};cell.font={name:F,bold:true}}})});
     for(let ri=2;ri<=2+c.rows.length;ri++)for(let ci=1;ci<=1+c.booms.length;ci++){const cell=w2.getCell(ri,ci);cell.border=BD;if(!cell.font||!cell.font.bold)cell.font={name:F,size:10,bold:(ri===2||ci===1)};cell.alignment={horizontal:'center'};if(ri===2||ci===1){if(!(cell.fill&&cell.fill.fgColor&&cell.fill.fgColor.argb==='FFF2B600'))cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEEF1F4'}}}}
     w2.getColumn(1).width=14;for(let i=0;i<c.booms.length;i++)w2.getColumn(2+i).width=9;
+    ws.pageSetup.printArea=`A1:E${r}`;
+    try{const png=await svgToPNG(tr(craneFull(S,true)),520,270);const imgId=wb.addImage({base64:png,extension:'png'});ws.addImage(imgId,{tl:{col:5.2,row:1},ext:{width:520,height:270}});}catch(e){}
     const buf=await wb.xlsx.writeBuffer();
     const st=await saveFile(fname('xlsx'),buf);
     toast(st==='saved'?'엑셀을 저장했다.':'저장을 취소했다.');
@@ -642,11 +795,19 @@ async function exportXLSX(){
 }
 
 /* ---------- 선택지·이벤트 ---------- */
-function fillCraneSelects(){const o=cranes.map((c,i)=>`<option value="${i}">${esc(c.name)}${i===0?' (기본)':''}</option>`).join('');$('crane').innerHTML=o;$('crane2').innerHTML=o;$('crane').value=$('crane2').value=curCrane}
+function fillCraneSelects(){const o=cranes.map((c,i)=>`<option value="${i}">${P(esc(c.name))}${i===0?' (기본)':''}</option>`).join('');$('crane').innerHTML=o;$('crane2').innerHTML=o;$('crane').value=$('crane2').value=curCrane}
 function fillBooms(keep){const c=cranes[curCrane],prev=keep?$('boom').value:'';$('boom').innerHTML=c.booms.map((b,i)=>`<option value="${i}">${esc(b)} m</option>`).join('');const d=c.booms.findIndex(b=>b===25);$('boom').value=prev!==''&&c.booms[prev]!==undefined?prev:(d>=0?d:0)}
+function fillEnds(){const sel=$('w-end'),prev=sel.value;while(sel.firstChild)sel.removeChild(sel.firstChild);ENDS.forEach(e=>{const o=document.createElement('option');o.value=e[0];o.appendChild(document.createTextNode(tr(e[0])));sel.appendChild(o)});if(prev)sel.value=prev}
+function fillBeltW(){const p=$('b-w').value;$('b-w').innerHTML=DATA.belt.map(r=>`<option value="${r[0]}">${r[0]} mm (${r[6]})</option>`).join('');if(p)$('b-w').value=p}
+function setLang(l,silent){
+  lang=l;document.documentElement.lang=l;try{localStorage.setItem('mc2-lang',l)}catch(e){}
+  $('lang-ko').setAttribute('aria-pressed',l==='ko');$('lang-ja').setAttribute('aria-pressed',l==='ja');
+  document.title=tr('이동식 크레인 안전성검토');applyStatic(document.body);
+  fillCraneSelects();fillEnds();fillBeltW();renderRefs();if(!silent)update();
+}
 function fillWireDia(){const t=$('w-core').value==='마심'?DATA.wireFC:DATA.wireIWRC,p=parseFloat($('w-dia').value);$('w-dia').innerHTML=t.map(r=>`<option value="${r[0]}">${r[0]} mm</option>`).join('');$('w-dia').value=t.some(r=>r[0]===p)?p:(t.some(r=>r[0]===20)?20:t[0][0])}
 function update(){
-  const S=calcAll();renderSummary(S);renderDetails(S);renderReport(S);renderCraneTable(S);saveState();
+  const S=calcAll();$('fig').innerHTML=craneInner(S,false);renderSummary(S);renderDetails(S);renderReport(S);renderCraneTable(S);saveState();
 }
 function setRig(m,silent){
   $('seg-wire').setAttribute('aria-pressed',m==='wire');$('seg-belt').setAttribute('aria-pressed',m==='belt');
@@ -659,21 +820,24 @@ function parseTable(text){
   const split=l=>l.includes('\t')?l.split('\t'):l.trim().split(/[\s,]+/);
   const toN=s=>{const v=parseFloat(String(s).replace(/[^\d.\-]/g,''));return String(s).trim()===''||!Number.isFinite(v)?null:v};
   let head=split(lines[0]).map(s=>s.trim()),body=lines.slice(1).map(split);const width=Math.max(...body.map(r=>r.length));
-  if(head.length===width)head=head.slice(1);else if(head.length!==width-1)throw new Error(`붐길이 ${head.length}개와 데이터 열 ${width-1}개가 맞지 않는다.`);
+  if(head.length===width)head=head.slice(1);else if(head.length!==width-1)throw new Error(TT(`붐길이 ${head.length}개와 데이터 열 ${width-1}개가 맞지 않는다.`,`ブーム長さ ${head.length} 個とデータ列 ${width-1} 個が一致しない。`));
   const booms=head.map(h=>{const v=parseFloat(h);return Number.isFinite(v)&&/^[\d.]+$/.test(h)?v:h});
   const rows=body.map(r=>{const rad=toN(r[0]);if(rad===null)throw new Error('작업반경(첫 열)이 숫자가 아닌 행이 있다.');const v=[];for(let i=1;i<=booms.length;i++)v.push(toN(r[i]===undefined?'':r[i]));return[rad,...v]});
   rows.sort((a,b)=>a[0]-b[0]);return{booms,rows};
 }
 let DEFAULTS={};
 function init(){
-  loadCranes();fillCraneSelects();fillBooms(false);
-  $('w-end').innerHTML=ENDS.map(e=>`<option>${e[0]}</option>`).join('');$('w-end').value='슬링(10mm≥)';fillWireDia();$('w-dia').value=20;
-  $('b-w').innerHTML=DATA.belt.map(r=>`<option value="${r[0]}">${r[0]} mm (${r[6]})</option>`).join('');$('b-w').value=100;
+  initHooks();loadCranes();fillCraneSelects();fillBooms(false);
+  fillEnds();$('w-end').value='슬링(10mm≥)';fillWireDia();$('w-dia').value=20;
+  fillBeltW();$('b-w').value=100;
   $('b-ang').innerHTML=DATA.beltAngle.deg.map(d=>`<option value="${d}">${d}°</option>`).join('');
   $('s-size').innerHTML=DATA.shackle.map(r=>`<option value="${r[0]}">${r[0]}" (${r[1]} t)</option>`).join('');$('s-size').value='1-3/4';
   {const n=new Date();$('m-date').value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
   DEFAULTS={};FIELDS.concat(['boom','w-dia']).forEach(k=>DEFAULTS[k]=$(k).value);DEFAULTS.crane=0;
   renderRefs();restoreState();
+  {let l='ko';try{l=localStorage.getItem('mc2-lang')||((navigator.language||'').startsWith('ja')?'ja':'ko')}catch(e){}
+   document.getElementById('lang-ko').addEventListener('click',()=>setLang('ko'));document.getElementById('lang-ja').addEventListener('click',()=>setLang('ja'));
+   if(l==='ja')setLang('ja',true);}
   document.addEventListener('input',e=>{if(e.target.closest('#n-text,#n-name'))return;if(e.target.id==='w-core')fillWireDia();update()});
   const sel=e=>{curCrane=parseInt(e.target.value);$('crane').value=$('crane2').value=curCrane;fillBooms(false);update()};
   $('crane').addEventListener('change',sel);$('crane2').addEventListener('change',sel);
@@ -692,7 +856,7 @@ function init(){
   });
   $('n-add').addEventListener('click',()=>{
     const name=$('n-name').value.trim(),m=$('n-msg');
-    try{if(!name)throw new Error('제조사/모델명을 입력한다.');const t=parseTable($('n-text').value);cranes.push({name,booms:t.booms,rows:t.rows});saveCranes();curCrane=cranes.length-1;fillCraneSelects();fillBooms(false);$('n-text').value='';$('n-name').value='';m.textContent=`추가했다: 붐 ${t.booms.length}종 · 반경 ${t.rows.length}행`;update()}catch(err){m.textContent=err.message}
+    try{if(!name)throw new Error('제조사/모델명을 입력한다.');const t=parseTable($('n-text').value);cranes.push({name,booms:t.booms,rows:t.rows});saveCranes();curCrane=cranes.length-1;fillCraneSelects();fillBooms(false);$('n-text').value='';$('n-name').value='';m.textContent=TT(`추가했다: 붐 ${t.booms.length}종 · 반경 ${t.rows.length}행`,`追加した: ブーム ${t.booms.length}種類・半径 ${t.rows.length}行`);update()}catch(err){m.textContent=err.message}
   });
   $('n-del').addEventListener('click',()=>{if(curCrane===0)return;cranes.splice(curCrane,1);saveCranes();curCrane=0;fillCraneSelects();fillBooms(false);$('n-msg').textContent='삭제했다.';update()});
   $('copy').addEventListener('click',async()=>{
