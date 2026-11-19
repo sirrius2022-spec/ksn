@@ -1,937 +1,668 @@
-
 <!DOCTYPE html>
-<html lang="ko" class="scroll-smooth">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>김성남 교수 | 스마트 건설안전 통합 아카데미 포털</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d2147">
+<meta name="description" content="김성남 교수의 스마트 건설안전 · AI 공학 통합 아카데미 포털 — 실무 도구, 강의용 게임, 실습 자료실">
+<title>김성남 교수 | 스마트 건설안전 통합 아카데미 포털</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome 6 Pro-style Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Pretendard Font -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
-                    },
-                    colors: {
-                        pastelBg: '#fdfbf7',
-                        brand: {
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                        }
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-6px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+<style>
+/* ===== 1. 디자인 토큰 ===== */
+:root{
+  --navy-950:#07122b; --navy-900:#0d2147; --navy-700:#1b3d6e;
+  --ice-100:#e8f1fb; --ice-300:#b5d3f2; --ice-400:#9fd4ff;
+  --bg:#f1f6fb; --surface:#fff; --line:#d9e3ee;
+  --ink:#0f172a; --ink-2:#334155; --ink-3:#51627a;      /* 본문 대비 7:1 이상 */
+  --brand:#1d4ed8; --brand-soft:#e0ecff;
+  --radius:18px; --shadow:0 1px 2px rgba(15,23,42,.05),0 6px 18px -8px rgba(15,23,42,.12);
+  --font:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR','Malgun Gothic',sans-serif;
+  --maxw:1200px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--ink-2);line-height:1.6;letter-spacing:-.015em;word-break:keep-all;overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:3px solid #60a5fa;outline-offset:2px;border-radius:8px}
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,32px)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-    <style>
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: #f8fafc; /* 부드러운 라이트 톤 바탕 */
-            color: #334155; /* 편안한 텍스트 */
-            overflow-x: hidden;
-            letter-spacing: -0.015em;
-        }
+/* ===== 2. 히어로 (겨울 테마) ===== */
+.hero{position:relative;isolation:isolate;overflow:hidden;color:var(--ice-100);
+  background:linear-gradient(180deg,var(--navy-950) 0%,var(--navy-900) 40%,var(--navy-700) 72%,#4d7cab 100%)}
+.hero__fx{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.aurora{position:absolute;border-radius:50%;filter:blur(80px);will-change:transform}
+.aurora--1{width:60vw;height:240px;left:-10vw;top:40px;background:rgba(80,220,190,.26);transform:rotate(-8deg)}
+.aurora--2{width:55vw;height:220px;right:-8vw;top:10px;background:rgba(120,140,255,.28);transform:rotate(10deg)}
+#snow{position:absolute;inset:0;width:100%;height:100%}
+.scene{position:absolute;left:0;right:0;bottom:0;width:100%;height:clamp(180px,32vw,340px)}
 
-        /* Subtle grid background - 파스텔톤에 맞게 은은하게 */
-        .bg-grid-pattern {
-            background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-            background-size: 28px 28px;
-        }
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:72px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand__logo{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#d7ecff,#82b8ff);box-shadow:0 0 22px rgba(160,210,255,.45)}
+.brand__name{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:900;color:#fff;white-space:nowrap}
+.badge{font-size:11px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:6px;background:rgba(160,210,255,.18);border:1px solid rgba(160,210,255,.45);color:#d6eaff}
+.brand__sub{font-size:13px;color:var(--ice-300);white-space:nowrap}
+.actions{display:flex;align-items:center;gap:8px}
+.seg{display:flex;padding:3px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+.seg button{padding:6px 12px;min-height:32px;border-radius:7px;font-size:13px;font-weight:700;color:var(--ice-300)}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--brand)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:12px;font-size:14px;font-weight:700;transition:transform .2s,background .2s,box-shadow .2s;white-space:nowrap}
+.btn--ghost{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff}
+.btn--ghost:hover{background:rgba(255,255,255,.22)}
+.btn--primary{background:linear-gradient(135deg,#eaf5ff,#a9d2ff);color:#0b2a55;box-shadow:0 10px 28px rgba(140,200,255,.3)}
+.btn--primary:hover{transform:translateY(-2px)}
+.btn--lg{min-height:52px;padding:0 28px;font-size:16px;border-radius:14px}
 
-        /* Ambient glowing circles - 밝은 파스텔 핑크/블루 글로우 */
-        .ambient-glow-1 {
-            background: radial-gradient(circle, rgba(255, 182, 193, 0.35) 0%, rgba(255, 182, 193, 0) 70%);
-        }
-        .ambient-glow-2 {
-            background: radial-gradient(circle, rgba(173, 216, 230, 0.35) 0%, rgba(173, 216, 230, 0) 70%);
-        }
+.hero__body{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:center;padding:56px 0 clamp(190px,30vw,300px)}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(190,225,255,.45);font-size:14px;font-weight:600;color:#dcedff;margin-bottom:22px}
+.pill i{width:8px;height:8px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 10px #6ee7b7}
+.hero h1{font-size:clamp(30px,5.2vw,58px);line-height:1.22;font-weight:900;color:#fff;letter-spacing:-.03em;text-shadow:0 4px 28px rgba(0,20,60,.45)}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#fff,#bfe5ff 45%,#9cc2ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero__lead{margin-top:20px;max-width:700px;font-size:clamp(15px,1.5vw,17px);line-height:1.8;color:#d3e4f6}
+.hero__lead strong{color:#fff}.hero__lead mark{background:none;color:var(--ice-400);font-weight:700}
+.tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;list-style:none}
+.tags li{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:11px;font-size:14px;font-weight:600;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#eaf3fc}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
 
-        /* Glassmorphism Card Style - 라이트 테마 */
-        .tech-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 1);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            cursor: pointer;
-            text-decoration: none; /* a 태그 밑줄 제거 */
-        }
+.stats{padding:24px;border-radius:24px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 20px 50px rgba(0,15,50,.4),inset 0 1px 0 rgba(255,255,255,.35)}
+.stats h2{display:flex;justify-content:space-between;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ice-300);margin-bottom:16px}
+.stats__grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{padding:14px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18)}
+.stat b{display:block;font-size:32px;line-height:1.1;font-weight:900;color:#fff}
+.stat:nth-child(2) b{color:#a5e4ff}
+.stat span{font-size:13px;color:var(--ice-300)}
+.stats__foot{display:flex;justify-content:space-between;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2);font-size:13px;color:var(--ice-300)}
+.stats__foot b{color:#6ee7b7;font-weight:600}
+.stats__note{margin-top:14px;padding:11px 13px;border-radius:12px;background:rgba(160,210,255,.14);border:1px dashed rgba(190,225,255,.5);font-size:13px;line-height:1.55;color:#dcedff}
 
-        .tech-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(147, 197, 253, 0.5); /* 파스텔 블루 보더 */
-            background: rgba(255, 255, 255, 1);
-            box-shadow: 0 16px 30px -10px rgba(147, 197, 253, 0.25), 0 0 1px 1px rgba(147, 197, 253, 0.3);
-        }
+/* ===== 3. 컨트롤 바 (스티키) ===== */
+.controls{position:sticky;top:0;z-index:30;background:rgba(241,246,251,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.controls__in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 0}
+.tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px;max-width:100%}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;font-size:15px;font-weight:700;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);transition:background .2s,color .2s}
+.tab:hover{background:#fff;border-color:#93c5fd}
+.tab[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.tab__n{min-width:24px;padding:1px 7px;border-radius:999px;font-size:12px;font-weight:700;text-align:center;background:#e2e8f0;color:var(--ink-2)}
+.tab[aria-selected="true"] .tab__n{background:rgba(255,255,255,.28);color:#fff}
+.search{position:relative;flex:1 1 260px;max-width:360px}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink-3);pointer-events:none}
+.search input{width:100%;height:44px;padding:0 40px 0 40px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:15px;color:var(--ink)}
+.search input::placeholder{color:#6b7c93}
+.search input:focus{outline:none;border-color:#60a5fa;box-shadow:0 0 0 3px rgba(96,165,250,.3)}
+.search__clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:8px;color:var(--ink-3);font-size:16px}
+.search__clear[hidden]{display:none}
 
-        /* Smooth scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+/* ===== 4. 카드 그리드 ===== */
+main{flex:1;padding:28px 0 48px}
+.result-meta{font-size:14px;color:var(--ink-3);margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px}
+.card{--c-bg:#e0f2fe;--c-bd:#bae6fd;--c-tx:#0369a1;
+  display:flex;flex-direction:column;justify-content:space-between;gap:16px;padding:20px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .25s,border-color .25s,box-shadow .25s}
+.card:hover{transform:translateY(-4px);border-color:var(--c-bd);box-shadow:0 16px 30px -12px rgba(15,23,42,.2)}
+.card__top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.card__icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:25px;background:var(--c-bg);border:1px solid var(--c-bd)}
+.card__tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--c-bg);border:1px solid var(--c-bd);color:var(--c-tx)}
+.card h3{font-size:18px;line-height:1.35;font-weight:800;color:var(--ink)}
+.card p{margin-top:8px;font-size:14.5px;line-height:1.65;color:var(--ink-3);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card__go{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid #edf2f7;font-size:14px;font-weight:700;color:var(--c-tx)}
+.card__go span:last-child{transition:transform .2s}
+.card:hover .card__go span:last-child{transform:translateX(4px)}
+.empty{margin-top:18px;padding:56px 20px;text-align:center;border-radius:22px;border:2px dashed #b8c6d8;background:rgba(255,255,255,.7)}
+.empty[hidden]{display:none}
+.empty strong{display:block;font-size:18px;color:var(--ink)}
+.empty p{margin:6px 0 16px;font-size:14px;color:var(--ink-3)}
+.empty .btn{background:var(--brand-soft);color:var(--brand);border:1px solid #bfdbfe}
 
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
+/* ===== 5. 하단 배너 ===== */
+.banners{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;margin-top:40px}
+.banner{display:flex;flex-direction:column;justify-content:space-between;gap:22px;padding:clamp(22px,3vw,32px);border-radius:24px;border:1px solid var(--bd);background:var(--bgc)}
+.banner--a{--bd:#fcd9a0;--bgc:linear-gradient(135deg,#fff7e6,#ffefd6);--t:#7c2d12;--k:#b45309;--b:#c2410c}
+.banner--b{--bd:#c7d2fe;--bgc:linear-gradient(135deg,#eef2ff,#e0eaff);--t:#1e1b4b;--k:#4338ca;--b:#4338ca}
+.banner small{display:block;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--k);margin-bottom:8px}
+.banner h3{font-size:clamp(20px,2.4vw,25px);font-weight:900;color:var(--t);margin-bottom:8px}
+.banner p{font-size:15px;line-height:1.7;color:var(--ink-2)}
+.banner .btn{align-self:flex-start;background:var(--b);color:#fff;min-height:46px}
+.banner .btn:hover{filter:brightness(1.1)}
 
-    <script>
-        // 현재 선택된 언어
-        let currentLang = 'ko';
+/* ===== 6. 푸터 · 토스트 ===== */
+footer{background:#0d2147;color:var(--ice-300);font-size:13px}
+.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:26px 0}
+.foot strong{color:#fff}.foot a:hover{color:#fff}
+.foot__r{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));z-index:60;transform:translate(-50%,16px);opacity:0;pointer-events:none;padding:12px 20px;border-radius:14px;background:#0f172a;color:#fff;font-size:14px;font-weight:700;box-shadow:0 14px 34px rgba(0,0,0,.3);transition:opacity .25s,transform .25s}
+.toast.is-on{opacity:1;transform:translate(-50%,0)}
 
-        // 모바일 인앱 브라우저 대응 함수 (표준 a 태그 동작 유지)
-        function handleLinkClick(event, url) {
-            const userAgent = navigator.userAgent.toLowerCase();
-            if (userAgent.match(/kakaotalk/i)) {
-                event.preventDefault(); // 카톡 브라우저에서만 기본 동작 중지하고 외부 브라우저 호출
-                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
-            }
-            // 일반 브라우저(사파리, 크롬 등)에서는 event.preventDefault()가 호출되지 않으므로 정상 이동
-        }
-
-        function copyCurrentUrl() {
-            const tempInput = document.createElement('input');
-            tempInput.value = window.location.href;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            try {
-                document.execCommand('copy');
-                const msg = currentLang === 'ko' ? '홈페이지 주소가 복사되었습니다.' : 'ウェブサイトのアドレスがコピーされました。';
-                showToast(msg);
-            } catch (err) {
-                console.error(err);
-            }
-            document.body.removeChild(tempInput);
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMsg');
-            toastMsg.innerText = message;
-            toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-            toast.classList.add('opacity-100', 'translate-y-0');
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-            }, 2500);
-        }
-
-        // --- 다국어 전환 로직 ---
-        function setLanguage(lang) {
-            currentLang = lang;
-            document.documentElement.lang = lang;
-
-            // 버튼 스타일 업데이트
-            const btnKo = document.getElementById('lang-ko');
-            const btnJa = document.getElementById('lang-ja');
-
-            if (lang === 'ko') {
-                btnKo.className = 'px-2 py-1 rounded text-[11px] font-bold bg-white text-blue-600 shadow-sm transition-all';
-                btnJa.className = 'px-2 py-1 rounded text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-all';
-            } else {
-                btnJa.className = 'px-2 py-1 rounded text-[11px] font-bold bg-white text-blue-600 shadow-sm transition-all';
-                btnKo.className = 'px-2 py-1 rounded text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-all';
-            }
-
-            // 모든 i18n 요소 텍스트 변경
-            document.querySelectorAll('.i18n').forEach(el => {
-                const text = el.getAttribute(`data-${lang}`);
-                if (text) {
-                    if(el.tagName === 'INPUT' && el.type === 'text') {
-                        el.placeholder = text;
-                    } else {
-                        el.innerHTML = text; // innerHTML로 변경하여 내부 태그(span 등) 유지
-                    }
-                }
-            });
-
-            // 검색 기능 재실행 (텍스트가 바뀌었으므로)
-            applyFilters();
-        }
-    </script>
+/* ===== 7. 반응형 ===== */
+@media (max-width:960px){
+  .hero__body{grid-template-columns:1fr;padding-top:36px}
+  .stats{max-width:420px}
+}
+@media (max-width:640px){
+  .controls{position:static}
+  .brand__sub,.btn--lib{display:none}
+  .search{max-width:none;flex-basis:100%}
+  .hero__body{gap:28px}
+  .cta .btn{flex:1 1 100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+</style>
 </head>
-<body class="min-h-screen flex flex-col relative selection:bg-pink-100 selection:text-pink-900 break-keep">
 
-    <!-- Background Ambient Lighting & Grid -->
-    <div class="fixed inset-0 bg-grid-pattern opacity-60 pointer-events-none z-0"></div>
-    <div class="fixed -top-40 left-1/3 -translate-x-1/2 w-[720px] h-[500px] ambient-glow-1 rounded-full pointer-events-none z-0"></div>
-    <div class="fixed top-1/3 -right-40 w-[600px] h-[600px] ambient-glow-2 rounded-full pointer-events-none z-0"></div>
+<body>
+<a href="#tools" class="sr">본문 바로가기</a>
 
-    <!-- Top Navigation Bar -->
-    <header class="relative z-40 border-b border-slate-200 bg-white/70 backdrop-blur-xl">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-1">
-            <!-- Brand Identity -->
-            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-100 via-indigo-100 to-sky-100 p-[1px] shadow-sm flex items-center justify-center shrink-0">
-                    <div class="w-full h-full bg-white rounded-[11px] flex items-center justify-center">
-                        <i class="fa-solid fa-helmet-safety text-blue-400 text-base sm:text-lg"></i>
-                    </div>
-                </div>
-                <div class="flex flex-col justify-center">
-                    <div class="flex items-center gap-1.5 sm:gap-2">
-                        <span class="i18n text-sm font-black tracking-tight text-slate-800 sm:text-base whitespace-nowrap" data-ko="김성남" data-ja="キム・ソンナム">김성남</span>
-                        <span class="px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-semibold bg-blue-50 text-blue-500 border border-blue-200 tracking-wide uppercase whitespace-nowrap">Academy</span>
-                    </div>
-                    <p class="i18n text-[11px] text-slate-500 hidden sm:block whitespace-nowrap" data-ko="스마트 건설안전 · AI 공학 통합 포털" data-ja="スマート建設安全・AI工学統合ポータル">스마트 건설안전 · AI 공학 통합 포털</p>
-                </div>
-            </div>
+<!-- ========== HERO ========== -->
+<header class="hero">
+  <div class="hero__fx" aria-hidden="true">
+    <span class="aurora aurora--1"></span><span class="aurora aurora--2"></span>
+    <svg class="scene" viewBox="0 0 1600 380" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <linearGradient id="gMt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ea3cc"/><stop offset="1" stop-color="#4f78a6"/></linearGradient>
+        <linearGradient id="gSn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f9ff"/><stop offset="1" stop-color="#d3e5f6"/></linearGradient>
+      </defs>
+      <path d="M0 250 180 130 300 210 470 90 640 230 820 150 1000 240 1180 110 1360 220 1500 140 1600 200V380H0Z" fill="url(#gMt)" opacity=".55"/>
+      <path d="M470 90 440 128 470 118 495 135ZM1180 110 1150 146 1180 138 1205 152ZM180 130 155 160 180 152 200 166Z" fill="#fff" opacity=".85"/>
+      <g stroke="#17335c" fill="none" stroke-width="3" opacity=".92">
+        <path d="M1110 380V70M1130 380V70M1110 340 1130 320M1110 300 1130 280M1110 260 1130 240M1110 220 1130 200M1110 180 1130 160M1110 140 1130 120M1110 100 1130 80M880 70H1400M880 70 1120 40 1400 70M1120 40V70M1000 70V150"/>
+        <path d="M986 150h28v18h-28z" stroke-width="2"/>
+      </g>
+      <rect x="1325" y="62" width="40" height="16" fill="#17335c"/>
+      <path d="M880 64H1400" stroke="#fff" stroke-width="5" opacity=".8"/>
+      <g fill="#17335c"><rect x="1230" y="190" width="14" height="190"/><rect x="1300" y="190" width="14" height="190"/><rect x="1370" y="190" width="14" height="190"/><rect x="1440" y="190" width="14" height="190"/><rect x="1222" y="190" width="240" height="10"/><rect x="1222" y="250" width="240" height="10"/><rect x="1222" y="310" width="240" height="10"/></g>
+      <g fill="#fff"><rect x="1222" y="184" width="240" height="7"/><rect x="1222" y="244" width="240" height="7"/><rect x="1222" y="304" width="240" height="7"/></g>
+      <g fill="#16355a"><path d="M120 380 170 250 220 380ZM140 300 170 220 200 300ZM150 250 170 190 190 250ZM250 380 290 280 330 380ZM262 320 290 250 318 320ZM760 380 805 270 850 380ZM775 320 805 245 835 320Z"/></g>
+      <g fill="#fff" opacity=".9"><path d="M170 190 158 218H182ZM290 250 279 274H301ZM805 245 793 272H817Z"/></g>
+      <path d="M0 330Q200 290 420 322T860 318T1280 330T1600 304V380H0Z" fill="url(#gSn)"/>
+      <path d="M0 352Q300 330 600 350T1200 346T1600 340V380H0Z" fill="#eaf3fb"/>
+      <g transform="translate(560 300)"><path d="M0 40 14 0 28 40Z" fill="#ff8a3d"/><rect x="-4" y="38" width="36" height="6" rx="2" fill="#2b3d5a"/><rect x="6" y="14" width="16" height="6" fill="#fff"/></g>
+      <g transform="translate(940 296)"><path d="M0 44 16 0 32 44Z" fill="#ff8a3d"/><rect x="-4" y="42" width="40" height="6" rx="2" fill="#2b3d5a"/><rect x="7" y="16" width="18" height="6" fill="#fff"/></g>
+    </svg>
+    <canvas id="snow"></canvas>
+  </div>
 
-            <!-- Header Quick Action Buttons & Lang Switcher -->
-            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <!-- Language Switcher -->
-                <div class="flex items-center bg-slate-100/80 p-0.5 sm:p-1 rounded-lg border border-slate-200 shrink-0">
-                    <button onclick="setLanguage('ko')" id="lang-ko" class="px-1.5 sm:px-2 py-1 rounded text-[10px] sm:text-[11px] font-bold bg-white text-blue-600 shadow-sm transition-all whitespace-nowrap">KR</button>
-                    <button onclick="setLanguage('ja')" id="lang-ja" class="px-1.5 sm:px-2 py-1 rounded text-[10px] sm:text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-all whitespace-nowrap">JP</button>
-                </div>
-
-                <a href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" target="_blank" onclick="handleLinkClick(event, this.href)"
-                   class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-sm shrink-0 whitespace-nowrap">
-                    <i class="fa-solid fa-folder-open text-amber-400"></i> <span class="i18n" data-ko="실습자료실" data-ja="実習資料室">실습자료실</span>
-                </a>
-                <button onclick="copyCurrentUrl()" 
-                        class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all shadow-sm shrink-0 whitespace-nowrap">
-                    <i class="fa-regular fa-clone"></i> <span class="i18n hidden min-[360px]:inline" data-ko="주소 복사" data-ja="コピー">주소 복사</span>
-                </button>
-            </div>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0b2a55" stroke-width="2" stroke-linecap="round"><path d="M3 17h18M5 17a7 7 0 0114 0M12 6v6M9 8l-1 4M15 8l1 4"/></svg>
         </div>
-    </header>
-
-    <!-- Hero Section -->
-    <main class="relative z-10 flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 w-full">
-
-        <!-- Modern Hero Card (Pastel Version) -->
-        <section class="relative overflow-hidden rounded-3xl border border-white bg-gradient-to-b from-white/90 via-white/80 to-slate-50/90 p-6 sm:p-10 mb-10 shadow-lg backdrop-blur-xl">
-            <div class="absolute -right-16 -bottom-16 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -left-16 -top-16 w-60 h-60 bg-pink-100/50 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
-                <div class="max-w-3xl">
-                    <!-- Status pill -->
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-xs font-medium mb-4 shadow-sm">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span class="i18n" data-ko="스마트 건설안전기술 & 생성형 AI 교육 에이전트" data-ja="スマート建設安全技術 & 生成AI教育エージェント">스마트 건설안전기술 & 생성형 AI 교육 에이전트</span>
-                    </div>
-
-                    <h1 class="i18n text-2xl sm:text-4xl font-extrabold text-slate-800 tracking-tight leading-tight sm:leading-tight" 
-                        data-ko="건설안전의 미래를 이끄는<br class='hidden sm:inline' /> <span class='text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-sky-500 to-indigo-500'>스마트 AI 공학 실습 플랫폼</span>"
-                        data-ja="建設安全の未来を導く<br class='hidden sm:inline' /> <span class='text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-sky-500 to-indigo-500'>スマートAI工学実践プラットフォーム</span>">
-                        건설안전의 미래를 이끄는<br class="hidden sm:inline" />
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-sky-500 to-indigo-500">
-                            스마트 AI 공학 실습 플랫폼
-                        </span>
-                    </h1>
-
-                    <p class="i18n mt-4 text-slate-600 text-sm sm:text-base leading-relaxed"
-                       data-ko="안녕하세요, <strong class='text-slate-800'>김성남</strong>입니다. 본 포털은 건설안전 현장 실무와 학술적 공학 이론을 융합한 통합 교육 허브입니다. 현장에서 즉시 활용 가능한 <span class='text-blue-500 font-semibold'>AI 위험성 평가 에이전트, 흙막이 탄소성 해석, 실무 유틸리티 도구 및 참여형 강의 컨텐츠</span>를 제공합니다."
-                       data-ja="こんにちは、<strong class='text-slate-800'>キム・ソンナム</strong>です。本ポータルは建設安全の現場実務と学術的な工学理論を融合した統合教育ハブです。現場で即時活用可能な<span class='text-blue-500 font-semibold'>AI危険性評価エージェント、山留め弾塑性解析、実務ツールおよび参加型講義コンテンツ</span>を提供します。">
-                        안녕하세요, <strong class="text-slate-800">김성남</strong>입니다. 본 포털은 건설안전 현장 실무와 학술적 공학 이론을 융합한 통합 교육 허브입니다. 
-                        현장에서 즉시 활용 가능한 <span class="text-blue-500 font-semibold">AI 위험성 평가 에이전트, 흙막이 탄소성 해석, 실무 유틸리티 도구 및 참여형 강의 컨텐츠</span>를 제공합니다.
-                    </p>
-
-                    <!-- Key Topics Tags -->
-                    <div class="mt-6 flex flex-wrap gap-2 text-xs">
-                        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm flex items-center gap-1.5">
-                            <i class="fa-solid fa-hard-hat text-amber-500"></i> <span class="i18n" data-ko="건설안전공학" data-ja="建設安全工学">건설안전공학</span>
-                        </span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm flex items-center gap-1.5">
-                            <i class="fa-solid fa-microchip text-sky-500"></i> <span class="i18n" data-ko="4M 위험성 평가" data-ja="4M 危険性評価">4M 위험성 평가</span>
-                        </span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm flex items-center gap-1.5">
-                            <i class="fa-solid fa-robot text-purple-500"></i> <span class="i18n" data-ko="생성형 AI 실무 도구" data-ja="生成AI実務ツール">생성형 AI 실무 도구</span>
-                        </span>
-                        <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm flex items-center gap-1.5">
-                            <i class="fa-solid fa-bolt text-emerald-500"></i> <span class="i18n" data-ko="인터랙티브 강의" data-ja="インタラクティブ講義">인터랙티브 강의</span>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Metrics / Summary Box -->
-                <div class="w-full lg:w-72 shrink-0 bg-white/70 border border-slate-100 rounded-2xl p-5 shadow-sm backdrop-blur-md">
-                    <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 flex items-center justify-between">
-                        <span>Platform Overview</span>
-                        <i class="fa-solid fa-chart-simple text-blue-400"></i>
-                    </h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                            <span class="block text-2xl font-bold text-slate-800">20+</span>
-                            <span class="i18n text-[11px] text-slate-500" data-ko="등록 실무도구" data-ja="登録ツール">등록 실무도구</span>
-                        </div>
-                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                            <span class="block text-2xl font-bold text-sky-500">100%</span>
-                            <span class="i18n text-[11px] text-slate-500" data-ko="웹 기반 즉시실행" data-ja="ウェブ即時実行">웹 기반 즉시실행</span>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
-                        <span class="i18n" data-ko="최적화 환경" data-ja="最適化環境">최적화 환경</span>
-                        <span class="i18n text-emerald-500 font-medium" data-ko="<i class='fa-solid fa-check-circle mr-1'></i>모바일 & PC 대응" data-ja="<i class='fa-solid fa-check-circle mr-1'></i>モバイル & PC対応">
-                            <i class="fa-solid fa-check-circle mr-1"></i>모바일 & PC 대응
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Controls: Category Chips & Search Box -->
-        <section class="relative z-30 py-2 mb-6">
-            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-                <!-- Category Filter Tabs -->
-                <div class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1 md:pb-0" id="filter-tabs">
-                    <button onclick="filterCategory('all')" data-category="all" 
-                            class="tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-blue-400 text-white shadow-md shadow-blue-200 border border-blue-300 flex items-center gap-1.5">
-                        <i class="fa-solid fa-layer-group"></i> <span class="i18n" data-ko="전체보기" data-ja="すべて表示">전체보기</span>
-                        <span class="tab-count ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white/30 text-white">24</span>
-                    </button>
-                    <button onclick="filterCategory('ai')" data-category="ai" 
-                            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white/80 text-slate-600 hover:text-slate-900 hover:bg-white border border-slate-200 flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-robot text-sky-400"></i> <span class="i18n" data-ko="건설안전 & AI" data-ja="建設安全 & AI">건설안전 & AI</span>
-                    </button>
-                    <button onclick="filterCategory('utility')" data-category="utility" 
-                            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white/80 text-slate-600 hover:text-slate-900 hover:bg-white border border-slate-200 flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-toolbox text-emerald-400"></i> <span class="i18n" data-ko="실무 & 생성도구" data-ja="実務 & 生成ツール">실무 & 생성도구</span>
-                    </button>
-                    <button onclick="filterCategory('game')" data-category="game" 
-                            class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white/80 text-slate-600 hover:text-slate-900 hover:bg-white border border-slate-200 flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-gamepad text-amber-400"></i> <span class="i18n" data-ko="강의용 게임 & 이벤트" data-ja="講義ゲーム & イベント">강의용 게임 & 이벤트</span>
-                    </button>
-                </div>
-
-                <!-- Instant Search Input -->
-                <div class="relative w-full md:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="도구명, 키워드 검색..." data-ko="도구명, 키워드 검색..." data-ja="ツール名、キーワード検索..."
-                           class="i18n w-full pl-10 pr-9 py-2.5 bg-white/90 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 transition-all backdrop-blur-sm shadow-sm">
-                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Tools & Content Grid (100% <a> 태그 기반) -->
-        <section class="mb-14">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" id="cardGrid">
-
-                <!-- 1. 4M 위험성 평가 에이전트 -->
-                <a href="/agent/4m/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="ai" data-keywords="4m 위험성 평가 에이전트 현장 사진 분석 인적 기계적 작업적 관리적 안전진단">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🤖</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-600 border border-sky-200" data-ko="위험성평가" data-ja="危険性評価">위험성평가</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-blue-500 transition-colors" data-ko="4M 위험성 평가 에이전트" data-ja="4M 危険性評価エージェント">4M 위험성 평가 에이전트</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="현장 사진을 기반으로 4M 위험 요인을 정밀 분석하는 전문 도구" data-ja="現場写真に基づいて4Mリスク要因を精密分析する専門ツール">현장 사진을 기반으로 4M(인적, 기계적, 작업적, 관리적) 위험 요인을 정밀 분석하는 전문 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-sky-500 group-hover:text-sky-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 2. 흙막이 탄소성 해석 에이전트 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/sunex-ai" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="ai" data-keywords="흙막이 탄소성 해석 에이전트 굴착 지반 거동 구조물 상호작용 지반공학 sunex ai">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🏗️</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200" data-ko="지반공학 AI" data-ja="地盤工学 AI">지반공학 AI</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-amber-500 transition-colors" data-ko="흙막이 탄소성 해석 에이전트" data-ja="山留め弾塑性解析エージェント">흙막이 탄소성 해석 에이전트</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 정밀하게 분석" data-ja="掘削段階別の地盤挙動を分析し安全性を検討する専門ツール">굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 정밀하게 분석하여 안전성을 검토하는 전문 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-500 group-hover:text-amber-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 3. 이동식크레인 안전성검토 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/car1/car1.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="ai" data-keywords="이동식크레인 안전성검토 양중작업 크레인 하중 모멘트 전복 위험도">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🚜</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-600 border border-red-200" data-ko="장비 안전" data-ja="装備安全">장비 안전</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-red-500 transition-colors" data-ko="이동식크레인 안전성검토" data-ja="移動式クレーン安全性検討">이동식크레인 안전성검토</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="이동식 크레인 양중 작업 시 정격하중 및 전복 방지 안전율 산출" data-ja="揚重作業時の定格荷重、作業半径および転倒防止安全率を算出">이동식 크레인 양중 작업 시 정격하중, 작업반경 및 전복 방지 안전율을 체계적으로 산출 및 검토하는 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-red-500 group-hover:text-red-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-<!-- 항타기 안전성검토 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/car2/car2.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="ai" data-keywords="이동식크레인 안전성검토 양중작업 크레인 하중 모멘트 전복 위험도">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🚜</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-600 border border-red-200" data-ko="장비 안전" data-ja="装備安全">장비 안전</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-red-500 transition-colors" data-ko="항타기 안전성검토" data-ja="移動式クレーン安全性検討">이동식크레인 안전성검토</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="항타기" data-ja="揚重作業時の定格荷重、作業半径および転倒防止安全率を算出">이동식 크레인 양중 작업 시 정격하중, 작업반경 및 전복 방지 안전율을 체계적으로 산출 및 검토하는 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-red-500 group-hover:text-red-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-                
-                <!-- 4. 스마트 공학용 계산기 -->
-                <a href="/agent/cal/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="ai" data-keywords="스마트 공학용 계산기 수식 계산 현장 실무 웹 계산기 삼각함수">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🔢</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-teal-50 text-teal-600 border border-teal-200" data-ko="공학 계산" data-ja="工学計算">공학 계산</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-teal-500 transition-colors" data-ko="스마트 공학용 계산기" data-ja="スマート工学用電卓">스마트 공학용 계산기</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="강의 및 현장 실무에서 복잡한 구조·역학 수식을 즉각 해결" data-ja="講義や現場実務で複雑な構造・力学数式を即座に解決">강의 및 현장 실무에서 복잡한 구조·역학 수식을 즉각 해결할 수 있는 웹 기반 정밀 공학 계산기</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-500 group-hover:text-teal-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 5. 홈페이지 제작 가이드 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/guide/homepage/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="ai" data-keywords="홈페이지 제작 가이드 개인 웹사이트 지식 공유 에이전트 구축 매뉴얼">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🌐</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 border border-violet-200" data-ko="웹 구축 가이드" data-ja="ウェブ構築ガイド">웹 구축 가이드</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-violet-500 transition-colors" data-ko="홈페이지 제작 가이드" data-ja="ホームページ制作ガイド">홈페이지 제작 가이드</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="건설 기술인을 위한 맞춤형 웹사이트 구축 매뉴얼" data-ja="建設技術者のための個人知識共有プラットフォーム構築ガイド">건설 기술인을 위한 개인 지식 공유 플랫폼 및 맞춤형 AI 에이전트 웹사이트 구축 가이드</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-violet-500 group-hover:text-violet-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 6. QR코드 이미지 생성기 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/qr/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="utility" data-keywords="qr코드 이미지 생성기 큐알 생성 텍스트 주소 변환">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">📱</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200" data-ko="생성 도구" data-ja="生成ツール">생성 도구</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-emerald-500 transition-colors" data-ko="QR코드 이미지 생성기" data-ja="QRコード画像生成器">QR코드 이미지 생성기</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="원하는 URL을 고화질 QR코드 이미지로 즉시 생성" data-ja="URLやテキストを高画質QRコード画像として即座に生成">원하는 URL 및 교육 텍스트를 고화질 QR코드 이미지로 신속하게 즉시 생성 및 다운로드하는 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-500 group-hover:text-emerald-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 7. 무료 웹 메모장 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/memo/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="utility" data-keywords="메모장 무료 웹 메모 필기 실무 노트">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">📝</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-600 border border-cyan-200" data-ko="실무 유틸" data-ja="実務ツール">실무 유틸</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-cyan-500 transition-colors" data-ko="무료 웹 메모장" data-ja="無料ウェブメモ帳">무료 웹 메모장</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="브라우저에서 안전하고 편리하게 기록하는 스마트 메모장" data-ja="インストール不要でブラウザ上で安全に記録できるスマートメモ帳">강의 필기나 현장 아이디어를 별도 설치 없이 브라우저에서 안전하고 편리하게 기록하는 스마트 메모장</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-cyan-500 group-hover:text-cyan-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 8. AI 성우 (TTS 변환) -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/aiwav/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="utility" data-keywords="ai 성우 tts 텍스트 음성 변환 wav 저장 리딩 안내방송">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-pink-50 border border-pink-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🎙️</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-pink-50 text-pink-600 border border-pink-200" data-ko="음성 생성" data-ja="音声生成">음성 생성</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-pink-500 transition-colors" data-ko="AI 성우 (TTS 음성 변환)" data-ja="AI声優 (TTS音声変換)">AI 성우 (TTS 음성 변환)</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="텍스트를 자연스러운 성우 음성으로 변환하고 다운로드" data-ja="案内放送やテキストを自然な音声に変換し保存">안전 안내방송이나 교재 텍스트를 자연스러운 성우 음성으로 변환하고 고음질 파일로 내려받는 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-pink-500 group-hover:text-pink-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 9. 8개국어 AI 번역기 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/8lang/8lang.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="utility" data-keywords="8개국어 번역기 외국인 근로자 다국어 안전 번역 글로벌">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🌍</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200" data-ko="다국어 통역" data-ja="多言語通訳">다국어 통역</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-indigo-500 transition-colors" data-ko="다국어 AI 번역기 (8개국어)" data-ja="多言語AI翻訳機 (8ヶ国語)">다국어 AI 번역기 (8개국어)</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="다국적 현장 근로자를 위한 실시간 안전 수칙 번역 지원" data-ja="多国籍労働者のためのリアルタイム安全規則翻訳サポート">다국적 현장 근로자 및 안전 교육을 위한 8개국 주요 언어 실시간 안전 수칙 번역 지원 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-500 group-hover:text-indigo-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 10. 스마트 텍스트 전달 도구 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/text/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="utility" data-keywords="텍스트 전달 실시간 클립보드 공유 현장 메시지">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">💬</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-600 border border-sky-200" data-ko="데이터 전송" data-ja="データ転送">데이터 전송</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-sky-500 transition-colors" data-ko="스마트 텍스트 전달 도구" data-ja="スマートテキスト伝達ツール">스마트 텍스트 전달 도구</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="기기 간 텍스트와 코드를 손쉽게 주고받는 브라우저 전송 도구" data-ja="テキストやコードを素早く簡単に送受信できるツール">강의 수강생과 강사 간 또는 기기 간에 텍스트와 코드를 빠르고 손쉽게 주고받는 브라우저 전송 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-sky-500 group-hover:text-sky-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 11. 로또 번호 생성기 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/lotto" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="utility" data-keywords="로또 번호 생성기 행운 번호 추첨 이벤트 휴식">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🔮</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 border border-purple-200" data-ko="이벤트" data-ja="イベント">이벤트</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-purple-500 transition-colors" data-ko="로또 번호 생성기" data-ja="ロト番号生成器">로또 번호 생성기</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="행운의 숫자를 무작위 알고리즘으로 추출하는 휴식용 도구" data-ja="ランダムアルゴリズムで幸運の数字を抽出する休息用ツール">행운의 숫자를 무작위 알고리즘으로 추출하여 최적의 번호 조합을 제시하는 휴식용 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-500 group-hover:text-purple-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 12. 마블레이싱 게임 (제미나이) -->
-                <a href="/game/mableroulet/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="마블레이싱 게임 제미나이 경연 레이싱 조별 아이스브레이킹 구슬">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🏎️</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200" data-ko="레이싱" data-ja="レーシング">레이싱</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-orange-500 transition-colors" data-ko="마블레이싱 (제미나이)" data-ja="マーブルレーシング (Gemini)">마블레이싱 (제미나이)</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="조별 경연 및 분위기 전환을 위한 역동적인 구슬 레이스" data-ja="グループコンテストや気分転換のためのリアルタイムビー玉レース">강의 중 조별 경연 및 분위기 전환을 위한 역동적인 실시간 구슬 레이스 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-orange-500 group-hover:text-orange-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 13. 마블레이싱 게임 (클로드) -->
-                <a href="/game/mablerace/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="마블레이싱 게임 클로드 경연 레이싱 조별 이벤트">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🏁</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200" data-ko="레이싱" data-ja="レーシング">레이싱</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-amber-500 transition-colors" data-ko="마블레이싱 (클로드)" data-ja="マーブルレーシング (Claude)">마블레이싱 (클로드)</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="집중력 향상과 팀별 아이스브레이킹을 위한 구슬 시뮬레이션" data-ja="集中力向上とチーム別アイスブレイクのためのシミュレーション">강의 중 집중력 향상과 팀별 아이스브레이킹을 위한 구슬 롤링 시뮬레이션 게임</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-500 group-hover:text-amber-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 14. 룰렛 추첨 게임 (한국어) -->
-                <a href="/game/roulet/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="룰렛 게임 발표자 추첨 랜덤 제비뽑기 질문자">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🎯</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-600 border border-red-200" data-ko="랜덤 추첨" data-ja="ランダム抽選">랜덤 추첨</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-red-500 transition-colors" data-ko="발표자 룰렛 추첨 (한국어)" data-ja="発表者ルーレット抽選 (韓国語)">발표자 룰렛 추첨 (한국어)</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="교육생 발표자 지정을 위한 공정하고 긴장감 넘치는 룰렛" data-ja="質疑応答や発表者指定のための緊張感あふれるルーレット">교육생 질의응답 및 조별 발표자 지정을 위한 공정하고 긴장감 넘치는 한국어 지원 회전 룰렛</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-red-500 group-hover:text-red-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 15. 룰렛 게임 (English) -->
-                <a href="/game/roulet-eng/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="룰렛 게임 영어 eng roulette random draw selection">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🎡</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200" data-ko="Global Edition" data-ja="グローバル版">Global Edition</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-rose-500 transition-colors" data-ko="룰렛 게임 (English)" data-ja="ルーレットゲーム (English)">룰렛 게임 (English)</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="외국인 교육생을 위한 영문 인터페이스 지원 무작위 룰렛" data-ja="グローバル教育生のための英語インターフェース支援ルーレット">글로벌 및 외국인 교육생을 위한 영문 인터페이스 지원 무작위 룰렛 추첨 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-rose-500 group-hover:text-rose-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 16. 테트리스 게임 -->
-                <a href="/game/tetris/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="테트리스 게임 블록 미니게임 휴식 퍼즐">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-yellow-50 border border-yellow-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🧩</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-600 border border-yellow-200" data-ko="클래식" data-ja="クラシック">클래식</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-yellow-500 transition-colors" data-ko="클래식 테트리스" data-ja="クラシックテトリス">클래식 테트리스</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="쉬는 시간 두뇌 회전을 위한 전통적인 블록 퍼즐 미니게임" data-ja="休憩時間のための伝統的なブロックパズルミニゲーム">강의 쉬는 시간 두뇌 회전 및 가벼운 휴식을 위한 전통적인 블록 퍼즐 미니게임</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-yellow-500 group-hover:text-yellow-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 17. 퍼즐버블 게임 -->
-                <a href="/game/puzzlebubble/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="퍼즐버블 게임 버블 슈터 슈팅 휴식 방울">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-lime-50 border border-lime-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🫧</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-lime-50 text-lime-600 border border-lime-200" data-ko="버블 퍼즐" data-ja="バブルパズル">버블 퍼즐</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-lime-500 transition-colors" data-ko="퍼즐버블 게임" data-ja="パズルボブルゲーム">퍼즐버블 게임</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="동일한 색상의 버블을 조준해 터뜨리는 캐주얼 퍼즐 게임" data-ja="同じ色のバブルを狙って消すカジュアルアーケードパズル">동일한 색상의 버블을 조준해 터뜨리는 캐주얼 아케이드 퍼즐 게임</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-lime-500 group-hover:text-lime-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 18. 블록깨기 게임 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/block/" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="블록깨기 게임 아케이드 벽돌깨기 브릭 알카노이드">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🧱</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-200" data-ko="아케이드" data-ja="アーケード">아케이드</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-green-500 transition-colors" data-ko="벽돌깨기 게임" data-ja="ブロック崩しゲーム">벽돌깨기 게임</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="패들로 공을 튕겨 화면 내 블록을 제거하는 고전 브릭 브레이커" data-ja="パドルでボールを弾いてブロックを消す古典的名作">패들로 공을 튕겨 화면 내 블록을 제거해 나가는 고전 명작 브릭 브레이커</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-green-500 group-hover:text-green-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 19. 스네이크 게임 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/snake" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="스네이크 게임 뱀게임 방향키 먹이 레트로">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🐍</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200" data-ko="레트로" data-ja="レトロ">레트로</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-emerald-500 transition-colors" data-ko="스네이크 뱀 게임" data-ja="スネークゲーム">스네이크 뱀 게임</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="먹이를 먹으며 몸집을 늘려가는 클래식 스네이크" data-ja="方向キーを制御して餌を食べながら体を大きくするゲーム">키보드 방향키를 제어하여 먹이를 먹으며 몸집을 늘려가는 클래식 스네이크</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-500 group-hover:text-emerald-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 20. 플래피 버드 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/bird/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="플래피 버드 장애물 점프 게임 터치">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🐦</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-600 border border-cyan-200" data-ko="아케이드" data-ja="アーケード">아케이드</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-cyan-500 transition-colors" data-ko="플래피 버드" data-ja="フラッピーバード">플래피 버드</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="타이밍에 맞춰 파이프 사이를 통과하는 순발력 게임" data-ja="タイミングに合わせて障害物を通過する瞬発力ゲーム">타이밍에 맞춰 날갯짓하며 장애물 파이프 사이를 통과하는 순발력 게임</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-cyan-500 group-hover:text-cyan-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 21. 스페이스 인베이더 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/space/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="스페이스 인베이더 외계인 슈팅 고전게임">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">👾</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200" data-ko="슈팅" data-ja="シューティング">슈팅</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-indigo-500 transition-colors" data-ko="스페이스 인베이더" data-ja="スペースインベーダー">스페이스 인베이더</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="외계 함선을 요격하며 기지를 방어하는 레트로 우주 슈팅" data-ja="エイリアンを迎撃して基地を防衛するレトロ宇宙シューティング">하강하는 외계 함선을 요격하며 기지를 방어하는 전설적인 복고풍 우주 슈팅 게임</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-500 group-hover:text-indigo-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 22. 너구리 게임 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/game/ngr/ngr.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="너구리 게임 폰포코 점프 과일 레트로 고전">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🦝</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200" data-ko="어드벤처" data-ja="アドベンチャー">어드벤처</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-orange-500 transition-colors" data-ko="너구리 (Ponpoko) 게임" data-ja="ポンポコ (Ponpoko) ゲーム">너구리 (Ponpoko) 게임</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="장애물을 피해 점프하며 과일을 획득하는 클래식 어드벤처" data-ja="障害物を避けてジャンプしフルーツを獲得するアドベンチャー">가시와 몬스터를 피해 점프하며 과일을 획득하는 향수의 클래식 점프 어드벤처</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-orange-500 group-hover:text-orange-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 23. 3D모델링 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/3d/index.html" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="3D모델링">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🧊</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-600 border border-sky-200" data-ko="3D" data-ja="3D">3D</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-sky-500 transition-colors" data-ko="3D 모델링" data-ja="3Dモデリング">3D 모델링</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="웹 기반 3D 모델링 및 시각화 실습 도구" data-ja="ウェブベースの3Dモデリングおよび視覚化実習ツール">웹 기반 3D 모델링 및 시각화 실습 도구</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-sky-500 group-hover:text-sky-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-                <!-- 24. 3D모델링(챗지피티) -->
-                <a href="https://easy-page-fly.lovable.app" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="3D모델링 챗지피티 AI">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">✨</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200" data-ko="AI 3D" data-ja="AI 3D">AI 3D</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-indigo-500 transition-colors" data-ko="3D 모델링 (챗지피티)" data-ja="3Dモデリング (ChatGPT)">3D 모델링 (챗지피티)</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="생성형 AI를 활용한 빠르고 직관적인 3D 객체 생성 에이전트" data-ja="生成AIを活用した直感的な3Dオブジェクトモデリング">생성형 AI를 활용한 빠르고 직관적인 3D 객체 모델링 생성 에이전트</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-500 group-hover:text-indigo-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-
-
-                <!-- 25. 법령포털 -->
-                   <a href="https://easy-page-fly.lovable.app" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="3D모델링 챗지피티 AI">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">✨</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200" data-ko="AI 3D" data-ja="AI 3D">AI 3D</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-indigo-500 transition-colors" data-ko="3D 모델링 (챗지피티)" data-ja="">법령포털)</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="법령포털" data-ja="">법령포털</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-500 group-hover:text-indigo-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-
-
-        <!-- 26. 오피스 -->
-                <a href="https://sirrius2022-spec.github.io/ksn/agent/op/" onclick="handleLinkClick(event, this.href)" target="_blank" class="tool-card tech-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden text-left w-full" data-category="game" data-keywords="오피스">
-                    <div>
-                        <div class="flex items-center justify-between mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform shadow-sm">🐍</div>
-                            <span class="i18n text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200" data-ko="오피스" data-ja="レトロ">오피스</span>
-                        </div>
-                        <h3 class="i18n text-base sm:text-lg font-bold text-slate-800 group-hover:text-emerald-500 transition-colors" data-ko="오피스" data-ja="スネークゲーム">오피스</h3>
-                        <p class="i18n text-slate-500 text-xs sm:text-sm mt-2 line-clamp-2 leading-relaxed" data-ko="오피스" data-ja="方向キーを制御して餌を食べながら体を大きくするゲーム">오피스</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-500 group-hover:text-emerald-600">
-                        <span class="i18n" data-ko="실행하기" data-ja="実行する">실행하기</span> <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
-                    </div>
-                </a>
-   
-
-            </div>
-
-            <!-- Empty Search State -->
-            <div id="noResults" class="hidden text-center py-16 bg-white/60 rounded-3xl border border-dashed border-slate-300 backdrop-blur-sm mt-6">
-                <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-2xl text-slate-400 mb-4 shadow-sm">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </div>
-                <p class="i18n text-base font-bold text-slate-700" data-ko="검색 결과가 없습니다" data-ja="検索結果がありません">검색 결과가 없습니다</p>
-                <p class="i18n text-xs text-slate-500 mt-1" data-ko="다른 검색어를 입력하시거나 카테고리 탭을 변경해 보세요." data-ja="別の検索語を入力するか、カテゴリタブを変更してみてください。">다른 검색어를 입력하시거나 카테고리 탭을 변경해 보세요.</p>
-                <button onclick="resetSearchAndFilters()" class="i18n mt-4 px-4 py-2 rounded-xl text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm" data-ko="전체 목록 보기" data-ja="すべてのリストを表示">
-                    전체 목록 보기
-                </button>
-            </div>
-        </section>
-
-        <!-- Interactive Resource Banners (보물창고 & 방명록) -->
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-            <!-- 보물창고 카드 -->
-            <div class="relative overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-6 sm:p-8 flex flex-col justify-between shadow-md">
-                <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/60 rounded-full blur-2xl pointer-events-none"></div>
-                <div>
-                    <div class="inline-flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-wider mb-3">
-                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                        <i class="fa-solid fa-box-archive"></i> Class Materials
-                    </div>
-                    <h3 class="i18n text-xl sm:text-2xl font-black text-amber-900 mb-2" data-ko="보물창고 (실습 자료실)" data-ja="宝物庫 (実習資料室)">보물창고 (실습 자료실)</h3>
-                    <p class="i18n text-amber-800/80 text-xs sm:text-sm leading-relaxed mb-6 font-medium" data-ko="스마트 안전 강의에 필요한 각종 실습 서식, 예제 데이터 및 교안 자료를 열람하세요." data-ja="スマート安全講義に必要な各種実習書式、デモデータ、講義資料を閲覧できます。">
-                        스마트 안전 강의에 필요한 각종 실습 서식, 시연 예제 데이터 및 핵심 강의 교안 자료를 자유롭게 열람하고 다운로드하세요.
-                    </p>
-                </div>
-                <div>
-                    <a href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" onclick="handleLinkClick(event, this.href)" target="_blank"
-                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-amber-200 hover:scale-[1.02]">
-                        <span class="i18n" data-ko="보물창고 바로가기" data-ja="宝物庫へ移動">보물창고 바로가기</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 방명록 카드 -->
-            <div class="relative overflow-hidden rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-blue-50 to-sky-50 p-6 sm:p-8 flex flex-col justify-between shadow-md">
-                <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/60 rounded-full blur-2xl pointer-events-none"></div>
-                <div>
-                    <div class="inline-flex items-center gap-2 text-indigo-600 text-xs font-bold uppercase tracking-wider mb-3">
-                        <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-                        <i class="fa-solid fa-comments"></i> Feedback & Q&A
-                    </div>
-                    <h3 class="i18n text-xl sm:text-2xl font-black text-indigo-900 mb-2" data-ko="방명록 & 질의응답" data-ja="芳名録 & 質疑応答">방명록 & 질의응답</h3>
-                    <p class="i18n text-indigo-800/80 text-xs sm:text-sm leading-relaxed mb-6 font-medium" data-ko="강의에 대한 생생한 후기, 교육 소감이나 현장 적용 공학적 질문을 남겨주세요." data-ja="講義の感想、教育の所感、現場への適用などに関する質問を自由に投稿してください。">
-                        강의에 대한 생생한 후기, 교육 소감이나 현장 스마트 안전 적용과 관련된 공학적 질문을 자유롭게 남겨주세요.
-                    </p>
-                </div>
-                <div>
-                    <a href="https://padlet.com/sirrius2022/padlet-9cd0j2khbmx7m2ec" onclick="handleLinkClick(event, this.href)" target="_blank"
-                       class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-400 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-indigo-200 hover:scale-[1.02]">
-                        <span class="i18n" data-ko="방명록 남기기" data-ja="芳名録を作成">방명록 남기기</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="relative z-10 border-t border-slate-200 bg-white/90 backdrop-blur-xl mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <div class="text-center sm:text-left">
-                <p class="i18n text-slate-700 font-semibold mb-1" data-ko="운영 및 개발: <span class='text-slate-900 font-bold'>김성남 교수</span> (스마트 건설안전 아카데미)" data-ja="運営および開発: <span class='text-slate-900 font-bold'>キム・ソンナム教授</span> (スマート建設安全アカデミー)">
-                    운영 및 개발: <span class="text-slate-900 font-bold">김성남 교수</span> (스마트 건설안전 아카데미)
-                </p>
-                <p class="i18n text-slate-500 text-[11px]" data-ko="본 포털은 건설안전 기술인의 역량 강화 및 스마트 안전공학 교육을 위해 제작되었습니다." data-ja="本ポータルは建設安全技術者の力量強化とスマート安全工学教育のために制作されました。">
-                    본 포털은 건설안전 기술인의 역량 강화 및 스마트 안전공학 교육을 위해 제작되었습니다.
-                </p>
-            </div>
-            <div class="flex items-center gap-4 text-slate-500">
-                <a href="mailto:sirrius@naver.com" class="hover:text-blue-500 transition-colors flex items-center gap-1.5 font-medium">
-                    <i class="fa-regular fa-envelope"></i> sirrius@naver.com
-                </a>
-                <span class="text-slate-300">•</span>
-                <span>&copy; 2026 Kim Sung-nam</span>
-            </div>
+        <div>
+          <div class="brand__name"><span data-i="name">김성남</span><span class="badge">ACADEMY</span></div>
+          <p class="brand__sub" data-i="sub">스마트 건설안전 · AI 공학 통합 포털</p>
         </div>
-    </footer>
-
-    <!-- Minimalist Toast Notification -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
-        <div class="bg-white/95 text-slate-800 text-xs font-bold px-5 py-3 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-2.5 backdrop-blur-xl">
-            <i class="fa-solid fa-circle-check text-blue-500 text-sm"></i>
-            <span id="toastMsg">알림 메시지</span>
+      </div>
+      <div class="actions">
+        <div class="seg" role="group" aria-label="Language">
+          <button type="button" data-lang="ko" aria-pressed="true">KR</button>
+          <button type="button" data-lang="ja" aria-pressed="false">JP</button>
         </div>
+        <a class="btn btn--ghost btn--lib" data-ext href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" target="_blank" rel="noopener" data-i="lib">실습자료실</a>
+        <button class="btn btn--ghost" type="button" id="copyBtn" data-i="copy">주소 복사</button>
+      </div>
     </div>
 
-    <!-- Application Logic -->
-    <script>
-        let currentCategory = 'all';
+    <div class="hero__body">
+      <div>
+        <div class="pill"><i></i><span data-i="pill">스마트 건설안전기술 &amp; 생성형 AI 교육 에이전트</span></div>
+        <h1 data-i="h1" data-html>건설안전의 미래를 이끄는<br><em>스마트 AI 공학 실습 플랫폼</em></h1>
+        <p class="hero__lead" data-i="lead" data-html>안녕하세요, <strong>김성남</strong>입니다. 건설안전 현장 실무와 학술적 공학 이론을 융합한 통합 교육 허브입니다. 현장에서 즉시 활용 가능한 <mark>AI 위험성 평가 에이전트, 흙막이 탄소성 해석, 실무 유틸리티 도구 및 참여형 강의 컨텐츠</mark>를 제공합니다.</p>
+        <ul class="tags">
+          <li>🦺 <span data-i="t1">건설안전공학</span></li>
+          <li>🧠 <span data-i="t2">4M 위험성 평가</span></li>
+          <li>🤖 <span data-i="t3">생성형 AI 실무 도구</span></li>
+          <li>⚡ <span data-i="t4">인터랙티브 강의</span></li>
+        </ul>
+        <div class="cta">
+          <a class="btn btn--primary btn--lg" href="#tools" data-i="cta1">실습 도구 바로가기 →</a>
+          <a class="btn btn--ghost btn--lg" data-ext href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" target="_blank" rel="noopener" data-i="cta2">보물창고 열기</a>
+        </div>
+      </div>
 
-        function filterCategory(category) {
-            currentCategory = category;
+      <aside class="stats" aria-label="Platform overview">
+        <h2><span>Platform Overview</span><span aria-hidden="true">❄</span></h2>
+        <div class="stats__grid">
+          <div class="stat"><b id="statCount">20+</b><span data-i="s1">등록 실무도구</span></div>
+          <div class="stat"><b>100%</b><span data-i="s2">웹 기반 즉시실행</span></div>
+        </div>
+        <div class="stats__foot"><span data-i="s3">최적화 환경</span><b data-i="s4">✓ 모바일 &amp; PC 대응</b></div>
+        <p class="stats__note" data-i="note">❄ 동절기 안전관리 · 결빙·적설·한랭 위험요인까지 AI로 점검하는 겨울철 현장 안전 포털</p>
+      </aside>
+    </div>
+  </div>
+</header>
 
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                const isActive = btn.dataset.category === category;
-                if (isActive) {
-                    btn.className = 'tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-blue-400 text-white shadow-md shadow-blue-200 border border-blue-300 flex items-center gap-1.5';
-                } else {
-                    btn.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-white/80 text-slate-600 hover:text-slate-900 hover:bg-white border border-slate-200 flex items-center gap-1.5 shadow-sm';
-                }
-            });
+<!-- ========== CONTROLS ========== -->
+<div class="controls">
+  <div class="wrap controls__in">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Category"></div>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <label class="sr" for="q" data-i="searchLabel">도구 검색</label>
+      <input id="q" type="search" autocomplete="off" enterkeyhint="search" data-i="ph" placeholder="도구명, 키워드 검색... ( / )">
+      <button type="button" class="search__clear" id="clearBtn" aria-label="Clear" hidden>✕</button>
+    </div>
+  </div>
+</div>
 
-            applyFilters();
-        }
+<!-- ========== MAIN ========== -->
+<main id="tools">
+  <div class="wrap">
+    <p class="result-meta" id="meta" aria-live="polite"></p>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" hidden>
+      <strong data-i="e1">검색 결과가 없습니다</strong>
+      <p data-i="e2">다른 검색어를 입력하시거나 카테고리 탭을 변경해 보세요.</p>
+      <button type="button" class="btn" id="resetBtn" data-i="e3">전체 목록 보기</button>
+    </div>
 
-        function handleSearch() {
-            const query = document.getElementById('searchInput').value.trim();
-            const clearBtn = document.getElementById('clearSearchBtn');
-            if (query.length > 0) {
-                clearBtn.classList.remove('hidden');
-            } else {
-                clearBtn.classList.add('hidden');
-            }
-            applyFilters();
-        }
+    <section class="banners" aria-label="Resources">
+      <article class="banner banner--a">
+        <div>
+          <small>Class Materials</small>
+          <h3 data-i="b1t">보물창고 (실습 자료실)</h3>
+          <p data-i="b1p">스마트 안전 강의에 필요한 각종 실습 서식, 시연 예제 데이터 및 핵심 강의 교안 자료를 자유롭게 열람하고 다운로드하세요.</p>
+        </div>
+        <a class="btn" data-ext href="https://padlet.com/sirrius2022/padlet-1h4n4p8bg8v71psw" target="_blank" rel="noopener"><span data-i="b1b">보물창고 바로가기</span> ↗</a>
+      </article>
+      <article class="banner banner--b">
+        <div>
+          <small>Feedback &amp; Q&amp;A</small>
+          <h3 data-i="b2t">방명록 &amp; 질의응답</h3>
+          <p data-i="b2p">강의에 대한 생생한 후기, 교육 소감이나 현장 스마트 안전 적용과 관련된 공학적 질문을 자유롭게 남겨주세요.</p>
+        </div>
+        <a class="btn" data-ext href="https://padlet.com/sirrius2022/padlet-9cd0j2khbmx7m2ec" target="_blank" rel="noopener"><span data-i="b2b">방명록 남기기</span> ↗</a>
+      </article>
+    </section>
+  </div>
+</main>
 
-        function clearSearch() {
-            const searchInput = document.getElementById('searchInput');
-            searchInput.value = '';
-            document.getElementById('clearSearchBtn').classList.add('hidden');
-            searchInput.focus();
-            applyFilters();
-        }
+<footer>
+  <div class="wrap foot">
+    <div>
+      <p data-i="f1" data-html>운영 및 개발: <strong>김성남 교수</strong> (스마트 건설안전 아카데미)</p>
+      <p data-i="f2">본 포털은 건설안전 기술인의 역량 강화 및 스마트 안전공학 교육을 위해 제작되었습니다.</p>
+    </div>
+    <div class="foot__r">
+      <a href="mailto:sirrius@naver.com">✉ sirrius@naver.com</a>
+      <span>&copy; 2026 Kim Sung-nam</span>
+    </div>
+  </div>
+</footer>
 
-        function resetSearchAndFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('clearSearchBtn').classList.add('hidden');
-            filterCategory('all');
-        }
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-        function applyFilters() {
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-            const cards = document.querySelectorAll('.tool-card');
-            let visibleCount = 0;
+<script>
+'use strict';
+/* =====================================================================
+ * 1. 데이터  — 도구 추가/수정은 이 배열만 편집하면 됩니다.
+ *    c: 카테고리(ai|utility|game) · hue: 색상 키 · k: 검색 키워드
+ * ===================================================================== */
+const CATEGORIES = [
+  {id:'all',     ko:'전체보기',            ja:'すべて表示',          ico:'🗂'},
+  {id:'ai',      ko:'건설안전 & AI',       ja:'建設安全 & AI',       ico:'🤖'},
+  {id:'utility', ko:'실무 & 생성도구',     ja:'実務 & 生成ツール',   ico:'🧰'},
+  {id:'game',    ko:'강의용 게임 & 이벤트', ja:'講義ゲーム & イベント', ico:'🎮'}
+];
 
-            cards.forEach(card => {
-                const cardCategory = card.dataset.category;
-                const cardKeywords = (card.dataset.keywords || '').toLowerCase();
-                // 언어에 따라 현재 렌더링된 텍스트 기반으로 검색
-                const cardTitle = card.querySelector('h3').innerText.toLowerCase();
-                const cardText = card.querySelector('p').innerText.toLowerCase();
+/* 색상 팔레트: [배경, 테두리, 글자(대비 4.5:1 이상)] */
+const HUES = {
+  sky:['#e0f2fe','#bae6fd','#075985'], amber:['#fef3c7','#fde68a','#92400e'], red:['#fee2e2','#fecaca','#b91c1c'],
+  teal:['#ccfbf1','#99f6e4','#0f766e'], violet:['#ede9fe','#ddd6fe','#6d28d9'], emerald:['#d1fae5','#a7f3d0','#047857'],
+  cyan:['#cffafe','#a5f3fc','#0e7490'], pink:['#fce7f3','#fbcfe8','#be185d'], indigo:['#e0e7ff','#c7d2fe','#4338ca'],
+  purple:['#f3e8ff','#e9d5ff','#7e22ce'], orange:['#ffedd5','#fed7aa','#c2410c'], rose:['#ffe4e6','#fecdd3','#be123c'],
+  yellow:['#fef9c3','#fef08a','#854d0e'], lime:['#ecfccb','#d9f99d','#3f6212'], green:['#dcfce7','#bbf7d0','#15803d']
+};
 
-                const matchesCategory = (currentCategory === 'all' || cardCategory === currentCategory);
-                const matchesSearch = !searchQuery || 
-                                     cardKeywords.includes(searchQuery) || 
-                                     cardTitle.includes(searchQuery) || 
-                                     cardText.includes(searchQuery);
+const TOOLS = [
+  // ── 건설안전 & AI ──
+  {c:'ai', hue:'sky', ico:'🤖', url:'/agent/4m/index.html',
+   tag:{ko:'위험성평가', ja:'危険性評価'},
+   title:{ko:'4M 위험성 평가 에이전트', ja:'4M 危険性評価エージェント'},
+   desc:{ko:'현장 사진을 기반으로 4M(인적·기계적·작업적·관리적) 위험 요인을 정밀 분석하는 전문 도구', ja:'現場写真に基づいて4M(人・機械・作業・管理)のリスク要因を精密分析する専門ツール'},
+   k:'4m 위험성 평가 에이전트 현장 사진 분석 인적 기계적 작업적 관리적 안전진단'},
+  {c:'ai', hue:'amber', ico:'🏗️', url:'https://sirrius2022-spec.github.io/ksn/agent/sunex-ai',
+   tag:{ko:'지반공학 AI', ja:'地盤工学 AI'},
+   title:{ko:'흙막이 탄소성 해석 에이전트', ja:'山留め弾塑性解析エージェント'},
+   desc:{ko:'굴착 단계별 지반의 탄소성 거동과 지반-구조물 상호작용을 분석하여 안전성을 검토하는 전문 도구', ja:'掘削段階別の地盤挙動と地盤・構造物の相互作用を分析し、安全性を検討する専門ツール'},
+   k:'흙막이 탄소성 해석 굴착 지반 거동 구조물 상호작용 지반공학 sunex'},
+  {c:'ai', hue:'red', ico:'🚜', url:'https://sirrius2022-spec.github.io/ksn/agent/car1/car1.html',
+   tag:{ko:'장비 안전', ja:'装備安全'},
+   title:{ko:'이동식크레인 안전성검토', ja:'移動式クレーン安全性検討'},
+   desc:{ko:'이동식 크레인 양중 작업 시 정격하중, 작업반경 및 전복 방지 안전율을 체계적으로 산출·검토하는 도구', ja:'揚重作業時の定格荷重、作業半径および転倒防止安全率を算出・検討するツール'},
+   k:'이동식크레인 안전성검토 양중작업 크레인 하중 모멘트 전복 위험도'},
+  {c:'ai', hue:'orange', ico:'🔨', url:'https://sirrius2022-spec.github.io/ksn/agent/car2/car2.html',
+   tag:{ko:'장비 안전', ja:'装備安全'},
+   title:{ko:'항타기 안전성검토', ja:'杭打機安全性検討'},
+   desc:{ko:'항타기 작업 시 지반 지지력과 장비 전도 안전율을 검토하는 도구', ja:'杭打機作業時の地盤支持力と機械の転倒安全率を検討するツール'},
+   k:'항타기 안전성검토 파일 항타 지지력 전도 장비 car2'},
+  {c:'ai', hue:'teal', ico:'🔢', url:'/agent/cal/index.html',
+   tag:{ko:'공학 계산', ja:'工学計算'},
+   title:{ko:'스마트 공학용 계산기', ja:'スマート工学用電卓'},
+   desc:{ko:'강의 및 현장 실무에서 복잡한 구조·역학 수식을 즉각 해결할 수 있는 웹 기반 정밀 공학 계산기', ja:'講義や現場実務で複雑な構造・力学の数式を即座に解決できるWeb工学電卓'},
+   k:'스마트 공학용 계산기 수식 계산 현장 실무 웹 계산기 삼각함수'},
+  {c:'ai', hue:'violet', ico:'🌐', url:'https://sirrius2022-spec.github.io/ksn/guide/homepage/index.html',
+   tag:{ko:'웹 구축 가이드', ja:'ウェブ構築ガイド'},
+   title:{ko:'홈페이지 제작 가이드', ja:'ホームページ制作ガイド'},
+   desc:{ko:'건설 기술인을 위한 개인 지식 공유 플랫폼 및 맞춤형 AI 에이전트 웹사이트 구축 가이드', ja:'建設技術者のための個人知識共有プラットフォーム構築ガイド'},
+   k:'홈페이지 제작 가이드 개인 웹사이트 지식 공유 에이전트 구축 매뉴얼'},
+  {c:'ai', hue:'indigo', ico:'⚖️', url:'https://sirrius2022-spec.github.io/ksn/agent/law/index.html',   /* ⚠ URL 확인 필요 */
+   tag:{ko:'법령 검색', ja:'法令検索'},
+   title:{ko:'건설안전 법령포털', ja:'建設安全 法令ポータル'},
+   desc:{ko:'건설현장 안전용어와 관련 법령을 함께 검색하는 법령·용어 검색 앱', ja:'建設現場の安全用語と関連法令を併せて検索できるアプリ'},
+   k:'법령포털 법령 용어 사전 검색 안전용어 산업안전보건법 law'},
+  {c:'ai', hue:'emerald', ico:'🏢', url:'https://sirrius2022-spec.github.io/ksn/agent/op/',
+   tag:{ko:'AI 오피스', ja:'AIオフィス'},
+   title:{ko:'김성남 오피스', ja:'キム・ソンナム オフィス'},
+   desc:{ko:'사장실·교육부·컨설팅부 등 AI 직원이 일하는 평면도형 가상 오피스', ja:'社長室・教育部・コンサル部などAI社員が働く平面図形の仮想オフィス'},
+   k:'오피스 가상 오피스 ai 직원 사장실 교육부 컨설팅부'},
 
-                if (matchesCategory && matchesSearch) {
-                    card.style.display = 'flex';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+  // ── 실무 & 생성도구 ──
+  {c:'utility', hue:'emerald', ico:'📱', url:'https://sirrius2022-spec.github.io/ksn/agent/qr/index.html',
+   tag:{ko:'생성 도구', ja:'生成ツール'},
+   title:{ko:'QR코드 이미지 생성기', ja:'QRコード画像生成器'},
+   desc:{ko:'원하는 URL 및 교육 텍스트를 고화질 QR코드 이미지로 즉시 생성·다운로드하는 도구', ja:'URLやテキストを高画質QRコード画像として即座に生成・保存するツール'},
+   k:'qr코드 이미지 생성기 큐알 생성 텍스트 주소 변환'},
+  {c:'utility', hue:'cyan', ico:'📝', url:'https://sirrius2022-spec.github.io/ksn/agent/memo/index.html',
+   tag:{ko:'실무 유틸', ja:'実務ツール'},
+   title:{ko:'무료 웹 메모장', ja:'無料ウェブメモ帳'},
+   desc:{ko:'강의 필기나 현장 아이디어를 별도 설치 없이 브라우저에서 안전하게 기록하는 스마트 메모장', ja:'インストール不要でブラウザ上に安全に記録できるスマートメモ帳'},
+   k:'메모장 무료 웹 메모 필기 실무 노트'},
+  {c:'utility', hue:'pink', ico:'🎙️', url:'https://sirrius2022-spec.github.io/ksn/agent/aiwav/index.html',
+   tag:{ko:'음성 생성', ja:'音声生成'},
+   title:{ko:'AI 성우 (TTS 음성 변환)', ja:'AI声優 (TTS音声変換)'},
+   desc:{ko:'안전 안내방송이나 교재 텍스트를 자연스러운 성우 음성으로 변환하고 고음질 파일로 내려받는 도구', ja:'案内放送やテキストを自然な音声に変換して保存するツール'},
+   k:'ai 성우 tts 텍스트 음성 변환 wav 저장 리딩 안내방송'},
+  {c:'utility', hue:'indigo', ico:'🌍', url:'https://sirrius2022-spec.github.io/ksn/agent/8lang/8lang.html',
+   tag:{ko:'다국어 통역', ja:'多言語通訳'},
+   title:{ko:'다국어 AI 번역기 (8개국어)', ja:'多言語AI翻訳機 (8ヶ国語)'},
+   desc:{ko:'다국적 현장 근로자 및 안전 교육을 위한 8개국 주요 언어 안전 수칙 번역 지원 도구', ja:'多国籍の現場労働者向けに、安全規則を8言語で翻訳するツール'},
+   k:'8개국어 번역기 외국인 근로자 다국어 안전 번역 글로벌'},
+  {c:'utility', hue:'sky', ico:'💬', url:'https://sirrius2022-spec.github.io/ksn/agent/text/index.html',
+   tag:{ko:'데이터 전송', ja:'データ転送'},
+   title:{ko:'스마트 텍스트 전달 도구', ja:'スマートテキスト伝達ツール'},
+   desc:{ko:'강의 수강생과 강사 간 또는 기기 간에 텍스트와 코드를 빠르게 주고받는 브라우저 전송 도구', ja:'受講生と講師、または端末間でテキストやコードを素早くやり取りするツール'},
+   k:'텍스트 전달 실시간 클립보드 공유 현장 메시지'},
+  {c:'utility', hue:'violet', ico:'🧊', url:'https://sirrius2022-spec.github.io/ksn/agent/3d/index.html',
+   tag:{ko:'3D', ja:'3D'},
+   title:{ko:'3D 모델링', ja:'3Dモデリング'},
+   desc:{ko:'웹 기반 3D 모델링 및 시각화 실습 도구', ja:'ウェブベースの3Dモデリングおよび視覚化実習ツール'},
+   k:'3d 모델링 시각화 실습'},
+  {c:'utility', hue:'indigo', ico:'✨', url:'https://easy-page-fly.lovable.app',
+   tag:{ko:'AI 3D', ja:'AI 3D'},
+   title:{ko:'3D 모델링 (챗지피티)', ja:'3Dモデリング (ChatGPT)'},
+   desc:{ko:'생성형 AI를 활용한 빠르고 직관적인 3D 객체 모델링 생성 에이전트', ja:'生成AIを活用した直感的な3Dオブジェクトモデリング'},
+   k:'3d 모델링 챗지피티 chatgpt ai'},
+  {c:'utility', hue:'purple', ico:'🔮', url:'https://sirrius2022-spec.github.io/ksn/game/lotto',
+   tag:{ko:'이벤트', ja:'イベント'},
+   title:{ko:'로또 번호 생성기', ja:'ロト番号生成器'},
+   desc:{ko:'행운의 숫자를 무작위 알고리즘으로 추출하는 휴식용 도구', ja:'ランダムアルゴリズムで幸運の数字を抽出する休憩用ツール'},
+   k:'로또 번호 생성기 행운 번호 추첨 이벤트 휴식'},
 
-            const noResults = document.getElementById('noResults');
-            if (visibleCount === 0) {
-                noResults.classList.remove('hidden');
-            } else {
-                noResults.classList.add('hidden');
-            }
-        }
+  // ── 강의용 게임 & 이벤트 ──
+  {c:'game', hue:'orange', ico:'🏎️', url:'/game/mableroulet/index.html',
+   tag:{ko:'레이싱', ja:'レーシング'},
+   title:{ko:'마블레이싱 (제미나이)', ja:'マーブルレーシング (Gemini)'},
+   desc:{ko:'강의 중 조별 경연 및 분위기 전환을 위한 역동적인 실시간 구슬 레이스 도구', ja:'グループ対抗や気分転換のためのリアルタイムのビー玉レース'},
+   k:'마블레이싱 게임 제미나이 gemini 경연 레이싱 조별 아이스브레이킹 구슬'},
+  {c:'game', hue:'amber', ico:'🏁', url:'/game/mablerace/index.html',
+   tag:{ko:'레이싱', ja:'レーシング'},
+   title:{ko:'마블레이싱 (클로드)', ja:'マーブルレーシング (Claude)'},
+   desc:{ko:'강의 중 집중력 향상과 팀별 아이스브레이킹을 위한 구슬 롤링 시뮬레이션 게임', ja:'集中力向上とチーム別アイスブレイクのためのビー玉シミュレーション'},
+   k:'마블레이싱 게임 클로드 claude 경연 레이싱 조별 이벤트'},
+  {c:'game', hue:'red', ico:'🎯', url:'/game/roulet/index.html',
+   tag:{ko:'랜덤 추첨', ja:'ランダム抽選'},
+   title:{ko:'발표자 룰렛 추첨 (한국어)', ja:'発表者ルーレット抽選 (韓国語)'},
+   desc:{ko:'교육생 질의응답 및 조별 발표자 지정을 위한 공정하고 긴장감 넘치는 한국어 회전 룰렛', ja:'質疑応答や発表者指定のための、公平で緊張感のあるルーレット'},
+   k:'룰렛 게임 발표자 추첨 랜덤 제비뽑기 질문자'},
+  {c:'game', hue:'rose', ico:'🎡', url:'/game/roulet-eng/index.html',
+   tag:{ko:'Global Edition', ja:'グローバル版'},
+   title:{ko:'룰렛 게임 (English)', ja:'ルーレットゲーム (English)'},
+   desc:{ko:'글로벌 및 외국인 교육생을 위한 영문 인터페이스 지원 무작위 룰렛 추첨 도구', ja:'グローバル受講生向けの英語インターフェース対応ルーレット'},
+   k:'룰렛 게임 영어 eng roulette random draw selection'},
+  {c:'game', hue:'yellow', ico:'🧩', url:'/game/tetris/index.html',
+   tag:{ko:'클래식', ja:'クラシック'},
+   title:{ko:'클래식 테트리스', ja:'クラシックテトリス'},
+   desc:{ko:'강의 쉬는 시간 두뇌 회전 및 가벼운 휴식을 위한 전통적인 블록 퍼즐 미니게임', ja:'休憩時間の頭の体操に最適な定番ブロックパズル'},
+   k:'테트리스 게임 블록 미니게임 휴식 퍼즐'},
+  {c:'game', hue:'lime', ico:'🫧', url:'/game/puzzlebubble/index.html',
+   tag:{ko:'버블 퍼즐', ja:'バブルパズル'},
+   title:{ko:'퍼즐버블 게임', ja:'パズルボブルゲーム'},
+   desc:{ko:'동일한 색상의 버블을 조준해 터뜨리는 캐주얼 아케이드 퍼즐 게임', ja:'同じ色のバブルを狙って消すカジュアルパズル'},
+   k:'퍼즐버블 게임 버블 슈터 슈팅 휴식 방울'},
+  {c:'game', hue:'green', ico:'🧱', url:'https://sirrius2022-spec.github.io/ksn/game/block/',
+   tag:{ko:'아케이드', ja:'アーケード'},
+   title:{ko:'벽돌깨기 게임', ja:'ブロック崩しゲーム'},
+   desc:{ko:'패들로 공을 튕겨 화면 내 블록을 제거해 나가는 고전 명작 브릭 브레이커', ja:'パドルでボールを弾いてブロックを崩す古典的名作'},
+   k:'블록깨기 게임 아케이드 벽돌깨기 브릭'},
+  {c:'game', hue:'emerald', ico:'🐍', url:'https://sirrius2022-spec.github.io/ksn/game/snake',
+   tag:{ko:'레트로', ja:'レトロ'},
+   title:{ko:'스네이크 뱀 게임', ja:'スネークゲーム'},
+   desc:{ko:'키보드 방향키를 제어하여 먹이를 먹으며 몸집을 늘려가는 클래식 스네이크', ja:'方向キーで操作し、餌を食べて体を伸ばすクラシックゲーム'},
+   k:'스네이크 게임 뱀게임 방향키 먹이 레트로'},
+  {c:'game', hue:'cyan', ico:'🐦', url:'https://sirrius2022-spec.github.io/ksn/game/bird/index.html',
+   tag:{ko:'아케이드', ja:'アーケード'},
+   title:{ko:'플래피 버드', ja:'フラッピーバード'},
+   desc:{ko:'타이밍에 맞춰 날갯짓하며 장애물 파이프 사이를 통과하는 순발력 게임', ja:'タイミングよく羽ばたいて障害物を通過する瞬発力ゲーム'},
+   k:'플래피 버드 장애물 점프 게임 터치'},
+  {c:'game', hue:'indigo', ico:'👾', url:'https://sirrius2022-spec.github.io/ksn/game/space/index.html',
+   tag:{ko:'슈팅', ja:'シューティング'},
+   title:{ko:'스페이스 인베이더', ja:'スペースインベーダー'},
+   desc:{ko:'하강하는 외계 함선을 요격하며 기지를 방어하는 복고풍 우주 슈팅 게임', ja:'降下するエイリアンを迎撃して基地を守るレトロシューティング'},
+   k:'스페이스 인베이더 외계인 슈팅 고전게임'},
+  {c:'game', hue:'orange', ico:'🦝', url:'https://sirrius2022-spec.github.io/ksn/game/ngr/ngr.html',
+   tag:{ko:'어드벤처', ja:'アドベンチャー'},
+   title:{ko:'너구리 (Ponpoko) 게임', ja:'ポンポコ (Ponpoko) ゲーム'},
+   desc:{ko:'가시와 몬스터를 피해 점프하며 과일을 획득하는 향수의 클래식 점프 어드벤처', ja:'障害物を避けてジャンプし、フルーツを集める懐かしのアドベンチャー'},
+   k:'너구리 게임 폰포코 점프 과일 레트로 고전'}
+];
 
-        window.addEventListener('DOMContentLoaded', () => {
-            applyFilters();
-            // 페이지 첫 로딩 시 한국어 초기화
-            setLanguage('ko');
-        });
-    </script>
+/* =====================================================================
+ * 2. UI 문구 (한/일)
+ * ===================================================================== */
+const UI = {
+  ko:{name:'김성남', sub:'스마트 건설안전 · AI 공학 통합 포털', lib:'실습자료실', copy:'주소 복사',
+    pill:'스마트 건설안전기술 & 생성형 AI 교육 에이전트',
+    h1:'건설안전의 미래를 이끄는<br><em>스마트 AI 공학 실습 플랫폼</em>',
+    lead:'안녕하세요, <strong>김성남</strong>입니다. 건설안전 현장 실무와 학술적 공학 이론을 융합한 통합 교육 허브입니다. 현장에서 즉시 활용 가능한 <mark>AI 위험성 평가 에이전트, 흙막이 탄소성 해석, 실무 유틸리티 도구 및 참여형 강의 컨텐츠</mark>를 제공합니다.',
+    t1:'건설안전공학', t2:'4M 위험성 평가', t3:'생성형 AI 실무 도구', t4:'인터랙티브 강의',
+    cta1:'실습 도구 바로가기 →', cta2:'보물창고 열기',
+    s1:'등록 실무도구', s2:'웹 기반 즉시실행', s3:'최적화 환경', s4:'✓ 모바일 & PC 대응',
+    note:'❄ 동절기 안전관리 · 결빙·적설·한랭 위험요인까지 AI로 점검하는 겨울철 현장 안전 포털',
+    searchLabel:'도구 검색', ph:'도구명, 키워드 검색... ( / )',
+    e1:'검색 결과가 없습니다', e2:'다른 검색어를 입력하시거나 카테고리 탭을 변경해 보세요.', e3:'전체 목록 보기',
+    b1t:'보물창고 (실습 자료실)', b1p:'스마트 안전 강의에 필요한 각종 실습 서식, 시연 예제 데이터 및 핵심 강의 교안 자료를 자유롭게 열람하고 다운로드하세요.', b1b:'보물창고 바로가기',
+    b2t:'방명록 & 질의응답', b2p:'강의에 대한 생생한 후기, 교육 소감이나 현장 스마트 안전 적용과 관련된 공학적 질문을 자유롭게 남겨주세요.', b2b:'방명록 남기기',
+    f1:'운영 및 개발: <strong>김성남 교수</strong> (스마트 건설안전 아카데미)', f2:'본 포털은 건설안전 기술인의 역량 강화 및 스마트 안전공학 교육을 위해 제작되었습니다.',
+    go:'실행하기', copied:'홈페이지 주소가 복사되었습니다.', fail:'복사하지 못했습니다. 주소창에서 직접 복사해 주세요.',
+    count:(n,t)=>`총 ${t}개 중 ${n}개 표시`},
+  ja:{name:'キム・ソンナム', sub:'スマート建設安全・AI工学統合ポータル', lib:'実習資料室', copy:'コピー',
+    pill:'スマート建設安全技術 & 生成AI教育エージェント',
+    h1:'建設安全の未来を導く<br><em>スマートAI工学実践プラットフォーム</em>',
+    lead:'こんにちは、<strong>キム・ソンナム</strong>です。本ポータルは建設安全の現場実務と学術的な工学理論を融合した統合教育ハブです。現場で即時活用可能な<mark>AI危険性評価エージェント、山留め弾塑性解析、実務ツールおよび参加型講義コンテンツ</mark>を提供します。',
+    t1:'建設安全工学', t2:'4M 危険性評価', t3:'生成AI実務ツール', t4:'インタラクティブ講義',
+    cta1:'実習ツールへ →', cta2:'宝物庫を開く',
+    s1:'登録ツール', s2:'ウェブ即時実行', s3:'最適化環境', s4:'✓ モバイル & PC対応',
+    note:'❄ 冬季安全管理・凍結・積雪・寒冷リスクまでAIで点検する冬の現場安全ポータル',
+    searchLabel:'ツール検索', ph:'ツール名、キーワード検索... ( / )',
+    e1:'検索結果がありません', e2:'別の検索語を入力するか、カテゴリタブを変更してみてください。', e3:'すべてのリストを表示',
+    b1t:'宝物庫 (実習資料室)', b1p:'スマート安全講義に必要な各種実習書式、デモデータ、講義資料を閲覧・ダウンロードできます。', b1b:'宝物庫へ移動',
+    b2t:'芳名録 & 質疑応答', b2p:'講義の感想や、現場へのスマート安全適用に関する工学的な質問を自由に投稿してください。', b2b:'芳名録を作成',
+    f1:'運営および開発: <strong>キム・ソンナム教授</strong> (スマート建設安全アカデミー)', f2:'本ポータルは建設安全技術者の力量強化とスマート安全工学教育のために制作されました。',
+    go:'実行する', copied:'ウェブサイトのアドレスがコピーされました。', fail:'コピーできませんでした。アドレスバーから直接コピーしてください。',
+    count:(n,t)=>`全${t}件中 ${n}件を表示`}
+};
+
+/* =====================================================================
+ * 3. 상태 · 유틸
+ * ===================================================================== */
+const $ = (s, r=document) => r.querySelector(s);
+const state = { lang:'ko', cat:'all', q:'' };
+const els = { grid:$('#grid'), tabs:$('#tabs'), q:$('#q'), clear:$('#clearBtn'), meta:$('#meta'),
+              empty:$('#empty'), toast:$('#toast'), stat:$('#statCount') };
+
+const store = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }
+};
+const isKakao = /kakaotalk/i.test(navigator.userAgent);
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms) } };
+
+/* 검색 인덱스: 한·일 제목/설명/키워드를 미리 합쳐 소문자화 (입력마다 DOM 읽기 방지) */
+TOOLS.forEach(t => {
+  t._idx = [t.title.ko, t.title.ja, t.desc.ko, t.desc.ja, t.tag.ko, t.tag.ja, t.k].join(' ').toLowerCase();
+});
+
+/* =====================================================================
+ * 4. 렌더링
+ * ===================================================================== */
+function cardHTML(t){
+  const [bg,bd,tx] = HUES[t.hue] || HUES.sky, L = state.lang;
+  return `<a class="card" href="${t.url}" target="_blank" rel="noopener" data-ext data-cat="${t.c}"
+      style="--c-bg:${bg};--c-bd:${bd};--c-tx:${tx}">
+    <div>
+      <div class="card__top"><span class="card__icon" aria-hidden="true">${t.ico}</span><span class="card__tag">${t.tag[L]}</span></div>
+      <h3>${t.title[L]}</h3>
+      <p>${t.desc[L]}</p>
+    </div>
+    <div class="card__go"><span>${UI[L].go}</span><span aria-hidden="true">→</span></div>
+  </a>`;
+}
+
+function renderTabs(){
+  const L = state.lang;
+  els.tabs.innerHTML = CATEGORIES.map(c => {
+    const n = c.id === 'all' ? TOOLS.length : TOOLS.filter(t => t.c === c.id).length;
+    return `<button type="button" class="tab" role="tab" data-cat="${c.id}" aria-selected="${c.id === state.cat}">
+      <span aria-hidden="true">${c.ico}</span><span>${c[L]}</span><span class="tab__n">${n}</span></button>`;
+  }).join('');
+}
+
+function renderGrid(){
+  const q = state.q.toLowerCase();
+  const list = TOOLS.filter(t => (state.cat === 'all' || t.c === state.cat) && (!q || t._idx.includes(q)));
+  els.grid.innerHTML = list.map(cardHTML).join('');
+  els.empty.hidden = list.length > 0;
+  els.meta.textContent = UI[state.lang].count(list.length, TOOLS.length);
+}
+
+function applyText(){
+  const L = state.lang, T = UI[L];
+  document.documentElement.lang = L;
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const v = T[el.dataset.i];
+    if (v == null) return;
+    if (el.tagName === 'INPUT') el.placeholder = v;
+    else if (el.hasAttribute('data-html')) el.innerHTML = v;
+    else el.textContent = v;
+  });
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === L));
+  els.stat.textContent = TOOLS.length + '+';
+  els.clear.setAttribute('aria-label', L === 'ko' ? '검색어 지우기' : '検索語を消去');
+}
+
+function setLang(L){
+  state.lang = L; store.set('lang', L);
+  applyText(); renderTabs(); renderGrid();
+}
+
+/* =====================================================================
+ * 5. 이벤트
+ * ===================================================================== */
+els.tabs.addEventListener('click', e => {
+  const b = e.target.closest('.tab'); if (!b) return;
+  state.cat = b.dataset.cat; renderTabs(); renderGrid();
+});
+const onSearch = debounce(() => { state.q = els.q.value.trim(); renderGrid(); }, 120);
+els.q.addEventListener('input', () => { els.clear.hidden = !els.q.value; onSearch(); });
+els.clear.addEventListener('click', () => { els.q.value = ''; els.clear.hidden = true; state.q = ''; renderGrid(); els.q.focus(); });
+$('#resetBtn').addEventListener('click', () => {
+  els.q.value = ''; els.clear.hidden = true; state.q = ''; state.cat = 'all'; renderTabs(); renderGrid();
+});
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+
+/* 카카오톡 인앱 브라우저: 외부 브라우저로 열기 (이벤트 위임 — 동적 카드 포함) */
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[data-ext]');
+  if (a && isKakao){ e.preventDefault(); location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(a.href); }
+});
+/* '/' 키로 검색창 포커스 */
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)){ e.preventDefault(); els.q.focus(); }
+});
+
+/* 주소 복사 */
+let toastTimer;
+function toast(msg){
+  els.toast.textContent = msg; els.toast.classList.add('is-on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => els.toast.classList.remove('is-on'), 2400);
+}
+async function copyUrl(){
+  const url = location.href;
+  try{
+    if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(url);
+    else { const i = document.createElement('input'); i.value = url; document.body.appendChild(i); i.select();
+           const ok = document.execCommand('copy'); i.remove(); if (!ok) throw 0; }
+    toast(UI[state.lang].copied);
+  }catch(e){ toast(UI[state.lang].fail); }
+}
+$('#copyBtn').addEventListener('click', copyUrl);
+
+/* =====================================================================
+ * 6. 눈 내리는 효과 (가벼운 Canvas · 탭 비활성/모션 축소 시 정지)
+ * ===================================================================== */
+(function snow(){
+  const cv = $('#snow'), ctx = cv.getContext('2d'), hero = cv.closest('.hero');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  let W, H, flakes = [], raf = 0, running = false;
+
+  function resize(){
+    const dpr = Math.min(devicePixelRatio || 1, 2), r = hero.getBoundingClientRect();
+    W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const n = Math.round(Math.min(110, W / 14));                 // 화면 크기에 비례 (모바일 절약)
+    flakes = Array.from({length:n}, () => ({
+      x:Math.random()*W, y:Math.random()*H, r:Math.random()*2.6+.8,
+      s:Math.random()*.7+.25, d:Math.random()*Math.PI*2, a:Math.random()*.5+.4 }));
+    draw();
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for (const f of flakes){
+      ctx.globalAlpha = f.a; ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.283); ctx.fill();
+    }
+  }
+  function tick(){
+    for (const f of flakes){
+      f.y += f.s * (1 + f.r * .25); f.d += .012; f.x += Math.sin(f.d) * .35;
+      if (f.y > H + 5){ f.y = -5; f.x = Math.random() * W; }
+    }
+    draw(); raf = requestAnimationFrame(tick);
+  }
+  function start(){ if (!running && !reduce.matches && !document.hidden){ running = true; raf = requestAnimationFrame(tick); } }
+  function stop(){ running = false; cancelAnimationFrame(raf); }
+
+  new ResizeObserver(debounce(resize, 150)).observe(hero);
+  document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+  reduce.addEventListener && reduce.addEventListener('change', () => reduce.matches ? (stop(), draw()) : start());
+  /* 히어로가 화면 밖이면 정지 */
+  new IntersectionObserver(([en]) => en.isIntersecting ? start() : stop()).observe(hero);
+  resize();
+})();
+
+/* =====================================================================
+ * 7. 초기화
+ * ===================================================================== */
+setLang(store.get('lang') === 'ja' ? 'ja' : 'ko');
+</script>
 </body>
 </html>
