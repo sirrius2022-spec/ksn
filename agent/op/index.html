@@ -134,6 +134,8 @@ select{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;backgro
 textarea{width:100%;min-height:64px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 10px}
 .quick{display:flex;flex-wrap:wrap;gap:5px}
 .note{font-size:11px;color:var(--muted)}
+.act-row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
 .bnav,.backdrop,.x{display:none}
 @media (max-width:900px){
   html,body{height:100%;overflow:hidden}
@@ -178,6 +180,7 @@ textarea{width:100%;min-height:64px;resize:vertical;border:1px solid var(--line)
   body.sheet-open .side{transform:none;visibility:visible}
   .x{display:inline-block;margin-left:auto;min-height:32px}
   .pane{min-height:0}
+  body.v-rp .composer{display:none}
   textarea{min-height:52px}
   select,textarea,.btn{font-size:16px}
 }
@@ -294,7 +297,9 @@ var FOLDER={
  a4:['1BeOVAq_Kmmyam8LC4CTWjjYlgxZYS8UJ','1xAgGAAIXXze5aaj2Ph3_bgkiKOfXOr6c'],
  a5:['1Mq21L3xV3cuzkAzyf-EM3ZqzL7Qwmbw1','1bwESuG41TaBHpeqIwtDwFOwhQpzrcbIm']
 };
-var MCP=null, SAMPLE=null, FILES={}, busy=false;
+var INBOX='1MJAhxPIT4TZvRTBI-lmZ15_oXW2D99GL';
+var KROOMS=['교육방','판촉물방','컨설팅방'];
+var MCP=null, SAMPLE=null, TTS=null, FILES={}, busy=false, speaking=false;
 function furl(id){return 'https://drive.google.com/drive/folders/'+id}
 function safeUrl(u){return typeof u==='string'&&u.indexOf('https://')===0?u:''}
 function txt(r){
@@ -326,6 +331,7 @@ function loadFiles(id){
 function setSheet(o){document.body.classList.toggle('sheet-open',o);syncNav()}
 function syncNav(){
   var o=document.body.classList.contains('sheet-open'), c=!o?'plan':(view==='rp'?'rp':'ch');
+  document.body.classList.toggle('v-rp',view==='rp');
   Array.prototype.forEach.call(document.querySelectorAll('[data-nav]'),function(b){
     var on=b.getAttribute('data-nav')===c||(c==='ch'&&b.getAttribute('data-nav')==='cmd'&&false);
     b.setAttribute('aria-current',on?'true':'false');
@@ -338,8 +344,8 @@ function openAgent(id){
 function initCaps(){
   try{
     if(window.claude&&window.claude.use){
-      return Promise.all([window.claude.use('mcp'),window.claude.use('sample')]).then(function(r){
-        MCP=r[0];SAMPLE=r[1];renderTop();if(MCP&&view==='rp')loadFiles(cur);
+      return Promise.all([window.claude.use('mcp'),window.claude.use('sample'),window.claude.use('tts').catch(function(){return null})]).then(function(r){
+        MCP=r[0];SAMPLE=r[1];TTS=r[2];renderTop();if(view==='rp')renderPane();if(MCP&&view==='rp')loadFiles(cur);
       }).catch(function(){});
     }
   }catch(e){}
@@ -442,11 +448,13 @@ function renderPane(){
     var a=byId(cur), r=a.rep;
     p.innerHTML='<div class="rep"><h3>'+esc(a.name)+' '+a.title+' · '+esc(a.rn)+'</h3><div class="meta">'+esc(a.role)+' · '+pill(a.st)+'</div>'
       +'<div class="meta">'+esc(r.head)+' · '+esc(r.time)+(safeUrl(r.url)?' · <a href="'+esc(r.url)+'" target="_blank" rel="noopener" style="color:var(--run)">Google 문서로 열기</a>':'')+'</div>'
+      +actionsBox(a)
       +(r.text?'<div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(r.text)+'</div>'
         :'<div class="note" style="margin-bottom:6px">샘플 보고서입니다. 지시를 내리면 Drive 자료 기반 실제 보고서로 교체됩니다.</div>'
          +r.sec.map(function(s){return '<h4>'+esc(s[0])+'</h4><ul'+(s[0]==='긴급'?' class="urgent"':'')+'>'+s[1].map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>'}).join(''))
       +driveBox(a)+'</div>';
   }
+  Array.prototype.forEach.call(p.querySelectorAll('[data-act]'),function(b){b.onclick=function(){var k=b.getAttribute('data-act');if(k==='speak')voiceReport();else if(k==='kakao')runKakao();else if(k==='weekly')runWeekly()}});
   Array.prototype.forEach.call(p.querySelectorAll('[data-refresh]'),function(b){b.onclick=function(){loadFiles(b.getAttribute('data-refresh'))}});
   p.scrollTop=0;
   syncNav();
@@ -518,6 +526,87 @@ function runLive(a,instr){
     post(a,e&&e.code==='empty'?'보고서 생성 결과가 비어 있습니다. 다시 지시해 주세요.':errMsg(e));
     FILES[a.id]=null;
   });
+}
+/* 사장실 비서 기능: 카톡 업무 정리 · 주간 보고 · 음성 보고 */
+function today(){return new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Seoul'})}
+function readTextN(id,n){return dcall('read_file_content',{fileId:id}).then(function(r){return txt(r).slice(0,n)})}
+function saveReport(a,title,text,msg){
+  return dcall('create_file',{title:title,parentId:FOLDER[a.id][1],contentMimeType:'text/plain',textContent:text}).then(function(r){
+    var p=r.payload; if(typeof p==='string'){try{p=JSON.parse(p)}catch(e){p={}}}
+    var url=safeUrl(p&&(p.viewUrl||p.webViewLink));
+    a.rep={head:title,time:'오늘 '+hm(),text:text,url:url};
+    a.st='ok'; post(a,msg,url);
+  });
+}
+function finishJob(a){busy=false;FILES[a.id]=null;renderAll();if(MCP&&view==='rp'&&cur===a.id)loadFiles(a.id)}
+function failJob(a,e){a.st='warn';post(a,e&&e.code==='empty'?'결과가 비어 있습니다. 다시 실행해 주세요.':errMsg(e))}
+function startJob(a){busy=true;a.prev=a.st;a.st='run';view='ch';filt='all';renderAll()}
+function runKakao(){
+  if(!(MCP&&SAMPLE)||busy)return;
+  var a=byId('a1'); startJob(a);
+  listFiles(INBOX,7).then(function(fl){
+    fl=fl.filter(function(f){return /^text\//.test(f.mimeType||'')});
+    return Promise.all(fl.map(function(f){return readTextN(f.id,30000)}));
+  }).then(function(parts){
+    var lines=[];
+    parts.forEach(function(t){t.split('\n').forEach(function(l){
+      var f=l.split('|'); if(f.length<4)return;
+      if(KROOMS.some(function(k){return f[1].indexOf(k)>-1}))lines.push(l.trim().slice(0,400));
+    })});
+    lines=lines.slice(-300);
+    if(!lines.length){a.st='warn';post(a,'수신함에 대상 대화방(교육방·판촉물방·컨설팅방) 기록이 없습니다. 폰 매크로 설정과 Drive 동기화를 확인해 주세요. 설정 안내 문서는 수신함 폴더에 있습니다.');return}
+    var prompt='당신은 김성남 대표의 AI 비서입니다. 아래는 카카오톡 업무 대화방(교육방·판촉물방·컨설팅방)에서 수집한 알림 기록입니다(형식: 시각 | 대화방 | 보낸이 | 내용). 업무·회의·일정과 무관한 내용(사적·잡담)은 제외하세요.\n\n작성 규칙:\n1) 한국어 기술사 답안 문체, 개조식 단문(→, · 연결).\n2) ① 일정·회의(날짜·시간·장소·대화방 명시, 날짜순) ② 업무 요청·할 일(대화방별) ③ 확인 필요·후속 조치.\n3) 기록에 없는 날짜·시간·장소는 추측하지 말고 "미확인"으로 표기. "내일" 등 상대 날짜는 메시지 시각 기준으로 환산하고 근거 시각을 병기.\n4) 마크다운 기호(#, *, **) 금지, 일반 텍스트만.\n5) 1,500자 이내.\n\n오늘 날짜: '+today()+'\n\n[기록]\n'+lines.join('\n');
+    return SAMPLE(prompt,{cache:false}).then(function(res){
+      var text=(res&&res.text||'').trim(); if(!text)throw {code:'empty'};
+      return saveReport(a,today()+'_카톡업무정리',text,'카톡 업무 정리를 완료했습니다. (대상 기록 '+lines.length+'건)');
+    });
+  }).catch(function(e){failJob(a,e)}).then(function(){finishJob(a)});
+}
+function runWeekly(){
+  if(!(MCP&&SAMPLE)||busy)return;
+  var a=byId('a1'); startJob(a);
+  var since=Date.now()-7*86400000;
+  Promise.all(AG.map(function(b){return listFiles(FOLDER[b.id][1],6).then(function(l){return l.filter(function(f){return new Date(f.modifiedTime).getTime()>=since}).map(function(f){return {f:f,rn:b.rn}})})})).then(function(ls){
+    var all=[].concat.apply([],ls).slice(0,10);
+    if(!all.length){a.st='warn';post(a,'최근 7일간 저장된 보고서가 없습니다. 각 실 보고서와 카톡 업무 정리를 먼저 생성해 주세요.');return}
+    return Promise.all(all.map(function(x){return readTextN(x.f.id,4000).then(function(t){return '=== ['+x.rn+'] '+x.f.title+' ===\n'+t})})).then(function(parts){
+      var prompt='당신은 김성남 대표의 AI 비서입니다. 아래 최근 7일간 부서별 보고서만 근거로 주간 보고서를 작성하세요.\n\n작성 규칙:\n1) 한국어 기술사 답안 문체, 개조식 단문(→, · 연결).\n2) ① 금주 실적(부서별) ② 일정·미결 사항 ③ 이슈·리스크 ④ 차주 계획.\n3) 자료에 없는 수치·사실은 쓰지 말고 "자료 없음"으로 표기.\n4) 마크다운 기호(#, *, **) 금지, 일반 텍스트만.\n5) 1,500자 이내.\n\n기준일: '+today()+'\n\n[자료]\n'+parts.join('\n\n');
+      return SAMPLE(prompt,{cache:false}).then(function(res){
+        var text=(res&&res.text||'').trim(); if(!text)throw {code:'empty'};
+        return saveReport(a,today()+'_주간보고',text,'주간 보고서를 작성하여 보고서 폴더에 저장했습니다. (참고 보고서 '+all.length+'건)');
+      });
+    });
+  }).catch(function(e){failJob(a,e)}).then(function(){finishJob(a)});
+}
+function repText(a){
+  var r=a.rep; if(r.text)return r.text;
+  return r.head+'. '+r.sec.map(function(s){return s[0]+'. '+s[1].join('. ')}).join('. ');
+}
+function voiceStop(){speaking=false;try{if(TTS)TTS.stop()}catch(e){} try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){} renderPane()}
+function voiceReport(){
+  if(speaking){voiceStop();return}
+  var a=byId(cur), t=repText(a).replace(/\s+/g,' ').slice(0,1900);
+  speaking=true; renderPane();
+  var done=function(){speaking=false;renderPane()};
+  if(TTS){TTS.speak(t,{language:'ko'}).then(done,done);return}
+  try{
+    if(window.speechSynthesis&&window.SpeechSynthesisUtterance){
+      var u=new SpeechSynthesisUtterance(t); u.lang='ko-KR'; u.onend=done; u.onerror=done;
+      speechSynthesis.cancel(); speechSynthesis.speak(u); return;
+    }
+  }catch(e){}
+  speaking=false; post(a,'이 기기에서는 음성 낭독을 지원하지 않습니다. 화면 보고서를 확인해 주세요.'); renderAll();
+}
+function actionsBox(a){
+  var live=MCP&&SAMPLE&&!busy;
+  var h='<div class="act-row"><button class="btn" data-act="speak">'+(speaking?'■ 낭독 정지':'▶ 음성 보고')+'</button>';
+  if(a.id==='a1'){
+    h+='<button class="btn" data-act="kakao"'+(live?'':' disabled')+'>카톡 업무 정리</button>'
+     +'<button class="btn" data-act="weekly"'+(live?'':' disabled')+'>주간 보고</button>';
+  }
+  h+='</div>';
+  if(a.id==='a1')h+='<div class="note">카톡 수집 대상: '+KROOMS.join(' · ')+' · 수신함 폴더의 설정 안내 참고'+(live?'':' · Drive 연동 시 사용 가능')+'</div>';
+  return h;
 }
 function send(){
   var x=$('#ta').value.trim(); if(!x||busy)return;
